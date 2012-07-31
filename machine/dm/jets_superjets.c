@@ -12,7 +12,8 @@
  * The Jet Bumpers increase the Retina Value.(eyeball)
  * It starts at 5M and goes up 100K per jet.
  * There are two Jet Bumpers and one slingshot ... the slingshot counts as a jet bumper.
- * Jet Bumpers award 500k a Pop.
+ * Jet Bumpers award 250k a Pop.
+ * superjets mode award 1 million each
  *
  * Scoring Description: (my rules)
  *
@@ -53,21 +54,21 @@ CALLSET_ENTRY (jets_superjets, start_ball) { jet_goal_reset (); }
 
 
 
-/*
- *
- */
+/****************************************************************************
+ * body
+ ***************************************************************************/
 
 void jet_goal_award (void) {
 	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
 	jet_count = 0;
-	score(SC_50K);//only once
+	score(SC_1M);//only once
 	if (jet_goal < JETS_GOAL_MAX)  jet_goal += JETS_GOAL_STEP;
 	}
 
 CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 	if (super_jets_activated){
 		++super_jet_count;
-		score(SC_25K);
+		score(SC_1M);
 		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
 		jets_effect_deff();
 		//crash here?
@@ -75,7 +76,7 @@ CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 		}
 	else {//not in super jets mode
 		++jet_count;
-		score(SC_5K);
+		score(SC_250K);
 		if (jet_count == jet_goal)  jet_goal_award ();
 		else
 			sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
@@ -83,6 +84,7 @@ CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 	task_create_gid1 (GID_JET_FLASHER, jet_flasher);
 	}
 
+//claw switch starts superjets mode
 CALLSET_ENTRY (jets_superjets, claw_super_jets) {
 	super_jets_activated = TRUE;
 	sound_start (ST_SAMPLE, SPCH_EXCELLENT, SL_1S, PRI_GAME_QUICK5);

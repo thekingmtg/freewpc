@@ -13,9 +13,13 @@
  * These are similar to Twilight Zone's Greed targets.
  * They are worth 1 million plus 1 million per number of hits
  * (resets on each ball). Maximum of 20 hits.
+ *
  * Depending on machine settings, One, Two, or Three sets of
  * targets must be completed to light Quick Freeze, depending on
  * whether Quick Freeze is set to easy, medium, or hard.
+ *
+ * an unlit target scores nothing
+ * once all 5 hit - they extinguish and all 5 relight
  *
  * Scoring Description: (my rules)
  *
@@ -32,7 +36,11 @@ U8 				standupFrenzySoundIndex;
 U8 				standupFrenzyTimer;
 score_t 		standupFrenzyTotalScore;
 U8 				standupFrenzyDefaultLightsLit;
-U8 				standupFrenzyLightsLit;//means target was hit
+U8 				standupFrenzyLightsLit; //means target was hit
+U8 			standupLightsLit;
+U8 			standup_counter;
+U8 			standup_goal;
+
 
 //prototypes
 void standupFrenzy_mode_init (void);
@@ -81,7 +89,17 @@ CALLSET_ENTRY (standupFrenzy, start_player, start_ball) {
 	standupFrenzyDefaultLightsLit = ALL_TARGETS;
 	standupFrenzyLightsLit = NO_TARGETS;
 	callset_invoke (lamp_update);
+	standupLightsLit  = ALL_TARGETS;
+	standup_counter = 0;
+	standup_goal = 3;
 }//end of start_player
+
+/****************************************************************************
+ * playfield lights and flags
+ *
+ *
+ ***************************************************************************/
+
 
 
 
@@ -107,10 +125,15 @@ void standupHandler (U8 target) {
 		//sound_send (SND_STANDUPFRENZY_MODE_BOOM);
 		standup_lamp_update1 (target, lamp);
 		}
-	//else //verify target hit was a lit target and mode not running
 
-
-
+	//else mode NOT running ---verify target hit was a lit target
+	else if (standupLightsLit & target) {
+			standupLightsLit &= ~target;  /* flag that target as hit */
+			lamp_tristate_flash (lamp);
+			score (SC_50K);
+			++standup_counter;
+			if (standup_counter >= standup_goal) callset_invoke(light_quick_freeze_light_on);//sent to inlanes.c
+			}//end of else if
 }//end of standupHandler 
 
 
@@ -143,6 +166,8 @@ CALLSET_ENTRY (standupFrenzy, lamp_update) {
 CALLSET_ENTRY (standupFrenzy, display_update) { timed_mode_display_update (&standupFrenzy_mode); }
 CALLSET_ENTRY (standupFrenzy, music_refresh)  { timed_mode_music_refresh (&standupFrenzy_mode); }
 CALLSET_ENTRY (standupFrenzy, end_ball)		{ timed_mode_end (&standupFrenzy_mode); }
+
+//freeze starts standup frenzy instead of locking a ball
 CALLSET_ENTRY (standupFrenzy, sw_claw_freeze) { timed_mode_begin (&standupFrenzy_mode); }
 
 

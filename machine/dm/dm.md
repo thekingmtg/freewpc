@@ -424,6 +424,7 @@ Trough: Ball Release, init_max_count(5), \
 ##########################################################################
 [scores]
 5K:
+5770:
 10K:
 25K:
 50K:
@@ -439,6 +440,7 @@ Trough: Ball Release, init_max_count(5), \
 3M:
 4M:
 5M:
+6M:
 7M:
 9M:
 10M:

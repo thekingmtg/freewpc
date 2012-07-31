@@ -19,35 +19,15 @@
  *
  * Scoring Description: (original game)
  *
+ * depending upon # of freeze required, shoot left loop will start MB with X num of balls,
+ * ends when 1 ball left if shoot light freeze from claw will grant instant 5 ball MB
+ * if at least 1 ball already frozen, else will light a ball
+ * and shoot left loop to start MB
+ *
+ *
  *
  */
 #include <freewpc.h>
-	/* In this file we will be using sounds for the first time so
-	 * sound_start is located in audio.h as inline function
-	 * format is: sound_start (U8 channels, sound_code_t code, U8 duration, U8 priority)
-	 *
-	 *	max possible of 4 channels of audio
-	 *	here are the channels
-	 *	MUSIC_CHANNEL 0
-	 *	ST_MUSIC   0x1
-	 *	ST_SPEECH  0x2
-	 *	ST_SAMPLE  0x4
-	 *	ST_EFFECT  0x8
-	 *	ST_ANY     (ST_SAMPLE | ST_EFFECT)
-	 *
-	 *Here are the priorities
-	 *  SP_NORMAL  PRI_NULL
-	 *
-	 *  Here are the possible duration codes
-	 *
-	 *  SL_100MS
-	 *  SL_500MS
-	 *  SL_1S
-	 *  SL_2S
-	 *  SL_3S
-	 *  SL_4S
-	*/
-
 //constants
 U8 ORBITS_EASY_GOAL = 5;
 U8 ORBITS_PREDEFINED_GOAL_INCREMENT = 1;
@@ -69,7 +49,9 @@ __boolean 		left_Loop_Arrow_activated;
 __boolean 			right_Loop_Explode_activated;
 __boolean 			right_Loop_Jackpot_activated;
 __boolean 			right_Loop_Arrow_activated;
-extern __boolean 		explode_activated;
+
+//external variables
+extern __boolean 		explode_activated; //in eyball_explode.c
 
 
 //prototypes
@@ -96,16 +78,20 @@ void orbits_reset (void) {
 	left_Loop_Explode_activated = FALSE;
 	left_Loop_Jackpot_activated = FALSE;
 	left_Loop_Arrow_activated = FALSE;
+
 	right_Loop_Explode_activated = FALSE;
 	right_Loop_Jackpot_activated = FALSE;
 	right_Loop_Arrow_activated = FALSE;
-	}
+	}//end of function
 
-//TODO: modify options to allow saving ramps/loops across balls
-CALLSET_ENTRY (orbits, start_player) { orbits_reset (); }
-CALLSET_ENTRY (orbits, start_ball) { orbits_reset (); }
+CALLSET_ENTRY (orbits, start_player) { orbits_reset(); }
+CALLSET_ENTRY (orbits, start_ball) { orbits_reset(); }
 
 
+/****************************************************************************
+ * playfield lights and flags
+ ***************************************************************************/
+//lit by 5 MTL rollovers --see rollovers.c
 CALLSET_ENTRY (orbits, ExtraBall_Light_On) {
 	left_Loop_ExtraBall_activated = TRUE;
 	lamp_tristate_on (LM_EXTRA_BALL);
@@ -116,13 +102,24 @@ CALLSET_ENTRY (orbits, ExtraBall_Light_Off) {
 	lamp_tristate_off (LM_EXTRA_BALL);
 	}
 
+//lit by ??
+CALLSET_ENTRY (orbits, Multiball_Light_On) {
+	left_Loop_MultiBall_activated = TRUE;
+	lamp_tristate_on (LM_START_MULTIBALL);
+	}
+
+CALLSET_ENTRY (orbits, Multiball_Light_Off) {
+	left_Loop_MultiBall_activated = FALSE;
+	lamp_tristate_off (LM_START_MULTIBALL);
+	}
+
+//lit by eyeball mode start --see eyeball_explode.c
 CALLSET_ENTRY (orbits, Activate_Explode_Inserts) {
 	left_Loop_Arrow_activated = TRUE;
 	right_Loop_Arrow_activated = TRUE;
 	lamp_tristate_flash (LM_LEFT_LOOP_EXPLODE);
 	lamp_tristate_flash (LM_RIGHT_LOOP_EXPLODE);
 	}
-
 
 CALLSET_ENTRY (orbits, DeActivate_Explode_Inserts) {
 	left_Loop_Arrow_activated = FALSE;
@@ -131,13 +128,55 @@ CALLSET_ENTRY (orbits, DeActivate_Explode_Inserts) {
 	lamp_tristate_off (LM_RIGHT_LOOP_EXPLODE);
 	}
 
+//lit by multiball modes --TODO:
+CALLSET_ENTRY (orbits, LL_Jackpot_Light_On) {
+	left_Loop_Jackpot_activated = TRUE;
+	lamp_tristate_on (LM_LEFT_LOOP_JACKPOT);
+	}
+
+CALLSET_ENTRY (orbits, LL_Jackpot_Light_Off) {
+	left_Loop_Jackpot_activated = FALSE;
+	lamp_tristate_off (LM_LEFT_LOOP_JACKPOT);
+	}
+
+//lit by multiball modes --TODO:
+CALLSET_ENTRY (orbits, RL_Jackpot_Light_On) {
+	right_Loop_Jackpot_activated = TRUE;
+	lamp_tristate_on (LM_RIGHT_LOOP_JACKPOT);
+	}
+
+CALLSET_ENTRY (orbits, RL_Jackpot_Light_Off) {
+	right_Loop_Jackpot_activated = FALSE;
+	lamp_tristate_off (LM_RIGHT_LOOP_JACKPOT);
+	}
+
+//lit by combo shots --TODO:
+CALLSET_ENTRY (orbits, LL_Arrow_Light_On) {
+	left_Loop_Arrow_activated = TRUE;
+	lamp_tristate_on (LM_LEFT_LOOP_ARROW);
+	}
+
+CALLSET_ENTRY (orbits, LL_Arrow_Light_Off) {
+	left_Loop_Arrow_activated = FALSE;
+	lamp_tristate_off (LM_LEFT_LOOP_ARROW);
+	}
+
+//lit by combo shots --TODO:
+CALLSET_ENTRY (orbits, RL_Arrow_Light_On) {
+	right_Loop_Arrow_activated = TRUE;
+	lamp_tristate_on (LM_RIGHT_LOOP_ARROW);
+	}
+
+CALLSET_ENTRY (orbits, RL_Arrow_Light_Off) {
+	right_Loop_Arrow_activated = FALSE;
+	lamp_tristate_off (LM_RIGHT_LOOP_ARROW);
+	}
 
 
-
-/*
+/****************************************************************************
+ * body
  *
- *left to right or right to left orbits
- */
+ ****************************************************************************/
 void left_orbit_task (void) { task_sleep_sec(2); task_exit(); }
 void right_orbit_task (void) { task_sleep_sec(2); task_exit(); }
 
@@ -145,32 +184,29 @@ void right_orbit_task (void) { task_sleep_sec(2); task_exit(); }
 // or start left to right check
 CALLSET_ENTRY (orbits, sw_left_loop) {
 //	if ( !single_ball_play() ) return;  //turn off during multiball?
-	if ( task_kill_gid(GID_RIGHT_ORBIT_MADE) ) {
-		callset_invoke(right_orbit_shot);
-		return;
-		}
-	task_create_gid1 (GID_LEFT_ORBIT_MADE, left_orbit_task);
+	if ( task_kill_gid(GID_RIGHT_ORBIT_MADE) ) callset_invoke(right_orbit_shot);
+	else task_create_gid1 (GID_LEFT_ORBIT_MADE, left_orbit_task);
 	}
 
 // full orbit left to right
 // or start right to left check
 CALLSET_ENTRY (orbits, sw_right_freeway) {
 //	if ( !single_ball_play () ) return;  //turn off during multiball?
-	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) {
-		callset_invoke(left_orbit_shot);
-		return;
-		}
-	task_create_gid1 (GID_RIGHT_ORBIT_MADE, right_orbit_task);
+	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) callset_invoke(left_orbit_shot);
+	else task_create_gid1 (GID_RIGHT_ORBIT_MADE, right_orbit_task);
 	}
-
 
 // full orbit left to hole
 CALLSET_ENTRY (orbits, sw_top_popper) {
-	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) &&
-			left_Loop_ExtraBall_activated ) {
-		callset_invoke(ExtraBall_Light_Off);
-		//add an extra ball here
-		}
+	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) {
+			if (left_Loop_ExtraBall_activated ) {
+					callset_invoke(ExtraBall_Light_Off);
+					//TODO: add an extra ball here
+					}//end of left_Loop_ExtraBall_activated
+			if (left_Loop_MultiBall_activated) {
+				//TODO: start multiball here
+			}//end of left_Loop_MultiBall_activated
+		}//end of task_kill_gid(GID_LEFT_ORBIT_MADE
 	}//end of orbits_sw_top_popper
 
 
@@ -182,7 +218,7 @@ void right_loop_goal_award (void) {
 
 void left_loop_goal_award (void) {
 	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
-	score (SC_50K);
+	score (SC_25K);
 	left_loop_counter = 0;
 	if (left_loop_goal < ORBITS_GOAL_MAX)  left_loop_goal += ORBITS_GOAL_STEP;
 	}
@@ -190,21 +226,22 @@ void left_loop_goal_award (void) {
 CALLSET_ENTRY (orbits, left_orbit_shot) {
 	++left_loop_counter;
 	++all_loop_counter;
-	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
 	sound_start (ST_SAMPLE, ZAPP_3_LONG, SL_1S, PRI_GAME_QUICK1);
+	score (SC_100K);//located in kernal/score.c
 	if(left_Loop_Arrow_activated && explode_activated) callset_invoke(explode_ramp_made);
-	else score (SC_100K);//located in kernal/score.c
-	}
+		//TODO: jackpot and combo shot detection
+	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
+	}//end of function
 
 CALLSET_ENTRY (orbits, right_orbit_shot) {
 	++right_loop_counter;
 	++all_loop_counter;
-	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
+	score (SC_100K);//located in kernal/score.c
 	sound_start (ST_SAMPLE, ZAPP_3_LONG, SL_1S, PRI_GAME_QUICK1);
-	score (SC_50K);
 	if(right_Loop_Arrow_activated && explode_activated) callset_invoke(explode_ramp_made);
-	else score (SC_100K);//located in kernal/score.c
-	}
+		//TODO: jackpot and combo shot detection
+	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
+	}//end of function
 
 
 

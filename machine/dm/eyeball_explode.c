@@ -10,7 +10,7 @@
  * Scoring Description: (original game)
  * Shots that knock the captive eyeball into the upper target award the Retina Scan value.
  * The Jet Bumpers increase the Retina Value.(eyeball)
- * It starts at 5M and goes up 100K per jet.
+ * TODO: It starts at 5M and goes up 100K per jet.
  *
  * At certain numbers of Retina Scans hits, Explode Hurry Up is activated.
  * It takes 1 hit for the first Hurry-Up, four for the next on the easiest level.
@@ -19,26 +19,12 @@
  * Hit any explode lamp to collect and add 10M to the value for the next Explode shot.
  * The round times out when the countdown reaches 5M (or higher if you've collected a few of the shots).
  * An extra ball is lit at three Retina Scans.
- * Retina Scan shots feed to the left saucer (also called eject) which drops the ball into the left inlane.
- *
- *
+ * TODO: Retina Scan shots feed to the left saucer (also called eject) which drops the ball into the left inlane.
  *
  *
  * Scoring Description: (my rules)
- * Shots that knock the captive eyeball into the upper target award the Retina Scan value.
- * The Jet Bumpers increase the Retina Value.(eyeball)
- * TODO: It starts at 5M and goes up 100K per jet.
- *
- * At certain numbers of Retina Scans hits, Explode Hurry Up is activated.
- * It takes 1 hit for the first Hurry-Up, four for the next on the easiest level.
- *
- * All four Explode ramps are lit at a value of 15M that begins counting down.
- * Hit any explode lamp to collect and add 10M to the value for the next Explode shot.
- * The round times out after 30 seconds or ball drain.
- *
- * An extra ball is lit at three Retina Scans.
- * TODO: Retina Scan shots feed to the left saucer (also called eject) which drops the ball into the left inlane.
- *
+ * same as above except explode mode times out after 30 seconds or ball drain
+ * and eyeball shot can be hit in addition to explode arrows
  *
  */
 
@@ -57,7 +43,11 @@ U8 explode_mode_timer;
 U8 explode_mode_counter;//number of times an explode arrow or eyeball is hit
 U8 explode_modes_achieved_counter;//number of times mode achieved
 score_t explode_mode_score;
+score_t temp_score;
 __boolean explode_activated;
+
+//external variables
+extern U8 jet_count;//found in jets_superjets.c
 
 //prototypes
 void explode_mode_init (void);
@@ -124,13 +114,16 @@ void explode_mode_expire (void) {
 	callset_invoke(DeActivate_Explode_Inserts);
 }
 
+/****************************************************************************
+ * playfield lights and flags
+ ***************************************************************************/
 
 
 
-/*
+/****************************************************************************
+ * body
  *
- *eyeball hits outside of explode mode
- */
+ ***************************************************************************/
 void eyeball_goal_award (void) {
 		eyeball_counter = 0;
 		timed_mode_begin (&explode_mode);//start explode mode
@@ -142,7 +135,11 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 	eyeball_flasher ("FLASH_EYEBALL_FLASHER");
 	sound_start (ST_SAMPLE, EXPLOSION1_MED, SL_1S, PRI_GAME_QUICK1);
 	score (SC_5M);
-	//need to add in 100k per jet hit here
+	//100k per jet hit here
+	score (100000 * jet_count);
+	//score_add (temp_score, 100K);
+	//score_mul (temp_score, jet_count);
+	//score (temp_score);
 
 	//light extra ball on 3rd eyeball hit
 	if (total_eyeball_counter == 3) callset_invoke(ExtraBall_Light_On);
@@ -171,6 +168,7 @@ CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	else if (&explode_mode_timer > 10) score (SC_9M);
 	else if (&explode_mode_timer > 5) score (SC_7M);
 	else score (SC_5M);
+	//bonus here
 	switch (explode_mode_counter) {
 	case 0: break;
 	case 1: {score (SC_10M); break;}

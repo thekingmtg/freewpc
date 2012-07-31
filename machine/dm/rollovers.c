@@ -20,6 +20,8 @@
  * multiplier is not scored until the end of the ball.
  * Getting the 5x bonus multiplier also lights the extra ball on the left loop (orbit).
  * Each completed MTL rollover sequence lights Access Claw at the left inlane.
+ * Hitting an unlit 250k, lit one 100k
+ * all 3 500k bonus
  *
  * Scoring Description: (my rules)
  * same as original
@@ -28,6 +30,7 @@
 
 #include <freewpc.h>
 //constants
+U8 					max_rollover_bonus_multiplier = 5;
 
 //local variables
 __boolean 			middle_rollover_activated;
@@ -35,12 +38,9 @@ __boolean 			top_rollover_activated;
 __boolean 			lower_rollover_activated;
 U8 					rollover_bonus_multiplier; // 0 to 5
 
-
 //prototypes
 void rollover_reset (void);
-
-
-
+void all_rollover_made (void);
 
 /****************************************************************************
  * initialize  and exit
@@ -60,91 +60,82 @@ CALLSET_ENTRY (rollovers, start_player) {  rollover_reset(); }
 CALLSET_ENTRY (rollovers, start_ball) { rollover_reset(); }
 
 
+/****************************************************************************
+ * body
+ ***************************************************************************/
+void all_rollover_made (void){
+	lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+	lamp_tristate_off(LM_TOP_ROLLOVER);
+	lamp_tristate_off(LM_LOWER_ROLLOVER);
+	middle_rollover_activated = FALSE;
+	top_rollover_activated = FALSE;
+	lower_rollover_activated = FALSE;
+	score (SC_500K);
+	//light access claw
+	callset_invoke(Access_Claw_Light_On);
+	if (rollover_bonus_multiplier < max_rollover_bonus_multiplier) ++rollover_bonus_multiplier;
+	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(ExtraBall_Light_On);
 
+	//TODO: DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
+	}//end of function
 
 
 CALLSET_ENTRY (rollovers, sw_middle_rollover) {
+	//if already lit
 	if (middle_rollover_activated) {
 		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		score (SC_100K);
 		}
-	else { //activate rollover
+	else { //else - not already lit, so activate rollover
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 		middle_rollover_activated = TRUE;
 		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		score (SC_250K);
 
 		//check to see if this is the third rollover to activate
-		if (top_rollover_activated && lower_rollover_activated) {
-			lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-			lamp_tristate_off(LM_TOP_ROLLOVER);
-			lamp_tristate_off(LM_LOWER_ROLLOVER);
-			middle_rollover_activated = FALSE;
-			top_rollover_activated = FALSE;
-			lower_rollover_activated = FALSE;
-			//light access claw
-			callset_invoke(Access_Claw_Light_On);
-			if (rollover_bonus_multiplier < 5)
-				++rollover_bonus_multiplier;
-			else callset_invoke(ExtraBall_Light_On);
-			//DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
-			}
-		}//end of else activate rollover
+		if (top_rollover_activated && lower_rollover_activated) all_rollover_made();
+		}//end of else - not already lit, so activate rollover
 	}//end of function rollovers_sw_middle_rollover
+
 
 CALLSET_ENTRY (rollovers, sw_top_rollover) {
 	if (top_rollover_activated) {
 		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		score (SC_100K);
 		}
 	else { //activate rollover
 		lamp_tristate_on(LM_TOP_ROLLOVER);
 		top_rollover_activated = TRUE;
 		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		score (SC_250K);
 
 		//check to see if this is the third rollover to activate
-		if (middle_rollover_activated && lower_rollover_activated) {
-			lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-			lamp_tristate_off(LM_TOP_ROLLOVER);
-			lamp_tristate_off(LM_LOWER_ROLLOVER);
-			middle_rollover_activated = FALSE;
-			top_rollover_activated = FALSE;
-			lower_rollover_activated = FALSE;
-			//light access claw
-			callset_invoke(Access_Claw_Light_On);
-			if (rollover_bonus_multiplier < 5)
-				++rollover_bonus_multiplier;
-			else callset_invoke(ExtraBall_Light_On);
-			//DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
-			}
-		}//end of else activate rollover
+		if (middle_rollover_activated && lower_rollover_activated)  all_rollover_made();
+		}//end of else - not already lit, so activate rollover
 	}//end of function rollovers_sw_top_rollover
+
 
 CALLSET_ENTRY (rollovers, sw_lower_rollover) {
 	if (lower_rollover_activated) {
 		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		score (SC_100K);
 		}
 	else { //activate rollover
 		lamp_tristate_on(LM_LOWER_ROLLOVER);
 		top_rollover_activated = TRUE;
 		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		score (SC_250K);
 
 		//check to see if this is the third rollover to activate
-		if (middle_rollover_activated && top_rollover_activated) {
-			lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-			lamp_tristate_off(LM_TOP_ROLLOVER);
-			lamp_tristate_off(LM_LOWER_ROLLOVER);
-			middle_rollover_activated = FALSE;
-			top_rollover_activated = FALSE;
-			lower_rollover_activated = FALSE;
-			//light access claw
-			callset_invoke(Access_Claw_Light_On);
-			if (rollover_bonus_multiplier < 5)
-				++rollover_bonus_multiplier;
-			else callset_invoke(ExtraBall_Light_On);
-			//DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
-			}
-		}//end of else activate rollover
+		if (middle_rollover_activated && top_rollover_activated)  all_rollover_made();
+		}//end of else - not already lit, so activate rollover
 	}//end of function rollovers_sw_lower_rollover
 
-//rotate rollovers when buttons pressed
+
+	/****************************************************************************
+	 * rotate rollovers when buttons pressed
+	 ***************************************************************************/
+
 CALLSET_ENTRY (rollovers, sw_left_button) {
 	if (top_rollover_activated && lower_rollover_activated) { //left not activated
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
