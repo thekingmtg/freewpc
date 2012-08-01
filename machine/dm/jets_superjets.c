@@ -16,6 +16,9 @@
  * superjets mode award 1 million each
  *
  * Scoring Description: (my rules)
+ * same as above
+ *
+ * TODO: verify scoring
  *
  */
 
@@ -25,11 +28,13 @@ U8 JETS_EASY_GOAL = 25;
 U8 JETS_PREDEFINED_GOAL_INCREMENT = 1;
 U8 JETS_GOAL_STEP = 15;
 U8 JETS_GOAL_MAX = 150;
+U8 SUPERJETS_EASY_GOAL = 20;
 
 //local variables
 U8 jet_count;
 U8 jet_goal;
 U8 super_jet_count;
+U8 super_jet_goal;
 __boolean super_jets_activated;
 
 //prototypes
@@ -38,6 +43,7 @@ void jets_effect_deff(void);
 void superjets_effect_deff(void);
 void jet_goal_reset (void);
 void jet_goal_award (void);
+void super_jet_goal_award (void);
 
 /****************************************************************************
  * initialize  and exit
@@ -45,6 +51,7 @@ void jet_goal_award (void);
 void jet_goal_reset (void) {
 	jet_count = 0;
 	jet_goal = JETS_EASY_GOAL;
+	super_jet_goal = SUPERJETS_EASY_GOAL;
 	super_jet_count = 0;
 	super_jets_activated = FALSE;
 	}
@@ -65,15 +72,28 @@ void jet_goal_award (void) {
 	if (jet_goal < JETS_GOAL_MAX)  jet_goal += JETS_GOAL_STEP;
 	}
 
+void super_jet_goal_award (void) {
+	sound_start (ST_SAMPLE, SPCH_SUPERJETS_COMPLETED, SL_1S, PRI_GAME_QUICK5);
+	jet_count = 0;
+	score(SC_20M);
+	super_jets_activated = FALSE;
+	}
+
 CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 	if (super_jets_activated){
 		++super_jet_count;
 		score(SC_1M);
 		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
-		jets_effect_deff();
+		if (super_jet_count == super_jet_goal)  super_jet_goal_award();
+
+		//
+		//
+		//jets_effect_deff();
 		//crash here?
-		//	deff_start (DEFF_SUPERJETS_EFFECT);//under /kernel/deff.c
-		}
+			deff_start (DEFF_SUPERJETS_EFFECT);//under /kernel/deff.c
+
+
+	}
 	else {//not in super jets mode
 		++jet_count;
 		score(SC_250K);
@@ -87,7 +107,12 @@ CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 //claw switch starts superjets mode
 CALLSET_ENTRY (jets_superjets, claw_super_jets) {
 	super_jets_activated = TRUE;
-	sound_start (ST_SAMPLE, SPCH_EXCELLENT, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_MUSIC, MUS_MD_SUPERJETS, 0, SP_NORMAL);
+	sound_start (ST_SAMPLE, SPCH_SUPERJETS_ACTIVATED, SL_1S, PRI_GAME_QUICK5);
+	//flash lamp for a time
+	lamp_tristate_flash(LM_CLAW_SUPER_JETS);
+	task_sleep (TIME_500MS);
+	lamp_tristate_off(LM_CLAW_SUPER_JETS);
 	}
 
 

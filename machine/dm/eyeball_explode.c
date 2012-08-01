@@ -36,6 +36,7 @@ U8 EYE_GOAL_STEP = 3;
 U8 EYE_GOAL_MAX = 50;
 
 //local variables
+U8 explode_SoundCounter;
 U8 eyeball_counter;//for current ball only
 U8 total_eyeball_counter;//for entire game
 U8 eyeball_goal;//num of hits to start explode
@@ -55,7 +56,6 @@ void explode_mode_expire (void);
 void explode_mode_exit (void);
 void eyeball_reset (void);
 void player_eyeball_reset (void);
-void eyeball_flasher (char * flasher);
 void eyeball_goal_award (void);
 
 //mode definition structure
@@ -85,6 +85,7 @@ void player_eyeball_reset (void) {
 	explode_activated = FALSE;
 	explode_modes_achieved_counter = 0;
 	explode_mode_counter = 0;
+	explode_SoundCounter = 0;
 	}
 
 void eyeball_reset (void) {
@@ -104,6 +105,11 @@ void explode_mode_exit (void) { explode_mode_expire();}
 void explode_mode_init (void) {
 	explode_activated = TRUE;
 	explode_mode_counter = 0;
+	sound_start (ST_MUSIC, MUS_MD_EXPLODE, 0, SP_NORMAL);
+	if ( (explode_SoundCounter++ % 2) == 0 )//check if even
+		sound_start (ST_SPEECH, SPCH_EXPLODE_ACTIVATED, SL_2S, PRI_GAME_QUICK5);
+	else
+		sound_start (ST_SPEECH, SPCH_EXPLODE_HURRYUP, SL_2S, PRI_GAME_QUICK5);
 	score_zero (explode_mode_score);
 	callset_invoke(Activate_Explode_Inserts);
 	++explode_modes_achieved_counter;
@@ -127,12 +133,13 @@ void explode_mode_expire (void) {
 void eyeball_goal_award (void) {
 		eyeball_counter = 0;
 		timed_mode_begin (&explode_mode);//start explode mode
-		sound_start (ST_SAMPLE, SPCH_LOVE_WHEN_THAT_HAPPENS, SL_2S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_LOVE_WHEN_THAT_HAPPENS, SL_2S, PRI_GAME_QUICK5);
 		if (eyeball_goal < EYE_GOAL_MAX)  eyeball_goal += EYE_GOAL_STEP;
 	}
 
 CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
-	eyeball_flasher ("FLASH_EYEBALL_FLASHER");
+	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
+	task_sleep (TIME_500MS);
 	sound_start (ST_SAMPLE, EXPLOSION1_MED, SL_1S, PRI_GAME_QUICK1);
 	score (SC_5M);
 	//100k per jet hit here
@@ -148,13 +155,13 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 	if ( !timed_mode_running_p(&explode_mode) ) {
 		++eyeball_counter;
 		if (eyeball_counter == eyeball_goal)  eyeball_goal_award();
-		}
+		}//end of if timed mode running
 
 	else { //else explode activated
 		++explode_mode_counter;
 		callset_invoke(explode_ramp_made);
-		}
-	}
+		}//end of else
+	}//end of function
 
 
 
@@ -175,16 +182,27 @@ CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	case 2: {score (SC_20M); break;}
 	case 3: {score (SC_30M); break;}
 	case 4: score (SC_40M);
-	}
-}
+	}//end of switch
+}//end of function
+
+
+
+CALLSET_ENTRY (eyeball_explode, sw_eject) {
+	lamp_tristate_flash(LM_RETINA_SCAN);
+	task_sleep (TIME_500MS);
+	task_sleep (TIME_500MS);
+	sound_start (ST_SAMPLE, RETINA_SCAN_LONG, SL_2S, PRI_GAME_QUICK1);
+	score (SC_5M);
+	lamp_tristate_off(LM_RETINA_SCAN);
+	task_sleep (TIME_500MS);
+	task_sleep (TIME_500MS);
+	task_sleep (TIME_500MS);
+	task_sleep (TIME_500MS);
+	sol_request (SOL_EJECT); //request to fire the eject solonoid
+	flasher_pulse (FLASH_EJECT_FLASHER);
+}//end of function
 
 
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
-//LIGHTING EFFECTS
-void eyeball_flasher (char *flasher) {
-	flasher_pulse (flasher); //FLASH followed by name of flasher in caps
-	task_sleep (TIME_500MS);
-	task_exit ();
-	}

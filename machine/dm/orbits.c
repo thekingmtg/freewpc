@@ -27,7 +27,9 @@
  *
  *
  */
+
 #include <freewpc.h>
+
 //constants
 U8 ORBITS_EASY_GOAL = 5;
 U8 ORBITS_PREDEFINED_GOAL_INCREMENT = 1;
@@ -35,6 +37,7 @@ U8 ORBITS_GOAL_STEP = 5;
 U8 ORBITS_GOAL_MAX = 50;
 
 //local variables
+U8		orbits_SoundCounter;
 U8 		left_loop_counter;
 U8 		right_loop_counter;
 U8 		all_loop_counter;
@@ -52,7 +55,7 @@ __boolean 			right_Loop_Arrow_activated;
 
 //external variables
 extern __boolean 		explode_activated; //in eyball_explode.c
-
+extern  __boolean 		capture_simon_mode_activated; //from capture_simon.c
 
 //prototypes
 void orbits_reset (void);
@@ -84,7 +87,12 @@ void orbits_reset (void) {
 	right_Loop_Arrow_activated = FALSE;
 	}//end of function
 
-CALLSET_ENTRY (orbits, start_player) { orbits_reset(); }
+void player_orbits_reset (void) {
+	orbits_SoundCounter = 0;
+	orbits_reset();
+}
+
+CALLSET_ENTRY (orbits, start_player) { player_orbits_reset(); }
 CALLSET_ENTRY (orbits, start_ball) { orbits_reset(); }
 
 
@@ -95,6 +103,10 @@ CALLSET_ENTRY (orbits, start_ball) { orbits_reset(); }
 CALLSET_ENTRY (orbits, ExtraBall_Light_On) {
 	left_Loop_ExtraBall_activated = TRUE;
 	lamp_tristate_on (LM_EXTRA_BALL);
+	if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
+		sound_start (ST_SPEECH, SPCH_GET_THE_EXTRABALL, SL_2S, PRI_GAME_QUICK5);
+	else
+		sound_start (ST_SPEECH, SPCH_NEED_EXTRABALL, SL_2S, PRI_GAME_QUICK5);
 	}
 
 CALLSET_ENTRY (orbits, ExtraBall_Light_Off) {
@@ -102,7 +114,7 @@ CALLSET_ENTRY (orbits, ExtraBall_Light_Off) {
 	lamp_tristate_off (LM_EXTRA_BALL);
 	}
 
-//lit by ??
+//lit by required number of freezes accomplished
 CALLSET_ENTRY (orbits, Multiball_Light_On) {
 	left_Loop_MultiBall_activated = TRUE;
 	lamp_tristate_on (LM_START_MULTIBALL);
@@ -184,69 +196,93 @@ void right_orbit_task (void) { task_sleep_sec(2); task_exit(); }
 // or start left to right check
 CALLSET_ENTRY (orbits, sw_left_loop) {
 //	if ( !single_ball_play() ) return;  //turn off during multiball?
-	if ( task_kill_gid(GID_RIGHT_ORBIT_MADE) ) callset_invoke(right_orbit_shot);
-	else task_create_gid1 (GID_LEFT_ORBIT_MADE, left_orbit_task);
-	}
+	if ( task_kill_gid(GID_RIGHT_ORBIT_MADE) ) callset_invoke(right_orbit_shot_made);
+	else {
+		task_create_gid1 (GID_LEFT_ORBIT_MADE, left_orbit_task);
+		if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
+			sound_start (ST_EFFECT, RACE_BY, SL_500MS, PRI_GAME_QUICK5);
+		else
+			sound_start (ST_EFFECT, RACE_BY_2, SL_500MS, PRI_GAME_QUICK5);
+		}//end of else
+	}//end of function
 
 // full orbit left to right
 // or start right to left check
 CALLSET_ENTRY (orbits, sw_right_freeway) {
 //	if ( !single_ball_play () ) return;  //turn off during multiball?
-	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) callset_invoke(left_orbit_shot);
-	else task_create_gid1 (GID_RIGHT_ORBIT_MADE, right_orbit_task);
-	}
+	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) callset_invoke(left_orbit_shot_made);
+	else {
+		task_create_gid1 (GID_RIGHT_ORBIT_MADE, right_orbit_task);
+		if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
+			sound_start (ST_EFFECT, RACE_BY, SL_500MS, PRI_GAME_QUICK5);
+		else
+			sound_start (ST_EFFECT, RACE_BY_2, SL_500MS, PRI_GAME_QUICK5);
+		}//end of else
+	}//end of function
 
 // full orbit left to hole
 CALLSET_ENTRY (orbits, sw_top_popper) {
-	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) {
-			if (left_Loop_ExtraBall_activated ) {
-					callset_invoke(ExtraBall_Light_Off);
-					//TODO: add an extra ball here
-					}//end of left_Loop_ExtraBall_activated
-			if (left_Loop_MultiBall_activated) {
-				//TODO: start multiball here
-			}//end of left_Loop_MultiBall_activated
-		}//end of task_kill_gid(GID_LEFT_ORBIT_MADE
+	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) callset_invoke(orbit_to_popper_made);
 	}//end of orbits_sw_top_popper
 
 
-void right_loop_goal_award (void) {
-	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
-	right_loop_counter = 0;
-	if (right_loop_goal < ORBITS_GOAL_MAX)  right_loop_goal += ORBITS_GOAL_STEP;
-	}
 
-void left_loop_goal_award (void) {
-	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
-	score (SC_25K);
-	left_loop_counter = 0;
-	if (left_loop_goal < ORBITS_GOAL_MAX)  left_loop_goal += ORBITS_GOAL_STEP;
-	}
+CALLSET_ENTRY (orbits, orbit_to_popper_made) {
+	sound_start (ST_EFFECT, RACE_BY_3, SL_1S, PRI_GAME_QUICK5);
+	//extra ball shot made
+	if (left_Loop_ExtraBall_activated ) {
+			callset_invoke(ExtraBall_Light_Off);
+			sol_request(SOL_KNOCKER);
+			sound_start (ST_SAMPLE, EXTRA_BALL_SOUND, SL_1S, PRI_GAME_QUICK5);
+			if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
+				sound_start (ST_SPEECH, SPCH_EXTRABALL_WES, SL_2S, PRI_GAME_QUICK5);
+			else
+				sound_start (ST_SPEECH, SPCH_EXTRABALL_SLY, SL_2S, PRI_GAME_QUICK5);
+			//TODO: add an extra ball here
+			}//end of left_Loop_ExtraBall_activated
+	if (left_Loop_MultiBall_activated) callset_invoke(multiball_start);
+	//TODO: random top popper award
 
-CALLSET_ENTRY (orbits, left_orbit_shot) {
+}//end of function
+
+CALLSET_ENTRY (orbits, left_orbit_shot_made) {
 	++left_loop_counter;
 	++all_loop_counter;
-	sound_start (ST_SAMPLE, ZAPP_3_LONG, SL_1S, PRI_GAME_QUICK1);
+	sound_start (ST_SAMPLE, MACHINE12, SL_1S, PRI_GAME_QUICK1);
 	score (SC_100K);//located in kernal/score.c
 	if(left_Loop_Arrow_activated && explode_activated) callset_invoke(explode_ramp_made);
-		//TODO: jackpot and combo shot detection
+	if(capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+
+	//TODO: jackpot and combo shot detection
 	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
 	}//end of function
 
-CALLSET_ENTRY (orbits, right_orbit_shot) {
+CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 	++right_loop_counter;
 	++all_loop_counter;
 	score (SC_100K);//located in kernal/score.c
-	sound_start (ST_SAMPLE, ZAPP_3_LONG, SL_1S, PRI_GAME_QUICK1);
+	sound_start (ST_SAMPLE, MACHINE12, SL_1S, PRI_GAME_QUICK1);
 	if(right_Loop_Arrow_activated && explode_activated) callset_invoke(explode_ramp_made);
+	if(capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 		//TODO: jackpot and combo shot detection
 	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
 	}//end of function
 
 
 
+void right_loop_goal_award (void) {
+	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
+	score (SC_250K);
+	right_loop_counter = 0;
+	if (right_loop_goal < ORBITS_GOAL_MAX)  right_loop_goal += ORBITS_GOAL_STEP;
+	}
 
-
+void left_loop_goal_award (void) {
+	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
+	score (SC_250K);
+	left_loop_counter = 0;
+	if (left_loop_goal < ORBITS_GOAL_MAX)  left_loop_goal += ORBITS_GOAL_STEP;
+	}
 
 /****************************************************************************
  * DMD display and sound effects

@@ -37,10 +37,14 @@ __boolean 			middle_rollover_activated;
 __boolean 			top_rollover_activated;
 __boolean 			lower_rollover_activated;
 U8 					rollover_bonus_multiplier; // 0 to 5
+U8					rollover_SoundCounter = 0;
 
 //prototypes
 void rollover_reset (void);
 void all_rollover_made (void);
+void rollover_sounds (void);
+void rollover_sounds_all_rollovers (void);
+void rollover_sounds_already_lit(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -64,6 +68,11 @@ CALLSET_ENTRY (rollovers, start_ball) { rollover_reset(); }
  * body
  ***************************************************************************/
 void all_rollover_made (void){
+	lamp_tristate_flash(LM_MIDDLE_ROLLOVER);
+	lamp_tristate_flash(LM_TOP_ROLLOVER);
+	lamp_tristate_flash(LM_LOWER_ROLLOVER);
+	rollover_sounds_all_rollovers ();
+	task_sleep (TIME_300MS);
 	lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 	lamp_tristate_off(LM_TOP_ROLLOVER);
 	lamp_tristate_off(LM_LOWER_ROLLOVER);
@@ -83,15 +92,16 @@ void all_rollover_made (void){
 CALLSET_ENTRY (rollovers, sw_middle_rollover) {
 	//if already lit
 	if (middle_rollover_activated) {
-		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		rollover_sounds_already_lit();
 		score (SC_100K);
 		}
 	else { //else - not already lit, so activate rollover
+		lamp_tristate_flash(LM_MIDDLE_ROLLOVER);
+		task_sleep (TIME_100MS);
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 		middle_rollover_activated = TRUE;
-		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		rollover_sounds();
 		score (SC_250K);
-
 		//check to see if this is the third rollover to activate
 		if (top_rollover_activated && lower_rollover_activated) all_rollover_made();
 		}//end of else - not already lit, so activate rollover
@@ -100,15 +110,16 @@ CALLSET_ENTRY (rollovers, sw_middle_rollover) {
 
 CALLSET_ENTRY (rollovers, sw_top_rollover) {
 	if (top_rollover_activated) {
-		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		rollover_sounds_already_lit();
 		score (SC_100K);
 		}
 	else { //activate rollover
+		lamp_tristate_flash(LM_TOP_ROLLOVER);
+		task_sleep (TIME_100MS);
 		lamp_tristate_on(LM_TOP_ROLLOVER);
 		top_rollover_activated = TRUE;
-		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		rollover_sounds();
 		score (SC_250K);
-
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && lower_rollover_activated)  all_rollover_made();
 		}//end of else - not already lit, so activate rollover
@@ -117,15 +128,16 @@ CALLSET_ENTRY (rollovers, sw_top_rollover) {
 
 CALLSET_ENTRY (rollovers, sw_lower_rollover) {
 	if (lower_rollover_activated) {
-		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		rollover_sounds_already_lit();
 		score (SC_100K);
 		}
 	else { //activate rollover
+		lamp_tristate_flash(LM_LOWER_ROLLOVER);
+		task_sleep (TIME_100MS);
 		lamp_tristate_on(LM_LOWER_ROLLOVER);
 		top_rollover_activated = TRUE;
-		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		rollover_sounds();
 		score (SC_250K);
-
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && top_rollover_activated)  all_rollover_made();
 		}//end of else - not already lit, so activate rollover
@@ -135,7 +147,6 @@ CALLSET_ENTRY (rollovers, sw_lower_rollover) {
 	/****************************************************************************
 	 * rotate rollovers when buttons pressed
 	 ***************************************************************************/
-
 CALLSET_ENTRY (rollovers, sw_left_button) {
 	if (top_rollover_activated && lower_rollover_activated) { //left not activated
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
@@ -235,4 +246,32 @@ CALLSET_ENTRY (rollovers, sw_right_button) {
  ****************************************************************************/
 
 
+
+void rollover_sounds (void) {
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+	if ( rollover_SoundCounter  == 0 )
+	sound_start (ST_EFFECT, MACHINE1_SHORT, SL_1S, PRI_GAME_QUICK5);
+else if ( rollover_SoundCounter  == 1 )
+	sound_start (ST_EFFECT, MACHINE1_MED, SL_1S, PRI_GAME_QUICK5);
+else if ( rollover_SoundCounter  == 2 )
+	sound_start (ST_EFFECT, MACHINE1_LONG, SL_1S, PRI_GAME_QUICK5);
+}
+
+void rollover_sounds_all_rollovers (void) {
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+	if ( rollover_SoundCounter  == 0 )
+	sound_start (ST_EFFECT, STORM1_SHORT, SL_1S, PRI_GAME_QUICK5);
+else if ( rollover_SoundCounter  == 1 )
+	sound_start (ST_EFFECT, STORM1_MED, SL_1S, PRI_GAME_QUICK5);
+else if ( rollover_SoundCounter  == 2 )
+	sound_start (ST_EFFECT, STORM1_LONG, SL_1S, PRI_GAME_QUICK5);
+}
+
+void rollover_sounds_already_lit(void) {
+	rollover_SoundCounter = random_scaled(2);//from kernal/random.c
+	if ( rollover_SoundCounter  == 0 )
+	sound_start (ST_EFFECT, TOINK1, SL_1S, PRI_GAME_QUICK5);
+else if ( rollover_SoundCounter  == 1 )
+	sound_start (ST_EFFECT, TOINK2, SL_1S, PRI_GAME_QUICK5);
+}
 

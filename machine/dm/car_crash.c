@@ -93,6 +93,8 @@ CALLSET_ENTRY (car_crash, carcrash_three_on) {
 	car_crash_three = TRUE;
 	lamp_tristate_off (LM_CAR_CRASH_TOP);
 	lamp_tristate_off (LM_CAR_CRASH_CENTER);
+	lamp_tristate_flash(LM_CAR_CRASH_BOTTOM);
+	task_sleep (TIME_300MS);
 	lamp_tristate_on (LM_CAR_CRASH_BOTTOM);
 	}
 
@@ -106,6 +108,8 @@ CALLSET_ENTRY (car_crash, carcrash_six_on) {
 	car_crash_ten = FALSE;
 	car_crash_three = TRUE;
 	lamp_tristate_off (LM_CAR_CRASH_TOP);
+	lamp_tristate_flash(LM_CAR_CRASH_CENTER);
+	task_sleep (TIME_300MS);
 	lamp_tristate_on (LM_CAR_CRASH_CENTER);
 	lamp_tristate_on (LM_CAR_CRASH_BOTTOM);
 	}
@@ -119,6 +123,8 @@ CALLSET_ENTRY (car_crash, carcrash_ten_on) {
 	car_crash_six  = TRUE;
 	car_crash_ten = TRUE;
 	car_crash_three = TRUE;
+	lamp_tristate_flash(LM_CAR_CRASH_TOP);
+	task_sleep (TIME_300MS);
 	lamp_tristate_on (LM_CAR_CRASH_TOP);
 	lamp_tristate_on (LM_CAR_CRASH_CENTER);
 	lamp_tristate_on (LM_CAR_CRASH_BOTTOM);
@@ -191,6 +197,7 @@ CALLSET_ENTRY (car_crash, chase_car_made) {
 		//start ramp mode
 		car_chase_mode_activated = TRUE;
 		callset_invoke(carcrash_mode_on); //at ramps.c
+		sound_start (ST_MUSIC, MUS_MD_CAR_CRASH, 0, SP_NORMAL);
 		//turn off car crash lights
 		callset_invoke(carcrash_three_off);
 		callset_invoke(carcrash_six_off);
