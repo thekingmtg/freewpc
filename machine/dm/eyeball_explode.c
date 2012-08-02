@@ -169,11 +169,11 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	//score 15 million counting down to 5 million at
 	//end of mode  + 10 million for bonus # of explodes hit
-	if (&explode_mode_timer > 25) score (SC_15M);
-	else if (&explode_mode_timer > 20) score (SC_13M);
-	else if (&explode_mode_timer > 15) score (SC_11M);
-	else if (&explode_mode_timer > 10) score (SC_9M);
-	else if (&explode_mode_timer > 5) score (SC_7M);
+	if (explode_mode_timer > 25) score (SC_15M);
+	else if (explode_mode_timer > 20) score (SC_13M);
+	else if (explode_mode_timer > 15) score (SC_11M);
+	else if (explode_mode_timer > 10) score (SC_9M);
+	else if (explode_mode_timer > 5) score (SC_7M);
 	else score (SC_5M);
 	//bonus here
 	switch (explode_mode_counter) {
