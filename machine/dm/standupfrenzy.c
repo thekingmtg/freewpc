@@ -30,8 +30,8 @@
 /** Bitmask referring to all 5 standup targets */
 #define 	NO_TARGETS 	0x0
 #define 	ALL_TARGETS 0x1f
-U8 			standup_goal_increment = 2;
-U8 			standup_goal_max = 8;
+const U8 			standup_goal_increment = 2;
+const U8 			standup_goal_max = 8;
 
 //local variables
 U8				standupFrenzy_SoundCounter = 0;

@@ -58,16 +58,31 @@ CALLSET_ENTRY (simple_switches, sw_lower_rebound) {
 	simple_sounds();
 }
 
+CALLSET_ENTRY (simple_switches, sw_left_sling) {
+	score(SC_540);
+	simple_sounds();
+}
+
+CALLSET_ENTRY (simple_switches, sw_right_sling) {
+	score(SC_540);
+	simple_sounds();
+}
+
+
+
+
+
+
 
 void simple_sounds (void) {
 	simple_SoundCounter = random_scaled(4);//from kernal/random.c
 
 	if ( simple_SoundCounter == 0 )
-	sound_start (ST_EFFECT, ZAPP_1, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, ZAPP_1, SL_500MS, PRI_GAME_QUICK5);
 else if ( simple_SoundCounter == 1 )
-	sound_start (ST_EFFECT, JOINK, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, JOINK, SL_500MS, PRI_GAME_QUICK5);
 else if ( simple_SoundCounter == 2 )
-	sound_start (ST_EFFECT, JOINK_2, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, JOINK_2, SL_500MS, PRI_GAME_QUICK5);
 else if ( simple_SoundCounter == 3 )
-	sound_start (ST_EFFECT, ZAPP_2, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, ZAPP_2, SL_500MS, PRI_GAME_QUICK5);
 }

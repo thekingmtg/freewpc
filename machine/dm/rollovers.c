@@ -30,7 +30,7 @@
 
 #include <freewpc.h>
 //constants
-U8 					max_rollover_bonus_multiplier = 5;
+const U8 			max_rollover_bonus_multiplier = 5;
 
 //local variables
 __boolean 			middle_rollover_activated;

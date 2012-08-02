@@ -30,10 +30,10 @@
 
 #include <freewpc.h>
 //constants
-U8 EYE_EASY_GOAL = 1;
-U8 EYE_PREDEFINED_GOAL_INCREMENT = 1;
-U8 EYE_GOAL_STEP = 3;
-U8 EYE_GOAL_MAX = 50;
+const U8 EYE_EASY_GOAL = 1;
+const U8 EYE_PREDEFINED_GOAL_INCREMENT = 1;
+const U8 EYE_GOAL_STEP = 3;
+const U8 EYE_GOAL_MAX = 50;
 
 //local variables
 U8 explode_SoundCounter;

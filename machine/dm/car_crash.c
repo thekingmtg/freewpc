@@ -36,10 +36,10 @@
  */
 #include <freewpc.h>
 //constants
-U8 	CAR_CRASH_EASY_GOAL = 3;
-U8 	CAR_CRASH_PREDEFINED_GOAL_INCREMENT = 1;//TODO: this is for making different levels besides easy
-U8 	CAR_CRASH_GOAL_STEP = 5; //increment for later goals
-U8 	CAR_CRASH_GOAL_MAX = 50;
+const U8 	CAR_CRASH_EASY_GOAL = 3;
+const U8 	CAR_CRASH_PREDEFINED_GOAL_INCREMENT = 1;//TODO: this is for making different levels besides easy
+const U8 	CAR_CRASH_GOAL_STEP = 5; //increment for later goals
+const U8 	CAR_CRASH_GOAL_MAX = 50;
 
 //local variables
 U8 			car_crash_counter;

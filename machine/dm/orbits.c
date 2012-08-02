@@ -31,10 +31,10 @@
 #include <freewpc.h>
 
 //constants
-U8 ORBITS_EASY_GOAL = 5;
-U8 ORBITS_PREDEFINED_GOAL_INCREMENT = 1;
-U8 ORBITS_GOAL_STEP = 5;
-U8 ORBITS_GOAL_MAX = 50;
+const U8 ORBITS_EASY_GOAL = 5;
+const U8 ORBITS_PREDEFINED_GOAL_INCREMENT = 1;
+const U8 ORBITS_GOAL_STEP = 5;
+const U8 ORBITS_GOAL_MAX = 50;
 
 //local variables
 U8		orbits_SoundCounter;

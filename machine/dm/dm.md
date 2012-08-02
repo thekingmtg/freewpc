@@ -469,6 +469,7 @@ Trough: Ball Release, init_max_count(5), \
 # A list of all scores needed by the game rules.
 ##########################################################################
 [scores]
+540:
 1010:
 5K:
 5770:

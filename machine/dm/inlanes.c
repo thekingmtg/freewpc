@@ -25,14 +25,6 @@
  * standup targets must be completed to light Quick Freeze, depending on
  * whether Quick Freeze is set to easy, medium, or hard.
  *
- *
- * rebounds 1010
- * slings 1000
-
- * top hole scores a random score
- * big points 1 million etc
- * also lights
- *
  * Scoring Description: (my rules)
  * same as above
  *
