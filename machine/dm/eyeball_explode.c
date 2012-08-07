@@ -36,6 +36,7 @@ const U8 EYE_GOAL_STEP = 3;
 const U8 EYE_GOAL_MAX = 50;
 
 //local variables
+U8 counter; //temporary counter for calculating scores
 U8 explode_SoundCounter;
 U8 eyeball_counter;//for current ball only
 U8 total_eyeball_counter;//for entire game
@@ -142,11 +143,17 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 	task_sleep (TIME_500MS);
 	sound_start (ST_SAMPLE, EXPLOSION1_MED, SL_1S, PRI_GAME_QUICK1);
 	score (SC_5M);
+
 	//100k per jet hit here
-	//score (100000 * jet_count);
-	score_add (temp_score, score_table[SC_100K]);//put 100k into temp score
-	score_mul (temp_score, jet_count); // multiple what is in temp score by jet count and keep that in temp score
-	score (&temp_score); //add temp score to player's score
+	if (jet_count > 0) {
+		 counter = jet_count;
+		do {
+			score_add (temp_score, score_table[SC_100K]);//multiply 100K by jet count
+		} while (--counter > 1);
+		score_long_unmultiplied (temp_score); //add temp score to player's score
+	}//end of if
+
+
 
 	//light extra ball on 3rd eyeball hit
 	if (total_eyeball_counter == 3) callset_invoke(ExtraBall_Light_On);
@@ -169,19 +176,19 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	//score 15 million counting down to 5 million at
 	//end of mode  + 10 million for bonus # of explodes hit
-	if (explode_mode_timer > 25) score (SC_15M);
-	else if (explode_mode_timer > 20) score (SC_13M);
-	else if (explode_mode_timer > 15) score (SC_11M);
-	else if (explode_mode_timer > 10) score (SC_9M);
-	else if (explode_mode_timer > 5) score (SC_7M);
-	else score (SC_5M);
+	if (explode_mode_timer > 25)  		{ score (SC_15M); score_add (explode_mode_score, score_table[SC_15M]); }
+	else if (explode_mode_timer > 20)	{ score (SC_13M); score_add (explode_mode_score, score_table[SC_13M]); }
+	else if (explode_mode_timer > 15) 	{ score (SC_11M); score_add (explode_mode_score, score_table[SC_11M]); }
+	else if (explode_mode_timer > 10)	{ score (SC_9M); score_add (explode_mode_score, score_table[SC_9M]); }
+	else if (explode_mode_timer > 5) 	{ score (SC_7M); score_add (explode_mode_score, score_table[SC_7M]); }
+	else { score (SC_5M); score_add (explode_mode_score, score_table[SC_5M]); }
 	//bonus here
 	switch (explode_mode_counter) {
-	case 0: break;
-	case 1: {score (SC_10M); break;}
-	case 2: {score (SC_20M); break;}
-	case 3: {score (SC_30M); break;}
-	case 4: score (SC_40M);
+	case 0: 	break;
+	case 1:  { score (SC_10M); score_add (explode_mode_score, score_table[SC_10M]); break;}
+	case 2:  { score (SC_20M); score_add (explode_mode_score, score_table[SC_20M]); break;}
+	case 3:  { score (SC_30M); score_add (explode_mode_score, score_table[SC_30M]); break;}
+	case 4:	 { score (SC_40M); score_add (explode_mode_score, score_table[SC_40M]); break;}
 	}//end of switch
 }//end of function
 
