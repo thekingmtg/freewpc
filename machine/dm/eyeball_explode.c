@@ -146,6 +146,7 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 
 	//100k per jet hit here
 	if (jet_count > 0) {
+		score_zero (temp_score);//zero out temp score
 		 counter = jet_count;
 		do {
 			score_add (temp_score, score_table[SC_100K]);//multiply 100K by jet count
