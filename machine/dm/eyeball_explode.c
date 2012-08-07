@@ -143,10 +143,10 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 	sound_start (ST_SAMPLE, EXPLOSION1_MED, SL_1S, PRI_GAME_QUICK1);
 	score (SC_5M);
 	//100k per jet hit here
-	score (100000 * jet_count);
-	//score_add (temp_score, 100K);
-	//score_mul (temp_score, jet_count);
-	//score (temp_score);
+	//score (100000 * jet_count);
+	score_add (temp_score, score_table[SC_100K]);//put 100k into temp score
+	score_mul (temp_score, jet_count); // multiple what is in temp score by jet count and keep that in temp score
+	score (&temp_score); //add temp score to player's score
 
 	//light extra ball on 3rd eyeball hit
 	if (total_eyeball_counter == 3) callset_invoke(ExtraBall_Light_On);
