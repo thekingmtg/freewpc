@@ -61,8 +61,8 @@ MACHINE_MINOR = 62
 GAME_OBJS = 
 GAME_TEST_OBJS =
 GAME_INCLUDES =
-GAME_PAGED_OBJS = 	acmag.o  car_crash.o    eyeball_explode.o    inlanes.o  \
-					jets_superjets.o  orbits.o    ramps.o    rollovers.o  \
-					standupfrenzy.o  	\
-
+GAME_PAGED_OBJS = 	acmag.o  capture_simon.o  car_crash.o    eyeball_explode.o    inlanes.o  \
+					jets_superjets.o  lock_freeze_mbstart.o   orbits.o    prison_break.o\
+					ramps.o    rollovers.o   simple_switches.o   standupfrenzy.o  	\
+					underground.o  \
 
