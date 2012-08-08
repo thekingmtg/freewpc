@@ -2,6 +2,8 @@
  * demolition man
  * orbits.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * Also called loops.
  * Left Loop: This loop is just to the right of the upper flipper.

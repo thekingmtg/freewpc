@@ -2,6 +2,8 @@
  * demolition man
  * inlanes.c
  * 
+ * written by James Cardona
+ *
  * Location Description:
  * inlanes are lanes that feed to flippers as opposed to outlanes which feed
  * to the drain

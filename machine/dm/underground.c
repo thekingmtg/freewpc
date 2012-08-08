@@ -1,6 +1,8 @@
 /*
  * demolition man
- * orbits.c
+ * underground.c
+ *
+ * written by James Cardona
  *
  * Location Description:
  * subway / underground is a scoop across from the upper flipper and to the left of the jets

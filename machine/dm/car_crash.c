@@ -2,6 +2,8 @@
  * demolition man
  * car_crash.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * Located to the left and above the retina scan is the Car Crash target.
  * the Car Crash contains two captive cars (yes, that's right ... captive cars) behind the impact target.

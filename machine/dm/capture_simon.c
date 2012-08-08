@@ -2,6 +2,8 @@
  * demolition man
  * capture_simon.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * mode started by claw switch capture_simon
  *

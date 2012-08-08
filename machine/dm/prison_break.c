@@ -2,6 +2,8 @@
  * demolition man
  * prison_break.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * mode started by claw switch Prison Break
  *

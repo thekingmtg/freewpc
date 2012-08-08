@@ -2,6 +2,8 @@
  * demolition man
  * jets_superjets.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * Jet Bumpers: There are two regular jet bumpers and a top slingshot
  * which scores the same as a jet bumper. They advance the

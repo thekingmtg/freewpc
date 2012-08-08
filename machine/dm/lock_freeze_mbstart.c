@@ -2,6 +2,8 @@
  * demolition man
  * lock_freeze_mbstart.c
  * 
+ * written by James Cardona
+ *
  * handles the lock freezes and the trigger of multiballs
  *
  *

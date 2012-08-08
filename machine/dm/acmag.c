@@ -2,6 +2,8 @@
  * demolition man
  * acmag.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * mode started by claw switch acmag -points scored by center ramp.
  *

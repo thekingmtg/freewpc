@@ -2,6 +2,8 @@
  * demolition man
  * ramps.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * There are 4 ramps total
  *

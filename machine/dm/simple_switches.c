@@ -1,6 +1,8 @@
 /*
  * demolition man
- * inlanes.c
+ * simple_swithces.c
+ *
+ * written by James Cardona
  * 
  * Location Description:
  * Upper Rebound : This is a three inch piece of rubber forming the left wall of

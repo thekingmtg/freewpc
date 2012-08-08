@@ -2,6 +2,8 @@
  * demolition man
  * standupfrenzy.c
  * 
+ * written by James Cardona
+ *
  * Location Description:
  * Standups: There are 5 yellow standup targets scattered about the playfield,
  * like those in TZ. However, these targets are very important to game play.

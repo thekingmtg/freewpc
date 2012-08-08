@@ -2,6 +2,8 @@
  * demolition man
  * eyeball_explode.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * Retina Scan: This is the leftmost shot of the game. The ball passes through a gate
  * and into an eject that feeds the left inlane.

@@ -2,6 +2,8 @@
  * demolition man
  * rollovers.c
  *
+ * written by James Cardona
+ *
  * Location Description:
  * MTL rollovers: In the top right corner are three rollovers which advance
  * the bonus multiplier. Balls leave the rollovers into the jet bumpers.
