@@ -22,6 +22,14 @@
  * once all 5 hit - they extinguish and all 5 relight
  *
  * Scoring Description: (my rules)
+ * same as above except
+ * in frenzy mode worth 5 million plus 1 million per number of hits
+ * no max number of hits - 20 second timer
+ * outside frenzy worth 500k points
+ *
+ *
+ * estimate of average standupfrenzy mode score: 21 million to 56 million
+ * estimate of average standup score: 2.5 million
  *
  * */
 
@@ -76,7 +84,7 @@ struct timed_mode_ops standupFrenzy_mode = {
  ***************************************************************************/
 void standupFrenzy_mode_init (void) {
 	standupFrenzyNumHits = 0;
-	standupFrenzyDefaultLightsLit = ALL_TARGETS;
+	standupFrenzyLightsLit = ALL_TARGETS;
 	callset_invoke (lamp_update);
 	//deff_start (DEFF_STANDUPFRENZY_MODE);
 	score_zero (standupFrenzyTotalScore);
@@ -130,12 +138,16 @@ void standupHandler (U8 target) {
 	//verify target hit was a lit target and mode is still running
 	if ( (standupFrenzyLightsLit & target) && timed_mode_running_p(&standupFrenzy_mode) ) {
 		standupFrenzyLightsLit &= ~target;  /* flag that target as hit */
+		standup_lamp_update1 (target, lamp);
 		standupFrenzy_sounds();
-		score (SC_1M);
-		score (standupFrenzyNumHits * SC_1M);
-		score_add (standupFrenzyTotalScore, score_table[SC_1M]);
-		score_add (standupFrenzyTotalScore, (standupFrenzyNumHits * 1000000000) );
+		score (SC_5M);
+		++standupFrenzyNumHits;
+		score (standupFrenzyNumHits * score_table[SC_1M]);
+		score_add (standupFrenzyTotalScore, score_table[SC_5M]);
+		score_add (standupFrenzyTotalScore, (standupFrenzyNumHits * score_table[SC_1M]) );
 		//sound_send (SND_STANDUPFRENZY_MODE_BOOM);
+		//if 5th light out then reset all lights back on
+		if (standupFrenzyNumHits % 5 == 0) 	standupFrenzyLightsLit = ALL_TARGETS;
 		standup_lamp_update1 (target, lamp);
 		}
 
@@ -144,7 +156,7 @@ void standupHandler (U8 target) {
 			standupLightsLit &= ~target;  /* flag that target as hit */
 			standup_sounds();
 			lamp_tristate_flash (lamp);
-			score (SC_50K);
+			score (SC_500K);
 			++standup_counter;
 			if (standup_counter >= standup_goal) {
 				callset_invoke(light_quick_freeze_light_on);//sent to inlanes.c
@@ -159,16 +171,16 @@ void standupHandler (U8 target) {
  ****************************************************************************/
 void standup_lamp_update1 (U8 mask, U8 lamp) {
 	if (timed_mode_running_p (&standupFrenzy_mode))	{
-			//target was hit so flash it
+			//target was not hit yet, flash it
 			if (standupFrenzyLightsLit & mask)	{
 					lamp_tristate_flash (lamp);
 					}
 			else	lamp_tristate_off (lamp);
 	}//end of if
 	else { //mode not running
-		//target was hit so flash it
+		//target was not hit yet so it is on
 		if (standupLightsLit & mask)	{
-				lamp_tristate_flash (lamp);
+				lamp_tristate_on (lamp);
 				}
 		else	lamp_tristate_off (lamp);
 	}//end of else
