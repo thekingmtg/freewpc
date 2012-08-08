@@ -26,11 +26,15 @@
  * Scoring Description: (original game)
  *
  *
+ * Scoring Description: (my rules)
+ * same as above except
+ *
  */
 
 #include <freewpc.h>
 
 //constants
+const U8 		computerAwardsNumOfSounds = 7; //num between 0 and 6
 
 //local variables
 U8		underground_SoundCounter;
@@ -38,6 +42,12 @@ U8 		underground_counter;
 U8 		underground_goal;
 __boolean 		underground_Jackpot_activated;
 __boolean 		underground_Arrow_activated;
+//this will be external and in combo function when written
+__boolean 		next_combo_total;
+U8		computerAwards;
+sound_code_t computerAwardsSoundsArray[] = {	COMPUTER1, 				COMPUTER_ADDING,   COMPUTER_AWARD_SMALL,
+												COMPUTER_AWARD_LONG,	COMPUTER2, 			SPCH_ACCESSING,
+												SPCH_COMPUTER_AWARD};
 
 //external variables
 extern __boolean 		prison_break_mode_activated; //from prison_break.c
@@ -57,6 +67,8 @@ void underground_reset (void) {
 	}//end of function
 
 void player_underground_reset(void) {
+	//this will be external and in combo function when written
+	next_combo_total = FALSE;
 	underground_SoundCounter = 0;
 	underground_reset();
 }
@@ -105,9 +117,46 @@ CALLSET_ENTRY (underground, sw_bottom_popper) {
 	if(capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	//TODO: jackpot and combo shot detection
 	//	if (underground_Jackpot_activated)  ;
-	//	if(underground_Arrow_activated) callset_invoke();
+	//	if(underground_Arrow_activated) allset_invoke();
+	if (next_combo_total ==TRUE) callset_invoke(computer_award);
 	}//end of function
 
+
+//called after minimum of every 10 combos and underground shot made
+CALLSET_ENTRY (underground, computer_award) {
+	computerAwards = random_scaled(computerAwardsNumOfSounds);//from kernal/random.c
+	sound_start (ST_SPEECH, computerAwardsSoundsArray[computerAwards], SL_2S, PRI_GAME_QUICK5);
+	switch (computerAwards) {
+	case 0 :{
+			sound_start(ST_SPEECH, SPCH_COLLECT_BONUS, SL_2S, PRI_GAME_QUICK5);
+			//TODO: put bonus routine here
+			}
+	case 1 :{
+			sound_start(ST_SPEECH, SPCH_TRIPLE_CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
+			//TODO: put routine here
+			}
+	case 2 :{
+			sound_start(ST_SPEECH, SPCH_COLLECT_STANDUPS, SL_2S, PRI_GAME_QUICK5);
+			//TODO: put routine here
+			}
+	case 3 :{
+			sound_start(ST_SPEECH, SPCH_LIGHT_ARROWS, SL_2S, PRI_GAME_QUICK5);
+			//TODO: put routine here
+			}
+	case 4 :{
+			sound_start(ST_SPEECH, SPCH_LIGHT_EXTRA_BALL, SL_2S, PRI_GAME_QUICK5);
+			//TODO: put routine here
+			}
+	case 5 :{
+			sound_start(ST_SPEECH, SPCH_MAXIMIZE_FREEZES, SL_2S, PRI_GAME_QUICK5);
+			//TODO: put routine here
+			}
+	case 6 :{
+			sound_start(ST_SPEECH, SPCH_DOUBLE_RETINA_SCAN, SL_2S, PRI_GAME_QUICK5);
+			//TODO: put routine here
+			}
+	}//end of switch
+}//end of function
 
 
 /****************************************************************************
