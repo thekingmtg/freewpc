@@ -83,14 +83,14 @@
 #define RACE_BY_SHORT 0xB4
 #define RACE_BY_LONG 0xB6
 #define RACE_BY_3 0xB8
-#define MACHINE7_SHORT 0xB9
-#define MACHINE7_LONG 0xBA
+#define BONUS_SHORT 0xB9
+#define BONUS_LONG 0xBA
 #define MACHINE10 0xBC
 #define MACHINE1_SHORT 0xBD
 #define MACHINE1_MED 0xBE
 #define MACHINE1_LONG 0xBF
 
-#define BUG_SOUND 0xC5
+#define INLANE_SOUND 0xC5
 #define STORM1_MED 0xC6
 #define STORM1_LONG 0xC7
 #define STORM1_SHORT 0xC8

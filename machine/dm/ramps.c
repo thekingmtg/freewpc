@@ -40,13 +40,12 @@
  * TODO: combos - 4million first combo and extra 2 mill for each successive combo
  * TODO: capture simon: all arrows flash and remain for easiest lev - shoot 3 arrows 5 mill each
  * first 2, last one 25 mill
- * TODO: center ramp during acmag mode -counts up as time goes down from 6 million to 13.5 million
  *
  * TODO: right ramp to access claw - 1 million
  *
  * Scoring Description: (my rules)
  * same as original except:
- * car chase is a mode here (not in original) --L or R ramp for 15 million shot --handled in carchase.c
+ * car chase is a mode here (not in original) --L or R ramp for xx million shot --handled in carchase.c
  *
  *
  */

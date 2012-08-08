@@ -157,7 +157,9 @@ CALLSET_ENTRY (car_crash, sw_car_chase_standup) {
 	if (car_chase_mode_activated)  {//crash the car and end mode
 		callset_invoke(carcrash_mode_off); //at ramps.c
 		car_crash_mode_reset();
-		//sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
+		sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
+		//return to normal music
+		sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
 		}
 	else task_create_gid1 (GID_CAR_CRASH_ENTERED, car_crash_task);
 	}//end of function

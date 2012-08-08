@@ -16,9 +16,12 @@
  * superjets mode award 1 million each
  *
  * Scoring Description: (my rules)
- * same as above
+ * same as above except
+ * superjets mode award 2 million each
+ * successive modes award more
  *
- * TODO: verify scoring
+ * estimate of average superjets mode score: 20 million to 80 million
+ * estimate of average jets score: 2.5 million
  *
  */
 
@@ -28,35 +31,47 @@ const U8 JETS_EASY_GOAL = 25;
 const U8 JETS_PREDEFINED_GOAL_INCREMENT = 1;
 const U8 JETS_GOAL_STEP = 15;
 const U8 JETS_GOAL_MAX = 150;
+const U8 SUPERJETS_GOAL_MAX = 100;
 const U8 SUPERJETS_EASY_GOAL = 20;
+const U8 SUPERJETS_GOAL_STEP = 10;
+score_t superjets_mode_score;
 
 //local variables
 U8 jet_count;
 U8 jet_goal;
 U8 super_jet_count;
 U8 super_jet_goal;
+U8 superjets_mode_counter; // number of times we entered the mode
+U8 superjets_SoundCounter;
 __boolean super_jets_activated;
 
 //prototypes
-void jet_flasher (void);
+void jet_flasher(void);
 void jets_effect_deff(void);
 void superjets_effect_deff(void);
-void jet_goal_reset (void);
-void jet_goal_award (void);
-void super_jet_goal_award (void);
+void jet_goal_reset(void);
+void jet_goal_award(void);
+void super_jet_goal_award(void);
+void player_jet_goal_reset(void);
 
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
 void jet_goal_reset (void) {
 	jet_count = 0;
-	jet_goal = JETS_EASY_GOAL;
-	super_jet_goal = SUPERJETS_EASY_GOAL;
 	super_jet_count = 0;
 	super_jets_activated = FALSE;
+	superjets_SoundCounter = 0;
 	}
 
-CALLSET_ENTRY (jets_superjets, start_player) {  jet_goal_reset (); }
+void player_jet_goal_reset  (void) {
+superjets_mode_counter = 0;
+jet_goal = JETS_EASY_GOAL;
+super_jet_goal = SUPERJETS_EASY_GOAL;
+jet_goal_reset();
+}
+
+CALLSET_ENTRY (jets_superjets, start_player) {  player_jet_goal_reset (); }
 CALLSET_ENTRY (jets_superjets, start_ball) { jet_goal_reset (); }
 
 
@@ -73,33 +88,54 @@ void jet_goal_award (void) {
 	}
 
 void super_jet_goal_award (void) {
-	sound_start (ST_SAMPLE, SPCH_SUPERJETS_COMPLETED, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_SUPERJETS_COMPLETED, SL_2S, PRI_GAME_QUICK5);
 	jet_count = 0;
-	score(SC_20M);
+	super_jet_count = 0;
+	//score higher if mode done more than once
+	switch (superjets_mode_counter) {
+		case 0: 	break; //never entered mode
+		case 1:  { score (SC_40M);  score_add (superjets_mode_score, score_table[SC_40M]); break;}
+		case 2:  { score (SC_45M);  score_add (superjets_mode_score, score_table[SC_45M]); break;}
+		case 3:  { score (SC_50M);  score_add (superjets_mode_score, score_table[SC_50M]); break;}
+		case 4:	 { score (SC_55M);  score_add (superjets_mode_score, score_table[SC_55M]); break;}
+		default: { score (SC_60M);  score_add (superjets_mode_score, score_table[SC_60M]); break;}
+		}//end of switch
 	super_jets_activated = FALSE;
+	if (super_jet_goal < SUPERJETS_GOAL_MAX)  super_jet_goal += SUPERJETS_GOAL_STEP;
+	//TODO: deff
+	//return to normal music
+	sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
 	}
 
 CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 	if (super_jets_activated){
 		++super_jet_count;
-		score(SC_1M);
-		sound_start (ST_SAMPLE, SPCH_WOAH, SL_1S, PRI_GAME_QUICK5);
+		superjets_SoundCounter = random_scaled(3);//from kernal/random.c - pick number from 0 to 2
+		if ( (superjets_SoundCounter) == 0 ) 		sound_start (ST_SPEECH, SPCH_DULCH, SL_500MS, PRI_GAME_QUICK5);
+		else if ( (superjets_SoundCounter) == 1 ) 	sound_start (ST_SPEECH, SPCH_WOOH, SL_500MS, PRI_GAME_QUICK5);
+		else 										sound_start (ST_SPEECH, SPCH_WOW, SL_500MS, PRI_GAME_QUICK5);
+
 		if (super_jet_count == super_jet_goal)  super_jet_goal_award();
 
-		//
-		//
-		//jets_effect_deff();
-		//crash here?
+		// deff must be listed in md file or will crash here
 			deff_start (DEFF_SUPERJETS_EFFECT);//under /kernel/deff.c
-
-
+		//score higher if mode done more than once
+		switch (superjets_mode_counter) {
+			case 0: 	break; //never entered mode
+			case 1:  { score (SC_2M);  score_add (superjets_mode_score, score_table[SC_2M]); break;}
+			case 2:  { score (SC_3M);  score_add (superjets_mode_score, score_table[SC_3M]); break;}
+			case 3:  { score (SC_4M);  score_add (superjets_mode_score, score_table[SC_4M]); break;}
+			case 4:	 { score (SC_5M);  score_add (superjets_mode_score, score_table[SC_5M]); break;}
+			default: { score (SC_5M);  score_add (superjets_mode_score, score_table[SC_5M]); break;}
+			}//end of switch
 	}
 	else {//not in super jets mode
 		++jet_count;
 		score(SC_250K);
-		if (jet_count == jet_goal)  jet_goal_award ();
-		else
-			sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
+		if (jet_count == jet_goal)  jet_goal_award ();//sound played in call
+		//TODO: do we want a sound here?
+		//	else
+	//		sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
 		}
 	task_create_gid1 (GID_JET_FLASHER, jet_flasher);
 	}
@@ -107,6 +143,8 @@ CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 //claw switch starts superjets mode
 CALLSET_ENTRY (jets_superjets, claw_super_jets) {
 	super_jets_activated = TRUE;
+	++superjets_mode_counter;
+	score_zero (superjets_mode_score);
 	sound_start (ST_MUSIC, MUS_MD_SUPERJETS, 0, SP_NORMAL);
 	sound_start (ST_SAMPLE, SPCH_SUPERJETS_ACTIVATED, SL_1S, PRI_GAME_QUICK5);
 	//flash lamp for a time

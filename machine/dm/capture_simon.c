@@ -106,9 +106,12 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 	if (capture_simon_shots_made > 2) {
 		score (SC_50M);
 		capture_simon_mode_activated = FALSE;
-		//TODO: insert end of mode music and display effects call here
+		//return to normal music
+		sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
+
+		//TODO: insert display effects call here
 		}
-	//else TODO: normal shot made effects here
+		//else TODO: normal shot made effects here
 	switch (capture_simon_modes_achieved ){
 		case 0:
 			score (SC_15M);

@@ -16,6 +16,9 @@
  * rebounds score 1010
  * slings score 1000
  *
+ * Scoring Description: (my rules)
+ * same as original
+ *
  * */
 
 #include <freewpc.h>
@@ -25,7 +28,6 @@ U8		simple_SoundCounter = 0;
 
 //prototypes
 void simple_sounds(void);
-
 
 
 /****************************************************************************
@@ -68,15 +70,11 @@ CALLSET_ENTRY (simple_switches, sw_right_sling) {
 	simple_sounds();
 }
 
-
-
-
-
-
-
+/****************************************************************************
+ * DMD display and sound effects
+ ****************************************************************************/
 void simple_sounds (void) {
 	simple_SoundCounter = random_scaled(4);//from kernal/random.c
-
 	if ( simple_SoundCounter == 0 )
 	sound_start (ST_EFFECT, ZAPP_1, SL_500MS, PRI_GAME_QUICK5);
 else if ( simple_SoundCounter == 1 )

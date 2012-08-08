@@ -115,7 +115,7 @@ void explode_mode_init (void) {
 		sound_start (ST_SPEECH, SPCH_EXPLODE_ACTIVATED, SL_2S, PRI_GAME_QUICK5);
 	else
 		sound_start (ST_SPEECH, SPCH_EXPLODE_HURRYUP, SL_2S, PRI_GAME_QUICK5);
-	score_zero (explode_mode_score);
+	score_zero(explode_mode_score);
 	callset_invoke(Activate_Explode_Inserts);
 	++explode_modes_achieved_counter;
 	}//end of function
@@ -123,6 +123,8 @@ void explode_mode_init (void) {
 void explode_mode_expire (void) {
 	explode_activated = FALSE;
 	callset_invoke(DeActivate_Explode_Inserts);
+	//return to normal music
+	sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
 }
 
 /****************************************************************************
@@ -184,7 +186,7 @@ CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	else if (explode_mode_timer > 15) 	{ score (SC_11M); score_add (explode_mode_score, score_table[SC_11M]); }
 	else if (explode_mode_timer > 10)	{ score (SC_9M); score_add (explode_mode_score, score_table[SC_9M]); }
 	else if (explode_mode_timer > 5) 	{ score (SC_7M); score_add (explode_mode_score, score_table[SC_7M]); }
-	else { score (SC_5M); score_add (explode_mode_score, score_table[SC_5M]); }
+	else 								{ score (SC_5M); score_add (explode_mode_score, score_table[SC_5M]); }
 	//bonus here
 	switch (explode_mode_counter) {
 	case 0: 	break;
@@ -192,6 +194,7 @@ CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	case 2:  { score (SC_20M); score_add (explode_mode_score, score_table[SC_20M]); break;}
 	case 3:  { score (SC_30M); score_add (explode_mode_score, score_table[SC_30M]); break;}
 	case 4:	 { score (SC_40M); score_add (explode_mode_score, score_table[SC_40M]); break;}
+	default: { score (SC_40M); score_add (explode_mode_score, score_table[SC_40M]); break;}
 	}//end of switch
 	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK1);
 	//TODO: DEFF here
