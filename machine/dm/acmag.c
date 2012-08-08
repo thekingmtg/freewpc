@@ -6,15 +6,21 @@
  * mode started by claw switch acmag -points scored by center ramp.
  *
  * Scoring Description: (original game)
- * counts up as time goes down from 6 million to 13.5 million, typically
+ * counts up as time goes down from 5 million to 12.5 million, typically
  * about a 20 second mode.  Only shot that scores is the very wide
  * center ramp
  *
  * Scoring Description: (my rules)
  * same as above except:
- *
- * TODO: potentially we can make a 2nd and 3rd acmag mode that score differently
+ * scoring is higher to balance with other modes
+ * 2nd and 3rd acmag mode score higher to encourage doing mode more than once
  * TODO: 20 second timer - currently mode never ends until end of ball
+ * TODO: currently score does not change over time
+ *
+ * estimate of average acmag mode score: 60 million to 125 million
+ *
+ *
+ *
  */
 #include <freewpc.h>
 //constants
@@ -91,24 +97,24 @@ CALLSET_ENTRY (acmag, acmag_made) {
 
 	switch (acmag_modes_achieved ){
 		case 0:
-			//as it is right now we score 6 mill + 1 million for each extra shot
-			score (SC_6M);
-			score (acmag_mode_counter * SC_1M);
+			//as it is right now we score xx mill + 1 million for each extra shot
+			score (SC_15M);
+			score (acmag_mode_counter * SC_5M);
 			break;
 		case 1:
 			//2nd time we are in acmag - score differently
-			score (SC_7M);
-			score (acmag_mode_counter * SC_2M);
+			score (SC_20M);
+			score (acmag_mode_counter * SC_7M);
 			break;
 		case 2:
 			//3rd time we are in acmag - score differently
-			score (SC_8M);
-			score (acmag_mode_counter * SC_3M);
+			score (SC_25M);
+			score (acmag_mode_counter * SC_8M);
 			break;
 		default:
 			//all cases past 3rd time we are in acmag
-			score (SC_8M);
-			score (acmag_mode_counter * SC_3M);
+			score (SC_25M);
+			score (acmag_mode_counter * SC_8M);
 			break;
 	}//end of switch
 

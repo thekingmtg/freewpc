@@ -13,9 +13,10 @@
 
  * Scoring Description: (my rules)
  * same as above except:
+ * major shots are lit for 15 mil each for three shots.
+ * A 50 million award for completing all three shots for a total of 95 million.
  *
- * TODO: write scoring code
- * TODO: potentially we can make a 2nd and 3rd capture_simon mode that score differently
+ * estimate of average capture simon mode score: 30 million to 95 million
  *
  */
 #include <freewpc.h>
@@ -23,6 +24,7 @@
 
 //local variables
 U8			capture_simon_SoundCounter;
+U8			capture_simon_shots_made;
 U8 			capture_simon_mode_counter;
 U8 			capture_simon_modes_achieved;
 score_t 	capture_simon_mode_score;
@@ -37,6 +39,7 @@ void capture_simon_player_reset (void);
  ***************************************************************************/
 void capture_simon_reset (void) {
 	capture_simon_mode_counter = 0;
+	capture_simon_shots_made = 0;
 	capture_simon_mode_activated = FALSE;
 	score_zero(capture_simon_mode_score);
 	}
@@ -66,6 +69,7 @@ CALLSET_ENTRY (capture_simon, sw_claw_capture_simon) {
 	score (SC_250K);
 	capture_simon_mode_activated = TRUE;
 	++capture_simon_modes_achieved;
+	capture_simon_shots_made = 0;
 	sound_start (ST_MUSIC, MUS_MD_CAPTURE_SIMON, 0, SP_NORMAL);
 	sound_start (ST_SAMPLE, SPCH_UNDER_ARREST, SL_1S, PRI_GAME_QUICK5);
 	task_sleep(TIME_500MS);
@@ -98,27 +102,30 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 	//lamp_tristate_flash(LM_CENTER_RAMP_MIDDLE);
 	//task_sleep(TIME_200MS);
 	//lamp_tristate_off(LM_CENTER_RAMP_INNER);
-
+	++capture_simon_shots_made;
+	if (capture_simon_shots_made > 2) {
+		score (SC_50M);
+		capture_simon_mode_activated = FALSE;
+		//TODO: insert end of mode music and display effects call here
+		}
+	//else TODO: normal shot made effects here
 	switch (capture_simon_modes_achieved ){
 		case 0:
-			//as it is right now we score 6 mill + 1 million for each extra shot
-			score (SC_5M);
+			score (SC_15M);
 			break;
 		case 1:
 			//2nd time we are in capture_simon - score differently
-			score (SC_6M);
+			score (SC_20M);
 			break;
 		case 2:
 			//3rd time we are in capture_simon - score differently
-			score (SC_7M);
+			score (SC_25M);
 			break;
 		default:
 			//all cases past 3rd time we are in capture_simon
-			score (SC_7M);
+			score (SC_25M);
 			break;
 	}//end of switch
-
-	//TODO: display effects
 }//end of function
 
 

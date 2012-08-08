@@ -10,7 +10,7 @@
  * Scoring Description: (original game)
  * Shots that knock the captive eyeball into the upper target award the Retina Scan value.
  * The Jet Bumpers increase the Retina Value.(eyeball)
- * TODO: It starts at 5M and goes up 100K per jet.
+ * It starts at 5M and goes up 100K per jet.
  *
  * At certain numbers of Retina Scans hits, Explode Hurry Up is activated.
  * It takes 1 hit for the first Hurry-Up, four for the next on the easiest level.
@@ -25,6 +25,10 @@
  * Scoring Description: (my rules)
  * same as above except explode mode times out after 30 seconds or ball drain
  * and eyeball shot can be hit in addition to explode arrows
+ *
+ * estimate of average explode mode score: 80 million to 120 million
+ * estimate of average eyeball score: 10 million to 20 million
+ *
  *
  */
 
@@ -154,8 +158,6 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 		score_long_unmultiplied (temp_score); //add temp score to player's score
 	}//end of if
 
-
-
 	//light extra ball on 3rd eyeball hit
 	if (total_eyeball_counter == 3) callset_invoke(ExtraBall_Light_On);
 
@@ -191,6 +193,8 @@ CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	case 3:  { score (SC_30M); score_add (explode_mode_score, score_table[SC_30M]); break;}
 	case 4:	 { score (SC_40M); score_add (explode_mode_score, score_table[SC_40M]); break;}
 	}//end of switch
+	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK1);
+	//TODO: DEFF here
 }//end of function
 
 
@@ -208,6 +212,7 @@ CALLSET_ENTRY (eyeball_explode, sw_eject) {
 	task_sleep (TIME_500MS);
 	sol_request (SOL_EJECT); //request to fire the eject solonoid
 	flasher_pulse (FLASH_EJECT_FLASHER);
+	//TODO: DEFF here
 }//end of function
 
 

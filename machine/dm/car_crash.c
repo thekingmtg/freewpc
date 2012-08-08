@@ -33,6 +33,9 @@
  *
  * once 10 million shot is lit, it starts mode and car crash lights reset to lowest value
  *
+ * estimate of average carcrash mode score: 45 million to 90 million
+ * estimate of average car score: 9 million to 21 million
+ *
  */
 #include <freewpc.h>
 //constants
@@ -42,7 +45,8 @@ const U8 	CAR_CRASH_GOAL_STEP = 5; //increment for later goals
 const U8 	CAR_CRASH_GOAL_MAX = 50;
 
 //local variables
-U8 			car_crash_counter;
+U8 			car_crash_counter;	//non-mode shots made counter
+U8			car_chase_mode_counter; //mode  shots made counter
 U8 			car_crash_goal;		//goal to reach mode
 __boolean 	car_chase_mode_activated;
 __boolean 	car_crash_six; 		//tracks which score to be awarded
@@ -59,6 +63,7 @@ void car_crash1_task (void);
  ***************************************************************************/
 void car_crash_reset (void) {
 	car_crash_counter = 0;
+	car_chase_mode_counter = 0;
 	car_crash_goal = CAR_CRASH_EASY_GOAL;
 	car_chase_mode_activated = FALSE;
 	car_crash_six = FALSE;
@@ -71,6 +76,7 @@ void car_crash_reset (void) {
 
 void car_crash_mode_reset (void) {
 	car_crash_counter = 0;
+	car_chase_mode_counter = 0;
 	car_chase_mode_activated = FALSE;
 	car_crash_six = FALSE;
 	car_crash_ten = FALSE;
@@ -151,7 +157,7 @@ CALLSET_ENTRY (car_crash, sw_car_chase_standup) {
 	if (car_chase_mode_activated)  {//crash the car and end mode
 		callset_invoke(carcrash_mode_off); //at ramps.c
 		car_crash_mode_reset();
-		sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
+		//sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
 		}
 	else task_create_gid1 (GID_CAR_CRASH_ENTERED, car_crash_task);
 	}//end of function
@@ -209,7 +215,9 @@ CALLSET_ENTRY (car_crash, chase_car_made) {
 //this is called from ramps.c
 CALLSET_ENTRY (car_crash, car_chase_ramp_made) {
 	score (SC_15M);
+	++car_chase_mode_counter;
 	//TODO: DEFF here
+	sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
 	}
 
 

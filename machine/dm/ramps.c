@@ -357,7 +357,6 @@ CALLSET_ENTRY (ramps, right_ramp_made) {
 	++right_ramp_counter;
 	++all_ramp_counter;
 	score (SC_250K);
-	ramp_sounds();
 	flasher_pulse (FLASH_RIGHT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
 	if (explode_activated) callset_invoke(explode_ramp_made); //goto eyeball_explode.c for scoring
@@ -365,6 +364,9 @@ CALLSET_ENTRY (ramps, right_ramp_made) {
 	if (capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	// TODO: check for multiball jackpots here
 	// TODO: check for combo arrows here
+	//if not in a mode then perform normal sounds and display effects
+	if (!explode_activated && !car_chase_mode_activated&& !capture_simon_mode_activated) ramp_sounds();
+	// TODO: normal display effects call
 	if (right_ramp_counter == right_ramp_goal)  right_ramp_goal_award ();
 	}//end of function
 
@@ -387,6 +389,7 @@ CALLSET_ENTRY (ramps, sw_left_ramp_enter) {
 	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
 	score (SC_100K);
+	if (car_chase_mode_activated) sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
 	}
 
 CALLSET_ENTRY (ramps, sw_left_ramp_exit) {
@@ -397,7 +400,6 @@ CALLSET_ENTRY (ramps, left_ramp_made) {
 	++left_ramp_counter;
 	++all_ramp_counter;
 	score (SC_250K);
-	ramp_sounds();
 	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
 	if (explode_activated) callset_invoke(explode_ramp_made); //goto eyeball_explode.c for scoring
@@ -406,6 +408,9 @@ CALLSET_ENTRY (ramps, left_ramp_made) {
 	if (capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	// TODO: check for multiball jackpots here
 	// TODO: check for combo arrows here
+	//if not in a mode then perform normal sounds and display effects
+	if (!explode_activated && !car_chase_mode_activated&& !capture_simon_mode_activated) ramp_sounds();
+	// TODO: normal display effects call
 	if (left_ramp_counter == left_ramp_goal)  left_ramp_goal_award();
 	}//end of function
 
