@@ -59,6 +59,8 @@ __boolean 	car_crash_three; 		//tracks which score to be awarded
 void car_crash_reset (void);
 void car_crash_task (void);
 void car_crash1_task (void);
+void carcrash_mode_effect_deff(void);
+void carcrash_effect_deff(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -194,6 +196,7 @@ CALLSET_ENTRY (car_crash, sw_chase_car_2) {
 //final car makes switch so do bonuses
 CALLSET_ENTRY (car_crash, chase_car_made) {
 	++car_crash_counter;
+	deff_start (DEFF_CARCRASH_EFFECT);//under /kernel/deff.c
 	//set point values and lights for car crash
 	if (car_crash_counter == 1) callset_invoke(carcrash_three_on);
 	else if (car_crash_counter == 2) callset_invoke(carcrash_six_on);
@@ -220,7 +223,7 @@ CALLSET_ENTRY (car_crash, chase_car_made) {
 CALLSET_ENTRY (car_crash, car_chase_ramp_made) {
 	score (SC_15M);
 	++car_chase_mode_counter;
-	//TODO: DEFF here
+	deff_start (DEFF_CARCRASH_MODE_EFFECT);//under /kernel/deff.c
 	sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
 	}
 
@@ -228,3 +231,27 @@ CALLSET_ENTRY (car_crash, car_chase_ramp_made) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+//DMD DISPLAY EFFECTS
+void carcrash_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 96, 5, "car crash");
+	//sprintf ("%d", jet_count);
+	//font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
+	//if (jet_count == jet_goal)
+	//	sprintf ("JET BONUS");
+	//else
+	//	sprintf ("BONUS AT %d", jet_goal);
+	//font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of standard_effect_deff
+
+void carcrash_mode_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 96, 5, "car race");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+

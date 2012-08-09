@@ -44,9 +44,11 @@ const U8 			standup_goal_increment = 2;
 const U8 			standup_goal_max = 8;
 
 //local variables
+U8		standupFrenzy_temp_counter;//generic counter
 U8				standupFrenzy_SoundCounter = 0;
 U8 				standupFrenzyNumHits;
 U8 				standupFrenzyTimer;
+score_t 		standupFrenzy_temp_score;//generic score for calculations
 score_t 		standupFrenzyTotalScore;
 U8 				standupFrenzyDefaultLightsLit;
 U8 				standupFrenzyLightsLit; //means target was hit
@@ -60,8 +62,8 @@ void standupFrenzy_mode_init (void);
 void standupFrenzy_mode_exit (void);
 void standupHandler (U8 target);
 void standup_lamp_update1 (U8 mask, U8 lamp);
-void standupFrenzyTotalScore_deff (void);
-void standupFrenzy_mode_deff (void);
+void standupFrenzyTotalScore_effect_deff (void);
+void standupFrenzy_mode_effect_deff (void);
 void standupFrenzy_sounds (void);
 void standup_sounds (void);
 
@@ -100,6 +102,7 @@ void standupFrenzy_mode_exit (void) {
 	standupLightsLit  = ALL_TARGETS;
 	callset_invoke (lamp_update);
 	standup_counter = 0;
+	deff_start (DEFF_STANDUPFRENZYTOTALSCORE_EFFECT);
 }//end of standupFrenzy_mode_exit 
 
 /*light the default standup lights*/
@@ -142,11 +145,19 @@ void standupHandler (U8 target) {
 		standupFrenzyLightsLit &= ~target;  /* flag that target as hit */
 		standup_lamp_update1 (target, lamp);
 		standupFrenzy_sounds();
-		score (SC_5M);
 		++standupFrenzyNumHits;
-		score (standupFrenzyNumHits * score_table[SC_1M]);
+		deff_start (DEFF_STANDUPFRENZY_MODE_EFFECT);
+		//score 5 million plus 1 million times number of hits
+		score (SC_5M);
+		score_zero (standupFrenzy_temp_score);//zero out temp score
+		standupFrenzy_temp_counter = standupFrenzyNumHits;
+		do {
+			score_add (standupFrenzy_temp_score, score_table[SC_1M]);//multiply 1M by count
+		} while (--standupFrenzy_temp_counter > 1);
+		score_long_unmultiplied (standupFrenzy_temp_score); //add temp score to player's score
+		//do same for mode score
 		score_add (standupFrenzyTotalScore, score_table[SC_5M]);
-		score_add (standupFrenzyTotalScore, (standupFrenzyNumHits * score_table[SC_1M]) );
+		score_add (standupFrenzyTotalScore, standupFrenzy_temp_score);
 		//sound_send (SND_STANDUPFRENZY_MODE_BOOM);
 		//if 5th light out then reset all lights back on
 		if (standupFrenzyNumHits % 5 == 0) 	standupFrenzyLightsLit = ALL_TARGETS;
@@ -220,7 +231,6 @@ void standupFrenzy_mode_expire (void) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
-
 void standup_sounds (void) {
 	standup_SoundCounter = random_scaled(3);//from kernal/random.c
 	if ( standup_SoundCounter  == 0 )
@@ -230,7 +240,6 @@ else if ( standup_SoundCounter  == 1 )
 else if ( standup_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, ZAPP_3_LONG, SL_1S, PRI_GAME_QUICK5);
 }
-
 
 void standupFrenzy_sounds (void) {
 	standupFrenzy_SoundCounter = random_scaled(3);//from kernal/random.c
@@ -242,9 +251,8 @@ else if ( standupFrenzy_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, CHORD3, SL_1S, PRI_GAME_QUICK5);
 }
 
-
 /*mode is over*/
-void standupFrenzyTotalScore_deff (void) {
+void standupFrenzyTotalScore_effect_deff (void) {
 	//sound_send (SND_SEE_WHAT_GREED);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 5, "Standup Frenzy");
@@ -257,8 +265,14 @@ void standupFrenzyTotalScore_deff (void) {
 } // standupFrenzyTotalScore_deff 
 
 /*during mode*/
-void standupFrenzy_mode_deff (void) {
-/*	dmd_alloc_pair_clean ();
+void standupFrenzy_mode_effect_deff (void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 96, 5, "Standup Frenzy");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+
+	/*	dmd_alloc_pair_clean ();
 	U16 imageFrameNumber;
 	for (;;) {
 		U8 i = 0;

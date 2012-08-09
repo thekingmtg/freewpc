@@ -33,6 +33,7 @@ __boolean 	prison_break_mode_activated;
 //prototypes
 void prison_break_reset (void);
 void prison_break_player_reset (void);
+void prisonbreak_effect_deff (void);
 
 /****************************************************************************
  * initialize  and exit
@@ -83,6 +84,7 @@ CALLSET_ENTRY (prison_break, sw_claw_prison_break) {
 CALLSET_ENTRY (prison_break, prison_break_made) {
 	++prison_break_mode_counter;
 	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
+	deff_start (DEFF_PRISONBREAK_EFFECT);
 	//flash lamp for a time
 	//lamp_tristate_flash(LM_CENTER_RAMP_MIDDLE);
 	//lamp_tristate_flash(LM_CENTER_RAMP_OUTER);
@@ -123,3 +125,10 @@ CALLSET_ENTRY (prison_break, prison_break_made) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+void prisonbreak_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 96, 5, "Prison Break");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}

@@ -64,6 +64,8 @@ void explode_mode_exit (void);
 void eyeball_reset (void);
 void player_eyeball_reset (void);
 void eyeball_goal_award (void);
+void eyeball_effect_deff(void);
+void explode_effect_deff(void);
 
 //mode definition structure
 struct timed_mode_ops explode_mode = {
@@ -199,7 +201,7 @@ CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	default: { score (SC_40M); score_add (explode_mode_score, score_table[SC_40M]); break;}
 	}//end of switch
 	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK1);
-	//TODO: DEFF here
+	deff_start (DEFF_EXPLODE_EFFECT);
 }//end of function
 
 
@@ -217,10 +219,40 @@ CALLSET_ENTRY (eyeball_explode, sw_eject) {
 	task_sleep (TIME_500MS);
 	sol_request (SOL_EJECT); //request to fire the eject solonoid
 	flasher_pulse (FLASH_EJECT_FLASHER);
-	//TODO: DEFF here
+	deff_start (DEFF_EYEBALL_EFFECT);
 }//end of function
 
 
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+void eyeball_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 96, 5, "retina scan");
+	//sprintf ("%d", jet_count);
+	//font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
+	//if (jet_count == jet_goal)
+	//	sprintf ("JET BONUS");
+	//else
+	//	sprintf ("BONUS AT %d", jet_goal);
+	//font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+
+void explode_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 96, 5, "explode");
+	//sprintf ("%d", jet_count);
+	//font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
+	//if (jet_count == jet_goal)
+	//	sprintf ("JET BONUS");
+	//else
+	//	sprintf ("BONUS AT %d", jet_goal);
+	//font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+

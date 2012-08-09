@@ -134,6 +134,7 @@ CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 	else {//not in super jets mode
 		++jet_count;
 		score(SC_250K);
+		deff_start (DEFF_JETS_EFFECT);//under /kernel/deff.c
 		if (jet_count == jet_goal)  jet_goal_award ();//sound played in call
 		//TODO: do we want a sound here?
 		//	else

@@ -36,6 +36,7 @@ __boolean 	acmag_mode_activated;
 //prototypes
 void acmag_reset (void);
 void acmag_player_reset (void);
+void acmag_effect_deff(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -120,7 +121,7 @@ CALLSET_ENTRY (acmag, acmag_made) {
 			break;
 	}//end of switch
 
-	//TODO: display effects
+	deff_start (DEFF_ACMAG_EFFECT);//under /kernel/deff.c
 }//end of function
 
 
@@ -128,3 +129,18 @@ CALLSET_ENTRY (acmag, acmag_made) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+void acmag_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 96, 5, "acmag");
+	//sprintf ("%d", jet_count);
+	//font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
+	//if (jet_count == jet_goal)
+	//	sprintf ("JET BONUS");
+	//else
+	//	sprintf ("BONUS AT %d", jet_goal);
+	//font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+

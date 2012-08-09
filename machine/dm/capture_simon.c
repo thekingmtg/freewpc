@@ -35,6 +35,7 @@ __boolean 	capture_simon_mode_activated;
 //prototypes
 void capture_simon_reset (void);
 void capture_simon_player_reset (void);
+void capturesimon_effect_deff(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -72,6 +73,7 @@ CALLSET_ENTRY (capture_simon, sw_claw_capture_simon) {
 	capture_simon_mode_activated = TRUE;
 	++capture_simon_modes_achieved;
 	capture_simon_shots_made = 0;
+	deff_start (DEFF_CAPTURESIMON_EFFECT);//under /kernel/deff.c
 	sound_start (ST_MUSIC, MUS_MD_CAPTURE_SIMON, 0, SP_NORMAL);
 	sound_start (ST_SAMPLE, SPCH_UNDER_ARREST, SL_1S, PRI_GAME_QUICK5);
 	task_sleep(TIME_500MS);
@@ -105,15 +107,16 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 	//task_sleep(TIME_200MS);
 	//lamp_tristate_off(LM_CENTER_RAMP_INNER);
 	++capture_simon_shots_made;
+	//IF FINAL CAPTURE SIMON SHOT MADE
 	if (capture_simon_shots_made > 2) {
 		score (SC_50M);
 		capture_simon_mode_activated = FALSE;
 		//return to normal music
 		sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
-
-		//TODO: insert display effects call here
+		deff_start (DEFF_CAPTURESIMON_EFFECT);//under /kernel/deff.c
 		}
-		//else TODO: normal shot made effects here
+	else deff_start (DEFF_CAPTURESIMON_EFFECT);//under /kernel/deff.c
+
 	switch (capture_simon_modes_achieved ){
 		case 0:
 			score (SC_15M);
@@ -138,3 +141,18 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+void capturesimon_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, 96, 5, "capture simon");
+	//sprintf ("%d", jet_count);
+	//font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
+	//if (jet_count == jet_goal)
+	//	sprintf ("JET BONUS");
+	//else
+	//	sprintf ("BONUS AT %d", jet_goal);
+	//font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+
