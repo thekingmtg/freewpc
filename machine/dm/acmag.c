@@ -144,3 +144,15 @@ void acmag_effect_deff(void) {
 	deff_exit ();
 	}//end of mode_effect_deff
 
+
+/*
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack        */
+CALLSET_ENTRY (acmag, status_report){
+	font_render_string_center (&font_mono5, 96, 5, "acmag modes completed");
+	sprintf ("%d", acmag_modes_achieved);
+	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
+	//deff_exit (); is called at end of calling function - not needed here
+}//end of function
+
