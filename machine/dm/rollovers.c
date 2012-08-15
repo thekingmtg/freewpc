@@ -41,6 +41,9 @@ __boolean 			lower_rollover_activated;
 U8 					rollover_bonus_multiplier; // 0 to 5
 U8					rollover_SoundCounter = 0;
 
+//external variables
+extern 	__boolean 		inTest; //located in global_constants.c
+
 //prototypes
 void rollover_reset (void);
 void all_rollover_made (void);
@@ -277,3 +280,18 @@ else if ( rollover_SoundCounter  == 1 )
 	sound_start (ST_EFFECT, TOINK2, SL_1S, PRI_GAME_QUICK5);
 }
 
+
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (rollovers, status_report){
+	sprintf ("rollover bonus multiplier:  %d", rollover_bonus_multiplier);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function

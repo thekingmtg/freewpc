@@ -30,7 +30,10 @@ U8			capture_simon_shots_made;
 U8 			capture_simon_mode_counter;
 U8 			capture_simon_modes_achieved;
 score_t 	capture_simon_mode_score;
-__boolean 	capture_simon_mode_activated;
+__boolean 	is_capture_simon_mode_activated;
+
+//external variables
+extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void capture_simon_reset (void);
@@ -43,7 +46,7 @@ void capturesimon_effect_deff(void);
 void capture_simon_reset (void) {
 	capture_simon_mode_counter = 0;
 	capture_simon_shots_made = 0;
-	capture_simon_mode_activated = FALSE;
+	is_capture_simon_mode_activated = FALSE;
 	score_zero(capture_simon_mode_score);
 	}
 
@@ -70,7 +73,7 @@ CALLSET_ENTRY (capture_simon, start_ball) { capture_simon_reset(); }
  ***************************************************************************/
 CALLSET_ENTRY (capture_simon, sw_claw_capture_simon) {
 	score (SC_250K);
-	capture_simon_mode_activated = TRUE;
+	is_capture_simon_mode_activated = TRUE;
 	++capture_simon_modes_achieved;
 	capture_simon_shots_made = 0;
 	deff_start (DEFF_CAPTURESIMON_EFFECT);//under /kernel/deff.c
@@ -110,7 +113,7 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 	//IF FINAL CAPTURE SIMON SHOT MADE
 	if (capture_simon_shots_made > 2) {
 		score (SC_50M);
-		capture_simon_mode_activated = FALSE;
+		is_capture_simon_mode_activated = FALSE;
 		//return to normal music
 		sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
 		deff_start (DEFF_CAPTURESIMON_EFFECT);//under /kernel/deff.c
@@ -155,4 +158,34 @@ void capturesimon_effect_deff(void) {
 	task_sleep_sec (2);
 	deff_exit ();
 	}//end of mode_effect_deff
+
+
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (capture_simon, status_report){
+	if (inTest) {
+		if (is_capture_simon_mode_activated) sprintf ("capture simon is activated");
+		else sprintf ("capture simon is not activated");
+		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+	}//end of 	if (inTest)
+
+	sprintf ("%d capture simon modes completed", capture_simon_modes_achieved);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+
+	sprintf ("capture simon score: %d", capture_simon_mode_score);
+	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+
+	if (inTest) {
+		sprintf ("%d capture simon shots made", capture_simon_shots_made);
+		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function
 

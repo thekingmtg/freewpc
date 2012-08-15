@@ -39,6 +39,9 @@
 __boolean 	left_inlane_Access_Claw_activated;
 __boolean 	right_inlane_Light_Quick_Freeze_activated;
 
+//external variables
+extern 	__boolean 		inTest; //located in global_constants.c
+
 //prototypes
 
 
@@ -115,3 +118,30 @@ CALLSET_ENTRY (inlanes, sw_right_inlane) {
 	if (right_inlane_Light_Quick_Freeze_activated) callset_invoke(Activate_left_Ramp_QuickFreeze);
 }
 
+
+
+/****************************************************************************
+ * DMD display and sound effects
+ ****************************************************************************/
+
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (inlanes, status_report){
+	if (inTest) {
+		if (right_inlane_Light_Quick_Freeze_activated) sprintf ("quick freeze is activated");
+		else sprintf ("quick freeze is not activated");
+		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+
+		if (left_inlane_Access_Claw_activated) sprintf ("access claw is activated");
+		else sprintf ("access claw is not activated");
+		font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function

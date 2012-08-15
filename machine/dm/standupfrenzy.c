@@ -44,18 +44,24 @@ const U8 			standup_goal_increment = 2;
 const U8 			standup_goal_max = 8;
 
 //local variables
-U8		standupFrenzy_temp_counter;//generic counter
-U8				standupFrenzy_SoundCounter = 0;
+U8			standupFrenzy_temp_counter;//generic counter
+U8			standupFrenzy_SoundCounter = 0;//used for randomizing sound calls
+U8			standup_SoundCounter = 0;//used for randomizing sound calls
+score_t 	standupFrenzy_temp_score;//generic score for calculations
+U8 				standupFrenzyDefaultLightsLit;
+
+U8				standupFrenzy_modes_achieved;
 U8 				standupFrenzyNumHits;
 U8 				standupFrenzyTimer;
-score_t 		standupFrenzy_temp_score;//generic score for calculations
 score_t 		standupFrenzyTotalScore;
-U8 				standupFrenzyDefaultLightsLit;
-U8 				standupFrenzyLightsLit; //means target was hit
-U8			standup_SoundCounter = 0;
-U8 			standupLightsLit;
-U8 			standup_counter;
+U8 				standupFrenzyLightsLit; //tracks which target was hit
+U8 			standupLightsLit; //tracks which target was hit
+U8 			standup_num_of_hits;
 U8 			standup_goal;
+__boolean 		isStandupFrenzyActivated;
+
+//external variables
+extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void standupFrenzy_mode_init (void);
@@ -93,6 +99,8 @@ void standupFrenzy_mode_init (void) {
 	//deff_start (DEFF_STANDUPFRENZY_MODE);
 	score_zero (standupFrenzyTotalScore);
 	lamp_tristate_on(LM_CLAW_FREEZE);
+	isStandupFrenzyActivated = TRUE;
+	++standupFrenzy_modes_achieved;
 }//end of standupFrenzy_mode_init 
 
 void standupFrenzy_mode_exit (void) {
@@ -101,21 +109,26 @@ void standupFrenzy_mode_exit (void) {
 	standupFrenzyLightsLit = NO_TARGETS;
 	standupLightsLit  = ALL_TARGETS;
 	callset_invoke (lamp_update);
-	standup_counter = 0;
+	standup_num_of_hits = 0;
 	deff_start (DEFF_STANDUPFRENZYTOTALSCORE_EFFECT);
+	isStandupFrenzyActivated = FALSE;
 }//end of standupFrenzy_mode_exit 
 
 /*light the default standup lights*/
-CALLSET_ENTRY (standupFrenzy, start_player, start_ball) {
+CALLSET_ENTRY (standupFrenzy, start_ball) {
 	/* Light all 'default' lamps */
 	standupFrenzyDefaultLightsLit = ALL_TARGETS;
 	standupFrenzyLightsLit = NO_TARGETS;
 	standupLightsLit  = ALL_TARGETS;
 	callset_invoke (lamp_update);
-	standup_counter = 0;
+	standup_num_of_hits = 0;
 	standup_goal = 1;
+	isStandupFrenzyActivated = FALSE;
 }//end of start_player
 
+CALLSET_ENTRY (standupFrenzy, start_player) {
+standupFrenzy_modes_achieved = 0;
+}
 /****************************************************************************
  * playfield lights and flags
  *
@@ -170,8 +183,8 @@ void standupHandler (U8 target) {
 			standup_sounds();
 			lamp_tristate_flash (lamp);
 			score (SC_500K);
-			++standup_counter;
-			if (standup_counter >= standup_goal) {
+			++standup_num_of_hits;
+			if (standup_num_of_hits >= standup_goal) {
 				callset_invoke(light_quick_freeze_light_on);//sent to inlanes.c
 				if (standup_goal < standup_goal_max ) standup_goal += standup_goal_increment;
 				}
@@ -304,3 +317,31 @@ void standupFrenzy_mode_effect_deff (void) {
 */
 }//end of standupFrenzy_mode_deff 
 
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (standupFrenzy, status_report){
+	if (inTest) {
+		if (isStandupFrenzyActivated) sprintf ("standup frenzy is activated");
+		else sprintf ("standup frenzy is not activated");
+		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+	}//end of 	if (inTest)
+
+	sprintf ("%d standup frenzy modes completed", standupFrenzy_modes_achieved);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+
+	sprintf ("standup frenzy score: %d", standupFrenzyTotalScore);
+	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+
+	if (inTest) {
+		sprintf ("%d standup frenzy shots made", standupFrenzyNumHits);
+		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function

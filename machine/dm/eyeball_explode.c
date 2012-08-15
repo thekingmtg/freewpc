@@ -44,18 +44,19 @@ const U8 EYE_GOAL_MAX = 50;
 //local variables
 U8 counter; //temporary counter for calculating scores
 U8 explode_SoundCounter;
-U8 eyeball_counter;//for current ball only
-U8 total_eyeball_counter;//for entire game
+U8 eyeball_shots_made;//for current ball only
+U8 total_eyeball_shots_made;//for entire game
 U8 eyeball_goal;//num of hits to start explode
 U8 explode_mode_timer;
-U8 explode_mode_counter;//number of times an explode arrow or eyeball is hit
+U8 explode_mode_shots_made;//number of times an explode arrow or eyeball is hit
 U8 explode_modes_achieved_counter;//number of times mode achieved
 score_t explode_mode_score;
 score_t temp_score;
-__boolean explode_activated;
+__boolean 	is_explode_activated;//external in orbits and ramps
 
 //external variables
-extern U8 jet_count;//found in jets_superjets.c
+extern 	__boolean 		inTest; //located in global_constants.c
+extern 	U8 				jet_shots_made;//found in jets_superjets.c
 
 //prototypes
 void explode_mode_init (void);
@@ -88,21 +89,21 @@ struct timed_mode_ops explode_mode = {
  * initialize  and exit
  ***************************************************************************/
 void player_eyeball_reset (void) {
-	total_eyeball_counter = 0;
-	eyeball_counter = 0;
+	total_eyeball_shots_made = 0;
+	eyeball_shots_made = 0;
 	eyeball_goal = EYE_EASY_GOAL;
-	explode_activated = FALSE;
+	is_explode_activated = FALSE;
 	explode_modes_achieved_counter = 0;
-	explode_mode_counter = 0;
+	explode_mode_shots_made = 0;
 	explode_SoundCounter = 0;
 	}
 
 void eyeball_reset (void) {
-	eyeball_counter = 0;
+	eyeball_shots_made = 0;
 	eyeball_goal = EYE_EASY_GOAL;
-	explode_activated = FALSE;
+	is_explode_activated = FALSE;
 	explode_modes_achieved_counter = 0;
-	explode_mode_counter = 0;
+	explode_mode_shots_made = 0;
 	}
 
 CALLSET_ENTRY (eyeball_explode, end_ball) { timed_mode_end (&explode_mode); }
@@ -112,8 +113,8 @@ CALLSET_ENTRY (eyeball_explode, start_ball) { eyeball_reset(); }
 void explode_mode_exit (void) { explode_mode_expire();}
 
 void explode_mode_init (void) {
-	explode_activated = TRUE;
-	explode_mode_counter = 0;
+	is_explode_activated = TRUE;
+	explode_mode_shots_made = 0;
 	sound_start (ST_MUSIC, MUS_MD_EXPLODE, 0, SP_NORMAL);
 	if ( (explode_SoundCounter++ % 2) == 0 )//check if even
 		sound_start (ST_SPEECH, SPCH_EXPLODE_ACTIVATED, SL_2S, PRI_GAME_QUICK5);
@@ -125,7 +126,7 @@ void explode_mode_init (void) {
 	}//end of function
 
 void explode_mode_expire (void) {
-	explode_activated = FALSE;
+	is_explode_activated = FALSE;
 	callset_invoke(DeActivate_Explode_Inserts);
 	//return to normal music
 	sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
@@ -142,7 +143,7 @@ void explode_mode_expire (void) {
  *
  ***************************************************************************/
 void eyeball_goal_award (void) {
-		eyeball_counter = 0;
+		eyeball_shots_made = 0;
 		timed_mode_begin (&explode_mode);//start explode mode
 		sound_start (ST_SPEECH, SPCH_LOVE_WHEN_THAT_HAPPENS, SL_2S, PRI_GAME_QUICK5);
 		if (eyeball_goal < EYE_GOAL_MAX)  eyeball_goal += EYE_GOAL_STEP;
@@ -155,9 +156,9 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 	score (SC_5M);
 
 	//100k per jet hit here
-	if (jet_count > 0) {
+	if (jet_shots_made > 0) {
 		score_zero (temp_score);//zero out temp score
-		 counter = jet_count;
+		 counter = jet_shots_made;
 		do {
 			score_add (temp_score, score_table[SC_100K]);//multiply 100K by jet count
 		} while (--counter > 1);
@@ -165,16 +166,16 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 	}//end of if
 
 	//light extra ball on 3rd eyeball hit
-	if (total_eyeball_counter == 3) callset_invoke(ExtraBall_Light_On);
+	if (total_eyeball_shots_made == 3) callset_invoke(ExtraBall_Light_On);
 
 	//explode mode not activated
 	if ( !timed_mode_running_p(&explode_mode) ) {
-		++eyeball_counter;
-		if (eyeball_counter == eyeball_goal)  eyeball_goal_award();
+		++eyeball_shots_made;
+		if (eyeball_shots_made == eyeball_goal)  eyeball_goal_award();
 		}//end of if timed mode running
 
 	else { //else explode activated
-		++explode_mode_counter;
+		++explode_mode_shots_made;
 		callset_invoke(explode_ramp_made);
 		}//end of else
 	}//end of function
@@ -192,7 +193,7 @@ CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 	else if (explode_mode_timer > 5) 	{ score (SC_7M); score_add (explode_mode_score, score_table[SC_7M]); }
 	else 								{ score (SC_5M); score_add (explode_mode_score, score_table[SC_5M]); }
 	//bonus here
-	switch (explode_mode_counter) {
+	switch (explode_mode_shots_made) {
 	case 0: 	break;
 	case 1:  { score (SC_10M); score_add (explode_mode_score, score_table[SC_10M]); break;}
 	case 2:  { score (SC_20M); score_add (explode_mode_score, score_table[SC_20M]); break;}
@@ -256,3 +257,45 @@ void explode_effect_deff(void) {
 	deff_exit ();
 	}//end of mode_effect_deff
 
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (explode, status_report){
+	if (inTest) {
+		if (is_explode_activated) sprintf ("explode is activated");
+		else sprintf ("explode is not activated");
+		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+	}//end of 	if (inTest)
+
+	sprintf ("%d explode modes completed", explode_modes_achieved_counter);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+
+	sprintf ("explode score: %d", explode_mode_score);
+	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+
+	if (inTest) {
+		sprintf ("%d explode shots made", explode_mode_shots_made);
+		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function
+
+
+CALLSET_ENTRY (eyeball, status_report){
+	sprintf ("%d eyeball shots made this ball", eyeball_shots_made);
+	font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+
+	sprintf ("%d eyeball shots to start explode", eyeball_goal - eyeball_shots_made);
+	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+
+	if (inTest) {
+		sprintf ("%d eyeball shots made total", total_eyeball_shots_made);
+		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function

@@ -28,6 +28,9 @@
 //local variables
 U8		simple_SoundCounter = 0;
 
+//external variables
+extern 	__boolean 		inTest; //located in global_constants.c
+
 //prototypes
 void simple_sounds(void);
 
@@ -86,3 +89,4 @@ else if ( simple_SoundCounter == 2 )
 else if ( simple_SoundCounter == 3 )
 	sound_start (ST_EFFECT, ZAPP_2, SL_500MS, PRI_GAME_QUICK5);
 }
+

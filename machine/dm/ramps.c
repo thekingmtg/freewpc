@@ -109,13 +109,13 @@ __boolean 	right_Ramp_Jackpot_activated;
 __boolean 	right_Ramp_Arrow_activated;
 
 //external variables
-
-extern	__boolean 	explode_activated; //located in eyeball_explode.c
+extern 	__boolean 	inTest; //located in global_constants.c
+extern	__boolean 	is_explode_activated; //located in eyeball_explode.c
 //extern	explode_mode_timer;
-extern	__boolean 	car_chase_mode_activated; //located in car_chase.c
-extern	__boolean 	acmag_mode_activated; //located in acmag.c
-extern __boolean 	prison_break_mode_activated; //from prison_break.c
-extern  __boolean 	capture_simon_mode_activated; //from capture_simon.c
+extern	__boolean 	is_car_chase_mode_activated; //located in car_chase.c
+extern	__boolean 	is_acmag_mode_activated; //located in acmag.c
+extern 	__boolean 	is_prison_break_mode_activated; //from prison_break.c
+extern  __boolean 	is_capture_simon_mode_activated; //from capture_simon.c
 
 //prototypes
 void ramps_reset (void);
@@ -360,13 +360,13 @@ CALLSET_ENTRY (ramps, right_ramp_made) {
 	score (SC_250K);
 	flasher_pulse (FLASH_RIGHT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
-	if (explode_activated) callset_invoke(explode_ramp_made); //goto eyeball_explode.c for scoring
-	if (car_chase_mode_activated) callset_invoke(car_chase_ramp_made); //goto carchase.c for scoring
-	if (capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if (is_explode_activated) callset_invoke(explode_ramp_made); //goto eyeball_explode.c for scoring
+	if (is_car_chase_mode_activated) callset_invoke(car_chase_ramp_made); //goto carchase.c for scoring
+	if (is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	// TODO: check for multiball jackpots here
 	// TODO: check for combo arrows here
 	//if not in a mode then perform normal sounds and display effects
-	if (!explode_activated && !car_chase_mode_activated&& !capture_simon_mode_activated) ramp_sounds();
+	if (!is_explode_activated && !is_car_chase_mode_activated&& !is_capture_simon_mode_activated) ramp_sounds();
 	// TODO: normal display effects call
 	if (right_ramp_counter == right_ramp_goal)  right_ramp_goal_award ();
 	}//end of function
@@ -390,7 +390,7 @@ CALLSET_ENTRY (ramps, sw_left_ramp_enter) {
 	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
 	score (SC_100K);
-	if (car_chase_mode_activated) sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
+	if (is_car_chase_mode_activated) sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
 	}
 
 CALLSET_ENTRY (ramps, sw_left_ramp_exit) {
@@ -403,14 +403,14 @@ CALLSET_ENTRY (ramps, left_ramp_made) {
 	score (SC_250K);
 	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
-	if (explode_activated) callset_invoke(explode_ramp_made); //goto eyeball_explode.c for scoring
-	if (car_chase_mode_activated) callset_invoke(car_chase_ramp_made); //goto carchase.c for scoring
+	if (is_explode_activated) callset_invoke(explode_ramp_made); //goto eyeball_explode.c for scoring
+	if (is_car_chase_mode_activated) callset_invoke(car_chase_ramp_made); //goto carchase.c for scoring
 	if (left_Ramp_QuickFreeze_activated) callset_invoke(increment_freeze); //goto lock_freeze_mbstart.c
-	if (capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if (is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	// TODO: check for multiball jackpots here
 	// TODO: check for combo arrows here
 	//if not in a mode then perform normal sounds and display effects
-	if (!explode_activated && !car_chase_mode_activated&& !capture_simon_mode_activated) ramp_sounds();
+	if (!is_explode_activated && !is_car_chase_mode_activated&& !is_capture_simon_mode_activated) ramp_sounds();
 	// TODO: normal display effects call
 	if (left_ramp_counter == left_ramp_goal)  left_ramp_goal_award();
 	}//end of function
@@ -440,8 +440,8 @@ CALLSET_ENTRY (ramps, center_ramp) {
 	lamp_tristate_off(LM_CENTER_RAMP_OUTER);
 	lamp_tristate_off(LM_CENTER_RAMP_INNER);
 	//lamps will also flash at acmag call - need to see how that looks
-	if (acmag_mode_activated) callset_invoke(acmag_made);
-	if (capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if (is_acmag_mode_activated) callset_invoke(acmag_made);
+	if (is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	// TODO: check for multiball jackpots here
 	// TODO: check for combo arrows here
 	if (center_ramp_counter == center_ramp_goal)  center_ramp_goal_award ();
@@ -479,8 +479,8 @@ CALLSET_ENTRY (ramps, side_ramp_made) {
 	ramp_sounds();
 	flasher_pulse (FLASH_SIDE_RAMP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
-	if(prison_break_mode_activated)  callset_invoke(prison_break_made);
-	if (capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if(is_prison_break_mode_activated)  callset_invoke(prison_break_made);
+	if (is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	// TODO: check for multiball jackpots here
 	// TODO: check for combo arrows here
 	if (side_ramp_counter == side_ramp_goal)  side_ramp_goal_award();
@@ -506,3 +506,29 @@ void missed_ramp_sounds (void) {
 	ramp_SoundCounter = random_scaled(missedTotalNumOfSounds);//from kernal/random.c
 	sound_start (ST_EFFECT, missedRampSoundsArray[ramp_SoundCounter], SL_1S, PRI_GAME_QUICK5);
 }
+
+
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (ramps, status_report){
+	sprintf ("%d left ramps", left_ramp_counter);
+	font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+
+	sprintf ("%d right ramps", right_ramp_counter);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+
+	sprintf ("%d center ramps", center_ramp_counter);
+	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+
+	sprintf ("%d side ramps", side_ramp_counter);
+	font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function
+

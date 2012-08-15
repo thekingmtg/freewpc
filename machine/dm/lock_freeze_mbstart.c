@@ -12,13 +12,16 @@
 #include <freewpc.h>
 
 //local variables
-__boolean 	ball_one_frozen;
-__boolean 	ball_two_frozen;
-__boolean 	ball_three_frozen;
-__boolean 	ball_four_frozen;
+__boolean 	is_ball_one_frozen;
+__boolean 	is_ball_two_frozen;
+__boolean 	is_ball_three_frozen;
+__boolean 	is_ball_four_frozen;
 U8			NumBallsFrozen;
 U8			NumMBsDone;
 U8			lock_SoundCounter;
+U8			NumBallsNeededForNextMB;
+//external variables
+extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void lock_reset (void);
@@ -27,10 +30,10 @@ void lock_reset (void);
  * initialize  and exit
  ***************************************************************************/
 void lock_reset (void) {
-	ball_one_frozen = FALSE;
-	ball_two_frozen = FALSE;
-	ball_three_frozen = FALSE;
-	ball_four_frozen = FALSE;
+	is_ball_one_frozen = FALSE;
+	is_ball_two_frozen = FALSE;
+	is_ball_three_frozen = FALSE;
+	is_ball_four_frozen = FALSE;
 	NumBallsFrozen = 0;
 }//end of reset
 
@@ -38,6 +41,7 @@ void player_reset (void) {
 	lock_SoundCounter = 0;
 	NumMBsDone = 0;
 	lock_reset();
+	NumBallsNeededForNextMB = 1;
 }
 
 
@@ -55,25 +59,25 @@ CALLSET_ENTRY (lock_freeze_mbstart, increment_freeze) {
 	sound_start (ST_EFFECT, LOCK_FREEZE_PLOINK, SL_1S, PRI_GAME_QUICK1);
 		switch (++NumBallsFrozen) {
 	case 1:
-			ball_one_frozen = TRUE;
+			is_ball_one_frozen = TRUE;
 			lamp_tristate_flash(LM_FREEZE_1);
 			task_sleep (TIME_500MS);
 			lamp_tristate_on (LM_FREEZE_1);
 			break;
 	case 2:
-			ball_two_frozen = TRUE;
+			is_ball_two_frozen = TRUE;
 			lamp_tristate_flash(LM_FREEZE_2);
 			task_sleep (TIME_500MS);
 			lamp_tristate_on (LM_FREEZE_2);
 			break;
 	case 3:
-			ball_three_frozen = TRUE;
+			is_ball_three_frozen = TRUE;
 			lamp_tristate_flash(LM_FREEZE_3);
 			task_sleep (TIME_500MS);
 			lamp_tristate_on (LM_FREEZE_3);
 			break;
 	case 4:
-			ball_four_frozen = TRUE;
+			is_ball_four_frozen = TRUE;
 			lamp_tristate_flash(LM_FREEZE_4);
 			task_sleep (TIME_500MS);
 			lamp_tristate_on (LM_FREEZE_4);
@@ -117,6 +121,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 		lamp_tristate_flash(LM_FORTRESS_MULTIBALL);
 		task_sleep (TIME_500MS);
 		lamp_tristate_on (LM_FORTRESS_MULTIBALL);
+		++NumBallsNeededForNextMB;
 		//TODO: here we call the Fortress multiball start function
 		}
 	//Museum Multiball	 	= 2 ball min needs to be frozen
@@ -131,6 +136,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 		lamp_tristate_flash(LM_MUSEUM_MULTIBALL);
 		task_sleep (TIME_500MS);
 		lamp_tristate_on (LM_MUSEUM_MULTIBALL);
+		++NumBallsNeededForNextMB;
 		//TODO: here we call the Museum multiball start function
 		}
 	//Cryoprison Multiball	= 3 ball min needs to be frozen
@@ -144,6 +150,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 		lamp_tristate_flash(LM_CRYOPRISON_MULTIBALL);
 		task_sleep (TIME_500MS);
 		lamp_tristate_on (LM_CRYOPRISON_MULTIBALL);
+		++NumBallsNeededForNextMB;
 		//here we call the Cryoprison multiball start function
 		}
 	//Wasteland Multiball 	= 4 ball min needs to be frozen
@@ -157,6 +164,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 		lamp_tristate_flash(LM_WASTELAND_MULTIBALL);
 		task_sleep (TIME_500MS);
 		lamp_tristate_on (LM_WASTELAND_MULTIBALL);
+		NumBallsNeededForNextMB = 1 ;
 		//here we call the Wasteland multiball start function
 		}
 	//TODO:write multiball functions - send out right num of frozen balls
@@ -169,3 +177,27 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+
+
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (lock_freeze_mbstart, status_report){
+	sprintf ("%d multiballs completed", NumMBsDone);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+
+	sprintf ("balls frozen: %d", NumBallsFrozen);
+	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+
+	if (inTest) {
+		sprintf ("%d Balls Needed For Next MB", NumBallsNeededForNextMB - NumBallsFrozen);
+		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function

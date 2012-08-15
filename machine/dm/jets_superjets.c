@@ -39,13 +39,17 @@ const U8 SUPERJETS_GOAL_STEP = 10;
 score_t superjets_mode_score;
 
 //local variables
-U8 jet_count;
-U8 jet_goal;
-U8 super_jet_count;
-U8 super_jet_goal;
-U8 superjets_mode_counter; // number of times we entered the mode
-U8 superjets_SoundCounter;
-__boolean super_jets_activated;
+U8 			jet_shots_made;//external ref to eyeball_explode.c
+U8 			jet_goal;
+
+U8 			super_jet_shots_made;
+U8 			super_jet_goal;
+U8 			superjets_modes_achieved; // number of times we entered the mode
+U8 			superjets_SoundCounter;
+__boolean 	super_jets_activated;
+
+//external variables
+extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void jet_flasher(void);
@@ -60,14 +64,14 @@ void player_jet_goal_reset(void);
  * initialize  and exit
  ***************************************************************************/
 void jet_goal_reset (void) {
-	jet_count = 0;
-	super_jet_count = 0;
+	jet_shots_made = 0;
+	super_jet_shots_made = 0;
 	super_jets_activated = FALSE;
 	superjets_SoundCounter = 0;
 	}
 
 void player_jet_goal_reset  (void) {
-superjets_mode_counter = 0;
+superjets_modes_achieved = 0;
 jet_goal = JETS_EASY_GOAL;
 super_jet_goal = SUPERJETS_EASY_GOAL;
 jet_goal_reset();
@@ -84,17 +88,17 @@ CALLSET_ENTRY (jets_superjets, start_ball) { jet_goal_reset (); }
 
 void jet_goal_award (void) {
 	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
-	jet_count = 0;
+	jet_shots_made = 0;
 	score(SC_1M);//only once
 	if (jet_goal < JETS_GOAL_MAX)  jet_goal += JETS_GOAL_STEP;
 	}
 
 void super_jet_goal_award (void) {
 	sound_start (ST_SPEECH, SPCH_SUPERJETS_COMPLETED, SL_2S, PRI_GAME_QUICK5);
-	jet_count = 0;
-	super_jet_count = 0;
+	jet_shots_made = 0;
+	super_jet_shots_made = 0;
 	//score higher if mode done more than once
-	switch (superjets_mode_counter) {
+	switch (superjets_modes_achieved) {
 		case 0: 	break; //never entered mode
 		case 1:  { score (SC_40M);  score_add (superjets_mode_score, score_table[SC_40M]); break;}
 		case 2:  { score (SC_45M);  score_add (superjets_mode_score, score_table[SC_45M]); break;}
@@ -111,18 +115,18 @@ void super_jet_goal_award (void) {
 
 CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 	if (super_jets_activated){
-		++super_jet_count;
+		++super_jet_shots_made;
 		superjets_SoundCounter = random_scaled(3);//from kernal/random.c - pick number from 0 to 2
 		if ( (superjets_SoundCounter) == 0 ) 		sound_start (ST_SPEECH, SPCH_DULCH, SL_500MS, PRI_GAME_QUICK5);
 		else if ( (superjets_SoundCounter) == 1 ) 	sound_start (ST_SPEECH, SPCH_WOOH, SL_500MS, PRI_GAME_QUICK5);
 		else 										sound_start (ST_SPEECH, SPCH_WOW, SL_500MS, PRI_GAME_QUICK5);
 
-		if (super_jet_count == super_jet_goal)  super_jet_goal_award();
+		if (super_jet_shots_made == super_jet_goal)  super_jet_goal_award();
 
 		// deff must be listed in md file or will crash here
 			deff_start (DEFF_SUPERJETS_EFFECT);//under /kernel/deff.c
 		//score higher if mode done more than once
-		switch (superjets_mode_counter) {
+		switch (superjets_modes_achieved) {
 			case 0: 	break; //never entered mode
 			case 1:  { score (SC_2M);  score_add (superjets_mode_score, score_table[SC_2M]); break;}
 			case 2:  { score (SC_3M);  score_add (superjets_mode_score, score_table[SC_3M]); break;}
@@ -132,10 +136,10 @@ CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 			}//end of switch
 	}
 	else {//not in super jets mode
-		++jet_count;
+		++jet_shots_made;
 		score(SC_250K);
 		deff_start (DEFF_JETS_EFFECT);//under /kernel/deff.c
-		if (jet_count == jet_goal)  jet_goal_award ();//sound played in call
+		if (jet_shots_made == jet_goal)  jet_goal_award ();//sound played in call
 		//TODO: do we want a sound here?
 		//	else
 	//		sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
@@ -146,7 +150,7 @@ CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 //claw switch starts superjets mode
 CALLSET_ENTRY (jets_superjets, claw_super_jets) {
 	super_jets_activated = TRUE;
-	++superjets_mode_counter;
+	++superjets_modes_achieved;
 	score_zero (superjets_mode_score);
 	sound_start (ST_MUSIC, MUS_MD_SUPERJETS, 0, SP_NORMAL);
 	sound_start (ST_SAMPLE, SPCH_SUPERJETS_ACTIVATED, SL_1S, PRI_GAME_QUICK5);
@@ -173,9 +177,9 @@ void jet_flasher (void) {
 void jets_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 96, 5, "JET BUMPERS");
-	sprintf ("%d", jet_count);
+	sprintf ("%d", jet_shots_made);
 	font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
-	if (jet_count == jet_goal)
+	if (jet_shots_made == jet_goal)
 		sprintf ("JET BONUS");
 	else
 		sprintf ("BONUS AT %d", jet_goal);
@@ -189,10 +193,36 @@ void jets_effect_deff(void) {
 void superjets_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 96, 5, "SUPER JETS");
-	sprintf ("%d", super_jet_count);
+	sprintf ("%d", super_jet_shots_made);
 	font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 	}//end of superjets_effect_deff
+
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (superjets, status_report){
+	if (inTest) {
+		if (super_jets_activated) sprintf ("superjets activated");
+		else sprintf ("superjets not activated");
+		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+	}//end of 	if (inTest)
+
+	sprintf ("%d superjets modes completed", superjets_modes_achieved);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+
+	if (inTest) {
+		sprintf ("%d superjets shots made", super_jet_shots_made);
+		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function
 

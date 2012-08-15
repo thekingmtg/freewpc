@@ -40,20 +40,21 @@ const U8 		computerAwardsNumOfSounds = 7; //num between 0 and 6
 
 //local variables
 U8		underground_SoundCounter;
-U8 		underground_counter;
+U8 		underground_shots_made;
 U8 		underground_goal;
-__boolean 		underground_Jackpot_activated;
-__boolean 		underground_Arrow_activated;
+__boolean 		is_underground_Jackpot_activated;
+__boolean 		is_underground_Arrow_activated;
 //this will be external and in combo function when written
 __boolean 		next_combo_total;
-U8		computerAwards;
+U8				computerAwards;
 sound_code_t computerAwardsSoundsArray[] = {	COMPUTER1, 				COMPUTER_ADDING,   COMPUTER_AWARD_SMALL,
 												COMPUTER_AWARD_LONG,	COMPUTER2, 			SPCH_ACCESSING,
 												SPCH_COMPUTER_AWARD};
 
 //external variables
-extern __boolean 		prison_break_mode_activated; //from prison_break.c
-extern  __boolean 		capture_simon_mode_activated; //from capture_simon.c
+extern 	__boolean 		is_prison_break_mode_activated; //from prison_break.c
+extern  __boolean 		is_capture_simon_mode_activated; //from capture_simon.c
+extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void underground_reset (void);
@@ -62,10 +63,10 @@ void underground_reset (void);
  * initialize  and exit
  ***************************************************************************/
 void underground_reset (void) {
-	underground_counter = 0;
+	underground_shots_made = 0;
 	underground_goal = 0;
-	underground_Jackpot_activated = FALSE;
-	underground_Arrow_activated = FALSE;
+	is_underground_Jackpot_activated = FALSE;
+	is_underground_Arrow_activated = FALSE;
 	}//end of function
 
 void player_underground_reset(void) {
@@ -84,23 +85,23 @@ CALLSET_ENTRY (underground, start_ball) { underground_reset(); }
  ***************************************************************************/
 //lit by multiball modes --TODO:
 CALLSET_ENTRY (underground, underground_Jackpot_Light_On) {
-	underground_Jackpot_activated = TRUE;
+	is_underground_Jackpot_activated = TRUE;
 	lamp_tristate_on (LM_UNDERGROUND_JACKPOT);
 	}
 
 CALLSET_ENTRY (underground, underground_Jackpot_Light_Off) {
-	underground_Jackpot_activated = FALSE;
+	is_underground_Jackpot_activated = FALSE;
 	lamp_tristate_off (LM_UNDERGROUND_JACKPOT);
 	}
 
 //lit by combo shots --TODO:
 CALLSET_ENTRY (underground, underground_Arrow_Light_On) {
-	underground_Arrow_activated = TRUE;
+	is_underground_Arrow_activated = TRUE;
 	lamp_tristate_on (LM_UNDERGROUND_ARROW);
 	}
 
 CALLSET_ENTRY (underground, underground_Arrow_Light_Off) {
-	underground_Arrow_activated = FALSE;
+	is_underground_Arrow_activated = FALSE;
 	lamp_tristate_off (LM_UNDERGROUND_ARROW);
 	}
 
@@ -109,17 +110,17 @@ CALLSET_ENTRY (underground, underground_Arrow_Light_Off) {
  *
  ****************************************************************************/
 CALLSET_ENTRY (underground, sw_bottom_popper) {
-	++underground_counter;
+	++underground_shots_made;
 	score (SC_100K);//located in kernal/score.c
 	if ( (underground_SoundCounter++ % 2) == 0 )//check if even
 		sound_start (ST_EFFECT, SUBWAY, SL_1S, SP_NORMAL);
 	else
 		sound_start (ST_EFFECT, SUBWAY2, SL_1S, SP_NORMAL);
-	if(prison_break_mode_activated)  callset_invoke(prison_break_made);
-	if(capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if(is_prison_break_mode_activated)  callset_invoke(prison_break_made);
+	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	//TODO: jackpot and combo shot detection
-	//	if (underground_Jackpot_activated)  ;
-	//	if(underground_Arrow_activated) allset_invoke();
+	//	if (is_underground_Jackpot_activated)  ;
+	//	if(is_underground_Arrow_activated) allset_invoke();
 	if (next_combo_total ==TRUE) callset_invoke(computer_award);
 	}//end of function
 
@@ -164,3 +165,20 @@ CALLSET_ENTRY (underground, computer_award) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (underground, status_report){
+	if (inTest) {
+		sprintf ("%d underground shots made", underground_shots_made);
+		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function
+

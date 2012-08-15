@@ -47,13 +47,19 @@ const U8 	CAR_CRASH_GOAL_STEP = 5; //increment for later goals
 const U8 	CAR_CRASH_GOAL_MAX = 50;
 
 //local variables
-U8 			car_crash_counter;	//non-mode shots made counter
-U8			car_chase_mode_counter; //mode  shots made counter
+U8 			car_crash_shots_made;	//non-mode shots made counter
 U8 			car_crash_goal;		//goal to reach mode
-__boolean 	car_chase_mode_activated;
-__boolean 	car_crash_six; 		//tracks which score to be awarded
-__boolean 	car_crash_ten; 		//tracks which score to be awarded
-__boolean 	car_crash_three; 		//tracks which score to be awarded
+__boolean 	is_car_crash_six_lit; 		//tracks which score to be awarded
+__boolean 	is_car_crash_ten_lit; 		//tracks which score to be awarded
+__boolean 	is_car_crash_three_lit; 		//tracks which score to be awarded
+
+U8			car_chase_mode_shots_made; //mode  shots made counter
+__boolean 	is_car_chase_mode_activated;
+U8			car_chase_modes_made;
+score_t		car_chase_score;
+
+//external variables
+extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void car_crash_reset (void);
@@ -66,28 +72,31 @@ void carcrash_effect_deff(void);
  * initialize  and exit
  ***************************************************************************/
 void car_crash_reset (void) {
-	car_crash_counter = 0;
-	car_chase_mode_counter = 0;
+	car_crash_shots_made = 0;
+	car_chase_mode_shots_made = 0;
 	car_crash_goal = CAR_CRASH_EASY_GOAL;
-	car_chase_mode_activated = FALSE;
-	car_crash_six = FALSE;
-	car_crash_ten = FALSE;
-	car_crash_three = FALSE;
+	is_car_chase_mode_activated = FALSE;
+	is_car_crash_six_lit = FALSE;
+	is_car_crash_ten_lit = FALSE;
+	is_car_crash_three_lit = FALSE;
 	lamp_tristate_off (LM_CAR_CRASH_TOP);
 	lamp_tristate_off (LM_CAR_CRASH_CENTER);
 	lamp_tristate_off (LM_CAR_CRASH_BOTTOM);
+	car_chase_modes_made = 0;
+	score_zero(car_chase_score);
 	}
 
 void car_crash_mode_reset (void) {
-	car_crash_counter = 0;
-	car_chase_mode_counter = 0;
-	car_chase_mode_activated = FALSE;
-	car_crash_six = FALSE;
-	car_crash_ten = FALSE;
-	car_crash_three = FALSE;
+	car_crash_shots_made = 0;
+	car_chase_mode_shots_made = 0;
+	is_car_chase_mode_activated = FALSE;
+	is_car_crash_six_lit = FALSE;
+	is_car_crash_ten_lit = FALSE;
+	is_car_crash_three_lit = FALSE;
 	lamp_tristate_off (LM_CAR_CRASH_TOP);
 	lamp_tristate_off (LM_CAR_CRASH_CENTER);
 	lamp_tristate_off (LM_CAR_CRASH_BOTTOM);
+	score_zero(car_chase_score);
 	}
 
 CALLSET_ENTRY (car_crash, start_player) { car_crash_reset (); }
@@ -98,9 +107,9 @@ CALLSET_ENTRY (car_crash, start_ball) { car_crash_reset (); }
  * playfield lights and flags
  ***************************************************************************/
 CALLSET_ENTRY (car_crash, carcrash_three_on) {
-	car_crash_six = FALSE;
-	car_crash_ten = FALSE;
-	car_crash_three = TRUE;
+	is_car_crash_six_lit = FALSE;
+	is_car_crash_ten_lit = FALSE;
+	is_car_crash_three_lit = TRUE;
 	lamp_tristate_off (LM_CAR_CRASH_TOP);
 	lamp_tristate_off (LM_CAR_CRASH_CENTER);
 	lamp_tristate_flash(LM_CAR_CRASH_BOTTOM);
@@ -109,14 +118,14 @@ CALLSET_ENTRY (car_crash, carcrash_three_on) {
 	}
 
 CALLSET_ENTRY (car_crash, carcrash_three_off) {
-	car_crash_three = FALSE;
+	is_car_crash_three_lit = FALSE;
 	lamp_tristate_off (LM_CAR_CRASH_BOTTOM);
 	}
 
 CALLSET_ENTRY (car_crash, carcrash_six_on) {
-	car_crash_six  = TRUE;
-	car_crash_ten = FALSE;
-	car_crash_three = TRUE;
+	is_car_crash_six_lit  = TRUE;
+	is_car_crash_ten_lit = FALSE;
+	is_car_crash_three_lit = TRUE;
 	lamp_tristate_off (LM_CAR_CRASH_TOP);
 	lamp_tristate_flash(LM_CAR_CRASH_CENTER);
 	task_sleep (TIME_300MS);
@@ -125,14 +134,14 @@ CALLSET_ENTRY (car_crash, carcrash_six_on) {
 	}
 
 CALLSET_ENTRY (car_crash, carcrash_six_off) {
-	car_crash_six = FALSE;
+	is_car_crash_six_lit = FALSE;
 	lamp_tristate_off (LM_CAR_CRASH_CENTER);
 	}
 
 CALLSET_ENTRY (car_crash, carcrash_ten_on) {
-	car_crash_six  = TRUE;
-	car_crash_ten = TRUE;
-	car_crash_three = TRUE;
+	is_car_crash_six_lit  = TRUE;
+	is_car_crash_ten_lit = TRUE;
+	is_car_crash_three_lit = TRUE;
 	lamp_tristate_flash(LM_CAR_CRASH_TOP);
 	task_sleep (TIME_300MS);
 	lamp_tristate_on (LM_CAR_CRASH_TOP);
@@ -141,7 +150,7 @@ CALLSET_ENTRY (car_crash, carcrash_ten_on) {
 	}
 
 CALLSET_ENTRY (car_crash, carcrash_ten_off) {
-	car_crash_ten = FALSE;
+	is_car_crash_ten_lit = FALSE;
 	lamp_tristate_off (LM_CAR_CRASH_TOP);
 	}
 
@@ -158,7 +167,7 @@ void car_crash1_task (void) { task_sleep_sec(2); task_exit(); }
 CALLSET_ENTRY (car_crash, sw_car_chase_standup) {
 	score (SC_250K);
 	flasher_pulse (FLASH_CAR_CHASE_LOWER_FLASHER);
-	if (car_chase_mode_activated)  {//crash the car and end mode
+	if (is_car_chase_mode_activated)  {//crash the car and end mode
 		callset_invoke(carcrash_mode_off); //at ramps.c
 		car_crash_mode_reset();
 		sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
@@ -172,9 +181,9 @@ CALLSET_ENTRY (car_crash, sw_car_chase_standup) {
 CALLSET_ENTRY (car_crash, sw_chase_car_1) {
 	//TODO: check for tilt here
 	task_create_gid1 (GID_CAR_CRASH_ENTERED1, car_crash1_task);
-	if (car_crash_six)	score (SC_6M);
-		else if (car_crash_ten)	score (SC_10M);
-			else if (car_crash_three) score (SC_3M);
+	if (is_car_crash_six_lit)	score (SC_6M);
+		else if (is_car_crash_ten_lit)	score (SC_10M);
+			else if (is_car_crash_three_lit) score (SC_3M);
 				else score (SC_1M);
 	sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
 	flasher_pulse (FLASH_CAR_CHASE_CENTER_FLASHER);
@@ -186,29 +195,30 @@ CALLSET_ENTRY (car_crash, sw_chase_car_2) {
 	sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
 	flasher_pulse (FLASH_CAR_CHASE_UPPER_FLASHER);
 	//effectively doubles the score
-	if (car_crash_six)	score (SC_6M);
-		else if (car_crash_ten)	score (SC_10M);
-			else if (car_crash_three) score (SC_3M);
+	if (is_car_crash_six_lit)	score (SC_6M);
+		else if (is_car_crash_ten_lit)	score (SC_10M);
+			else if (is_car_crash_three_lit) score (SC_3M);
 				else score (SC_1M);
 	if ( task_kill_gid(GID_CAR_CRASH1_ENTERED) ) callset_invoke(chase_car_made);
 }//end of function
 
 //final car makes switch so do bonuses
 CALLSET_ENTRY (car_crash, chase_car_made) {
-	++car_crash_counter;
+	++car_crash_shots_made;
 	deff_start (DEFF_CARCRASH_EFFECT);//under /kernel/deff.c
 	//set point values and lights for car crash
-	if (car_crash_counter == 1) callset_invoke(carcrash_three_on);
-	else if (car_crash_counter == 2) callset_invoke(carcrash_six_on);
-	else if (car_crash_counter == 3) callset_invoke(carcrash_ten_on);
+	if (car_crash_shots_made == 1) callset_invoke(carcrash_three_on);
+	else if (car_crash_shots_made == 2) callset_invoke(carcrash_six_on);
+	else if (car_crash_shots_made == 3) callset_invoke(carcrash_ten_on);
 
 	//goal made then start mode
-	if (car_crash_counter == car_crash_goal)  {
-		car_crash_counter = 0;
+	if (car_crash_shots_made == car_crash_goal)  {
+		car_crash_shots_made = 0;
 		//increment goal for next time
 		if (car_crash_goal < CAR_CRASH_GOAL_MAX)  car_crash_goal += CAR_CRASH_GOAL_STEP;
 		//start ramp mode
-		car_chase_mode_activated = TRUE;
+		is_car_chase_mode_activated = TRUE;
+		++car_chase_modes_made;
 		callset_invoke(carcrash_mode_on); //at ramps.c
 		sound_start (ST_MUSIC, MUS_MD_CAR_CRASH, 0, SP_NORMAL);
 		//turn off car crash lights
@@ -222,7 +232,8 @@ CALLSET_ENTRY (car_crash, chase_car_made) {
 //this is called from ramps.c
 CALLSET_ENTRY (car_crash, car_chase_ramp_made) {
 	score (SC_15M);
-	++car_chase_mode_counter;
+	score_add(car_chase_score, score_table[SC_15M]);
+	++car_chase_mode_shots_made;
 	deff_start (DEFF_CARCRASH_MODE_EFFECT);//under /kernel/deff.c
 	sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
 	}
@@ -254,4 +265,43 @@ void carcrash_mode_effect_deff(void) {
 	task_sleep_sec (2);
 	deff_exit ();
 	}//end of mode_effect_deff
+
+
+/****************************************************************************
+ * DMD display and sound effects
+ ****************************************************************************/
+
+
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (car_crash, status_report){
+	if (inTest) {
+		if (is_car_chase_mode_activated) sprintf ("car chase mode is activated");
+		else sprintf ("car chase mode is not activated");
+		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+	}//end of 	if (inTest)
+
+	sprintf ("%d car chase modes completed", car_chase_modes_made);
+	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+
+	sprintf ("car chase score: %d", car_chase_score);
+	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+
+	if (inTest) {
+		sprintf ("%d car chase shots made", car_chase_mode_shots_made);
+		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+	}//end of 	if (inTest)
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function
+
+//number of shots to make to start next car chase mode
+//car_crash_shots_made;	//non-mode shots made counter
+//car_crash_goal;		//goal to reach mode
 

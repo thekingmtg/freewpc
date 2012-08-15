@@ -56,8 +56,9 @@ __boolean 			right_Loop_Jackpot_activated;
 __boolean 			right_Loop_Arrow_activated;
 
 //external variables
-extern __boolean 		explode_activated; //in eyball_explode.c
-extern  __boolean 		capture_simon_mode_activated; //from capture_simon.c
+extern 	__boolean 		inTest; //located in global_constants.c
+extern 	__boolean 		is_explode_activated; //in eyball_explode.c
+extern  __boolean 		is_capture_simon_mode_activated; //from capture_simon.c
 
 //prototypes
 void orbits_reset (void);
@@ -252,8 +253,8 @@ CALLSET_ENTRY (orbits, left_orbit_shot_made) {
 	++all_loop_counter;
 	sound_start (ST_SAMPLE, MACHINE12, SL_1S, PRI_GAME_QUICK1);
 	score (SC_100K);//located in kernal/score.c
-	if(left_Loop_Arrow_activated && explode_activated) callset_invoke(explode_ramp_made);
-	if(capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if(left_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_ramp_made);
+	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 
 	//TODO: jackpot and combo shot detection
 	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
@@ -264,8 +265,8 @@ CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 	++all_loop_counter;
 	score (SC_100K);//located in kernal/score.c
 	sound_start (ST_SAMPLE, MACHINE12, SL_1S, PRI_GAME_QUICK1);
-	if(right_Loop_Arrow_activated && explode_activated) callset_invoke(explode_ramp_made);
-	if(capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if(right_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_ramp_made);
+	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 		//TODO: jackpot and combo shot detection
 	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
 	}//end of function
@@ -289,3 +290,22 @@ void left_loop_goal_award (void) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+
+
+
+/****************************************************************************
+ * status display
+ *
+ * called from common/status.c automatically whenever either flipper button
+ * is held for 4 seconds or longer.  since called by callset, order of
+ * various status reports will be random depending upon call stack
+****************************************************************************/
+CALLSET_ENTRY (orbits, status_report){
+	sprintf ("%d left loops", left_loop_counter);
+	font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+
+	sprintf ("%d right loops", right_loop_counter);
+	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+	//deff_exit (); is called at end of calling function - not needed here?
+}//end of function
+
