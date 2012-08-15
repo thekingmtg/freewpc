@@ -65,10 +65,11 @@ ROM_PAGE_COUNT = 32
 
 GAME_OBJS =	inlanes.o   orbits.o   ramps.o   rollovers.o   simple_switches.o   underground.o   global_constants.o 
 
- GAME2_OBJS = car_crash.o   lock_freeze_mbstart.o   eyeball_explode.o   
+GAME2_OBJS = car_crash.o   eyeball_explode.o   lock_freeze_mbstart.o   
  
 GAME_TEST_OBJS =
 
 GAME_INCLUDES =
 
-GAME_PAGED_OBJS = acmag.o   capture_simon.o   prison_break.o   jets_superjets.o   standupfrenzy.o
+# modes
+GAME_PAGED_OBJS = acmag.o   capture_simon.o   car_chase_mode.o   prison_break.o   jets_superjets.o   standupfrenzy.o
