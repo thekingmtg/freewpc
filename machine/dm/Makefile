@@ -45,27 +45,27 @@ ROM_PAGE_COUNT = 32
 #
 # Object files exported by this game
 #
-# GAME_OBJS go into the system page, which should be a last resort or for common
-# functions, or for those which have to for some reason.  RTTs must go into GAME_OBJS.
+# GAME_OBJS RTTs must go here.  also place files that are called often here.
 # 
-# GAME_TEST_OBJS (page 58) = 	All feature tests can go into GAME_TEST_OBJS.  
+# GAME_TEST_OBJS = page 58 = 	All feature tests can go here.  
 # 
-# GAME_PAGED_OBJS (page 59) =	Preferably, game functions go into GAME_PAGED_OBJS.
-# This works safely for any file that only uses CALLSET_ENTRY functions, deffs,
-# and leffs.  
+# GAME_PAGED_OBJS = page 59 =	Preferably, game functions go here.
+# This works safely for any file that only uses CALLSET_ENTRY functions, deffs, and leffs.  
 # 
-# GAME2_OBJS (page 55)
-# GAME3_OBJS (page 54)
-# GAME4_OBJS (page 53)
-# GAME5_OBJS (page 52)
+# GAME2_OBJS = page 55
+# GAME3_OBJS = page 54
+# GAME4_OBJS = page 53
+# GAME5_OBJS = page 52
 #
-# note: if we put tabs inbetween the file names you will get a linker error
-# note: continue line witha '\' make sure to leave off on last line or you will get a linker error
+# note: if we put tabs in between the file names you will get a linker error
+# note: continue line with a '\' --make sure to leave off on last line or you will get a linker error
 
 
-GAME_OBJS =	inlanes.o   orbits.o   ramps.o   rollovers.o   simple_switches.o   underground.o   global_constants.o 
+GAME_OBJS =	inlanes.o   orbits.o   ramps.o   rollovers.o   simple_switches.o
 
-GAME2_OBJS = car_crash.o   eyeball_explode.o   lock_freeze_mbstart.o   
+GAME2_OBJS = car_crash.o   eyeball_explode.o   lock_freeze_mbstart.o
+
+GAME3_OBJS = underground.o   global_constants.o 
  
 GAME_TEST_OBJS =
 

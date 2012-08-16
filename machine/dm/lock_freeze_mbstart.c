@@ -123,6 +123,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 		lamp_tristate_on (LM_FORTRESS_MULTIBALL);
 		++NumBallsNeededForNextMB;
 		//TODO: here we call the Fortress multiball start function
+		add_ball_count(NumBallsFrozen); //located at /common/serve.c - will add balls to playfield from trough
 		}
 	//Museum Multiball	 	= 2 ball min needs to be frozen
 	if ((NumMBsDone % 4) == 2) {
@@ -138,6 +139,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 		lamp_tristate_on (LM_MUSEUM_MULTIBALL);
 		++NumBallsNeededForNextMB;
 		//TODO: here we call the Museum multiball start function
+		add_ball_count(NumBallsFrozen); //located at /common/serve.c - will add balls to playfield from trough
 		}
 	//Cryoprison Multiball	= 3 ball min needs to be frozen
 	if ((NumMBsDone % 4) == 3) {
@@ -152,6 +154,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 		lamp_tristate_on (LM_CRYOPRISON_MULTIBALL);
 		++NumBallsNeededForNextMB;
 		//here we call the Cryoprison multiball start function
+		add_ball_count(NumBallsFrozen); //located at /common/serve.c - will add balls to playfield from trough
 		}
 	//Wasteland Multiball 	= 4 ball min needs to be frozen
 	if ((NumMBsDone % 4) == 0) {//since we use mod, 4 = 0
@@ -166,13 +169,15 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 		lamp_tristate_on (LM_WASTELAND_MULTIBALL);
 		NumBallsNeededForNextMB = 1 ;
 		//here we call the Wasteland multiball start function
+		add_ball_count(NumBallsFrozen); //located at /common/serve.c - will add balls to playfield from trough
 		}
-	//TODO:write multiball functions - send out right num of frozen balls
-	//TODO:reset all MB lights at end of wasteland MB
+	//TODO: write multiball functions
+	//TODO: reset all MB lights at end of wasteland MB
 
 	//turn off freeze light and reset counter for next MB
 	lock_reset();
 }//end of function
+
 
 /****************************************************************************
  * DMD display and sound effects
@@ -189,15 +194,21 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
  * various status reports will be random depending upon call stack
 ****************************************************************************/
 CALLSET_ENTRY (lock_freeze_mbstart, status_report){
-	sprintf ("%d multiballs completed", NumMBsDone);
+	sprintf ("%d Multiballs Completed", NumMBsDone);
+	font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+
+	sprintf ("Balls Frozen: %d", NumBallsFrozen);
 	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 
-	sprintf ("balls frozen: %d", NumBallsFrozen);
+	if (NumBallsFrozen >= NumBallsNeededForNextMB) 	sprintf ("Multiball Ready");
+	else sprintf ("Freeze %d More Balls For Next MultiBall", NumBallsNeededForNextMB - NumBallsFrozen);
 	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
 
-	if (inTest) {
-		sprintf ("%d Balls Needed For Next MB", NumBallsNeededForNextMB - NumBallsFrozen);
-		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
-	}//end of 	if (inTest)
-	//deff_exit (); is called at end of calling function - not needed here?
+	switch (NumMBsDone % 4 == 0) {
+		case 0: 	sprintf ("Next MultiBall is Fortress"); 	break;
+		case 1: 	sprintf ("Next MultiBall is Museum");  		break;
+		case 2: 	sprintf ("Next MultiBall is Cryo Prison");	break;
+		case 3: 	sprintf ("Next MultiBall is Wasteland");	break;
+	}//end of switch
+	font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
 }//end of function
