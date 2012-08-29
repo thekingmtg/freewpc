@@ -182,10 +182,20 @@ void fliptronic_rtt (void)
 			flipper_service (WPC_LL_FLIP_SW, WPC_LL_FLIP_EOS, WPC_LL_FLIP_POWER, WPC_LL_FLIP_HOLD);
 			flipper_service (WPC_LR_FLIP_SW, WPC_LR_FLIP_EOS, WPC_LR_FLIP_POWER, WPC_LR_FLIP_HOLD);
 
+//like on demolition man
+#ifdef MACHINE_HAS_FLIPPER_GUN_HANDLES
+			flipper_service (WPC_UL_FLIP_SW, WPC_LL_FLIP_EOS, WPC_LL_FLIP_POWER, WPC_LL_FLIP_HOLD);
+			flipper_service (WPC_UR_FLIP_SW, WPC_LR_FLIP_EOS, WPC_LR_FLIP_POWER, WPC_LR_FLIP_HOLD);
+#endif
+
 			/* Some machines use the upper flipper coils for other uses.
 			 * Those can already be handled by the regular solenoid module. */
 #ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER
 			flipper_service (WPC_UL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
+			//like on demolition man
+	#ifdef MACHINE_HAS_FLIPPER_GUN_HANDLES
+			flipper_service (WPC_LL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
+	#endif
 #endif
 
 #ifdef MACHINE_HAS_UPPER_RIGHT_FLIPPER

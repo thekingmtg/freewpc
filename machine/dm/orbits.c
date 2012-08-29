@@ -56,7 +56,6 @@ __boolean 			right_Loop_Jackpot_activated;
 __boolean 			right_Loop_Arrow_activated;
 
 //external variables
-extern 	__boolean 		inTest; //located in global_constants.c
 extern 	__boolean 		is_explode_activated; //in eyball_explode.c
 extern  __boolean 		is_capture_simon_mode_activated; //from capture_simon.c
 
@@ -107,9 +106,9 @@ CALLSET_ENTRY (orbits, ExtraBall_Light_On) {
 	left_Loop_ExtraBall_activated = TRUE;
 	lamp_tristate_on (LM_EXTRA_BALL);
 	if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-		sound_start (ST_SPEECH, SPCH_GET_THE_EXTRABALL, SL_2S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_GET_THE_EXTRABALL, SL_5S, PRI_GAME_QUICK5);
 	else
-		sound_start (ST_SPEECH, SPCH_NEED_EXTRABALL, SL_2S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_NEED_EXTRABALL, SL_5S, PRI_GAME_QUICK5);
 	}
 
 CALLSET_ENTRY (orbits, ExtraBall_Light_Off) {
@@ -203,9 +202,9 @@ CALLSET_ENTRY (orbits, sw_left_loop) {
 	else {
 		task_create_gid1 (GID_LEFT_ORBIT_MADE, left_orbit_task);
 		if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-			sound_start (ST_EFFECT, RACE_BY, SL_500MS, PRI_GAME_QUICK5);
+			sound_start (ST_EFFECT, RACE_BY, SL_2S, PRI_GAME_QUICK5);
 		else
-			sound_start (ST_EFFECT, RACE_BY_2, SL_500MS, PRI_GAME_QUICK5);
+			sound_start (ST_EFFECT, RACE_BY_2, SL_2S, PRI_GAME_QUICK5);
 		}//end of else
 	}//end of function
 
@@ -217,9 +216,9 @@ CALLSET_ENTRY (orbits, sw_right_freeway) {
 	else {
 		task_create_gid1 (GID_RIGHT_ORBIT_MADE, right_orbit_task);
 		if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-			sound_start (ST_EFFECT, RACE_BY, SL_500MS, PRI_GAME_QUICK5);
+			sound_start (ST_EFFECT, RACE_BY, SL_2S, PRI_GAME_QUICK5);
 		else
-			sound_start (ST_EFFECT, RACE_BY_2, SL_500MS, PRI_GAME_QUICK5);
+			sound_start (ST_EFFECT, RACE_BY_2, SL_2S, PRI_GAME_QUICK5);
 		}//end of else
 	}//end of function
 
@@ -231,27 +230,26 @@ CALLSET_ENTRY (orbits, sw_top_popper) {
 
 
 CALLSET_ENTRY (orbits, orbit_to_popper_made) {
-	sound_start (ST_EFFECT, RACE_BY_3, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, RACE_BY_3, SL_2S, PRI_GAME_QUICK5);
 	//extra ball shot made
 	if (left_Loop_ExtraBall_activated ) {
 			callset_invoke(ExtraBall_Light_Off);
 			sol_request(SOL_KNOCKER);
-			sound_start (ST_SAMPLE, EXTRA_BALL_SOUND, SL_1S, PRI_GAME_QUICK5);
+			sound_start (ST_SAMPLE, EXTRA_BALL_SOUND, SL_2S, PRI_GAME_QUICK5);
 			if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-				sound_start (ST_SPEECH, SPCH_EXTRABALL_WES, SL_2S, PRI_GAME_QUICK5);
+				sound_start (ST_SPEECH, SPCH_EXTRABALL_WES, SL_5S, PRI_GAME_QUICK5);
 			else
-				sound_start (ST_SPEECH, SPCH_EXTRABALL_SLY, SL_2S, PRI_GAME_QUICK5);
+				sound_start (ST_SPEECH, SPCH_EXTRABALL_SLY, SL_5S, PRI_GAME_QUICK5);
 			//TODO: add an extra ball here
 			}//end of left_Loop_ExtraBall_activated
 	if (left_Loop_MultiBall_activated) callset_invoke(multiball_start);
 	//TODO: random top popper award
-
 }//end of function
 
 CALLSET_ENTRY (orbits, left_orbit_shot_made) {
 	++left_loop_counter;
 	++all_loop_counter;
-	sound_start (ST_SAMPLE, MACHINE12, SL_1S, PRI_GAME_QUICK1);
+	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	score (SC_100K);//located in kernal/score.c
 	if(left_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_ramp_made);
 	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
@@ -264,7 +262,7 @@ CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 	++right_loop_counter;
 	++all_loop_counter;
 	score (SC_100K);//located in kernal/score.c
-	sound_start (ST_SAMPLE, MACHINE12, SL_1S, PRI_GAME_QUICK1);
+	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	if(right_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_ramp_made);
 	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 		//TODO: jackpot and combo shot detection
@@ -274,14 +272,14 @@ CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 
 
 void right_loop_goal_award (void) {
-	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
 	score (SC_250K);
 	right_loop_counter = 0;
 	if (right_loop_goal < ORBITS_GOAL_MAX)  right_loop_goal += ORBITS_GOAL_STEP;
 	}
 
 void left_loop_goal_award (void) {
-	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
 	score (SC_250K);
 	left_loop_counter = 0;
 	if (left_loop_goal < ORBITS_GOAL_MAX)  left_loop_goal += ORBITS_GOAL_STEP;
@@ -301,11 +299,12 @@ void left_loop_goal_award (void) {
  * various status reports will be random depending upon call stack
 ****************************************************************************/
 CALLSET_ENTRY (orbits, status_report){
-	sprintf ("%d left loops", left_loop_counter);
-	font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+//	sprintf ("%d left loops", left_loop_counter);
+//	font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
 
-	sprintf ("%d right loops", right_loop_counter);
-	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+//	sprintf ("%d right loops", right_loop_counter);
+//	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+
 	//deff_exit (); is called at end of calling function - not needed here?
 }//end of function
 

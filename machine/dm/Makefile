@@ -65,7 +65,7 @@ GAME_OBJS =	inlanes.o   orbits.o   ramps.o   rollovers.o   simple_switches.o
 
 GAME2_OBJS = car_crash.o   eyeball_explode.o   lock_freeze_mbstart.o
 
-GAME3_OBJS = underground.o   global_constants.o 
+GAME3_OBJS = underground.o  
  
 GAME_TEST_OBJS =
 

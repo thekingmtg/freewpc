@@ -31,6 +31,8 @@
  */
 
 #include <freewpc.h>
+#include "dm/global_constants.h"
+
 //constants
 const U8 			max_rollover_bonus_multiplier = 5;
 
@@ -42,7 +44,7 @@ U8 					rollover_bonus_multiplier; // 0 to 5
 U8					rollover_SoundCounter = 0;
 
 //external variables
-extern 	__boolean 		inTest; //located in global_constants.c
+extern 	__boolean 		TestData; //located in global_constants.c
 
 //prototypes
 void rollover_reset (void);
@@ -65,7 +67,9 @@ void rollover_reset (void) {
 	lamp_tristate_off(LM_LOWER_ROLLOVER);
 }//end of rollover_reset
 
-CALLSET_ENTRY (rollovers, start_player) {  rollover_reset(); }
+void new_player_rollover_reset (void) { }//end of function
+
+CALLSET_ENTRY (rollovers, start_player) { new_player_rollover_reset(); }
 CALLSET_ENTRY (rollovers, start_ball) { rollover_reset(); }
 
 
@@ -76,8 +80,8 @@ void all_rollover_made (void){
 	lamp_tristate_flash(LM_MIDDLE_ROLLOVER);
 	lamp_tristate_flash(LM_TOP_ROLLOVER);
 	lamp_tristate_flash(LM_LOWER_ROLLOVER);
-	rollover_sounds_all_rollovers ();
-	task_sleep (TIME_300MS);
+	rollover_sounds_all_rollovers();
+	task_sleep (TIME_2S);
 	lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 	lamp_tristate_off(LM_TOP_ROLLOVER);
 	lamp_tristate_off(LM_LOWER_ROLLOVER);
@@ -86,15 +90,16 @@ void all_rollover_made (void){
 	lower_rollover_activated = FALSE;
 	score (SC_500K);
 	//light access claw
-	callset_invoke(Access_Claw_Light_On);
+	callset_invoke(Access_Claw_Light_On);//at inlanes.c
 	if (rollover_bonus_multiplier < max_rollover_bonus_multiplier) ++rollover_bonus_multiplier;
 	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(ExtraBall_Light_On);
-
 	//TODO: DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
+	deff_start (DEFF_ALL_ROLLOVERS_EFFECT);
 	}//end of function
 
 
-CALLSET_ENTRY (rollovers, sw_middle_rollover) {
+//note that switch is called left rollover corresponds to light called middle rollover
+CALLSET_ENTRY (rollovers, sw_left_rollover) {
 	//if already lit
 	if (middle_rollover_activated) {
 		rollover_sounds_already_lit();
@@ -102,141 +107,164 @@ CALLSET_ENTRY (rollovers, sw_middle_rollover) {
 		}
 	else { //else - not already lit, so activate rollover
 		lamp_tristate_flash(LM_MIDDLE_ROLLOVER);
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_500MS);
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 		middle_rollover_activated = TRUE;
 		rollover_sounds();
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (top_rollover_activated && lower_rollover_activated) all_rollover_made();
-		}//end of else - not already lit, so activate rollover
-	}//end of function rollovers_sw_middle_rollover
+		else deff_start (DEFF_ROLLOVERS_EFFECT);
+	}//end of else - not already lit, so activate rollover
+}//end of function rollovers_sw_middle_rollover
 
 
-CALLSET_ENTRY (rollovers, sw_top_rollover) {
+
+//note that switch is called center rollover corresponds to light called top rollover
+CALLSET_ENTRY (rollovers, sw_center_rollover) {
 	if (top_rollover_activated) {
 		rollover_sounds_already_lit();
 		score (SC_100K);
 		}
 	else { //activate rollover
 		lamp_tristate_flash(LM_TOP_ROLLOVER);
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_500MS);
 		lamp_tristate_on(LM_TOP_ROLLOVER);
 		top_rollover_activated = TRUE;
 		rollover_sounds();
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && lower_rollover_activated)  all_rollover_made();
-		}//end of else - not already lit, so activate rollover
-	}//end of function rollovers_sw_top_rollover
+		else deff_start (DEFF_ROLLOVERS_EFFECT);
+	}//end of else - not already lit, so activate rollover
+}//end of function rollovers_sw_top_rollover
 
 
-CALLSET_ENTRY (rollovers, sw_lower_rollover) {
+
+//note that switch called right rollover corresponds to light called lower rollover
+CALLSET_ENTRY (rollovers, sw_right_rollover) {
 	if (lower_rollover_activated) {
 		rollover_sounds_already_lit();
 		score (SC_100K);
 		}
 	else { //activate rollover
 		lamp_tristate_flash(LM_LOWER_ROLLOVER);
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_500MS);
 		lamp_tristate_on(LM_LOWER_ROLLOVER);
-		top_rollover_activated = TRUE;
+		lower_rollover_activated = TRUE;
 		rollover_sounds();
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && top_rollover_activated)  all_rollover_made();
-		}//end of else - not already lit, so activate rollover
-	}//end of function rollovers_sw_lower_rollover
+		else deff_start (DEFF_ROLLOVERS_EFFECT);
+	}//end of else - not already lit, so activate rollover
+}//end of function rollovers_sw_lower_rollover
 
 
 	/****************************************************************************
 	 * rotate rollovers when buttons pressed
 	 ***************************************************************************/
-CALLSET_ENTRY (rollovers, sw_left_button) {
-	if (top_rollover_activated && lower_rollover_activated) { //left not activated
+CALLSET_ENTRY (rollovers, sw_left_button, sw_u_l_flipper_button) {
+	if (top_rollover_activated && lower_rollover_activated) { //left (M) not activated
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+		lamp_tristate_on(LM_TOP_ROLLOVER);
 		lamp_tristate_off(LM_LOWER_ROLLOVER);
 		middle_rollover_activated = TRUE;
+		top_rollover_activated = TRUE;
 		lower_rollover_activated = FALSE;
 		}
-	else
-	if (middle_rollover_activated && lower_rollover_activated) { //center not activated
+	else if (middle_rollover_activated && lower_rollover_activated) { //center (T) not activated
 		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 		lamp_tristate_on(LM_TOP_ROLLOVER);
+		lamp_tristate_on(LM_LOWER_ROLLOVER);
 		middle_rollover_activated = FALSE;
 		top_rollover_activated = TRUE;
+		lower_rollover_activated = TRUE;
 		}
-	else
-	if (middle_rollover_activated && top_rollover_activated) { //right not activated
+	else if (middle_rollover_activated && top_rollover_activated) { //right (L) not activated
+		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 		lamp_tristate_off(LM_TOP_ROLLOVER);
 		lamp_tristate_on(LM_LOWER_ROLLOVER);
+		middle_rollover_activated = TRUE;
 		top_rollover_activated = FALSE;
 		lower_rollover_activated = TRUE;
 		}
-	else
-	if (middle_rollover_activated) { //center and right not activated
+	else if (middle_rollover_activated) { //center and right not activated
 		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+		lamp_tristate_off(LM_TOP_ROLLOVER);
 		lamp_tristate_on(LM_LOWER_ROLLOVER);
 		middle_rollover_activated = FALSE;
 		lower_rollover_activated = TRUE;
-		}
-	else
-	if (top_rollover_activated) { //left and right not activated
-		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_off(LM_TOP_ROLLOVER);
-		middle_rollover_activated = TRUE;
 		top_rollover_activated = FALSE;
 		}
-	else
-	if (lower_rollover_activated) { //left and center not activated
+	else if (top_rollover_activated) { //left and right not activated
+		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+		lamp_tristate_off(LM_TOP_ROLLOVER);
+		lamp_tristate_off(LM_LOWER_ROLLOVER);
+		middle_rollover_activated = TRUE;
+		top_rollover_activated = FALSE;
+		lower_rollover_activated = FALSE;
+		}
+	else if (lower_rollover_activated) { //left and center not activated
+		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 		lamp_tristate_on(LM_TOP_ROLLOVER);
 		lamp_tristate_off(LM_LOWER_ROLLOVER);
+		middle_rollover_activated = FALSE;
 		top_rollover_activated = TRUE;
 		lower_rollover_activated = FALSE;
 		}
 }//end of function to rotate left
 
+
+
 //rotate rollovers when buttons pressed
-CALLSET_ENTRY (rollovers, sw_right_button) {
+CALLSET_ENTRY (rollovers, sw_right_button, sw_u_r_flipper_button) {
 	if (top_rollover_activated && lower_rollover_activated) { //left not activated
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 		lamp_tristate_off(LM_TOP_ROLLOVER);
+		lamp_tristate_on(LM_LOWER_ROLLOVER);
 		middle_rollover_activated = TRUE;
 		top_rollover_activated = FALSE;
+		lower_rollover_activated = TRUE;
 		}
-	else
-	if (middle_rollover_activated && lower_rollover_activated) { //center not activated
+	else if (middle_rollover_activated && lower_rollover_activated) { //center not activated
+		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 		lamp_tristate_on(LM_TOP_ROLLOVER);
 		lamp_tristate_off(LM_LOWER_ROLLOVER);
+		middle_rollover_activated = TRUE;
 		top_rollover_activated = TRUE;
 		lower_rollover_activated = FALSE;
 		}
-	else
-	if (middle_rollover_activated && top_rollover_activated) { //right not activated
-		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_on(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = FALSE;
-		lower_rollover_activated = TRUE;
-		}
-	else
-	if (middle_rollover_activated) { //center and right not activated
+	else if (middle_rollover_activated && top_rollover_activated) { //right not activated
 		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 		lamp_tristate_on(LM_TOP_ROLLOVER);
+		lamp_tristate_on(LM_LOWER_ROLLOVER);
 		middle_rollover_activated = FALSE;
 		top_rollover_activated = TRUE;
+		lower_rollover_activated = TRUE;
 		}
-	else
-	if (top_rollover_activated) { //left and right not activated
+	else if (middle_rollover_activated) { //center and right not activated
+		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+		lamp_tristate_on(LM_TOP_ROLLOVER);
+		lamp_tristate_off(LM_LOWER_ROLLOVER);
+		middle_rollover_activated = FALSE;
+		top_rollover_activated = TRUE;
+		lower_rollover_activated = FALSE;
+		}
+	else if (top_rollover_activated) { //left and right not activated
+		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 		lamp_tristate_off(LM_TOP_ROLLOVER);
 		lamp_tristate_on(LM_LOWER_ROLLOVER);
+		middle_rollover_activated = FALSE;
 		top_rollover_activated = FALSE;
 		lower_rollover_activated = TRUE;
 		}
-	else
-	if (lower_rollover_activated) { //left and center not activated
+	else if (lower_rollover_activated) { //left and center not activated
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+		lamp_tristate_off(LM_TOP_ROLLOVER);
 		lamp_tristate_off(LM_LOWER_ROLLOVER);
 		middle_rollover_activated = TRUE;
+		top_rollover_activated = FALSE;
 		lower_rollover_activated = FALSE;
 		}
 }//end of function to rotate right
@@ -249,37 +277,59 @@ CALLSET_ENTRY (rollovers, sw_right_button) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
-
-
-
 void rollover_sounds (void) {
 	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
 	if ( rollover_SoundCounter  == 0 )
-	sound_start (ST_EFFECT, MACHINE1_SHORT, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, MACHINE1_SHORT, SL_2S, PRI_GAME_QUICK5);
 else if ( rollover_SoundCounter  == 1 )
-	sound_start (ST_EFFECT, MACHINE1_MED, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, MACHINE1_MED, SL_2S, PRI_GAME_QUICK5);
 else if ( rollover_SoundCounter  == 2 )
-	sound_start (ST_EFFECT, MACHINE1_LONG, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, MACHINE1_LONG, SL_2S, PRI_GAME_QUICK5);
 }
 
 void rollover_sounds_all_rollovers (void) {
 	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
 	if ( rollover_SoundCounter  == 0 )
-	sound_start (ST_EFFECT, STORM1_SHORT, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, STORM1_SHORT, SL_2S, PRI_GAME_QUICK5);
 else if ( rollover_SoundCounter  == 1 )
-	sound_start (ST_EFFECT, STORM1_MED, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, STORM1_MED, SL_2S, PRI_GAME_QUICK5);
 else if ( rollover_SoundCounter  == 2 )
-	sound_start (ST_EFFECT, STORM1_LONG, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, STORM1_LONG, SL_2S, PRI_GAME_QUICK5);
 }
 
 void rollover_sounds_already_lit(void) {
 	rollover_SoundCounter = random_scaled(2);//from kernal/random.c
 	if ( rollover_SoundCounter  == 0 )
-	sound_start (ST_EFFECT, TOINK1, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, TOINK1, SL_2S, PRI_GAME_QUICK5);
 else if ( rollover_SoundCounter  == 1 )
-	sound_start (ST_EFFECT, TOINK2, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_EFFECT, TOINK2, SL_2S, PRI_GAME_QUICK5);
 }
 
+
+
+/****************************************************************************
+ * DMD display and sound effects
+ ****************************************************************************/
+void rollovers_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "LIGHT  M T L  TO");
+	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "ADVANCE MULTIPLIER");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+
+
+
+void all_rollovers_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	sprintf("BONUS %d", rollover_bonus_multiplier);
+	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "ADVANCED");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
 
 
 
@@ -290,8 +340,8 @@ else if ( rollover_SoundCounter  == 1 )
  * is held for 4 seconds or longer.  since called by callset, order of
  * various status reports will be random depending upon call stack
 ****************************************************************************/
-CALLSET_ENTRY (rollovers, status_report){
-	sprintf ("rollover bonus multiplier:  %d", rollover_bonus_multiplier);
-	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+//ALLSET_ENTRY (rollovers, status_report){
+//	sprintf ("ROLLOVER BONUS MULTIPLIER:  %d", rollover_bonus_multiplier);
+//	font_render_string_center (&font_fixed10, 96, 5, sprintf_buffer);
 	//deff_exit (); is called at end of calling function - not needed here?
-}//end of function
+//}//end of function

@@ -34,6 +34,7 @@
  */
 
 #include <freewpc.h>
+#include "dm/global_constants.h"
 
 //constants
 const U8 		computerAwardsNumOfSounds = 7; //num between 0 and 6
@@ -54,7 +55,6 @@ sound_code_t computerAwardsSoundsArray[] = {	COMPUTER1, 				COMPUTER_ADDING,   C
 //external variables
 extern 	__boolean 		is_prison_break_mode_activated; //from prison_break.c
 extern  __boolean 		is_capture_simon_mode_activated; //from capture_simon.c
-extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void underground_reset (void);
@@ -113,16 +113,23 @@ CALLSET_ENTRY (underground, sw_bottom_popper) {
 	++underground_shots_made;
 	score (SC_100K);//located in kernal/score.c
 	if ( (underground_SoundCounter++ % 2) == 0 )//check if even
-		sound_start (ST_EFFECT, SUBWAY, SL_1S, SP_NORMAL);
+		sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
 	else
-		sound_start (ST_EFFECT, SUBWAY2, SL_1S, SP_NORMAL);
-	if(is_prison_break_mode_activated)  callset_invoke(prison_break_made);
+		sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
+	if(is_prison_break_mode_activated)  callset_invoke(prison_break_made_from_underground);
 	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 	//TODO: jackpot and combo shot detection
-	//	if (is_underground_Jackpot_activated)  ;
-	//	if(is_underground_Arrow_activated) allset_invoke();
-	if (next_combo_total ==TRUE) callset_invoke(computer_award);
-	}//end of function
+	//	if (is_underground_Jackpot_activated) //during multiball
+	//	if (is_underground_Arrow_activated) //from combo shot
+	if (next_combo_total) callset_invoke(computer_award);
+	//if nothing special, do normal display effects
+	if(!is_prison_break_mode_activated
+			&& !is_capture_simon_mode_activated
+			&& !next_combo_total
+			&& !is_underground_Arrow_activated
+			&& !is_underground_Jackpot_activated)
+								deff_start (DEFF_UNDERGROUND_EFFECT);
+}//end of function
 
 
 //called after minimum of every 10 combos and underground shot made
@@ -131,31 +138,31 @@ CALLSET_ENTRY (underground, computer_award) {
 	sound_start (ST_SPEECH, computerAwardsSoundsArray[computerAwards], SL_2S, PRI_GAME_QUICK5);
 	switch (computerAwards) {
 	case 0 :{
-			sound_start(ST_SPEECH, SPCH_COLLECT_BONUS, SL_2S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_COLLECT_BONUS, SL_5S, PRI_GAME_QUICK5);
 			//TODO: put bonus routine here
 			}
 	case 1 :{
-			sound_start(ST_SPEECH, SPCH_TRIPLE_CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_TRIPLE_CAR_CRASH, SL_5S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 2 :{
-			sound_start(ST_SPEECH, SPCH_COLLECT_STANDUPS, SL_2S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_COLLECT_STANDUPS, SL_5S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 3 :{
-			sound_start(ST_SPEECH, SPCH_LIGHT_ARROWS, SL_2S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_LIGHT_ARROWS, SL_5S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 4 :{
-			sound_start(ST_SPEECH, SPCH_LIGHT_EXTRA_BALL, SL_2S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_LIGHT_EXTRA_BALL, SL_5S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 5 :{
-			sound_start(ST_SPEECH, SPCH_MAXIMIZE_FREEZES, SL_2S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_MAXIMIZE_FREEZES, SL_5S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 6 :{
-			sound_start(ST_SPEECH, SPCH_DOUBLE_RETINA_SCAN, SL_2S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_DOUBLE_RETINA_SCAN, SL_5S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	}//end of switch
@@ -165,6 +172,15 @@ CALLSET_ENTRY (underground, computer_award) {
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+void underground_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	sprintf ("%d SUBWAY", underground_shots_made);
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+
 
 
 /****************************************************************************
@@ -175,10 +191,8 @@ CALLSET_ENTRY (underground, computer_award) {
  * various status reports will be random depending upon call stack
 ****************************************************************************/
 CALLSET_ENTRY (underground, status_report){
-	if (inTest) {
-		sprintf ("%d underground shots made", underground_shots_made);
-		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
-	}//end of 	if (inTest)
-	//deff_exit (); is called at end of calling function - not needed here?
+	sprintf ("%d SUBWAY", underground_shots_made);
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+		//deff_exit (); is called at end of calling function - not needed here?
 }//end of function
 

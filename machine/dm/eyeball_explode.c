@@ -35,27 +35,35 @@
  */
 
 #include <freewpc.h>
+#include "dm/global_constants.h"
+
 //constants
-const U8 EYE_EASY_GOAL = 1;
+const U8 EYE_EASY_GOAL = 3;
 const U8 EYE_PREDEFINED_GOAL_INCREMENT = 1;
 const U8 EYE_GOAL_STEP = 3;
 const U8 EYE_GOAL_MAX = 50;
+const U8 EYE_EB_EASY_GOAL = 5;
+const U8 EYE_EB_GOAL_STEP = 3;
+const U8 EYE_EB_GOAL_MAX = 50;
 
 //local variables
 U8 counter; //temporary counter for calculating scores
 U8 explode_SoundCounter;
 U8 eyeball_shots_made;//for current ball only
+U8 eyeball_eb_shots_made;//for current ball only
 U8 total_eyeball_shots_made;//for entire game
 U8 eyeball_goal;//num of hits to start explode
+U8 eyeball_eb_goal;//num of hits to light extraball
 U8 explode_mode_timer;
 U8 explode_mode_shots_made;//number of times an explode arrow or eyeball is hit
 U8 explode_modes_achieved_counter;//number of times mode achieved
+__boolean eject_killer;
+U8 eject_killer_counter;
 score_t explode_mode_score;
 score_t temp_score;
 __boolean 	is_explode_activated;//external in orbits and ramps
 
 //external variables
-extern 	__boolean 		inTest; //located in global_constants.c
 extern 	U8 				jet_shots_made;//found in jets_superjets.c
 
 //prototypes
@@ -65,6 +73,7 @@ void explode_mode_exit (void);
 void eyeball_reset (void);
 void player_eyeball_reset (void);
 void eyeball_goal_award (void);
+void eyeball_eb_award (void);
 void eyeball_effect_deff(void);
 void explode_effect_deff(void);
 
@@ -75,8 +84,8 @@ struct timed_mode_ops explode_mode = {
 	.exit = explode_mode_exit,
 	.gid = GID_EXPLODE_MODE_RUNNING,
 	.music = MUS_MD_EXPLODE,
-//	.deff_running = DEFF_EXPLODE_MODE,
-//	.deff_ending = DEFF_EXPLODE_MODE_TOTAL,
+//	.deff_running = DEFF_EXPLODE_EFFECT,
+//	.deff_ending = DEFF_EXPLODE_END,
 	.prio = PRI_GAME_MODE1,
 	.init_timer = 30,
 	.timer = &explode_mode_timer,
@@ -92,11 +101,14 @@ void player_eyeball_reset (void) {
 	total_eyeball_shots_made = 0;
 	eyeball_shots_made = 0;
 	eyeball_goal = EYE_EASY_GOAL;
+	eyeball_eb_goal = EYE_EB_EASY_GOAL;
 	is_explode_activated = FALSE;
 	explode_modes_achieved_counter = 0;
 	explode_mode_shots_made = 0;
 	explode_SoundCounter = 0;
-	}
+	eject_killer_counter = 0;
+	eject_killer = FALSE;
+}
 
 void eyeball_reset (void) {
 	eyeball_shots_made = 0;
@@ -104,7 +116,8 @@ void eyeball_reset (void) {
 	is_explode_activated = FALSE;
 	explode_modes_achieved_counter = 0;
 	explode_mode_shots_made = 0;
-	}
+	eject_killer = 0;
+}
 
 CALLSET_ENTRY (eyeball_explode, end_ball) { timed_mode_end (&explode_mode); }
 CALLSET_ENTRY (eyeball_explode, display_update) { timed_mode_display_update (&explode_mode); }
@@ -115,11 +128,11 @@ void explode_mode_exit (void) { explode_mode_expire();}
 void explode_mode_init (void) {
 	is_explode_activated = TRUE;
 	explode_mode_shots_made = 0;
-	sound_start (ST_MUSIC, MUS_MD_EXPLODE, 0, SP_NORMAL);
+	music_set (MUS_MD_EXPLODE); //from sound_effect.c
 	if ( (explode_SoundCounter++ % 2) == 0 )//check if even
-		sound_start (ST_SPEECH, SPCH_EXPLODE_ACTIVATED, SL_2S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_EXPLODE_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
 	else
-		sound_start (ST_SPEECH, SPCH_EXPLODE_HURRYUP, SL_2S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_EXPLODE_HURRYUP, SL_5S, PRI_GAME_QUICK5);
 	score_zero(explode_mode_score);
 	callset_invoke(Activate_Explode_Inserts);
 	++explode_modes_achieved_counter;
@@ -129,7 +142,7 @@ void explode_mode_expire (void) {
 	is_explode_activated = FALSE;
 	callset_invoke(DeActivate_Explode_Inserts);
 	//return to normal music
-	sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
+	music_set (MUS_BG); //from sound_effect.c
 }
 
 /****************************************************************************
@@ -149,12 +162,21 @@ void eyeball_goal_award (void) {
 		if (eyeball_goal < EYE_GOAL_MAX)  eyeball_goal += EYE_GOAL_STEP;
 	}
 
-CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
-	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
-	task_sleep (TIME_500MS);
-	sound_start (ST_SAMPLE, EXPLOSION1_MED, SL_1S, PRI_GAME_QUICK1);
-	score (SC_5M);
 
+void eyeball_eb_award (void) {
+		callset_invoke(ExtraBall_Light_On);
+		eyeball_eb_shots_made = 0;
+		sound_start (ST_SPEECH, SPCH_LOVE_WHEN_THAT_HAPPENS, SL_2S, PRI_GAME_QUICK5);
+		if (eyeball_eb_goal < EYE_EB_GOAL_MAX)  eyeball_eb_goal += EYE_EB_GOAL_STEP;
+	}
+
+
+CALLSET_ENTRY (eyeball_explode, sw_eyeball_standup) {
+	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
+	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
+	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
+	sound_start (ST_SAMPLE, EXPLOSION1_MED, SL_2S, PRI_GAME_QUICK1);
+	score (SC_5M);
 	//100k per jet hit here
 	if (jet_shots_made > 0) {
 		score_zero (temp_score);//zero out temp score
@@ -165,18 +187,18 @@ CALLSET_ENTRY (eyeball_explode, eyeball_standup) {
 		score_long_unmultiplied (temp_score); //add temp score to player's score
 	}//end of if
 
-	//light extra ball on 3rd eyeball hit
-	if (total_eyeball_shots_made == 3) callset_invoke(ExtraBall_Light_On);
+	//light extra ball
+	if (eyeball_eb_shots_made == eyeball_eb_goal)  eyeball_eb_award();
 
-	//explode mode not activated
+	//if explode mode not activated
 	if ( !timed_mode_running_p(&explode_mode) ) {
 		++eyeball_shots_made;
 		if (eyeball_shots_made == eyeball_goal)  eyeball_goal_award();
 		}//end of if timed mode running
 
-	else { //else explode activated
+	else { //else if explode activated
 		++explode_mode_shots_made;
-		callset_invoke(explode_ramp_made);
+		callset_invoke(explode_ramp_made);//hitting eyeball same as ramp - TODO: rename this
 		}//end of else
 	}//end of function
 
@@ -208,19 +230,26 @@ CALLSET_ENTRY (eyeball_explode, explode_ramp_made) {
 
 
 CALLSET_ENTRY (eyeball_explode, sw_eject) {
-	lamp_tristate_flash(LM_RETINA_SCAN);
-	task_sleep (TIME_500MS);
-	task_sleep (TIME_500MS);
-	sound_start (ST_SAMPLE, RETINA_SCAN_LONG, SL_2S, PRI_GAME_QUICK1);
-	score (SC_5M);
-	lamp_tristate_off(LM_RETINA_SCAN);
-	task_sleep (TIME_500MS);
-	task_sleep (TIME_500MS);
-	task_sleep (TIME_500MS);
-	task_sleep (TIME_500MS);
-	sol_request (SOL_EJECT); //request to fire the eject solonoid
-	flasher_pulse (FLASH_EJECT_FLASHER);
-	deff_start (DEFF_EYEBALL_EFFECT);
+	//this is to prevent a retrigger of the eject switch as soon as ball exits
+	if (eject_killer_counter++ % 3 == 0) eject_killer = FALSE;
+	if (!eject_killer) {
+		sound_start (ST_SAMPLE, RETINA_SCAN_LONG, SL_4S, PRI_GAME_QUICK1);
+		score (SC_5M);
+		//TODO: find out why this crashes the cpu
+		//	deff_start (DEFF_EYEBALL_EFFECT);
+		lamp_tristate_flash(LM_RETINA_SCAN);
+		task_sleep (TIME_500MS);
+		task_sleep (TIME_500MS);
+		task_sleep (TIME_500MS);
+		task_sleep (TIME_500MS);
+		lamp_tristate_off(LM_RETINA_SCAN);
+		flasher_pulse (FLASH_EJECT_FLASHER);
+		flasher_pulse (FLASH_EJECT_FLASHER);
+		flasher_pulse (FLASH_EJECT_FLASHER);
+		flasher_pulse (FLASH_EJECT_FLASHER);
+		sol_request (SOL_EJECT); //request to fire the eject sol
+		eject_killer = TRUE;
+	}//end of if
 }//end of function
 
 
@@ -229,31 +258,30 @@ CALLSET_ENTRY (eyeball_explode, sw_eject) {
  ****************************************************************************/
 void eyeball_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 96, 5, "retina scan");
-	//sprintf ("%d", jet_count);
-	//font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
-	//if (jet_count == jet_goal)
-	//	sprintf ("JET BONUS");
-	//else
-	//	sprintf ("BONUS AT %d", jet_goal);
-	//font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "RETINA");
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SCAN");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 	}//end of mode_effect_deff
 
+
 void explode_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 96, 5, "explode");
-	//sprintf ("%d", jet_count);
-	//font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
-	//if (jet_count == jet_goal)
-	//	sprintf ("JET BONUS");
-	//else
-	//	sprintf ("BONUS AT %d", jet_goal);
-	//font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "EXPLODE");
 	dmd_show_low ();
 	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+
+
+
+void explode_end_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_var5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "EXPLODE");
+	font_render_string_center (&font_var5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "  EXPLODE");
+	dmd_show_low ();
+	task_sleep_sec (4);
 	deff_exit ();
 	}//end of mode_effect_deff
 
@@ -266,36 +294,15 @@ void explode_effect_deff(void) {
  * various status reports will be random depending upon call stack
 ****************************************************************************/
 CALLSET_ENTRY (explode, status_report){
-	if (inTest) {
-		if (is_explode_activated) sprintf ("explode is activated");
-		else sprintf ("explode is not activated");
-		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
-	}//end of 	if (inTest)
-
-	sprintf ("%d explode modes completed", explode_modes_achieved_counter);
-	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
-
-	sprintf ("explode score: %d", explode_mode_score);
-	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
-
-	if (inTest) {
-		sprintf ("%d explode shots made", explode_mode_shots_made);
-		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
-	}//end of 	if (inTest)
+//		if (is_explode_activated) sprintf ("EXPLODE");
+//		font_render_string_left (&font_fixed10, 1, 1, sprintf_buffer);
 	//deff_exit (); is called at end of calling function - not needed here?
 }//end of function
 
 
 CALLSET_ENTRY (eyeball, status_report){
-	sprintf ("%d eyeball shots made this ball", eyeball_shots_made);
-	font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
+//	sprintf ("%d EYEBALL", eyeball_shots_made);
+//	font_render_string_left (&font_fixed10, 1, 1, sprintf_buffer);
 
-	sprintf ("%d eyeball shots to start explode", eyeball_goal - eyeball_shots_made);
-	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
-
-	if (inTest) {
-		sprintf ("%d eyeball shots made total", total_eyeball_shots_made);
-		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
-	}//end of 	if (inTest)
 	//deff_exit (); is called at end of calling function - not needed here?
 }//end of function

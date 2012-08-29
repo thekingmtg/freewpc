@@ -28,6 +28,8 @@
  */
 
 #include <freewpc.h>
+#include "dm/global_constants.h"
+
 //constants
 const U8 JETS_EASY_GOAL = 25;
 const U8 JETS_PREDEFINED_GOAL_INCREMENT = 1;
@@ -49,7 +51,6 @@ U8 			superjets_SoundCounter;
 __boolean 	super_jets_activated;
 
 //external variables
-extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void jet_flasher(void);
@@ -87,14 +88,14 @@ CALLSET_ENTRY (jets_superjets, start_ball) { jet_goal_reset (); }
  ***************************************************************************/
 
 void jet_goal_award (void) {
-	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
 	jet_shots_made = 0;
 	score(SC_1M);//only once
 	if (jet_goal < JETS_GOAL_MAX)  jet_goal += JETS_GOAL_STEP;
 	}
 
 void super_jet_goal_award (void) {
-	sound_start (ST_SPEECH, SPCH_SUPERJETS_COMPLETED, SL_2S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_SUPERJETS_COMPLETED, SL_5S, PRI_GAME_QUICK5);
 	jet_shots_made = 0;
 	super_jet_shots_made = 0;
 	//score higher if mode done more than once
@@ -113,13 +114,14 @@ void super_jet_goal_award (void) {
 	sound_start (ST_MUSIC, MUS_BG, 0, SP_NORMAL);
 	}
 
-CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
+
+CALLSET_ENTRY (jets_superjets, sw_jet) {
 	if (super_jets_activated){
 		++super_jet_shots_made;
 		superjets_SoundCounter = random_scaled(3);//from kernal/random.c - pick number from 0 to 2
-		if ( (superjets_SoundCounter) == 0 ) 		sound_start (ST_SPEECH, SPCH_DULCH, SL_500MS, PRI_GAME_QUICK5);
-		else if ( (superjets_SoundCounter) == 1 ) 	sound_start (ST_SPEECH, SPCH_WOOH, SL_500MS, PRI_GAME_QUICK5);
-		else 										sound_start (ST_SPEECH, SPCH_WOW, SL_500MS, PRI_GAME_QUICK5);
+		if ( (superjets_SoundCounter) == 0 ) 		sound_start (ST_SPEECH, SPCH_DULCH, SL_2S, PRI_GAME_QUICK5);
+		else if ( (superjets_SoundCounter) == 1 ) 	sound_start (ST_SPEECH, SPCH_WOOH, SL_2S, PRI_GAME_QUICK5);
+		else 										sound_start (ST_SPEECH, SPCH_WOW, SL_2S, PRI_GAME_QUICK5);
 
 		if (super_jet_shots_made == super_jet_goal)  super_jet_goal_award();
 
@@ -147,13 +149,15 @@ CALLSET_ENTRY (jets_superjets, sw_left_jet, sw_right_jet, sw_top_sling) {
 	task_create_gid1 (GID_JET_FLASHER, jet_flasher);
 	}
 
+
+
 //claw switch starts superjets mode
-CALLSET_ENTRY (jets_superjets, claw_super_jets) {
+CALLSET_ENTRY (jets_superjets, sw_claw_super_jets) {
 	super_jets_activated = TRUE;
 	++superjets_modes_achieved;
 	score_zero (superjets_mode_score);
-	sound_start (ST_MUSIC, MUS_MD_SUPERJETS, 0, SP_NORMAL);
-	sound_start (ST_SAMPLE, SPCH_SUPERJETS_ACTIVATED, SL_1S, PRI_GAME_QUICK5);
+	music_set (MUS_MD_SUPERJETS); //from sound_effect.c
+	sound_start (ST_SAMPLE, SPCH_SUPERJETS_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
 	//flash lamp for a time
 	lamp_tristate_flash(LM_CLAW_SUPER_JETS);
 	task_sleep (TIME_500MS);
@@ -169,32 +173,34 @@ CALLSET_ENTRY (jets_superjets, claw_super_jets) {
 //LIGHTING EFFECTS
 void jet_flasher (void) {
 	flasher_pulse (FLASH_JETS_FLASHER);//FLASH followed by name of flasher in caps
-	task_sleep (TIME_500MS);
+	flasher_pulse (FLASH_JETS_FLASHER);
+	flasher_pulse (FLASH_JETS_FLASHER);
 	task_exit ();
 	}
 
 //DMD DISPLAY EFFECTS
 void jets_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 96, 5, "JET BUMPERS");
-	sprintf ("%d", jet_shots_made);
-	font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
-	if (jet_shots_made == jet_goal)
-		sprintf ("JET BONUS");
-	else
-		sprintf ("BONUS AT %d", jet_goal);
+	if (jet_shots_made <= 1) 	sprintf ("%d JET", jet_shots_made);
+	else sprintf ("%d JETS", jet_shots_made);
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
 
-	font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
+	sprintf ("%d FOR BONUS", jet_goal);
+	font_render_string_center (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 	}//end of jets_effect_deff
 
+
+
 void superjets_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 96, 5, "SUPER JETS");
-	sprintf ("%d", super_jet_shots_made);
-	font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
+	sprintf ("%d SUPERJETS", super_jet_shots_made);
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+
+	sprintf ("%d FOR BONUS", super_jet_goal);
+	font_render_string_center (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -209,20 +215,15 @@ void superjets_effect_deff(void) {
  * is held for 4 seconds or longer.  since called by callset, order of
  * various status reports will be random depending upon call stack
 ****************************************************************************/
-CALLSET_ENTRY (superjets, status_report){
-	if (inTest) {
-		if (super_jets_activated) sprintf ("superjets activated");
-		else sprintf ("superjets not activated");
-		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
-	}//end of 	if (inTest)
+//ALLSET_ENTRY (superjets, status_report){
+//		if (super_jets_activated) sprintf ("SUPER JETS");
+//		font_render_string_left (&font_fixed10, 1, 1, sprintf_buffer);
 
-	sprintf ("%d superjets modes completed", superjets_modes_achieved);
-	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+//	sprintf ("%d superjets modes completed", superjets_modes_achieved);
+//	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 
-	if (inTest) {
-		sprintf ("%d superjets shots made", super_jet_shots_made);
-		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
-	}//end of 	if (inTest)
+//		sprintf ("%d superjets shots made", super_jet_shots_made);
+//		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
 	//deff_exit (); is called at end of calling function - not needed here?
-}//end of function
+//}//end of function
 

@@ -10,7 +10,7 @@
 # General section (before a [section] header is given.
 # Miscellaneous parameters are specified here.
 ##########################################################################
-Title: Demolition Man
+Title: Demolition Time
 #the following tags are required because the wpc-dcs md is not finished
 DMD: Yes
 Fliptronic: Yes
@@ -29,19 +29,34 @@ include platform/wpc/wpc-dcs.md
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
+
+#see code changes in /kernal/flip.c
+define MACHINE_HAS_FLIPPER_GUN_HANDLES
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
-define MACHINE_START_GAME_SOUND		MUS_PLUNGER
-define MACHINE_BALL_IN_PLAY_MUSIC 	MUS_BG
-#define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
-define MACHINE_BALL_SAVE_TIME             6
+
+define MACHINE_START_BALL_MUSIC   MUS_PLUNGER
+	#this is triggered after the first playfield switch is made
+define MACHINE_BALL_IN_PLAY_MUSIC 	MUS_BG 
+define MACHINE_BALL_SAVE_TIME             7
 define MACHINE_MAX_BALLS                  5
 define MACHINE_BALL_SAVE_LAMP LM_SHOOT_AGAIN
 
+define MACHINE_GRAND_CHAMPION_INITIALS { 'D', 'A', 'D' }
+define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x00, 0x00, 0x00, 0x00 }
+define MACHINE_HIGH_SCORE_INITIALS { 'D', 'A', 'D' }, { 'D', 'A', 'D' }, { 'D', 'A', 'D' }, { 'D', 'A', 'D' }
+define MACHINE_HIGH_SCORES { 0x00, 0x00, 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00, 0x00, 0x00 }, { 0x00, 0x00, 0x00, 0x00, 0x00 }
+
+	#these did not work for me
+#define MACHINE_START_GAME_SOUND	MUS_PLUNGER - supposed to be at a new game
+#define MACHINE_MUSIC_PLUNGER		MUS_PLUNGER
+#define MACHINE_MUSIC_GAME	MUS_BG 
+
+define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
+
+	#not sure about these
 #define MACHINE_SOL_EXTBOARD1
 #define MACHINE_CUSTOM_AMODE
 #define MACHINE_SCORE_DIGITS
-#define MACHINE_MUSIC_GAME
-#define MACHINE_MUSIC_PLUNGER
 #define MACHINE_REPLAY_CODE_TO_SCORE
 #define MACHINE_DEBUGGER_HOOK
 #define MACHINE_REPLAY_SCORE_CHOICES 10
@@ -103,9 +118,9 @@ define MACHINE_BALL_SAVE_LAMP LM_SHOOT_AGAIN
 63: Claw Prison Break,yellow, x( 4), y( 5 )
 64: Claw Freeze, yellow ,x( 5), y( 2)
 65: Claw Acmag, yellow ,x( 5), y( 1)
-66: Middle Rollover, red ,x( 2), y(14)
-67: Top Rollover, white ,x( 2), y(15)
-68: Lower Rollover, orange ,x( 2), y(17)
+66: Middle Rollover, green ,x( 2), y(14)
+67: Top Rollover, green ,x( 2), y(15)
+68: Lower Rollover, green ,x( 2), y(17)
 71: Super Jackpot,yellow, x( 7), y(11)
 72: Computer,yellow, x( 8), y(11)
 73: Demo Time, yellow, x( 9), y(11)
@@ -146,17 +161,19 @@ define MACHINE_BALL_SAVE_LAMP LM_SHOOT_AGAIN
 #
 ##########################################################################
 [switches]
-11: Ball Launch, launch-button, noplay, sound(EXPLOSION)
-12: Left Handle Button, ingame, noplay
-13: Start Button, start-button, intest, noplay, debounce(TIME_100MS)
+
+#tried launch-button but that didn't work
+11: Ball Launch, launch-button, cabinet, noplay
+12: Left Handle Button, cabinet, noplay
+13: Start Button, start-button, cabinet, intest, noplay, debounce(TIME_100MS)
 14: Tilt, tilt, ingame, noplay, cabinet, sound(TILT)
-15: Left Outlane, ingame, sound(OUTLANE_PIANO)
+15: Left Outlane, ingame 
 16: Left Inlane, ingame
 17: Right Inlane, ingame
-18: Right Outlane, ingame, sound(OUTLANE_PIANO)
+18: Right Outlane, ingame
 21: Slam Tilt, slam-tilt, ingame, noplay, cabinet, sound(TILT)
-22: Coin Door Closed, noplay
-23: Buyin Button, buyin-button, noplay
+22: Coin Door Closed, noplay, cabinet
+23: Buyin Button, buyin-button, cabinet, noplay
 24: Always Closed, noplay
 25: Claw Position 1, opto, noscore, noplay
 26: Claw Position 2, opto, noscore, noplay
@@ -170,17 +187,17 @@ define MACHINE_BALL_SAVE_LAMP LM_SHOOT_AGAIN
 36: Trough Jam, noscore, noplay, opto
 37: Not Used, noplay
 38: Standup 5, ingame, standup
-41: Left Sling, ingame, c_decl(sw_sling), noplay 
-42: Right Sling, ingame, c_decl(sw_sling), noplay
-43: Left Jet, ingame, c_decl(sw_jet), noplay
-44: Top Sling, ingame, c_decl(sw_jet), noplay
-45: Right Jet, ingame, c_decl(sw_jet), noplay
-46: Right Ramp Enter, ingame, sound(RACE_BY_LONG)
+41: Left Sling, ingame, c_decl(sw_sling)
+42: Right Sling, ingame, c_decl(sw_sling)
+43: Left Jet, ingame, c_decl(sw_jet)
+44: Top Sling, ingame, c_decl(sw_jet)
+45: Right Jet, ingame, c_decl(sw_jet)
+46: Right Ramp Enter, ingame
 47: Right Ramp Exit, ingame
 48: Right Freeway, ingame
-51: Left Ramp Enter, ingame, sound(RACE_BY)
+51: Left Ramp Enter, ingame
 52: Left Ramp Exit, ingame
-53: Center Ramp, ingame, sound(RACE_BY_SHORT)
+53: Center Ramp, ingame
 54: Upper Rebound, ingame, noplay
 55: Left Loop, ingame 
 56: Standup 2, standup, ingame
@@ -191,22 +208,22 @@ define MACHINE_BALL_SAVE_LAMP LM_SHOOT_AGAIN
 63: Left Rollover, ingame
 64: Center Rollover, ingame
 65: Right Rollover, ingame
-66: Eject, ingame, sound(EJECT)
+66: Eject, ingame
 67: Elevator Index, ingame, noplay, opto
 68: Not Used, noplay
-71: Chase Car 1, opto, noplay, ingame
-72: Chase Car  2, opto, noplay, ingame
+71: Chase Car 1, opto, ingame
+72: Chase Car  2, opto, ingame
 73: Top Popper, opto, ingame, noplay
 74: Elevator Hold, opto, noplay
 75: Elevator Ramp, ingame
 76: Bottom Popper, opto, ingame
 77: Eyeball Standup, standup, ingame
 78: Standup 1, standup, ingame
-81: Claw Capture Simon, noplay, ingame
-82: Claw Super Jets, noplay, ingame
-83: Claw Prison Break, noplay, ingame
-84: Claw Freeze, noplay, ingame
-85: Claw Acmag, noplay, ingame
+81: Claw Capture Simon, ingame
+82: Claw Super Jets, ingame
+83: Claw Prison Break, ingame
+84: Claw Freeze, ingame
+85: Claw Acmag, ingame
 86: Upper Left Flipper Gate, ingame
 87: Car Chase Standup, ingame
 88: Lower Rebound, ingame
@@ -231,9 +248,15 @@ define MACHINE_BALL_SAVE_LAMP LM_SHOOT_AGAIN
 # THIS IS LIST IS SHOWN IN THE SAME ORDER AS THE SOLENOID/FLASHER TABLE
 [drives]
 #H = high power J130
-H1: Ball Release, duty(SOL_DUTY_25), time(TIME_200MS)
+
+#tried 25 and 200 here and it was too weak - from tz
+#these are the times from corvette and they worked
+H1: Ball Release, ballserve, duty(SOL_DUTY_100), time(TIME_66MS)
+
 H2: Bottom Popper, time(TIME_200MS)
-H3: Auto Plunger, nosearch, launch, duty(SOL_DUTY_100), time(TIME_200MS)
+
+#ball launch not working yet
+H3: Auto Plunger, nosearch, launch, duty(SOL_DUTY_100), time(TIME_133MS)
 H4: Top Popper, time(TIME_100MS)
 H5: Diverter Power, duty(SOL_DUTY_50), time(TIME_133MS)
 H6: Not Used
@@ -245,7 +268,9 @@ L2: Right Sling, duty(SOL_DUTY_100)
 L3: Left Jet, duty(SOL_DUTY_100)
 L4: Top Sling, duty(SOL_DUTY_100)
 L5: Right Jet, duty(SOL_DUTY_100)
-L6: Eject, duty(SOL_DUTY_50)
+
+#this resets the cpu at 50 and no time
+L6: Eject, duty(SOL_DUTY_75), time(TIME_133MS)
 L7: Diverter Hold, nosearch
 L8: : Not Used
 
@@ -542,17 +567,35 @@ Superjets Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Carcrash Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Carchase Mode Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
+Capturesimon Start Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Capturesimon Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Capturesimon Completed Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 Acmag Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 Eyeball Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Explode Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Explode End: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 Standupfrenzytotalscore Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Standupfrenzy Mode Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Standup Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 Prisonbreak Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Prisonbreak Start Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+
+Rollovers Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+All Rollovers Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+
+Clw Inlanes Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Qf Inlanes Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+
+Freeze Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Multiball Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+
+Simple Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+
+Underground Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 
 ##########################################################################
@@ -562,5 +605,27 @@ Prisonbreak Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 ##########################################################################
 # Fonts used in this game.
+# these are in addition to default fonts
+# default fonts do not have to be listed and are:
+# font_mono5
+# font_mono9
+# font_num5x7
+# font_lucida9
+# font_tinynum
+# font_var5
+# font_fixed6 
+# font_fixed10 
+# font_cu17
+# font_term6
+# font_times8
+# font_bitmap8
+# 
+# the number at the end roughly corresponds to their point size
 ##########################################################################
 [fonts]
+pcsenior:
+misctype:
+lithograph:
+times10:
+steel:
+

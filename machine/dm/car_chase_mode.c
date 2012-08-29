@@ -25,6 +25,8 @@
  *
  */
 #include <freewpc.h>
+#include "dm/global_constants.h"
+
 //constants
 
 //local variables
@@ -34,7 +36,6 @@ U8			car_chase_modes_made;
 score_t		car_chase_score;
 
 //external variables
-extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 
@@ -66,13 +67,18 @@ CALLSET_ENTRY (car_chase_mode, car_chase_ramp_made) {
 	score_add(car_chase_score, score_table[SC_15M]);
 	++car_chase_mode_shots_made;
 	deff_start (DEFF_CARCHASE_MODE_EFFECT);//under /kernel/deff.c
-	sound_start (ST_SAMPLE, CAR_CRASH, SL_2S, PRI_GAME_QUICK5);
+	sound_start (ST_SAMPLE, CAR_CRASH, SL_5S, PRI_GAME_QUICK5);
 	}
 
 //this is called from car_crash.c
 CALLSET_ENTRY (car_chase_mode, start_car_chase) {
+	score (SC_15M);
+	score_add(car_chase_score, score_table[SC_15M]);
 	++car_chase_modes_made;
 	is_car_chase_mode_activated = TRUE;
+	callset_invoke (carchase_mode_on); //at ramps.c
+	music_set (MUS_MD_CAR_CRASH);
+	deff_start (DEFF_CARCHASE_MODE_EFFECT);//under /kernel/deff.c
 }
 
 //this is called from car_crash.c
@@ -86,7 +92,7 @@ CALLSET_ENTRY (car_chase_mode, end_car_chase) {
 //DMD DISPLAY EFFECTS
 void carchase_mode_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 96, 5, "car race");
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "CAR CHASE");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -101,21 +107,17 @@ void carchase_mode_effect_deff(void) {
  * various status reports will be random depending upon call stack
 ****************************************************************************/
 CALLSET_ENTRY (car_chase_mode, status_report){
-	if (inTest) {
-		if (is_car_chase_mode_activated) sprintf ("car chase mode is activated");
-		else sprintf ("car chase mode is not activated");
-		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
-	}//end of 	if (inTest)
+//		if (is_car_chase_mode_activated) sprintf ("CAR CHASE");
+//		font_render_string_left (&font_fixed10, 1, 1, sprintf_buffer);
 
-	sprintf ("%d car chase modes completed", car_chase_modes_made);
-	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+//	sprintf ("%d CAR RACE CAR CHASE modes completed", car_chase_modes_made);
+//	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
 
-	sprintf ("car chase score: %d", car_chase_score);
-	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+//	sprintf ("CAR RACE CAR CHASE score: %d", car_chase_score);
+//	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
 
-	if (inTest) {
-		sprintf ("%d car chase shots made", car_chase_mode_shots_made);
-		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
-	}//end of 	if (inTest)
-	//deff_exit (); is called at end of calling function - not needed here?
+//		sprintf ("%d CAR RACE CAR CHASE shots made", car_chase_mode_shots_made);
+//		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
+
+		//deff_exit (); is called at end of calling function - not needed here?
 }//end of function

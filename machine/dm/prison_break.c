@@ -22,16 +22,18 @@
  * TODO: potentially we can make a 2nd and 3rd mode that score differently
  */
 #include <freewpc.h>
+#include "dm/global_constants.h"
+
 //constants
 
 //local variables
 U8 			prison_break_mode_shots_made; //number of shots made this mode
 U8 			prison_break_modes_achieved;
+U8			prison_break_mode_shots_made_from_underground;
 score_t 	prison_break_mode_score; //score for this mode only
 __boolean 	is_prison_break_mode_activated;
 
 //external variables
-extern 	__boolean 		inTest; //located in global_constants.c
 
 //prototypes
 void prison_break_reset (void);
@@ -45,6 +47,7 @@ void prison_break_reset (void) {
 	prison_break_mode_shots_made = 0;
 	is_prison_break_mode_activated = FALSE;
 	score_zero(prison_break_mode_score);
+	prison_break_mode_shots_made_from_underground = 0;
 	}
 
 void prison_break_player_reset (void) {
@@ -71,58 +74,94 @@ CALLSET_ENTRY (prison_break, sw_claw_prison_break) {
 	score (SC_15M);
 	is_prison_break_mode_activated = TRUE;
 	++prison_break_modes_achieved;
-	sound_start (ST_MUSIC, MUS_MD_CRYO_PRISON_BREAKOUT, 0, SP_NORMAL);
-	sound_start (ST_SPEECH, SPCH_CRYO_PRISON_BREAKOUT, SL_1S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_CRYO_PRISON_BREAKOUT, SL_5S, PRI_GAME_QUICK5);
+	music_set(MUS_MD_CRYO_PRISON_BREAKOUT); //from sound_effect.c
 	//flash lamp for a time
 	lamp_tristate_flash(LM_CLAW_PRISON_BREAK);
 	task_sleep(TIME_500MS);
 	lamp_tristate_on(LM_CLAW_PRISON_BREAK);
+	//TODO: store standard arrow status?
+	//TODO: flash prison break arrows
+	lamp_tristate_flash(LM_UNDERGROUND_ARROW);
+	lamp_tristate_flash(LM_SIDE_RAMP_ARROW);
+	deff_start (DEFF_PRISONBREAK_START_EFFECT);
 	}//end of function
 
 
 /****************************************************************************
  * shot made during prison_break mode
- * call sent from ramps.c or underground.c
+ * call sent from ramps.c - side ramp or underground.c
  ***************************************************************************/
 CALLSET_ENTRY (prison_break, prison_break_made) {
 	++prison_break_mode_shots_made;
-	sound_start (ST_SAMPLE, EXPLOSION, SL_1S, PRI_GAME_QUICK5);
-	deff_start (DEFF_PRISONBREAK_EFFECT);
+	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
 	//flash lamp for a time
-	//lamp_tristate_flash(LM_CENTER_RAMP_MIDDLE);
-	//lamp_tristate_flash(LM_CENTER_RAMP_OUTER);
-	//task_sleep(TIME_200MS);
-	//lamp_tristate_off(LM_CENTER_RAMP_OUTER);
-	//lamp_tristate_off(LM_CENTER_RAMP_INNER);
 	//TODO: score rolls up as time goes?
-	//score_add(prison_break_mode_score, score_table[SC_6M]);
-
 	switch (prison_break_modes_achieved ){
 		case 0:
 			//as it is right now we score 6 mill + 1 million for each extra shot
 			score (SC_6M);
-			score (prison_break_mode_shots_made * SC_1M);
+			score_add(prison_break_mode_score, score_table[SC_6M]);
 			break;
 		case 1:
 			//2nd time we are in prison_break - score differently
 			score (SC_7M);
-			score (prison_break_mode_shots_made * SC_2M);
+			score_add(prison_break_mode_score, score_table[SC_7M]);
 			break;
 		case 2:
 			//3rd time we are in prison_break - score differently
 			score (SC_8M);
-			score (prison_break_mode_shots_made * SC_3M);
+			score_add(prison_break_mode_score, score_table[SC_8M]);
 			break;
 		default:
 			//all cases past 3rd time we are in prison_break
 			score (SC_8M);
-			score (prison_break_mode_shots_made * SC_3M);
+			score_add(prison_break_mode_score, score_table[SC_8M]);
 			break;
 	}//end of switch
-
 	//TODO: display effects
+	deff_start (DEFF_PRISONBREAK_EFFECT);
 }//end of function
 
+
+/*
+ * The following is a temporary workaround because
+ * the underground bottom popper triggers its switch twice when it
+ * fires the ball
+ */
+CALLSET_ENTRY (prison_break, prison_break_made_from_underground) {
+	//check that trigger is odd, see note above
+	if (prison_break_mode_shots_made_from_underground++ % 2 != 0) {
+	++prison_break_mode_shots_made;
+	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
+	//flash lamp for a time
+	//TODO: score rolls up as time goes?
+	switch (prison_break_modes_achieved ){
+		case 0:
+			//as it is right now we score 6 mill + 1 million for each extra shot
+			score (SC_6M);
+			score_add(prison_break_mode_score, score_table[SC_6M]);
+			break;
+		case 1:
+			//2nd time we are in prison_break - score differently
+			score (SC_7M);
+			score_add(prison_break_mode_score, score_table[SC_7M]);
+			break;
+		case 2:
+			//3rd time we are in prison_break - score differently
+			score (SC_8M);
+			score_add(prison_break_mode_score, score_table[SC_8M]);
+			break;
+		default:
+			//all cases past 3rd time we are in prison_break
+			score (SC_8M);
+			score_add(prison_break_mode_score, score_table[SC_8M]);
+			break;
+	}//end of switch
+	//TODO: display effects
+	deff_start (DEFF_PRISONBREAK_EFFECT);
+	}//end of if
+}//end of function
 
 
 /****************************************************************************
@@ -130,12 +169,23 @@ CALLSET_ENTRY (prison_break, prison_break_made) {
  ****************************************************************************/
 void prisonbreak_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 96, 5, "Prison Break");
+	font_render_string_center (&font_times8, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
+	sprintf ("%d", prison_break_mode_shots_made);
+	font_render_string_center (&font_times8, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 }
 
+
+void prisonbreak_start_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
+	font_render_string_center (&font_times8, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SHOOT ARROWS");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}
 
 
 /****************************************************************************
@@ -146,21 +196,18 @@ void prisonbreak_effect_deff(void) {
  * various status reports will be random depending upon call stack
 ****************************************************************************/
 CALLSET_ENTRY (prison_break, status_report){
-	if (inTest) {
-		if (is_prison_break_mode_activated) sprintf ("prison break is activated");
-		else sprintf ("prison break is not activated");
-		font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
-	}//end of 	if (inTest)
+		if (is_prison_break_mode_activated) sprintf ("PB");
+		else sprintf ("NPB");
+		font_render_string_left (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
 
-	sprintf ("%d prison break modes completed", prison_break_modes_achieved);
-	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+//	sprintf ("%d PRISON BREAKOUT MODES", prison_break_modes_achieved);
+//	font_render_string_left (&font_mono5, 1, 16, sprintf_buffer);
 
-	sprintf ("prison break score: %d", prison_break_mode_score);
-	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
+//	sprintf ("prison break score: %d", prison_break_mode_score);
+//	font_render_string_left (&font_mono5, 64, 13, sprintf_buffer);
+//
+//		sprintf ("%d prison break shots made", prison_break_mode_shots_made);
+//		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
 
-	if (inTest) {
-		sprintf ("%d prison break shots made", prison_break_mode_shots_made);
-		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
-	}//end of 	if (inTest)
-	//deff_exit (); is called at end of calling function - not needed here?
+		//deff_exit (); is called at end of calling function - not needed here?
 }//end of function
