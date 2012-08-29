@@ -41,6 +41,7 @@
 #define SL_2S      20
 #define SL_3S      30
 #define SL_4S      40
+#define SL_5S      50
 
 typedef struct
 {

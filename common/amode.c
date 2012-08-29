@@ -145,6 +145,7 @@ void amode_freeplay_page (void)
 	amode_page_end (0);
 }
 
+
 void amode_high_score_page (void)
 {
 	if (hstd_config.highest_scores == ON)
@@ -181,7 +182,7 @@ void amode_kill_music (void)
 void (*amode_page_table[]) (void) = {
 	amode_score_page,
 #if (MACHINE_DMD == 1)
-	amode_logo_page,
+//	amode_logo_page,
 #endif
 	amode_credits_page,
 	amode_freeplay_page,
