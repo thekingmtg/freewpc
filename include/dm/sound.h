@@ -29,7 +29,7 @@
 #define MUS_BG_B 0x4
 #define MUS_MB 0x5
 #define MUS_MB_READY 0x6
-#define MUS_MD_1 0x8
+#define MUS_MD_STANDUP_FRENZY 0x8
 #define MUS_ACMAG 0x9
 #define MUS_MD_CAR_CRASH 0xB
 #define MUS_MD_EXPLODE 0xC

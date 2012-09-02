@@ -45,7 +45,6 @@ score_t		car_chase_score;
 void car_chase_mode_reset (void) {
 	car_chase_mode_shots_made = 0;
 	is_car_chase_mode_activated = FALSE;
-	score_zero(car_chase_score);
 	}
 
 CALLSET_ENTRY (car_chase_mode, start_player, start_ball) { car_chase_mode_reset(); }
@@ -72,13 +71,14 @@ CALLSET_ENTRY (car_chase_mode, car_chase_ramp_made) {
 
 //this is called from car_crash.c
 CALLSET_ENTRY (car_chase_mode, start_car_chase) {
+	score_zero(car_chase_score);
 	score (SC_15M);
 	score_add(car_chase_score, score_table[SC_15M]);
 	++car_chase_modes_made;
 	is_car_chase_mode_activated = TRUE;
 	callset_invoke (carchase_mode_on); //at ramps.c
 	music_set (MUS_MD_CAR_CRASH);
-	deff_start (DEFF_CARCHASE_MODE_EFFECT);//under /kernel/deff.c
+	deff_start (DEFF_CARCHASE_START_MODE_EFFECT);//under /kernel/deff.c
 }
 
 //this is called from car_crash.c
@@ -90,9 +90,26 @@ CALLSET_ENTRY (car_chase_mode, end_car_chase) {
  * DMD display and sound effects
  ****************************************************************************/
 //DMD DISPLAY EFFECTS
+void carchase_start_mode_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	sprintf ("CAR CHASE");
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	sprintf ("SHOOT RAMPS");
+	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+	}//end of mode_effect_deff
+
+
 void carchase_mode_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "CAR CHASE");
+	sprintf ("%d CAR CHASE", car_chase_mode_shots_made);
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	sprintf ("%12b", car_chase_score);
+//	sprintf ("%b", car_chase_score);
+//	sprintf_score (car_chase_score);
+	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -108,7 +125,7 @@ void carchase_mode_effect_deff(void) {
 ****************************************************************************/
 CALLSET_ENTRY (car_chase_mode, status_report){
 //		if (is_car_chase_mode_activated) sprintf ("CAR CHASE");
-//		font_render_string_left (&font_fixed10, 1, 1, sprintf_buffer);
+//		font_render_string_center(&font_fixed10, 1, 1, sprintf_buffer);
 
 //	sprintf ("%d CAR RACE CAR CHASE modes completed", car_chase_modes_made);
 //	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);

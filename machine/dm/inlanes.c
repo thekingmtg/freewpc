@@ -48,8 +48,6 @@ __boolean 	right_inlane_Light_Quick_Freeze_activated;
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
-void inlanes_reset (void) { }//end of reset
-
 void new_player_inlanes_reset (void) {
 	left_inlane_Access_Claw_activated = TRUE;
 	lamp_tristate_on(LM_ACCESS_CLAW);
@@ -58,7 +56,6 @@ void new_player_inlanes_reset (void) {
 }//end of reset
 
 CALLSET_ENTRY (inlanes, start_player) {  new_player_inlanes_reset(); }
-CALLSET_ENTRY (inlanes, start_ball) { inlanes_reset(); }
 
 
 /****************************************************************************
@@ -138,8 +135,8 @@ CALLSET_ENTRY (inlanes, sw_right_inlane) {
  ****************************************************************************/
 void clw_inlanes_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CRYO CLAW");
-	font_render_string_left (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "SHOOT RIGHT RAMP");
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CRYO CLAW");
+	font_render_string_center(&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "SHOOT RIGHT RAMP");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -149,8 +146,8 @@ void clw_inlanes_effect_deff(void) {
 
 void qf_inlanes_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "QUICK FREEZE");
-	font_render_string_left (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "SHOOT LEFT RAMP");
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "QUICK FREEZE");
+	font_render_string_center(&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "SHOOT LEFT RAMP");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -165,13 +162,3 @@ void qf_inlanes_effect_deff(void) {
  * is held for 4 seconds or longer.  since called by callset, order of
  * various status reports will be random depending upon call stack
 ****************************************************************************/
-CALLSET_ENTRY (inlanes, status_report){
-		if (right_inlane_Light_Quick_Freeze_activated) sprintf ("QUICK FREEZE");
-		else sprintf (" ");
-		font_render_string_left (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
-
-		if (left_inlane_Access_Claw_activated) sprintf ("CRYO CLAW");
-		else sprintf (" ");
-		font_render_string_left (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
-	//deff_exit (); is called at end of calling function - not needed here?
-}//end of function

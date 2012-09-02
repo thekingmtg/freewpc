@@ -46,7 +46,6 @@ void prisonbreak_effect_deff (void);
 void prison_break_reset (void) {
 	prison_break_mode_shots_made = 0;
 	is_prison_break_mode_activated = FALSE;
-	score_zero(prison_break_mode_score);
 	prison_break_mode_shots_made_from_underground = 0;
 	}
 
@@ -71,6 +70,7 @@ CALLSET_ENTRY (prison_break, start_ball) { prison_break_reset(); }
  * perhaps make a claw mode enabled flag for all claw shots
  ***************************************************************************/
 CALLSET_ENTRY (prison_break, sw_claw_prison_break) {
+	score_zero(prison_break_mode_score);
 	score (SC_15M);
 	is_prison_break_mode_activated = TRUE;
 	++prison_break_modes_achieved;
@@ -169,9 +169,10 @@ CALLSET_ENTRY (prison_break, prison_break_made_from_underground) {
  ****************************************************************************/
 void prisonbreak_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_times8, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
-	sprintf ("%d", prison_break_mode_shots_made);
-	font_render_string_center (&font_times8, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	sprintf ("%d PRISON BREAK", prison_break_mode_shots_made);
+	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	sprintf_score (prison_break_mode_score);
+	font_render_string_center (&font_steel, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -180,8 +181,8 @@ void prisonbreak_effect_deff(void) {
 
 void prisonbreak_start_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
-	font_render_string_center (&font_times8, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SHOOT ARROWS");
+	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
+	font_render_string_center (&font_var5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SHOOT ARROWS");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -198,13 +199,13 @@ void prisonbreak_start_effect_deff(void) {
 CALLSET_ENTRY (prison_break, status_report){
 		if (is_prison_break_mode_activated) sprintf ("PB");
 		else sprintf ("NPB");
-		font_render_string_left (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+		font_render_string_center(&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
 
 //	sprintf ("%d PRISON BREAKOUT MODES", prison_break_modes_achieved);
-//	font_render_string_left (&font_mono5, 1, 16, sprintf_buffer);
+//	font_render_string_center(&font_mono5, 1, 16, sprintf_buffer);
 
 //	sprintf ("prison break score: %d", prison_break_mode_score);
-//	font_render_string_left (&font_mono5, 64, 13, sprintf_buffer);
+//	font_render_string_center(&font_mono5, 64, 13, sprintf_buffer);
 //
 //		sprintf ("%d prison break shots made", prison_break_mode_shots_made);
 //		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);

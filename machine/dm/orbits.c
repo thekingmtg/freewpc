@@ -74,10 +74,6 @@ void orbits_reset (void) {
 	right_loop_counter = 0;
 	all_loop_counter = 0;
 
-	right_loop_goal = 0;
-	left_loop_goal=ORBITS_EASY_GOAL;
-	all_loop_goal=(ORBITS_EASY_GOAL * 4);
-
 	left_Loop_ExtraBall_activated = FALSE;
 	left_Loop_MultiBall_activated = FALSE;
 	left_Loop_Explode_activated = FALSE;
@@ -91,6 +87,9 @@ void orbits_reset (void) {
 
 void player_orbits_reset (void) {
 	orbits_SoundCounter = 0;
+	right_loop_goal = 0;
+	left_loop_goal=ORBITS_EASY_GOAL;
+	all_loop_goal=(ORBITS_EASY_GOAL * 4);
 	orbits_reset();
 }
 
@@ -251,7 +250,7 @@ CALLSET_ENTRY (orbits, left_orbit_shot_made) {
 	++all_loop_counter;
 	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	score (SC_100K);//located in kernal/score.c
-	if(left_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_ramp_made);
+	if(left_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_made);
 	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 
 	//TODO: jackpot and combo shot detection
@@ -263,7 +262,7 @@ CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 	++all_loop_counter;
 	score (SC_100K);//located in kernal/score.c
 	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
-	if(right_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_ramp_made);
+	if(right_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_made);
 	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
 		//TODO: jackpot and combo shot detection
 	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();

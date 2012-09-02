@@ -60,16 +60,24 @@ ROM_PAGE_COUNT = 32
 # note: if we put tabs in between the file names you will get a linker error
 # note: continue line with a '\' --make sure to leave off on last line or you will get a linker error
 
+#test 1	good ---call_tester.o inlanes.o rollovers.o simple_switches.o  
+#test 2 good ---call_tester.o inlanes.o rollovers.o simple_switches.o orbits.o ramps.o   
+#test 3 fail ---call_tester.o inlanes.o rollovers.o simple_switches.o orbits.o ramps.o acmag.o 	capture_simon.o 
+#test 3 good ---call_tester.o inlanes.o rollovers.o simple_switches.o orbits.o ramps.o 			capture_simon.o prison_break.o jets_superjets.o   
+#test 4 good ---call_tester.o inlanes.o rollovers.o simple_switches.o orbits.o ramps.o 			capture_simon.o prison_break.o jets_superjets.o   
+#								lock_freeze_mbstart.o fortressMB.o sound_handler.o
 
-GAME_OBJS =	inlanes.o   orbits.o   ramps.o   rollovers.o   simple_switches.o
 
-GAME2_OBJS = car_crash.o   eyeball_explode.o   lock_freeze_mbstart.o
 
-GAME3_OBJS = underground.o  
- 
+
+GAME_OBJS =	orbits.o   	ramps.o   
+#	call_tester.o  
+
+GAME2_OBJS = lock_freeze_mbstart.o   fortressMB.o  sound_handler.o car_crash.o underground.o     eyeball_explode.o capture_simon.o  prison_break.o   jets_superjets.o   car_chase_mode.o   acmag.o   standupfrenzy.o inlanes.o   rollovers.o   simple_switches.o  
+
+
 GAME_TEST_OBJS =
 
 GAME_INCLUDES =
 
-# modes
-GAME_PAGED_OBJS = acmag.o   capture_simon.o   car_chase_mode.o   prison_break.o   jets_superjets.o   standupfrenzy.o
+GAME_PAGED_OBJS =    

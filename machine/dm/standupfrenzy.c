@@ -56,6 +56,7 @@ U8				standupFrenzy_modes_achieved;
 U8 				standupFrenzyNumHits;
 U8 				standupFrenzyTimer;
 score_t 		standupFrenzyTotalScore;
+score_t 		standupFrenzyLastScore;
 U8 				standupFrenzyLightsLit; //tracks which target was hit
 U8 			standupLightsLit; //tracks which target was hit
 U8 			standup_num_of_hits;
@@ -74,18 +75,24 @@ void standupFrenzy_mode_effect_deff (void);
 void standupFrenzy_sounds (void);
 void standup_sounds (void);
 
+
+
+/****************************************************************************
+ * mode definition structure
+ ***************************************************************************/
 struct timed_mode_ops standupFrenzy_mode = {
 	DEFAULT_MODE,
 	.init = standupFrenzy_mode_init,
 	.exit = standupFrenzy_mode_exit,
 	.gid = GID_STANDUPFRENZY_MODE_RUNNING,
-	.music = MUS_MD_1,
+	.music = MUS_MD_STANDUP_FRENZY,
+	.deff_starting = DEFF_STANDUPFRENZY_START_EFFECT,
 	.deff_running = DEFF_STANDUPFRENZY_MODE_EFFECT,
-	.deff_ending = DEFF_STANDUPFRENZYTOTALSCORE_EFFECT,
+//	.deff_ending = DEFF_STANDUPFRENZYTOTALSCORE_EFFECT,
 	.prio = PRI_GAME_MODE2,
-	.init_timer = 20,
+	.init_timer = 23, //time displayed plus length of starting deff
 	.timer = &standupFrenzyTimer,
-	.grace_timer = 3,
+	.grace_timer = 3, //if 0, no ending deff???
 	.pause = system_timer_pause,
 };
 
@@ -100,37 +107,48 @@ void standupFrenzy_mode_init (void) {
 	standupFrenzyLightsLit = ALL_TARGETS;
 	callset_invoke (lamp_update);
 	score_zero (standupFrenzyTotalScore);
-	deff_start (DEFF_STANDUPFRENZY_MODE_EFFECT);
+	score_zero (standupFrenzyLastScore);
+	score_add (standupFrenzyLastScore, score_table[SC_5M]);
 }//end of standupFrenzy_mode_init 
+
+
 
 void standupFrenzy_mode_exit (void) {
 	/* Light all 'default' lamps */
 	isStandupFrenzyActivated = FALSE;
-	standup_num_of_hits = 0;
 	standupFrenzyDefaultLightsLit = ALL_TARGETS;
 	standupFrenzyLightsLit = NO_TARGETS;
 	standupLightsLit  = ALL_TARGETS;
 	callset_invoke (lamp_update);
-	deff_start (DEFF_STANDUPFRENZYTOTALSCORE_EFFECT);
 }//end of standupFrenzy_mode_exit 
 
 
 
-/*light the default standup lights*/
-CALLSET_ENTRY (standupFrenzy, start_ball) {
-	/* Light all 'default' lamps */
-	standupFrenzyDefaultLightsLit = ALL_TARGETS;
-	standupFrenzyLightsLit = NO_TARGETS;
-	standupLightsLit  = ALL_TARGETS;
-	standup_num_of_hits = 0;
-	standup_goal = 1;
-	isStandupFrenzyActivated = FALSE;
-	callset_invoke (lamp_update);
-}//end of function
-
 CALLSET_ENTRY (standupFrenzy, start_player) {
 standupFrenzy_modes_achieved = 0;
+
+/* Light all 'default' lamps */
+standupFrenzyDefaultLightsLit = ALL_TARGETS;
+standupFrenzyLightsLit = NO_TARGETS;
+standupLightsLit  = ALL_TARGETS;
+standup_num_of_hits = 0;
+standup_goal = 1;
+isStandupFrenzyActivated = FALSE;
+callset_invoke (lamp_update);
 }//end of function
+
+
+
+
+
+/****************************************************************************
+ * external event listeners
+ ****************************************************************************/
+CALLSET_ENTRY (standupFrenzy, music_refresh)  	{ timed_mode_music_refresh (&standupFrenzy_mode); }
+CALLSET_ENTRY (standupFrenzy, end_ball) 		{ if (timed_mode_running_p(&standupFrenzy_mode) ) timed_mode_end (&standupFrenzy_mode); }
+CALLSET_ENTRY (standupFrenzy, display_update) 	{ timed_mode_display_update (&standupFrenzy_mode); }
+
+
 
 
 /****************************************************************************
@@ -151,12 +169,11 @@ void standupHandler (U8 target) {
 	const U8 lamp = switch_lookup_lamp (sw);
 
 	//verify target hit was a lit target and mode is still running
-	if ( (standupFrenzyLightsLit & target) && timed_mode_running_p(&standupFrenzy_mode) ) {
+	if (standupFrenzyLightsLit &target && timed_mode_running_p(&standupFrenzy_mode) ) {
 		standupFrenzyLightsLit &= ~target;  /* flag that target as hit */
 		standup_lamp_update1 (target, lamp);
 		standupFrenzy_sounds();
 		++standupFrenzyNumHits;
-		deff_start (DEFF_STANDUPFRENZY_MODE_EFFECT);
 		//score 5 million plus 1 million times number of hits
 		score (SC_5M);
 		score_zero (standupFrenzy_temp_score);//zero out temp score
@@ -168,16 +185,20 @@ void standupHandler (U8 target) {
 		//do same for mode score
 		score_add (standupFrenzyTotalScore, score_table[SC_5M]);
 		score_add (standupFrenzyTotalScore, standupFrenzy_temp_score);
+		score_zero (standupFrenzyLastScore);
+		score_add (standupFrenzyLastScore, score_table[SC_5M]);
+		score_add (standupFrenzyLastScore, standupFrenzy_temp_score);
 		//sound_send (SND_STANDUPFRENZY_MODE_BOOM);
 		//if 5th light out then reset all lights back on
 		if (standupFrenzyNumHits % 5 == 0) 	{
 			standupFrenzyLightsLit = ALL_TARGETS;
 			callset_invoke (lamp_update);
 		}
+		deff_start (DEFF_STANDUPFRENZYHIT_EFFECT);
 	}//end of if mode is running
 
 	//else mode NOT running ---verify target hit was a lit target
-	else if (standupLightsLit & target) {
+	else if (standupLightsLit &target && !timed_mode_running_p(&standupFrenzy_mode)) {
 		++standup_num_of_hits;
 		deff_start (DEFF_STANDUP_EFFECT);
 		standupLightsLit &= ~target;  /* flag that target as hit */
@@ -197,6 +218,8 @@ void standupHandler (U8 target) {
 	}//end of else if
 	standup_lamp_update1 (target, lamp);
 }//end of standupHandler 
+
+
 
 
 /****************************************************************************
@@ -230,13 +253,6 @@ CALLSET_ENTRY (standupFrenzy, lamp_update) {
 }//end of lamp_update 
 
 
-/****************************************************************************
- * external event listeners
- ****************************************************************************/
-CALLSET_ENTRY (standupFrenzy, display_update) { timed_mode_display_update (&standupFrenzy_mode); }
-CALLSET_ENTRY (standupFrenzy, music_refresh)  { timed_mode_music_refresh (&standupFrenzy_mode); }
-CALLSET_ENTRY (standupFrenzy, end_ball)		{ timed_mode_end (&standupFrenzy_mode); }
-
 //claw freeze starts standup frenzy instead of locking a ball
 CALLSET_ENTRY (standupFrenzy, sw_claw_freeze) { timed_mode_begin (&standupFrenzy_mode); }
 
@@ -263,6 +279,8 @@ else if ( standup_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, ZAPP_3_LONG, SL_2S, PRI_GAME_QUICK5);
 }
 
+
+
 void standupFrenzy_sounds (void) {
 	standupFrenzy_SoundCounter = random_scaled(3);//from kernal/random.c
 	if ( standupFrenzy_SoundCounter  == 0 )
@@ -273,9 +291,68 @@ else if ( standupFrenzy_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, CHORD3, SL_2S, PRI_GAME_QUICK5);
 }
 
+
+//effect for when not in frenzy mode
+void standup_effect_deff (void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "STANDUP");
+	sprintf ("%d STANDUPS HIT", standup_num_of_hits);
+	font_render_string_center(&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of standupFrenzy_mode_deff
+
+
+
+/*mode is starting*/
+void standupFrenzy_start_effect_deff (void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "STANDUP");
+	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "   FRENZY");
+	dmd_show_low ();
+	task_sleep_sec (3);
+	deff_exit ();
+} // standupFrenzyTotalScore_deff
+
+
+
+/*HIT mode*/
+void standupFrenzyHit_effect_deff (void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "FRENZY");
+	sprintf_score (standupFrenzyLastScore);
+	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (1);
+	deff_exit ();
+} // standupFrenzyTotalScore_deff
+
+
+
+
+/*during mode*/
+void standupFrenzy_mode_effect_deff (void) {
+	for (;;) {
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_fixed6, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "FRENZY");
+		sprintf ("%d SEC LEFT,  %d HIT", standupFrenzyTimer, standupFrenzyNumHits);
+		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
+		sprintf_score (standupFrenzyLastScore);
+		font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
+		dmd_show_low ();
+		task_sleep (TIME_200MS);
+	}//END OF ENDLESS LOOP
+}//end of standupFrenzy_mode_deff
+
+
+
+
+
+
+
 /*mode is over*/
 void standupFrenzyTotalScore_effect_deff (void) {
-	//sound_send (SND_SEE_WHAT_GREED);
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "STANDUP FRENZY");
 	sprintf_score (standupFrenzyTotalScore);
@@ -283,32 +360,7 @@ void standupFrenzyTotalScore_effect_deff (void) {
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
-} // standupFrenzyTotalScore_deff 
-
-/*during mode*/
-void standupFrenzy_mode_effect_deff (void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "STANDUP FRENZY");
-	font_render_string_center (&font_mono5, DMD_SMALL_CX_2, DMD_SMALL_CY_2, "SHOOT FLASHING STANDUPS");
-	sprintf ("%d", standup_num_of_hits);
-	font_render_string_left (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
-	//	dmd_text_outline ();//this makes bad things happen
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of standupFrenzy_mode_deff
-
-
-void standup_effect_deff (void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "STANDUP");
-	sprintf ("STANDUPS HIT");
-	 // standup_num_of_hits
-	font_render_string_left (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of standupFrenzy_mode_deff 
+} // standupFrenzyTotalScore_deff
 
 
 
@@ -319,19 +371,3 @@ void standup_effect_deff (void) {
  * is held for 4 seconds or longer.  since called by callset, order of
  * various status reports will be random depending upon call stack
 ****************************************************************************/
-//ALLSET_ENTRY (standupFrenzy, status_report){
-//		if (isStandupFrenzyActivated) sprintf ("SF");
-//		else sprintf ("NSF");
-//		font_render_string_center (&font_mono5, 96, 20, sprintf_buffer);
-
-//	sprintf ("%d STANDUP FRENZY MODES COMPLETED", standupFrenzy_modes_achieved);
-//	font_render_string_left (&font_mono5, 1, 16, sprintf_buffer);
-
-//	sprintf ("standup frenzy score: %d", standupFrenzyTotalScore);
-//	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
-
-//		sprintf ("%d standup frenzy shots made", standupFrenzyNumHits);
-//		font_render_string_center (&font_mono5, 64, 19, sprintf_buffer);
-
-//deff_exit (); is called at end of calling function - not needed here?
-//}//end of function

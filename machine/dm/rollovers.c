@@ -90,11 +90,11 @@ void all_rollover_made (void){
 	lower_rollover_activated = FALSE;
 	score (SC_500K);
 	//light access claw
-	callset_invoke(Access_Claw_Light_On);//at inlanes.c
 	if (rollover_bonus_multiplier < max_rollover_bonus_multiplier) ++rollover_bonus_multiplier;
 	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(ExtraBall_Light_On);
 	//TODO: DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
 	deff_start (DEFF_ALL_ROLLOVERS_EFFECT);
+	callset_invoke(Access_Claw_Light_On);//at inlanes.c
 	}//end of function
 
 
@@ -165,108 +165,112 @@ CALLSET_ENTRY (rollovers, sw_right_rollover) {
 	 * rotate rollovers when buttons pressed
 	 ***************************************************************************/
 CALLSET_ENTRY (rollovers, sw_left_button, sw_u_l_flipper_button) {
-	if (top_rollover_activated && lower_rollover_activated) { //left (M) not activated
-		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_on(LM_TOP_ROLLOVER);
-		lamp_tristate_off(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = TRUE;
-		top_rollover_activated = TRUE;
-		lower_rollover_activated = FALSE;
-		}
-	else if (middle_rollover_activated && lower_rollover_activated) { //center (T) not activated
-		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_on(LM_TOP_ROLLOVER);
-		lamp_tristate_on(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = FALSE;
-		top_rollover_activated = TRUE;
-		lower_rollover_activated = TRUE;
-		}
-	else if (middle_rollover_activated && top_rollover_activated) { //right (L) not activated
-		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_off(LM_TOP_ROLLOVER);
-		lamp_tristate_on(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = TRUE;
-		top_rollover_activated = FALSE;
-		lower_rollover_activated = TRUE;
-		}
-	else if (middle_rollover_activated) { //center and right not activated
-		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_off(LM_TOP_ROLLOVER);
-		lamp_tristate_on(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = FALSE;
-		lower_rollover_activated = TRUE;
-		top_rollover_activated = FALSE;
-		}
-	else if (top_rollover_activated) { //left and right not activated
-		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_off(LM_TOP_ROLLOVER);
-		lamp_tristate_off(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = TRUE;
-		top_rollover_activated = FALSE;
-		lower_rollover_activated = FALSE;
-		}
-	else if (lower_rollover_activated) { //left and center not activated
-		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_on(LM_TOP_ROLLOVER);
-		lamp_tristate_off(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = FALSE;
-		top_rollover_activated = TRUE;
-		lower_rollover_activated = FALSE;
-		}
+	if (in_live_game) {
+			if (top_rollover_activated && lower_rollover_activated) { //left (M) not activated
+				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_on(LM_TOP_ROLLOVER);
+				lamp_tristate_off(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = TRUE;
+				top_rollover_activated = TRUE;
+				lower_rollover_activated = FALSE;
+				}
+			else if (middle_rollover_activated && lower_rollover_activated) { //center (T) not activated
+				lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_on(LM_TOP_ROLLOVER);
+				lamp_tristate_on(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = FALSE;
+				top_rollover_activated = TRUE;
+				lower_rollover_activated = TRUE;
+				}
+			else if (middle_rollover_activated && top_rollover_activated) { //right (L) not activated
+				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_off(LM_TOP_ROLLOVER);
+				lamp_tristate_on(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = TRUE;
+				top_rollover_activated = FALSE;
+				lower_rollover_activated = TRUE;
+				}
+			else if (middle_rollover_activated) { //center and right not activated
+				lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_off(LM_TOP_ROLLOVER);
+				lamp_tristate_on(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = FALSE;
+				lower_rollover_activated = TRUE;
+				top_rollover_activated = FALSE;
+				}
+			else if (top_rollover_activated) { //left and right not activated
+				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_off(LM_TOP_ROLLOVER);
+				lamp_tristate_off(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = TRUE;
+				top_rollover_activated = FALSE;
+				lower_rollover_activated = FALSE;
+				}
+			else if (lower_rollover_activated) { //left and center not activated
+				lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_on(LM_TOP_ROLLOVER);
+				lamp_tristate_off(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = FALSE;
+				top_rollover_activated = TRUE;
+				lower_rollover_activated = FALSE;
+				}
+	}//end of if (in_live_game)
 }//end of function to rotate left
 
 
 
 //rotate rollovers when buttons pressed
 CALLSET_ENTRY (rollovers, sw_right_button, sw_u_r_flipper_button) {
-	if (top_rollover_activated && lower_rollover_activated) { //left not activated
-		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_off(LM_TOP_ROLLOVER);
-		lamp_tristate_on(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = TRUE;
-		top_rollover_activated = FALSE;
-		lower_rollover_activated = TRUE;
-		}
-	else if (middle_rollover_activated && lower_rollover_activated) { //center not activated
-		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_on(LM_TOP_ROLLOVER);
-		lamp_tristate_off(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = TRUE;
-		top_rollover_activated = TRUE;
-		lower_rollover_activated = FALSE;
-		}
-	else if (middle_rollover_activated && top_rollover_activated) { //right not activated
-		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_on(LM_TOP_ROLLOVER);
-		lamp_tristate_on(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = FALSE;
-		top_rollover_activated = TRUE;
-		lower_rollover_activated = TRUE;
-		}
-	else if (middle_rollover_activated) { //center and right not activated
-		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_on(LM_TOP_ROLLOVER);
-		lamp_tristate_off(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = FALSE;
-		top_rollover_activated = TRUE;
-		lower_rollover_activated = FALSE;
-		}
-	else if (top_rollover_activated) { //left and right not activated
-		lamp_tristate_off(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_off(LM_TOP_ROLLOVER);
-		lamp_tristate_on(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = FALSE;
-		top_rollover_activated = FALSE;
-		lower_rollover_activated = TRUE;
-		}
-	else if (lower_rollover_activated) { //left and center not activated
-		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
-		lamp_tristate_off(LM_TOP_ROLLOVER);
-		lamp_tristate_off(LM_LOWER_ROLLOVER);
-		middle_rollover_activated = TRUE;
-		top_rollover_activated = FALSE;
-		lower_rollover_activated = FALSE;
-		}
+	if (in_live_game) {
+			if (top_rollover_activated && lower_rollover_activated) { //left not activated
+				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_off(LM_TOP_ROLLOVER);
+				lamp_tristate_on(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = TRUE;
+				top_rollover_activated = FALSE;
+				lower_rollover_activated = TRUE;
+				}
+			else if (middle_rollover_activated && lower_rollover_activated) { //center not activated
+				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_on(LM_TOP_ROLLOVER);
+				lamp_tristate_off(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = TRUE;
+				top_rollover_activated = TRUE;
+				lower_rollover_activated = FALSE;
+				}
+			else if (middle_rollover_activated && top_rollover_activated) { //right not activated
+				lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_on(LM_TOP_ROLLOVER);
+				lamp_tristate_on(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = FALSE;
+				top_rollover_activated = TRUE;
+				lower_rollover_activated = TRUE;
+				}
+			else if (middle_rollover_activated) { //center and right not activated
+				lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_on(LM_TOP_ROLLOVER);
+				lamp_tristate_off(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = FALSE;
+				top_rollover_activated = TRUE;
+				lower_rollover_activated = FALSE;
+				}
+			else if (top_rollover_activated) { //left and right not activated
+				lamp_tristate_off(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_off(LM_TOP_ROLLOVER);
+				lamp_tristate_on(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = FALSE;
+				top_rollover_activated = FALSE;
+				lower_rollover_activated = TRUE;
+				}
+			else if (lower_rollover_activated) { //left and center not activated
+				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
+				lamp_tristate_off(LM_TOP_ROLLOVER);
+				lamp_tristate_off(LM_LOWER_ROLLOVER);
+				middle_rollover_activated = TRUE;
+				top_rollover_activated = FALSE;
+				lower_rollover_activated = FALSE;
+				}
+	}//end of 	if (in_live_game)
 }//end of function to rotate right
 
 
@@ -340,8 +344,3 @@ void all_rollovers_effect_deff(void) {
  * is held for 4 seconds or longer.  since called by callset, order of
  * various status reports will be random depending upon call stack
 ****************************************************************************/
-//ALLSET_ENTRY (rollovers, status_report){
-//	sprintf ("ROLLOVER BONUS MULTIPLIER:  %d", rollover_bonus_multiplier);
-//	font_render_string_center (&font_fixed10, 96, 5, sprintf_buffer);
-	//deff_exit (); is called at end of calling function - not needed here?
-//}//end of function

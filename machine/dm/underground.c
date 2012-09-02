@@ -40,7 +40,6 @@
 const U8 		computerAwardsNumOfSounds = 7; //num between 0 and 6
 
 //local variables
-U8		underground_SoundCounter;
 U8 		underground_shots_made;
 U8 		underground_goal;
 __boolean 		is_underground_Jackpot_activated;
@@ -54,7 +53,7 @@ sound_code_t computerAwardsSoundsArray[] = {	COMPUTER1, 				COMPUTER_ADDING,   C
 
 //external variables
 extern 	__boolean 		is_prison_break_mode_activated; //from prison_break.c
-extern  __boolean 		is_capture_simon_mode_activated; //from capture_simon.c
+extern  __boolean 		isCapSimUndergroundActive; //from capture_simon.c
 
 //prototypes
 void underground_reset (void);
@@ -67,12 +66,11 @@ void underground_reset (void) {
 	underground_goal = 0;
 	is_underground_Jackpot_activated = FALSE;
 	is_underground_Arrow_activated = FALSE;
-	}//end of function
+}//end of function
 
 void player_underground_reset(void) {
 	//this will be external and in combo function when written
 	next_combo_total = FALSE;
-	underground_SoundCounter = 0;
 	underground_reset();
 }
 
@@ -112,19 +110,20 @@ CALLSET_ENTRY (underground, underground_Arrow_Light_Off) {
 CALLSET_ENTRY (underground, sw_bottom_popper) {
 	++underground_shots_made;
 	score (SC_100K);//located in kernal/score.c
-	if ( (underground_SoundCounter++ % 2) == 0 )//check if even
+	U8		underground_SoundCounter;
+if ( (underground_SoundCounter++ % 2) == 0 )//check if even
 		sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
 	else
 		sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
 	if(is_prison_break_mode_activated)  callset_invoke(prison_break_made_from_underground);
-	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if(isCapSimUndergroundActive)  callset_invoke(capture_simon_made);
 	//TODO: jackpot and combo shot detection
 	//	if (is_underground_Jackpot_activated) //during multiball
 	//	if (is_underground_Arrow_activated) //from combo shot
 	if (next_combo_total) callset_invoke(computer_award);
 	//if nothing special, do normal display effects
 	if(!is_prison_break_mode_activated
-			&& !is_capture_simon_mode_activated
+			&& !isCapSimUndergroundActive
 			&& !next_combo_total
 			&& !is_underground_Arrow_activated
 			&& !is_underground_Jackpot_activated)
@@ -174,8 +173,10 @@ CALLSET_ENTRY (underground, computer_award) {
  ****************************************************************************/
 void underground_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	sprintf ("%d SUBWAY", underground_shots_made);
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	sprintf ("SUBWAY", underground_shots_made);
+	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	sprintf ("%d MADE", underground_shots_made);
+	font_render_string_center (&font_steel, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -190,9 +191,3 @@ void underground_effect_deff(void) {
  * is held for 4 seconds or longer.  since called by callset, order of
  * various status reports will be random depending upon call stack
 ****************************************************************************/
-CALLSET_ENTRY (underground, status_report){
-	sprintf ("%d SUBWAY", underground_shots_made);
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
-		//deff_exit (); is called at end of calling function - not needed here?
-}//end of function
-

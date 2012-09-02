@@ -29,7 +29,6 @@
 //local variables
 U8			capture_simon_SoundCounter;
 U8			capture_simon_shots_made;
-U8 			capture_simon_mode_counter;
 U8 			capture_simon_modes_achieved;
 score_t 	capture_simon_mode_score;
 __boolean 	is_capture_simon_mode_activated;
@@ -37,10 +36,7 @@ __boolean 	is_capture_simon_mode_activated;
 __boolean 	isCapSimSideRampActive;
 __boolean 	isCapSimLeftRampActive;
 __boolean 	isCapSimRightRampActive;
-__boolean 	isCapSimUndergroundRampActive;
-
-
-
+__boolean 	isCapSimUndergroundActive;
 
 //external variables
 
@@ -53,15 +49,12 @@ void capturesimon_effect_deff(void);
  * initialize  and exit
  ***************************************************************************/
 void capture_simon_reset (void) {
-	capture_simon_mode_counter = 0;
-	capture_simon_shots_made = 0;
 	is_capture_simon_mode_activated = FALSE;
 	isCapSimSideRampActive = FALSE;
 	isCapSimLeftRampActive = FALSE;
 	isCapSimRightRampActive = FALSE;
-	isCapSimUndergroundRampActive = FALSE;
-	score_zero(capture_simon_mode_score);
-	}
+	isCapSimUndergroundActive = FALSE;
+}
 
 void capture_simon_player_reset (void) {
 	capture_simon_reset();
@@ -85,23 +78,24 @@ CALLSET_ENTRY (capture_simon, start_ball) { capture_simon_reset(); }
  * perhaps make a claw mode enabled flag for all claw shots
  ***************************************************************************/
 CALLSET_ENTRY (capture_simon, sw_claw_capture_simon) {
+	score_zero(capture_simon_mode_score);
 	score (SC_250K);
 	is_capture_simon_mode_activated = TRUE;
 	++capture_simon_modes_achieved;
 	capture_simon_shots_made = 0;
 	music_disable();
+	music_set (MUS_MD_CAPTURE_SIMON);
 	deff_start (DEFF_CAPTURESIMON_EFFECT);//under /kernel/deff.c
-	sound_start (ST_SPEECH, SPCH_UNDER_ARREST, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_UNDER_ARREST, SL_5S, PRI_GAME_QUICK1);
 	lamp_tristate_flash(LM_CLAW_CAPTURE_SIMON);	//flash lamp for a time
 	task_sleep(TIME_500MS);
 	task_sleep(TIME_500MS);
 	task_sleep(TIME_500MS);
-	sound_start (ST_SPEECH, SPCH_SO_SCARED, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_SO_SCARED, SL_5S, PRI_GAME_QUICK1);
 	lamp_tristate_on(LM_CLAW_CAPTURE_SIMON);
 	task_sleep(TIME_500MS);
 	task_sleep(TIME_500MS);
 	task_sleep(TIME_500MS);
-	music_set (MUS_MD_CAPTURE_SIMON);
 
 	isCapSimSideRampActive = TRUE;
 	lamp_tristate_flash(LM_SIDE_RAMP_ARROW);
@@ -109,8 +103,8 @@ CALLSET_ENTRY (capture_simon, sw_claw_capture_simon) {
 	lamp_tristate_flash(LM_LEFT_RAMP_ARROW);
 	isCapSimRightRampActive = TRUE;
 	lamp_tristate_flash(LM_RIGHT_RAMP_ARROW);
-	isCapSimUndergroundRampActive = FALSE;
-	//music_enable();
+	isCapSimUndergroundActive = FALSE;
+	music_enable();
 }//end of function
 
 
@@ -124,12 +118,13 @@ CALLSET_ENTRY (capture_simon, sw_claw_capture_simon) {
 CALLSET_ENTRY (capture_simon, capture_simon_made) {
 	if ( (capture_simon_SoundCounter++ % 3) == 0 )
 		sound_start (ST_SPEECH, SPCH_WES_LAUGH1, SL_5S, PRI_GAME_QUICK5);
-	else if ( (capture_simon_SoundCounter++ % 3) == 1 )
+	else if ( (capture_simon_SoundCounter % 3) == 1 )
 		sound_start (ST_SPEECH, SPCH_WES_LAUGH2, SL_5S, PRI_GAME_QUICK5);
-	else if ( (capture_simon_SoundCounter++ % 3) == 2 )
+	else if ( (capture_simon_SoundCounter % 3) == 2 )
 		sound_start (ST_SPEECH, SPCH_WES_LAUGH3, SL_5S, PRI_GAME_QUICK5);
 
 	++capture_simon_shots_made;
+
 	if (capture_simon_shots_made == 1) {
 		isCapSimLeftRampActive = TRUE;
 		isCapSimRightRampActive = TRUE;
@@ -154,10 +149,8 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 		lamp_tristate_off(LM_LEFT_RAMP_ARROW);
 		lamp_tristate_off(LM_RIGHT_RAMP_ARROW);
 		score (SC_50M);
-	//	is_capture_simon_mode_activated = FALSE;
-		deff_start (DEFF_CAPTURESIMON_EFFECT);
-//		deff_start (DEFF_CAPTURESIMON_COMPLETED_EFFECT);
-		music_set (MUS_BG); //return to normal music
+		deff_start (DEFF_CAPTURESIMON_COMPLETED_EFFECT);
+//		music_set (MUS_BG); //return to normal music
 		}
 
 	switch (capture_simon_modes_achieved ){
@@ -185,8 +178,8 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
  ****************************************************************************/
 void capturesimon_start_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SHOOT ARROWS");
+	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
+	font_render_string_center (&font_steel, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SHOOT ARROWS");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -196,9 +189,9 @@ void capturesimon_start_effect_deff(void) {
 
 void capturesimon_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
-	sprintf ("%d", capture_simon_shots_made);
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
+	sprintf ("%d MADE", capture_simon_shots_made);
+	font_render_string_center (&font_steel, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -208,8 +201,8 @@ void capturesimon_effect_deff(void) {
 
 void capturesimon_completed_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "COMPLETED");
+	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
+	font_render_string_center (&font_steel, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "COMPLETED");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -224,7 +217,7 @@ void capturesimon_completed_effect_deff(void) {
 ****************************************************************************/
 CALLSET_ENTRY (capture_simon, status_report){
 		if (is_capture_simon_mode_activated) sprintf ("CAPTURE SIMON");
-		font_render_string_left (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+		font_render_string_center(&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
 
 //	sprintf ("%d CAPTURE SIMON modes completed", capture_simon_modes_achieved);
 //	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
