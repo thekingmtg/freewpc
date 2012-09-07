@@ -135,7 +135,7 @@ CALLSET_ENTRY (custom_deffs, start_all_rollovers_deff) { deff_start (DEFF_ALL_RO
 void all_rollovers_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	sprintf("BONUS %d", rollover_bonus_multiplier);
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
 	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "ADVANCED");
 	dmd_show_low ();
 	task_sleep_sec (2);
@@ -157,7 +157,7 @@ void underground_effect_deff(void) {
 	sprintf ("SUBWAY");
 	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
 	sprintf ("%d MADE", underground_shots_made);
-	font_render_string_center (&font_steel, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -195,7 +195,7 @@ void freeze_effect_deff(void) {
 	sprintf ("%d FROZEN", NumBallsFrozen);
 	font_render_string_center (&font_adore64, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
 	sprintf ("%d MORE FOR MB", NumBallsNeededForNextMB);
-	font_render_string_center (&font_adore64, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
