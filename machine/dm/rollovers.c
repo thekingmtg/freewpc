@@ -44,7 +44,6 @@ U8 					rollover_bonus_multiplier; // 0 to 5
 U8					rollover_SoundCounter = 0;
 
 //external variables
-extern 	__boolean 		TestData; //located in global_constants.c
 
 //prototypes
 void rollover_reset (void);
@@ -93,9 +92,9 @@ void all_rollover_made (void){
 	if (rollover_bonus_multiplier < max_rollover_bonus_multiplier) ++rollover_bonus_multiplier;
 	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(ExtraBall_Light_On);
 	//TODO: DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
-	deff_start (DEFF_ALL_ROLLOVERS_EFFECT);
+	callset_invoke(start_all_rollovers_deff);//at custom_deffs.c
 	callset_invoke(Access_Claw_Light_On);//at inlanes.c
-	}//end of function
+}//end of function
 
 
 //note that switch is called left rollover corresponds to light called middle rollover
@@ -114,7 +113,7 @@ CALLSET_ENTRY (rollovers, sw_left_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (top_rollover_activated && lower_rollover_activated) all_rollover_made();
-		else deff_start (DEFF_ROLLOVERS_EFFECT);
+		else callset_invoke(start_rollovers_deff);//at custom_deffs.c
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_middle_rollover
 
@@ -135,7 +134,7 @@ CALLSET_ENTRY (rollovers, sw_center_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && lower_rollover_activated)  all_rollover_made();
-		else deff_start (DEFF_ROLLOVERS_EFFECT);
+		else callset_invoke(start_rollovers_deff);//at custom_deffs.c
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_top_rollover
 
@@ -156,7 +155,7 @@ CALLSET_ENTRY (rollovers, sw_right_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && top_rollover_activated)  all_rollover_made();
-		else deff_start (DEFF_ROLLOVERS_EFFECT);
+		else callset_invoke(start_rollovers_deff);//at custom_deffs.c
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_lower_rollover
 
@@ -279,7 +278,7 @@ CALLSET_ENTRY (rollovers, sw_right_button, sw_u_r_flipper_button) {
 
 
 /****************************************************************************
- * DMD display and sound effects
+ * sound effects
  ****************************************************************************/
 void rollover_sounds (void) {
 	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
@@ -289,7 +288,7 @@ else if ( rollover_SoundCounter  == 1 )
 	sound_start (ST_EFFECT, MACHINE1_MED, SL_2S, PRI_GAME_QUICK5);
 else if ( rollover_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, MACHINE1_LONG, SL_2S, PRI_GAME_QUICK5);
-}
+}//end of function
 
 void rollover_sounds_all_rollovers (void) {
 	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
@@ -299,7 +298,7 @@ else if ( rollover_SoundCounter  == 1 )
 	sound_start (ST_EFFECT, STORM1_MED, SL_2S, PRI_GAME_QUICK5);
 else if ( rollover_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, STORM1_LONG, SL_2S, PRI_GAME_QUICK5);
-}
+}//end of function
 
 void rollover_sounds_already_lit(void) {
 	rollover_SoundCounter = random_scaled(2);//from kernal/random.c
@@ -307,40 +306,7 @@ void rollover_sounds_already_lit(void) {
 	sound_start (ST_EFFECT, TOINK1, SL_2S, PRI_GAME_QUICK5);
 else if ( rollover_SoundCounter  == 1 )
 	sound_start (ST_EFFECT, TOINK2, SL_2S, PRI_GAME_QUICK5);
-}
+}//end of function
 
 
 
-/****************************************************************************
- * DMD display and sound effects
- ****************************************************************************/
-void rollovers_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "LIGHT  M T L  TO");
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "ADVANCE MULTIPLIER");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-	}//end of mode_effect_deff
-
-
-
-void all_rollovers_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	sprintf("BONUS %d", rollover_bonus_multiplier);
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "ADVANCED");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-	}//end of mode_effect_deff
-
-
-
-/****************************************************************************
- * status display
- *
- * called from common/status.c automatically whenever either flipper button
- * is held for 4 seconds or longer.  since called by callset, order of
- * various status reports will be random depending upon call stack
-****************************************************************************/

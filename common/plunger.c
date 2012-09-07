@@ -101,6 +101,8 @@ static void launch_button_pressed (void)
 }
 #endif
 
+
+
 #ifdef INCLUDE_AUTOPLUNGER
 static void timed_plunger_monitor (void)
 {
@@ -125,7 +127,6 @@ CALLSET_ENTRY (launch_button, serve_ball)
 #endif
 #endif
 }
-
 
 CALLSET_ENTRY (launch_button, sw_launch_button)
 {

@@ -56,8 +56,6 @@ __boolean 			right_Loop_Jackpot_activated;
 __boolean 			right_Loop_Arrow_activated;
 
 //external variables
-extern 	__boolean 		is_explode_activated; //in eyball_explode.c
-extern  __boolean 		is_capture_simon_mode_activated; //from capture_simon.c
 
 //prototypes
 void orbits_reset (void);
@@ -83,7 +81,7 @@ void orbits_reset (void) {
 	right_Loop_Explode_activated = FALSE;
 	right_Loop_Jackpot_activated = FALSE;
 	right_Loop_Arrow_activated = FALSE;
-	}//end of function
+}//end of function
 
 void player_orbits_reset (void) {
 	orbits_SoundCounter = 0;
@@ -91,7 +89,7 @@ void player_orbits_reset (void) {
 	left_loop_goal=ORBITS_EASY_GOAL;
 	all_loop_goal=(ORBITS_EASY_GOAL * 4);
 	orbits_reset();
-}
+}//end of function
 
 CALLSET_ENTRY (orbits, start_player) { player_orbits_reset(); }
 CALLSET_ENTRY (orbits, start_ball) { orbits_reset(); }
@@ -108,23 +106,23 @@ CALLSET_ENTRY (orbits, ExtraBall_Light_On) {
 		sound_start (ST_SPEECH, SPCH_GET_THE_EXTRABALL, SL_5S, PRI_GAME_QUICK5);
 	else
 		sound_start (ST_SPEECH, SPCH_NEED_EXTRABALL, SL_5S, PRI_GAME_QUICK5);
-	}
+}//end of function
 
 CALLSET_ENTRY (orbits, ExtraBall_Light_Off) {
 	left_Loop_ExtraBall_activated = FALSE;
 	lamp_tristate_off (LM_EXTRA_BALL);
-	}
+}//end of function
 
 //lit by required number of freezes accomplished
 CALLSET_ENTRY (orbits, Multiball_Light_On) {
 	left_Loop_MultiBall_activated = TRUE;
 	lamp_tristate_on (LM_START_MULTIBALL);
-	}
+}//end of function
 
 CALLSET_ENTRY (orbits, Multiball_Light_Off) {
 	left_Loop_MultiBall_activated = FALSE;
 	lamp_tristate_off (LM_START_MULTIBALL);
-	}
+}//end of function
 
 //lit by eyeball mode start --see eyeball_explode.c
 CALLSET_ENTRY (orbits, Activate_Explode_Inserts) {
@@ -132,58 +130,58 @@ CALLSET_ENTRY (orbits, Activate_Explode_Inserts) {
 	right_Loop_Arrow_activated = TRUE;
 	lamp_tristate_flash (LM_LEFT_LOOP_EXPLODE);
 	lamp_tristate_flash (LM_RIGHT_LOOP_EXPLODE);
-	}
+}//end of function
 
 CALLSET_ENTRY (orbits, DeActivate_Explode_Inserts) {
 	left_Loop_Arrow_activated = FALSE;
 	right_Loop_Arrow_activated = FALSE;
 	lamp_tristate_off (LM_LEFT_LOOP_EXPLODE);
 	lamp_tristate_off (LM_RIGHT_LOOP_EXPLODE);
-	}
+}//end of function
 
 //lit by multiball modes --TODO:
 CALLSET_ENTRY (orbits, LL_Jackpot_Light_On) {
 	left_Loop_Jackpot_activated = TRUE;
 	lamp_tristate_on (LM_LEFT_LOOP_JACKPOT);
-	}
+}//end of function
 
 CALLSET_ENTRY (orbits, LL_Jackpot_Light_Off) {
 	left_Loop_Jackpot_activated = FALSE;
 	lamp_tristate_off (LM_LEFT_LOOP_JACKPOT);
-	}
+}//end of function
 
 //lit by multiball modes --TODO:
 CALLSET_ENTRY (orbits, RL_Jackpot_Light_On) {
 	right_Loop_Jackpot_activated = TRUE;
 	lamp_tristate_on (LM_RIGHT_LOOP_JACKPOT);
-	}
+}//end of function
 
 CALLSET_ENTRY (orbits, RL_Jackpot_Light_Off) {
 	right_Loop_Jackpot_activated = FALSE;
 	lamp_tristate_off (LM_RIGHT_LOOP_JACKPOT);
-	}
+}//end of function
 
 //lit by combo shots --TODO:
 CALLSET_ENTRY (orbits, LL_Arrow_Light_On) {
 	left_Loop_Arrow_activated = TRUE;
 	lamp_tristate_on (LM_LEFT_LOOP_ARROW);
-	}
+}//end of function
 
 CALLSET_ENTRY (orbits, LL_Arrow_Light_Off) {
 	left_Loop_Arrow_activated = FALSE;
 	lamp_tristate_off (LM_LEFT_LOOP_ARROW);
-	}
+}//end of function
 
 //lit by combo shots --TODO:
 CALLSET_ENTRY (orbits, RL_Arrow_Light_On) {
 	right_Loop_Arrow_activated = TRUE;
 	lamp_tristate_on (LM_RIGHT_LOOP_ARROW);
-	}
+}//end of function
 
 CALLSET_ENTRY (orbits, RL_Arrow_Light_Off) {
 	right_Loop_Arrow_activated = FALSE;
 	lamp_tristate_off (LM_RIGHT_LOOP_ARROW);
-	}
+}//end of function
 
 
 /****************************************************************************
@@ -205,7 +203,7 @@ CALLSET_ENTRY (orbits, sw_left_loop) {
 		else
 			sound_start (ST_EFFECT, RACE_BY_2, SL_2S, PRI_GAME_QUICK5);
 		}//end of else
-	}//end of function
+}//end of function
 
 // full orbit left to right
 // or start right to left check
@@ -219,12 +217,12 @@ CALLSET_ENTRY (orbits, sw_right_freeway) {
 		else
 			sound_start (ST_EFFECT, RACE_BY_2, SL_2S, PRI_GAME_QUICK5);
 		}//end of else
-	}//end of function
+}//end of function
 
 // full orbit left to hole
 CALLSET_ENTRY (orbits, sw_top_popper) {
 	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) callset_invoke(orbit_to_popper_made);
-	}//end of orbits_sw_top_popper
+}//end of orbits_sw_top_popper
 
 
 
@@ -250,23 +248,23 @@ CALLSET_ENTRY (orbits, left_orbit_shot_made) {
 	++all_loop_counter;
 	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	score (SC_100K);//located in kernal/score.c
-	if(left_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_made);
-	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) callset_invoke(explode_made);
+	if(flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED) )  callset_invoke(capture_simon_made);
 
 	//TODO: jackpot and combo shot detection
 	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
-	}//end of function
+}//end of function
 
 CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 	++right_loop_counter;
 	++all_loop_counter;
 	score (SC_100K);//located in kernal/score.c
 	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
-	if(right_Loop_Arrow_activated && is_explode_activated) callset_invoke(explode_made);
-	if(is_capture_simon_mode_activated)  callset_invoke(capture_simon_made);
+	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) callset_invoke(explode_made);
+	if(flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED) )  callset_invoke(capture_simon_made);
 		//TODO: jackpot and combo shot detection
 	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
-	}//end of function
+}//end of function
 
 
 
@@ -275,35 +273,12 @@ void right_loop_goal_award (void) {
 	score (SC_250K);
 	right_loop_counter = 0;
 	if (right_loop_goal < ORBITS_GOAL_MAX)  right_loop_goal += ORBITS_GOAL_STEP;
-	}
+}//end of function
 
 void left_loop_goal_award (void) {
 	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
 	score (SC_250K);
 	left_loop_counter = 0;
 	if (left_loop_goal < ORBITS_GOAL_MAX)  left_loop_goal += ORBITS_GOAL_STEP;
-	}
-
-/****************************************************************************
- * DMD display and sound effects
- ****************************************************************************/
-
-
-
-/****************************************************************************
- * status display
- *
- * called from common/status.c automatically whenever either flipper button
- * is held for 4 seconds or longer.  since called by callset, order of
- * various status reports will be random depending upon call stack
-****************************************************************************/
-CALLSET_ENTRY (orbits, status_report){
-//	sprintf ("%d left loops", left_loop_counter);
-//	font_render_string_center (&font_mono5, 64, 1, sprintf_buffer);
-
-//	sprintf ("%d right loops", right_loop_counter);
-//	font_render_string_center (&font_mono5, 64, 13, sprintf_buffer);
-
-	//deff_exit (); is called at end of calling function - not needed here?
 }//end of function
 

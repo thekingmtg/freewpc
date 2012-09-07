@@ -59,25 +59,29 @@ ROM_PAGE_COUNT = 32
 #
 # note: if we put tabs in between the file names you will get a linker error
 # note: continue line with a '\' --make sure to leave off on last line or you will get a linker error
-
-#test 1	good ---call_tester.o inlanes.o rollovers.o simple_switches.o  
-#test 2 good ---call_tester.o inlanes.o rollovers.o simple_switches.o orbits.o ramps.o   
-#test 3 fail ---call_tester.o inlanes.o rollovers.o simple_switches.o orbits.o ramps.o acmag.o 	capture_simon.o 
-#test 3 good ---call_tester.o inlanes.o rollovers.o simple_switches.o orbits.o ramps.o 			capture_simon.o prison_break.o jets_superjets.o   
-#test 4 good ---call_tester.o inlanes.o rollovers.o simple_switches.o orbits.o ramps.o 			capture_simon.o prison_break.o jets_superjets.o   
-#								lock_freeze_mbstart.o fortressMB.o sound_handler.o
-
-
-
-
-GAME_OBJS =	orbits.o   	ramps.o   
-#	call_tester.o  
-
-GAME2_OBJS = lock_freeze_mbstart.o   fortressMB.o  sound_handler.o car_crash.o underground.o     eyeball_explode.o capture_simon.o  prison_break.o   jets_superjets.o   car_chase_mode.o   acmag.o   standupfrenzy.o inlanes.o   rollovers.o   simple_switches.o  
-
-
+GAME2_OBJS = 
 GAME_TEST_OBJS =
-
 GAME_INCLUDES =
 
-GAME_PAGED_OBJS =    
+
+#all files here have NO deffs and may be frequently called
+GAME_OBJS =	inlanes.o   eyeball.o   eject.o   lock_freeze_mbstart.o   orbits.o   \
+ramps.o     rollovers.o   simple_switches.o   \
+underground.o        
+#	call_tester.o  
+
+#all files here have NO deffs and are infrequently called
+GAME3_OBJS = ball_handling.o   sound_handler.o  
+
+#all files here that have deffs
+GAME_PAGED_OBJS = acmag.o   capture_simon.o   car_chase_mode.o   car_crash.o \
+custom_deffs.o   dm_amode.o   explode.o \
+fortressMB.o \
+jets_superjets.o   prison_break.o   standupfrenzy.o 
+
+
+
+#listing of images used
+IMAGE_MAP += $(M)/dm.ild
+
+

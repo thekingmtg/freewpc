@@ -23,11 +23,12 @@ U8			NumBallsFrozen;
 U8			NumMBsDone;
 U8			lock_SoundCounter;
 U8			NumBallsNeededForNextMB;
+
 //external variables
 
 //prototypes
 void lock_reset (void);
-
+void player_reset (void);
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
@@ -37,15 +38,15 @@ void lock_reset (void) {
 	is_ball_three_frozen = FALSE;
 	is_ball_four_frozen = FALSE;
 	NumBallsFrozen = 0;
-	callset_invoke(Multiball_Light_Off);
+	callset_invoke (Multiball_Light_Off);//goto orbits.c to turn off light and flag
 }//end of reset
 
 void player_reset (void) {
+	lock_reset();
 	lock_SoundCounter = 0;
 	NumMBsDone = 0;
-	lock_reset();
 	NumBallsNeededForNextMB = 1;
-}
+}//end of function
 
 
 CALLSET_ENTRY (lock_freeze_mbstart, start_player) { player_reset(); }
@@ -95,7 +96,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, increment_freeze) {
 			lamp_tristate_on (LM_FREEZE_4);
 			break;
 	}//end of switch
-	deff_start (DEFF_FREEZE_EFFECT);
+	callset_invoke(start_freeze_deff);
 	callset_invoke(DeActivate_left_Ramp_QuickFreeze);//goto ramps.c
 	callset_invoke(light_quick_freeze_light_off);//goto inlanes.c
 	callset_invoke(check_multiball_requirements);
@@ -112,39 +113,31 @@ CALLSET_ENTRY (lock_freeze_mbstart, check_multiball_requirements) {
 	//Wasteland Multiball 	= 4 ball min needs to be frozen
 	if (NumBallsFrozen > (NumMBsDone % 4) ) { // % is modulus
 				callset_invoke (Multiball_Light_On);//goto orbits.c
-				music_disable();
+
+
+				//music_disable();
+				music_request (MUS_MB_READY, PRI_GAME_MODE8);//must be higher priority than PRI_SCORES
+				//no work - music_set (MUS_MB_READY); //from sound_effect.c
+				//music_enable();
+
+
 				if ( (lock_SoundCounter++ % 2) == 0 )//check if even
 					sound_start (ST_SPEECH, SPCH_MULTIBALL_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
 				else
 					sound_start (ST_SPEECH, SPCH_SHOOT_LEFT_LOOP, SL_5S, PRI_GAME_QUICK5);
-				music_set (MUS_MB_READY); //from sound_effect.c
-				music_enable();
-	}//end of if (NumBallsFrozen > (NumMBsDone % 4) )
+	}  //end of if (NumBallsFrozen > (NumMBsDone % 4) )
 }//end of function
 
 
 
 //this is called from left loop shot at orbits.c
 CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
-	NumMBsDone++;
-	callset_invoke (Multiball_Light_Off);//goto orbits.c to turn off light and flag
-
-	//Fortress Multiball 	= 1 ball min needs to be frozen
-	if ( (NumMBsDone % 4) == 1) { callset_invoke (Fortress_start);//goto fortressMB.c
-	}
-
-	//Museum Multiball	 	= 2 ball min needs to be frozen
-	else if ((NumMBsDone % 4) == 2) { callset_invoke (Museum_start);//goto museumMB.c
-	}
-
-	//Cryoprison Multiball	= 3 ball min needs to be frozen
-	else if ((NumMBsDone % 4) == 3) {callset_invoke (Cryoprison_start);//goto cryoprisonMB.c
-	}
-
-	//Wasteland Multiball 	= 4 ball min needs to be frozen
-	if ((NumMBsDone % 4) == 0) { callset_invoke (Wasteland_start);//goto wastelandMB.c
-		}
+	if 		( (NumMBsDone % 4) == 1) 	callset_invoke (Fortress_start);//goto fortressMB.c
+	else if ( (NumMBsDone % 4) == 2) 	callset_invoke (Museum_start);//goto museumMB.c
+	else if ( (NumMBsDone % 4) == 3) 	callset_invoke (Cryoprison_start);//goto cryoprisonMB.c
+	else 								callset_invoke (Wasteland_start);//goto wastelandMB.c
 	//turn off freeze light and reset counter for next MB
+	NumMBsDone++;
 	++NumBallsNeededForNextMB;
 	lock_reset();
 }//end of function
@@ -152,27 +145,3 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 
 
 
-/****************************************************************************
- * DMD display and sound effects
- ****************************************************************************/
-void freeze_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	sprintf ("%d FROZEN", NumBallsFrozen);
-	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("%d BALLS FOR MB", NumBallsNeededForNextMB);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-	}//end of mode_effect_deff
-
-
-/****************************************************************************
- * status display
- *
- * called from common/status.c automatically whenever either flipper button
- * is held for 4 seconds or longer.  since called by callset, order of
- * various status reports will be random depending upon call stack
-****************************************************************************/
-//ALLSET_ENTRY (lock_freeze_mbstart, status_report){
-//}//end of function

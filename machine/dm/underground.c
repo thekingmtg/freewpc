@@ -38,6 +38,9 @@
 
 //constants
 const U8 		computerAwardsNumOfSounds = 7; //num between 0 and 6
+const sound_code_t computerAwardsSoundsArray[] = {	COMPUTER1, 				COMPUTER_ADDING,   COMPUTER_AWARD_SMALL,
+												COMPUTER_AWARD_LONG,	COMPUTER2, 			SPCH_ACCESSING,
+												SPCH_COMPUTER_AWARD};
 
 //local variables
 U8 		underground_shots_made;
@@ -47,13 +50,8 @@ __boolean 		is_underground_Arrow_activated;
 //this will be external and in combo function when written
 __boolean 		next_combo_total;
 U8				computerAwards;
-sound_code_t computerAwardsSoundsArray[] = {	COMPUTER1, 				COMPUTER_ADDING,   COMPUTER_AWARD_SMALL,
-												COMPUTER_AWARD_LONG,	COMPUTER2, 			SPCH_ACCESSING,
-												SPCH_COMPUTER_AWARD};
 
 //external variables
-extern 	__boolean 		is_prison_break_mode_activated; //from prison_break.c
-extern  __boolean 		isCapSimUndergroundActive; //from capture_simon.c
 
 //prototypes
 void underground_reset (void);
@@ -72,7 +70,7 @@ void player_underground_reset(void) {
 	//this will be external and in combo function when written
 	next_combo_total = FALSE;
 	underground_reset();
-}
+}//end of function
 
 CALLSET_ENTRY (underground, start_player) { player_underground_reset(); }
 CALLSET_ENTRY (underground, start_ball) { underground_reset(); }
@@ -85,23 +83,23 @@ CALLSET_ENTRY (underground, start_ball) { underground_reset(); }
 CALLSET_ENTRY (underground, underground_Jackpot_Light_On) {
 	is_underground_Jackpot_activated = TRUE;
 	lamp_tristate_on (LM_UNDERGROUND_JACKPOT);
-	}
+}//end of function
 
 CALLSET_ENTRY (underground, underground_Jackpot_Light_Off) {
 	is_underground_Jackpot_activated = FALSE;
 	lamp_tristate_off (LM_UNDERGROUND_JACKPOT);
-	}
+}//end of function
 
 //lit by combo shots --TODO:
 CALLSET_ENTRY (underground, underground_Arrow_Light_On) {
 	is_underground_Arrow_activated = TRUE;
 	lamp_tristate_on (LM_UNDERGROUND_ARROW);
-	}
+}//end of function
 
 CALLSET_ENTRY (underground, underground_Arrow_Light_Off) {
 	is_underground_Arrow_activated = FALSE;
 	lamp_tristate_off (LM_UNDERGROUND_ARROW);
-	}
+}//end of function
 
 /****************************************************************************
  * body
@@ -115,19 +113,20 @@ if ( (underground_SoundCounter++ % 2) == 0 )//check if even
 		sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
 	else
 		sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
-	if(is_prison_break_mode_activated)  callset_invoke(prison_break_made_from_underground);
-	if(isCapSimUndergroundActive)  callset_invoke(capture_simon_made);
+	if(flag_test (FLAG_IS_PRISON_BREAK_ACTIVATED) )  callset_invoke(prison_break_made);
+	if(flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED) )
+		callset_invoke(capture_simon_made);
 	//TODO: jackpot and combo shot detection
 	//	if (is_underground_Jackpot_activated) //during multiball
 	//	if (is_underground_Arrow_activated) //from combo shot
 	if (next_combo_total) callset_invoke(computer_award);
 	//if nothing special, do normal display effects
-	if(!is_prison_break_mode_activated
-			&& !isCapSimUndergroundActive
-			&& !next_combo_total
-			&& !is_underground_Arrow_activated
-			&& !is_underground_Jackpot_activated)
-								deff_start (DEFF_UNDERGROUND_EFFECT);
+	if(		!flag_test (FLAG_IS_PRISON_BREAK_ACTIVATED)
+		&& 	!flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
+		&& 	!next_combo_total
+		&& 	!is_underground_Arrow_activated
+		&& 	!is_underground_Jackpot_activated)
+						callset_invoke(start_underground_deff);
 }//end of function
 
 
@@ -168,26 +167,3 @@ CALLSET_ENTRY (underground, computer_award) {
 }//end of function
 
 
-/****************************************************************************
- * DMD display and sound effects
- ****************************************************************************/
-void underground_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	sprintf ("SUBWAY", underground_shots_made);
-	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("%d MADE", underground_shots_made);
-	font_render_string_center (&font_steel, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-	}//end of mode_effect_deff
-
-
-
-/****************************************************************************
- * status display
- *
- * called from common/status.c automatically whenever either flipper button
- * is held for 4 seconds or longer.  since called by callset, order of
- * various status reports will be random depending upon call stack
-****************************************************************************/

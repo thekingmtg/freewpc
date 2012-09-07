@@ -2,7 +2,7 @@
  * demolition man
  * standupfrenzy.c
  * 
- * written by James Cardona
+ * written by James Cardona - based loosely on greed mode from TZ code
  *
  * Location Description:
  * Standups: There are 5 yellow standup targets scattered about the playfield,
@@ -57,6 +57,7 @@ U8 				standupFrenzyNumHits;
 U8 				standupFrenzyTimer;
 score_t 		standupFrenzyTotalScore;
 score_t 		standupFrenzyLastScore;
+score_t 		standupFrenzyNextScore;
 U8 				standupFrenzyLightsLit; //tracks which target was hit
 U8 			standupLightsLit; //tracks which target was hit
 U8 			standup_num_of_hits;
@@ -69,6 +70,8 @@ __boolean 		isStandupFrenzyActivated;
 void standupFrenzy_mode_init (void);
 void standupFrenzy_mode_exit (void);
 void standupHandler (U8 target);
+void standupHandler1 (U8 target, U8 lamp);
+void frenzyHandler (U8 target, U8 lamp);
 void standup_lamp_update1 (U8 mask, U8 lamp);
 void standupFrenzyTotalScore_effect_deff (void);
 void standupFrenzy_mode_effect_deff (void);
@@ -89,11 +92,11 @@ struct timed_mode_ops standupFrenzy_mode = {
 	.deff_starting = DEFF_STANDUPFRENZY_START_EFFECT,
 	.deff_running = DEFF_STANDUPFRENZY_MODE_EFFECT,
 //	.deff_ending = DEFF_STANDUPFRENZYTOTALSCORE_EFFECT,
-	.prio = PRI_GAME_MODE2,
+	.prio = PRI_GAME_MODE2,//lower priority than claw triggered modes
 	.init_timer = 23, //time displayed plus length of starting deff
 	.timer = &standupFrenzyTimer,
 	.grace_timer = 3, //if 0, no ending deff???
-	.pause = system_timer_pause,
+//	.pause = system_timer_pause,
 };
 
 
@@ -108,7 +111,8 @@ void standupFrenzy_mode_init (void) {
 	callset_invoke (lamp_update);
 	score_zero (standupFrenzyTotalScore);
 	score_zero (standupFrenzyLastScore);
-	score_add (standupFrenzyLastScore, score_table[SC_5M]);
+	score_zero (standupFrenzyNextScore);
+	score_add (standupFrenzyNextScore, score_table[SC_5M]);
 }//end of standupFrenzy_mode_init 
 
 
@@ -167,20 +171,25 @@ CALLSET_ENTRY (standupFrenzy, sw_standup_5) { standupHandler(0x10); }
 void standupHandler (U8 target) {
 	const U8 sw = task_get_arg ();
 	const U8 lamp = switch_lookup_lamp (sw);
-
 	//verify target hit was a lit target and mode is still running
-	if (standupFrenzyLightsLit &target && timed_mode_running_p(&standupFrenzy_mode) ) {
+	if (standupFrenzyLightsLit &target && timed_mode_running_p(&standupFrenzy_mode) ) 	frenzyHandler (target, lamp);
+	//else mode NOT running ---verify target hit was a lit target
+	else if (standupLightsLit &target && !timed_mode_running_p(&standupFrenzy_mode) ) standupHandler1 (target, lamp);
+	standup_lamp_update1 (target, lamp);
+}//end of standupHandler
+
+
+
+void frenzyHandler (U8 target, U8 lamp) {
 		standupFrenzyLightsLit &= ~target;  /* flag that target as hit */
 		standup_lamp_update1 (target, lamp);
 		standupFrenzy_sounds();
 		++standupFrenzyNumHits;
 		//score 5 million plus 1 million times number of hits
-		score (SC_5M);
 		score_zero (standupFrenzy_temp_score);//zero out temp score
-		standupFrenzy_temp_counter = standupFrenzyNumHits;
-		do {
-			score_add (standupFrenzy_temp_score, score_table[SC_1M]);//multiply 1M by count
-		} while (--standupFrenzy_temp_counter > 1);
+		score_add (standupFrenzy_temp_score, score_table[SC_1M]);//multiply 1M by num hits
+		score_mul (standupFrenzy_temp_score, standupFrenzyNumHits);
+		score (SC_5M);
 		score_long_unmultiplied (standupFrenzy_temp_score); //add temp score to player's score
 		//do same for mode score
 		score_add (standupFrenzyTotalScore, score_table[SC_5M]);
@@ -188,17 +197,20 @@ void standupHandler (U8 target) {
 		score_zero (standupFrenzyLastScore);
 		score_add (standupFrenzyLastScore, score_table[SC_5M]);
 		score_add (standupFrenzyLastScore, standupFrenzy_temp_score);
-		//sound_send (SND_STANDUPFRENZY_MODE_BOOM);
+		score_zero (standupFrenzyNextScore);
+		score_add (standupFrenzyNextScore, score_table[SC_5M]);
+		score_add (standupFrenzyNextScore, standupFrenzy_temp_score);
+		score_add (standupFrenzyNextScore, score_table[SC_1M]);//next score will be 1 million more
 		//if 5th light out then reset all lights back on
 		if (standupFrenzyNumHits % 5 == 0) 	{
 			standupFrenzyLightsLit = ALL_TARGETS;
 			callset_invoke (lamp_update);
 		}
 		deff_start (DEFF_STANDUPFRENZYHIT_EFFECT);
-	}//end of if mode is running
+}//end of function
 
-	//else mode NOT running ---verify target hit was a lit target
-	else if (standupLightsLit &target && !timed_mode_running_p(&standupFrenzy_mode)) {
+
+void standupHandler1 (U8 target, U8 lamp) {
 		++standup_num_of_hits;
 		deff_start (DEFF_STANDUP_EFFECT);
 		standupLightsLit &= ~target;  /* flag that target as hit */
@@ -215,11 +227,7 @@ void standupHandler (U8 target) {
 			standupLightsLit = ALL_TARGETS;
 			callset_invoke (lamp_update);
 		}
-	}//end of else if
-	standup_lamp_update1 (target, lamp);
-}//end of standupHandler 
-
-
+}//end of function
 
 
 /****************************************************************************
@@ -267,7 +275,7 @@ void standupFrenzy_mode_expire (void) {
 
 
 /****************************************************************************
- * DMD display and sound effects
+ * sound effects
  ****************************************************************************/
 void standup_sounds (void) {
 	standup_SoundCounter = random_scaled(3);//from kernal/random.c
@@ -277,7 +285,7 @@ else if ( standup_SoundCounter  == 1 )
 	sound_start (ST_EFFECT, ZAPP_3_MED, SL_2S, PRI_GAME_QUICK5);
 else if ( standup_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, ZAPP_3_LONG, SL_2S, PRI_GAME_QUICK5);
-}
+}//end of function
 
 
 
@@ -289,10 +297,12 @@ else if ( standupFrenzy_SoundCounter  == 1 )
 	sound_start (ST_EFFECT, CHORD2, SL_2S, PRI_GAME_QUICK5);
 else if ( standupFrenzy_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, CHORD3, SL_2S, PRI_GAME_QUICK5);
-}
+}//end of function
 
 
-//effect for when not in frenzy mode
+/****************************************************************************
+ * DMD display - non-frenzy
+ ****************************************************************************/
 void standup_effect_deff (void) {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "STANDUP");
@@ -305,6 +315,9 @@ void standup_effect_deff (void) {
 
 
 
+/****************************************************************************
+ * DMD display - frenzy
+ ****************************************************************************/
 /*mode is starting*/
 void standupFrenzy_start_effect_deff (void) {
 	dmd_alloc_low_clean ();
@@ -338,7 +351,7 @@ void standupFrenzy_mode_effect_deff (void) {
 		font_render_string_center (&font_fixed6, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "FRENZY");
 		sprintf ("%d SEC LEFT,  %d HIT", standupFrenzyTimer, standupFrenzyNumHits);
 		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
-		sprintf_score (standupFrenzyLastScore);
+		sprintf_score (standupFrenzyNextScore);
 		font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
@@ -361,13 +374,3 @@ void standupFrenzyTotalScore_effect_deff (void) {
 	task_sleep_sec (2);
 	deff_exit ();
 } // standupFrenzyTotalScore_deff
-
-
-
-/****************************************************************************
- * status display
- *
- * called from common/status.c automatically whenever either flipper button
- * is held for 4 seconds or longer.  since called by callset, order of
- * various status reports will be random depending upon call stack
-****************************************************************************/

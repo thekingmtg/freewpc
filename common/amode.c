@@ -173,7 +173,7 @@ void amode_date_time_page (void)
 
 void amode_kill_music (void)
 {
-	music_set (MUS_OFF);
+//	music_set (MUS_OFF);
 	amode_page_end (0);
 }
 
@@ -182,7 +182,7 @@ void amode_kill_music (void)
 void (*amode_page_table[]) (void) = {
 	amode_score_page,
 #if (MACHINE_DMD == 1)
-//	amode_logo_page,
+	amode_logo_page,
 #endif
 	amode_credits_page,
 	amode_freeplay_page,

@@ -38,7 +38,7 @@ U8 ball_save_timer;
 struct timed_mode_ops ball_save_mode = {
 	DEFAULT_MODE,
 	.gid = GID_BALLSAVER_TIMER,
-	.init_timer = 3,
+	.init_timer = MACHINE_BALL_SAVE_TIME,
 	.timer = &ball_save_timer,
 	.grace_timer = 3,
 	.pause = system_timer_pause,
@@ -94,8 +94,12 @@ bool ballsave_test_active (void)
  */
 static void ballsave_launch (void)
 {
-	serve_ball_auto ();
-	deff_start (DEFF_BALL_SAVE);
+#ifdef CUSTOM_BALL_SAVE_DEFF
+	callset_invoke (start_custom_ball_save_deff);
+#else
+		deff_start (DEFF_BALL_SAVE);
+#endif
+		serve_ball_auto ();
 }
 
 

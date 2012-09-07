@@ -67,14 +67,14 @@ void jet_goal_reset (void) {
 	jet_shots_made = 0;
 	super_jet_shots_made = 0;
 	super_jets_activated = FALSE;
-}
+}//end of function
 
 void player_jet_goal_reset  (void) {
 superjets_modes_achieved = 0;
 jet_goal = JETS_EASY_GOAL;
 super_jet_goal = SUPERJETS_EASY_GOAL;
 jet_goal_reset();
-}
+}//end of function
 
 CALLSET_ENTRY (jets_superjets, start_player) {  player_jet_goal_reset (); }
 CALLSET_ENTRY (jets_superjets, start_ball) { jet_goal_reset (); }
@@ -153,13 +153,13 @@ CALLSET_ENTRY (jets_superjets, sw_claw_super_jets) {
 	super_jets_activated = TRUE;
 	++superjets_modes_achieved;
 	score_zero (superjets_mode_score);
-	music_set (MUS_MD_SUPERJETS); //from sound_effect.c
+	music_request (MUS_MD_SUPERJETS, PRI_GAME_MODE4);//must be higher priority than PRI_SCORES
 	sound_start (ST_SAMPLE, SPCH_SUPERJETS_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
 	//flash lamp for a time
 	lamp_tristate_flash(LM_CLAW_SUPER_JETS);
 	task_sleep (TIME_500MS);
 	lamp_tristate_off(LM_CLAW_SUPER_JETS);
-	}
+}//end of function
 
 
 
@@ -173,7 +173,7 @@ void jet_flasher (void) {
 	flasher_pulse (FLASH_JETS_FLASHER);
 	flasher_pulse (FLASH_JETS_FLASHER);
 	task_exit ();
-	}
+}//end of function
 
 //DMD DISPLAY EFFECTS
 void jets_effect_deff(void) {
@@ -187,7 +187,7 @@ void jets_effect_deff(void) {
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
-	}//end of jets_effect_deff
+}//end of jets_effect_deff
 
 
 
@@ -203,7 +203,7 @@ void jets_completed_effect_deff(void) {
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
-	}//end of mode_effect_deff
+}//end of mode_effect_deff
 
 
 
@@ -218,7 +218,7 @@ void superjets_effect_deff(void) {
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
-	}//end of superjets_effect_deff
+}//end of superjets_effect_deff
 
 
 void superjets_completed_effect_deff(void) {
@@ -233,13 +233,4 @@ void superjets_completed_effect_deff(void) {
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
-	}//end of mode_effect_deff
-
-
-/****************************************************************************
- * status display
- *
- * called from common/status.c automatically whenever either flipper button
- * is held for 4 seconds or longer.  since called by callset, order of
- * various status reports will be random depending upon call stack
-****************************************************************************/
+}//end of mode_effect_deff

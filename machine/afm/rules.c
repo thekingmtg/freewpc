@@ -413,14 +413,14 @@ CALLSET_ENTRY (attack, start_player)
 /* Jet Value */
 
 __local__ U8 jet_count_goal;
-__local__ U8 jet_count;
+__local__ U8 jet_shots_made;
 score_t jet_value;
 
 void jet_level_up (void)
 {
 	if (jet_count_goal < 100)
 		jet_count_goal += 10;
-	jet_count = 0;
+	jet_shots_made = 0;
 	attack_light ();
 }
 
@@ -445,7 +445,7 @@ CALLSET_ENTRY (jet, sw_left_jet, sw_bottom_jet, sw_right_jet)
 CALLSET_ENTRY (jet, start_player)
 {
 	jet_count_goal = 30;
-	jet_count = 0;
+	jet_shots_made = 0;
 	score_copy (jet_value, score_table[SC_5K]);
 }
 

@@ -1,0 +1,31 @@
+IMG_OLDCAR: machine/dm/images/oldcar.pgm
+IMG_CITY: machine/tz/images/city.pgm
+IMG_CAR: machine/dm/images/car3.pgm
+IMG_TEST: machine/dm/images/test.pgm
+
+
+
+IMG_ROCKET_LOAD_START: machine/dm/animation/rocket/rocketa.pgm
+IMG_ROCKET_LOAD_2: machine/dm/animation/rocket/rocketb.pgm
+IMG_ROCKET_LOAD_3: machine/dm/animation/rocket/rocketc.pgm
+IMG_ROCKET_LOAD_END: machine/dm/animation/rocket/rocketd.pgm
+
+
+
+IMG_DRIVER_START: machine/tz/animation/driver/driver01.pgm
+IMG_DRIVER_2: machine/tz/animation/driver/driver02.pgm
+IMG_DRIVER_3: machine/tz/animation/driver/driver03.pgm
+IMG_DRIVER_4: machine/tz/animation/driver/driver04.pgm
+IMG_DRIVER_5: machine/tz/animation/driver/driver05.pgm
+IMG_DRIVER_6: machine/tz/animation/driver/driver06.pgm
+IMG_DRIVER_7: machine/tz/animation/driver/driver07.pgm
+IMG_DRIVER_8: machine/tz/animation/driver/driver08.pgm
+IMG_DRIVER_9: machine/tz/animation/driver/driver09.pgm
+IMG_DRIVER_10: machine/tz/animation/driver/driver10.pgm
+IMG_DRIVER_11: machine/tz/animation/driver/driver11.pgm
+IMG_DRIVER_12: machine/tz/animation/driver/driver12.pgm
+IMG_DRIVER_13: machine/tz/animation/driver/driver13.pgm
+IMG_DRIVER_END: machine/tz/animation/driver/driver14.pgm
+
+
+

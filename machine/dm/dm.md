@@ -24,46 +24,52 @@ Lamp-Matrix-Height: 34
 # Include standard definitions that apply to all WPC games.
 ##########################################################################
 include platform/wpc/wpc-dcs.md
+#nclude platform/wpc/wpc-fliptronic.md
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
-
-#see code changes in /kernal/flip.c
+	#see code changes in /kernal/flip.c
 define MACHINE_HAS_FLIPPER_GUN_HANDLES
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
-
 define MACHINE_START_BALL_MUSIC   MUS_PLUNGER
 	#this is triggered after the first playfield switch is made
 define MACHINE_BALL_IN_PLAY_MUSIC 	MUS_BG 
-define MACHINE_BALL_SAVE_TIME       6
+define MACHINE_BALL_SAVE_TIME       4
 define MACHINE_MAX_BALLS            5
 define MACHINE_BALL_SAVE_LAMP LM_SHOOT_AGAIN
 	#see code changes in ballsave.c
 define CUSTOM_BALL_SAVE_DEFF
+	#see code changes in shootalert.c
+define CUSTOM_SHOOT_REMINDER_DEFF
+
+	#for custom attract mode lighting effects <--in game.c::leff_start (LEFF_AMODE)
+define MACHINE_CUSTOM_AMODE
+	#for custom attract mode display effects <--in amode.c
+define MACHINE_AMODE_EFFECTS
+
 
 
 	#problem in plunger.c and serve.c
-	#this make auto fire work for multi-ball, auto save and pushing plunger button
-define INCLUDE_AUTOPLUNGER
-define HAVE_AUTO_SERVE
-
+	#this should make auto fire work for multi-ball, auto save and pushing plunger button
+#define INCLUDE_AUTOPLUNGER
+#define HAVE_AUTO_SERVE
+	#this is for fixing ballsave.c
+define MACHINE_DEMOLITION_MAN
 
 
 
 	#these did not work for me
 #define MACHINE_START_GAME_SOUND	MUS_PLUNGER - supposed to be at a new game
 #define MACHINE_MUSIC_PLUNGER		MUS_PLUNGER
-#define MACHINE_MUSIC_GAME	MUS_BG 
-
+#define MACHINE_MUSIC_GAME			MUS_BG 
 
 #this does not play
 define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 
 	#not sure about these
 #define MACHINE_SOL_EXTBOARD1
-#define MACHINE_CUSTOM_AMODE
 #define MACHINE_SCORE_DIGITS
 #define MACHINE_REPLAY_CODE_TO_SCORE
 #define MACHINE_DEBUGGER_HOOK
@@ -170,10 +176,9 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 ##########################################################################
 [switches]
 
-#tried launch-button but that didn't work
-#11: Launch Button, launch-button, cabinet, noplay
+#must be named this!!
+11: Launch Button, launch-button, cabinet, noplay
 
-11: Ball Launch Button, launch-button, cabinet, noplay
 12: Left Handle Button, cabinet, noplay
 13: Start Button, start-button, cabinet, intest, noplay, debounce(TIME_100MS)
 14: Tilt, tilt, ingame, noplay, cabinet, sound(TILT)
@@ -187,7 +192,10 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 24: Always Closed, noplay
 25: Claw Position 1, opto, noscore, noplay
 26: Claw Position 2, opto, noscore, noplay
-27: Shooter Lane, shooter, noscore, noplay
+
+#must be named this!!
+27: Shooter, shooter, noscore, noplay, edge
+
 28: Not Used, noplay
 31: Trough 1, noscore, noplay, opto
 32: Trough 2, noscore, noplay, opto
@@ -259,14 +267,13 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 [drives]
 #H = high power J130
 
-#tried 25 and 200 here and it was too weak - from tz
-#these are the times from corvette and they worked
-H1: Ball Release, ballserve, duty(SOL_DUTY_100), time(TIME_66MS)
-
+#must be named this!!
+H1: BallServe, ballserve, duty(SOL_DUTY_100), time(TIME_66MS)
 H2: Bottom Popper, time(TIME_200MS)
 
-#ball launch not working yet
-H3: Auto Plunger, launch, nosearch, duty(SOL_DUTY_100), time(TIME_133MS)
+#must be named this!!
+H3: Launch, launch, nosearch, duty(SOL_DUTY_100), time(TIME_133MS)
+
 H4: Top Popper, time(TIME_100MS)
 H5: Diverter Power, duty(SOL_DUTY_50), time(TIME_133MS)
 H6: Not Used
@@ -357,6 +364,7 @@ Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_H
 # 			polling the switch again.  This prevents constant lock-on.
 # auto 	- if nonzero, then automatically enable during start ball.
 SubwayVUK: driver(spsol), sol=SOL_BOTTOM_POPPER, sw=SW_BOTTOM_POPPER, ontime=8, offtime=15, auto=1
+TopSol: driver(spsol), sol=SOL_TOP_POPPER, sw=SW_TOP_POPPER, ontime=8, offtime=15, auto=1
 
 
 #This probably will not work and will have to write a new driver for this motor
@@ -460,15 +468,19 @@ Car Crash: Car Crash Top, Car Crash Center, Car Crash Bottom
 ##########################################################################
 [containers]
 #name: solenoid, switch
-Computer: Top Popper, Top Popper
+Top Sol: Top Popper, Top Popper
 
 Eyeball Eject: Eject, Eject
 
 Subway VUK: Bottom Popper, Bottom Popper
 
-Trough: Ball Release, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Trough 5
+Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Trough 5
 
 #Elevator:
+
+
+
+
 
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
@@ -547,16 +559,30 @@ Trough: Ball Release, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4,
 # Commas _cannot_ be used for this purpose since they separate parameters.
 ##########################################################################
 [highscores]
-GC: DAD, 000.000.000
-1: SAM, 000.000.000
-2: JOE, 000.000.000
-3: ISA, 000.000.000
-4: MOM, 000.000.000
+GC: DAD, 000.900.000
+1: SAM, 000.800.000
+2: JOE, 000.700.000
+3: ISA, 000.600.000
+4: MOM, 000.500.000
 
 ##########################################################################
 # Per-player bit flags.
 ##########################################################################
 [flags]
+is acmag activated:
+is CapSim SideRamp Activated:
+is CapSim LeftRamp Activated:
+is CapSim RightRamp Activated:
+is CapSim Under Activated:
+is CapSim CenterRamp Activated:
+is CapSim LeftOrb Activated:
+is CapSim RightOrb Activated:
+is Carchase Mode Activated:
+is Explode Mode Activated:
+is Prison Break Activated:
+
+#global_flag_test (GLOBAL_FLAG_IS_PRISONBREAK_ACTIVATED)
+#global_flag_off (GLOBAL_FLAG_IS_PRISONBREAK_ACTIVATED);
 
 ##########################################################################
 # System-wide bit flags.
@@ -567,62 +593,65 @@ GC: DAD, 000.000.000
 # Display effects
 ##########################################################################
 [deffs]
-Acmag Effect: 					page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Acmag Hit Effect: 				page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Acmag Start Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Acmag End Effect: 				page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Acmag Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Acmag Hit Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Acmag Start Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Acmag End Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-Capturesimon Start Effect: 		page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Capturesimon Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Capturesimon Completed Effect: 	page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Capture Simon Start Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
+Capture Simon Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Capture Simon Hit Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Capture Simon End Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-Carchase Mode Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Carchase Start Mode Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
+Car Chase Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
+Car Chase Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
+Car Chase Start Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
+Car Chase End Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
 
-################### machine page 2
-Carcrash Effect: 				page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Carcrash Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-################### machine page 2
-Eyeball Effect: 				page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Explode Start Effect:			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Explode Effect: 				page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Explode Hit Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Explode End: 					page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Explode Start Effect:			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Explode Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Explode Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Explode End: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-################### machine page 2
-fortressMB jackpot effect:		page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-fortressMB start effect:		page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-fortressMB effect:				page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortressMB jackpot effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortressMB start effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortressMB effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-Clw Inlanes Effect: 		page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Qf Inlanes Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Jets Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
+Jets Completed Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
+Superjets Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
+Superjets Completed Effect: 	page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
 
-Jets Effect: 					page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Jets Completed Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Superjets Effect: 				page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Superjets Completed Effect: 	page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
 
-################### machine page 2
-Freeze Effect: 					page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Prison Break Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Prison Break Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Prison Break Start Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Prison Break End Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-Prisonbreak Effect: 		page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Prisonbreak Start Effect: 	page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Rollovers Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+All Rollovers Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-Rollovers Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-All Rollovers Effect: 		page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-#Simple_switches.c
-Ball Save Effect:			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Troubleshooting:			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+#############custom_deffs.c###############################################################
+Ball Save Effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Freeze Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Clw Inlanes Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Qf Inlanes Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Eyeball Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Shoot Reminder Effect:			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Troubleshooting:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Underground Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+#############custom_deffs.c###############################################################
 
-standupFrenzy start effect: 		 page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Standupfrenzytotalscore Effect: 	page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Standupfrenzy Mode Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-StandupfrenzyHit Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Standup Effect: 					page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-################### machine page 2
-Underground Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+standupFrenzy start effect: 	page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Standupfrenzytotalscore Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Standupfrenzy Mode Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+StandupfrenzyHit Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Standup Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+
 
 
 ##########################################################################
@@ -633,33 +662,65 @@ Underground Effect: 			page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTAB
 ##########################################################################
 # Fonts used in this game.
 # these are in addition to default fonts
-# default fonts do not have to be listed and are:
+# default fonts do not have to be listed (they are declared under wpc-common.md) and are:
 # font_mono5
 # font_mono9
 # font_num5x7
-# font_lucida9
+# font_lucida9			---good only for very short words
 # font_tinynum
-# font_var5
-# font_fixed6 		---standups and frenzy
-# font_fixed10 
-# font_cu17
-# font_term6     	---carcrash and car chase
-# font_times8
+# font_var5			---small text messages
+# font_fixed6 		---standups and standup frenzy
+# font_fixed10 		---fortress MB
+# font_cu17				---good for large single letters only
+# font_term6     	---car crash and car chase and many smaller lines
+# font_times8		---capture simon
 # font_bitmap8
-# 
-# the number at the end doesn't correspond to their point size like you would think
-# best thing to do is look at the actual font in the menu
 #
-#pcsenior:
-#misctype:
-#lithograph:	---EXPLODE
-#times10:
-#steel:			---acmag
-##########################################################################
-[fonts]
-pcsenior:
-misctype:
-lithograph:
-times10:
-steel:
+# The number at the end doesn't correspond to their point size like you would think.
+# The best thing to do is look at the actual font in the development menu
+# Here are others that are available - from the fonts directory
 
+#pcsenior:			---good only for very short words
+#lithograph:	---EXPLODE, amode title, ball save, shoot reminder
+#times10:
+#steel:			---ACMAG
+#addlg:				---good only for very short words
+#Adore64:		---freeze  ---remember to drop the cap A when using this in your code
+#arcadepi:
+#micron55:
+#pixchicago:
+#px_sans_nouveaux:
+#twizone:
+#uni05_54:
+#uni05_63:
+#uni05_64:
+#v5prc:			---prison break
+#xpaiderp:
+#fixed12:
+
+#these won't compile
+#amiga4ever:
+#arial11:
+#arial11a:
+#c64:
+#miscfixed:
+#luctype:
+
+#these don't look good or don't show up
+#ffextra:		---these are not letters, but symbols, like wingdings
+#utopia:		---looks garbled
+#schu:			---looks garbled
+#joystix:		---don't show
+#ambitsek:		---don't show
+#uni05_53:
+#v5prd:
+#v5prf:
+
+##########################################################################
+#can pick, at most, 4 to 6 extra fonts, depending on file size, outside of the system fonts without
+#receiving compile errors for overflowing the fonts page 
+[fonts]
+lithograph:
+steel:
+Adore64:
+v5prc:

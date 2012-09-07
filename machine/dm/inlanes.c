@@ -70,8 +70,8 @@ CALLSET_ENTRY (inlanes, Access_Claw_Light_On) {
 	lamp_tristate_flash(LM_ACCESS_CLAW);
 	task_sleep (TIME_500MS);
 	lamp_tristate_on (LM_ACCESS_CLAW);
-	deff_start (DEFF_CLW_INLANES_EFFECT);
-}
+	callset_invoke(start_clw_inlanes_deff); //call to custom_deffs.c
+}//end of function
 
 
 
@@ -80,7 +80,7 @@ CALLSET_ENTRY (inlanes, Access_Claw_Light_Off) {
 	lamp_tristate_flash(LM_ACCESS_CLAW);
 	task_sleep (TIME_500MS);
 	lamp_tristate_off (LM_ACCESS_CLAW);
-}
+}//end of function
 
 
 
@@ -91,8 +91,8 @@ CALLSET_ENTRY (inlanes, sw_left_inlane) {
 		callset_invoke(RRamp_ClawReady_On);//at ramps.c - diverter moved there
 		callset_invoke(Access_Claw_Light_Off);
 		sound_start (ST_SPEECH, SPCH_CRYOCLAW_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
-		}
-}
+	}
+}//end of function
 
 
 
@@ -108,8 +108,8 @@ CALLSET_ENTRY (inlanes, light_quick_freeze_light_on) {
 	lamp_tristate_flash(LM_LIGHT_QUICK_FREEZE);
 	task_sleep (TIME_500MS);
 	lamp_tristate_on (LM_LIGHT_QUICK_FREEZE);
-	deff_start (DEFF_QF_INLANES_EFFECT);
-}
+	callset_invoke(start_qf_inlanes_deff); //call to custom_deffs.c
+}//end of function
 
 
 
@@ -118,7 +118,7 @@ CALLSET_ENTRY (inlanes, light_quick_freeze_light_off) {
 	lamp_tristate_flash(LM_LIGHT_QUICK_FREEZE);
 	task_sleep (TIME_500MS);
 	lamp_tristate_off (LM_LIGHT_QUICK_FREEZE);
-}
+}//end of function
 
 
 
@@ -126,39 +126,5 @@ CALLSET_ENTRY (inlanes, sw_right_inlane) {
 	score(SC_5770);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
 	if (right_inlane_Light_Quick_Freeze_activated) callset_invoke(Activate_left_Ramp_QuickFreeze);
-}
+}//end of function
 
-
-
-/****************************************************************************
- * DMD display and sound effects
- ****************************************************************************/
-void clw_inlanes_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CRYO CLAW");
-	font_render_string_center(&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "SHOOT RIGHT RAMP");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-	}//end of mode_effect_deff
-
-
-
-void qf_inlanes_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "QUICK FREEZE");
-	font_render_string_center(&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "SHOOT LEFT RAMP");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-	}//end of mode_effect_deff
-
-
-
-/****************************************************************************
- * status display
- *
- * called from common/status.c automatically whenever either flipper button
- * is held for 4 seconds or longer.  since called by callset, order of
- * various status reports will be random depending upon call stack
-****************************************************************************/

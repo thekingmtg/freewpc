@@ -36,8 +36,9 @@ U8 			acmag_modes_completed;
 U8			acmag_mode_timer;
 score_t 	acmag_mode_score;
 score_t 	acmag_mode_last_score;
+score_t 	acmag_mode_next_score;
 score_t 	acmag_mode_score_total_score;
-__boolean 	is_acmag_mode_activated;
+
 
 //external variables
 
@@ -64,10 +65,10 @@ struct timed_mode_ops acmag_mode = {
 	.deff_running = DEFF_ACMAG_EFFECT,
 //	.deff_ending = DEFF_ACMAG_END_EFFECT,
 	.prio = PRI_GAME_MODE1,
-	.init_timer = 20,
+	.init_timer = 23,
 	.timer = &acmag_mode_timer,
 	.grace_timer = 2,
-	.pause = system_timer_pause,
+//	.pause = system_timer_pause,
 };
 
 
@@ -76,7 +77,7 @@ struct timed_mode_ops acmag_mode = {
  * initialize  and exit
  ***************************************************************************/
 void acmag_reset (void) {
-	is_acmag_mode_activated = FALSE;
+	flag_off (FLAG_IS_ACMAG_ACTIVATED);
 }//end of function
 
 
@@ -93,27 +94,28 @@ void acmag_player_reset (void) {
 void acmag_mode_init (void) {
 	score (SC_250K);
 	acmag_mode_shots_made = 0;
-	is_acmag_mode_activated = TRUE;
+	flag_on (FLAG_IS_ACMAG_ACTIVATED);
 	++acmag_modes_achieved;
 	sound_start (ST_SPEECH, SPCH_ACMAG_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
 	//flash lamp for a time
 	lamp_tristate_flash(LM_CLAW_ACMAG);
 	task_sleep(TIME_500MS);
-	lamp_tristate_off(LM_CLAW_ACMAG);
+	lamp_tristate_on(LM_CLAW_ACMAG);
 	score_zero(acmag_mode_score);
 	score_zero(acmag_mode_last_score);
+	score_zero(acmag_mode_next_score);
 	switch (acmag_modes_achieved ){
-		case 1: score_add(acmag_mode_last_score, score_table[SC_15M]); break;
-		case 2: score_add(acmag_mode_last_score, score_table[SC_20M]); break;
-		case 3: score_add(acmag_mode_last_score, score_table[SC_25M]); break;
-		default: score_add(acmag_mode_last_score, score_table[SC_25M]);
+		case 1: score_add(acmag_mode_next_score, score_table[SC_15M]); break;
+		case 2: score_add(acmag_mode_next_score, score_table[SC_20M]); break;
+		case 3: score_add(acmag_mode_next_score, score_table[SC_25M]); break;
+		default: score_add(acmag_mode_next_score, score_table[SC_25M]);
 	}//end of switch
 }//end of function
 
 
 
 void acmag_mode_expire (void) {
-	is_acmag_mode_activated = FALSE;
+	flag_off (FLAG_IS_ACMAG_ACTIVATED);
 }//end of function
 
 
@@ -205,7 +207,7 @@ void acmag_start_effect_deff(void) {
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
-	}//end of mode_effect_deff
+}//end of mode_effect_deff
 
 
 
@@ -217,7 +219,7 @@ void acmag_hit_effect_deff(void) {
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
-	}//end of mode_effect_deff
+}//end of mode_effect_deff
 
 
 
@@ -227,7 +229,7 @@ void acmag_effect_deff(void) {
 		font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "ACMAG");
 		sprintf ("%d SEC LEFT,  %d HIT", acmag_mode_timer, acmag_mode_shots_made);
 		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
-		sprintf_score (acmag_mode_last_score);
+		sprintf_score (acmag_mode_next_score);
 		font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
