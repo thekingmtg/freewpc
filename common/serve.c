@@ -248,9 +248,9 @@ CALLSET_ENTRY (serve, dev_trough_kick_success)
 * we will autolaunch it but not if the door is open or we are
 * in tournament mode.
 */
-#ifndef MACHINE_DEMOLITION_MAN
 CALLSET_ENTRY (serve, sw_shooter)
 {
+#ifndef MACHINE_DEMOLITION_MAN
 	#ifdef MACHINE_SHOOTER_SWITCH
 		if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 			return;
@@ -265,8 +265,8 @@ CALLSET_ENTRY (serve, sw_shooter)
 		launch_ball ();
 	}
 	#endif
-}
 #endif
+}
 
 
 
