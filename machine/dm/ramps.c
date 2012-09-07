@@ -264,17 +264,18 @@ CALLSET_ENTRY (ramps, RRamp_ClawReady_On) {
 	right_Ramp_ClawReady_activated = TRUE;
 	lamp_tristate_on (LM_CLAW_READY);
 	flasher_pulse (FLASH_DIVERTER_FLASHER);
-	//TODO: THIS DOES NOT WORK!!!
+	//TODO:
 	diverter_start();//defined in divhold.ct
-	diverter_service();
+//	diverter_service();
 }//end of function
 
+//called by claw after ball is passed to it from elevator
 CALLSET_ENTRY (ramps, RRamp_ClawReady_Off) {
 	right_Ramp_ClawReady_activated = FALSE;
 	lamp_tristate_off (LM_CLAW_READY);
 	flasher_pulse (FLASH_DIVERTER_FLASHER);
 	diverter_stop();//defined in divhold.ct
-	diverter_service();
+//	diverter_service();
 }//end of function
 
 
