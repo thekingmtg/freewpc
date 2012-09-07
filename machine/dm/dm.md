@@ -176,7 +176,7 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 ##########################################################################
 [switches]
 
-#must be named this!!
+#must be named this
 11: Launch Button, launch-button, cabinet, noplay
 
 12: Left Handle Button, cabinet, noplay
@@ -193,7 +193,7 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 25: Claw Position 1, opto, noscore, noplay
 26: Claw Position 2, opto, noscore, noplay
 
-#must be named this!!
+#must be named this
 27: Shooter, shooter, noscore, noplay, edge
 
 28: Not Used, noplay
@@ -267,11 +267,11 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 [drives]
 #H = high power J130
 
-#must be named this!!
+#must be named this
 H1: BallServe, ballserve, duty(SOL_DUTY_100), time(TIME_66MS)
 H2: Bottom Popper, time(TIME_200MS)
 
-#must be named this!!
+#must be named this
 H3: Launch, launch, nosearch, duty(SOL_DUTY_100), time(TIME_133MS)
 
 H4: Top Popper, time(TIME_100MS)
@@ -355,7 +355,7 @@ Top Sling: driver(jet), sw=SW_TOP_SLING, sol=SOL_TOP_SLING, ontime=3, offtime=16
 # power_pulse_ms --Durations of the pulse for the full power solenoid (in ms) 
 # 					must be divisible by the value used by the schedule_ms parameter
 # schedule_ms  --try 32 first as highest number, then experiment from there
-Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=96,	schedule_ms=32, includetest(yes)
+Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=192,	schedule_ms=32, includetest(yes)
 
 
 
