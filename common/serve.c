@@ -35,15 +35,18 @@
 
 /* Use HAVE_AUTO_SERVE around code which deals with autoplunger hardware.
 Such code will not compile on machines where there is no such thing. */
-#if defined(MACHINE_LAUNCH_SWITCH) && defined(MACHINE_LAUNCH_SOLENOID) && defined(MACHINE_SHOOTER_SWITCH)
+#if defined(MACHINE_LAUNCH_SWITCH) && \
+	defined(MACHINE_LAUNCH_SOLENOID) && \
+	defined(MACHINE_SHOOTER_SWITCH)
+
 #define HAVE_AUTO_SERVE
 
 /* When using an autoplunger, LAUNCH_DELAY says how much time to wait
 after launching a ball, before trying to launch another one (could be
 another ball served, or the same ball which failed to launch OK). */
-	#ifndef LAUNCH_DELAY
-		#define LAUNCH_DELAY TIME_3S
-	#endif
+#ifndef LAUNCH_DELAY
+#define LAUNCH_DELAY TIME_3S
+#endif
 
 #endif
 
@@ -113,7 +116,6 @@ void launch_ball (void)
  */
 void serve_ball_auto (void)
 {
-
 #ifdef DEVNO_TROUGH
 	/* Fall back to manual ball serve if there is no autoplunger. */
 	if (!have_auto_serve_p ())
@@ -123,16 +125,15 @@ void serve_ball_auto (void)
 	else
 	{
 		set_valid_playfield ();
-		/* TZ's autoplunger is a little different, so it is handled specially. */
+		/* TZ's autoplunger is a little different, so it is handled
+		specially. */
 #if defined(MACHINE_TZ)
 		autofire_add_ball ();
 #else
 		device_request_kick (device_entry (DEVNO_TROUGH));
 #endif
 	}
-
-
-	#endif /* DEVNO_TROUGH */
+#endif /* DEVNO_TROUGH */
 }
 
 
@@ -190,16 +191,15 @@ static void set_ball_count_task (void)
 
 
 /**
-* Set the total number of balls in play to COUNT.
-*/
+ * Set the total number of balls in play to COUNT.
+ */
 void set_ball_count (U8 count)
 {
-if (count <= live_balls)
-return;
-live_balls_wanted = count;
-task_recreate_gid (GID_SET_BALL_COUNT, set_ball_count_task);
+	if (count <= live_balls)
+		return;
+	live_balls_wanted = count;
+	task_recreate_gid (GID_SET_BALL_COUNT, set_ball_count_task);
 }
-
 
 
 /**
@@ -244,13 +244,12 @@ CALLSET_ENTRY (serve, dev_trough_kick_success)
 
 
 /**
-* If we see the shooter at any other time than a trough kick,
-* we will autolaunch it but not if the door is open or we are
-* in tournament mode.
-*/
+ * If we see the shooter at any other time than a trough kick,
+ * we will autolaunch it but not if the door is open or we are
+ * in tournament mode.
+ */
 CALLSET_ENTRY (serve, sw_shooter)
 {
-#ifndef MACHINE_DEMOLITION_MAN
 	#ifdef MACHINE_SHOOTER_SWITCH
 		if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 			return;
@@ -265,9 +264,7 @@ CALLSET_ENTRY (serve, sw_shooter)
 		launch_ball ();
 	}
 	#endif
-#endif
 }
-
 
 
 CALLSET_ENTRY (serve, valid_playfield)
