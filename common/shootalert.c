@@ -40,11 +40,7 @@ void shoot_alert_task (void)
 	{
 		if (switch_poll (MACHINE_SHOOTER_SWITCH))
 		{
-#ifdef CUSTOM_SHOOT_REMINDER_DEFF
-	callset_invoke (start_custom_shoot_reminder_deff);
-#else
 			deff_start (DEFF_PLUNGE_BALL);
-#endif
 			task_sleep_sec (20);
 		}
 		else
@@ -63,10 +59,6 @@ CALLSET_ENTRY (shootalert, start_ball)
 CALLSET_ENTRY (shootalert, valid_playfield)
 {
 	task_kill_gid (GID_SHOOT_ALERT);
-#ifdef CUSTOM_SHOOT_REMINDER_DEFF
-	callset_invoke (kill_custom_shoot_reminder_deff);
-#else
 	deff_stop (DEFF_PLUNGE_BALL);
-#endif
 }
 
