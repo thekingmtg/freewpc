@@ -122,9 +122,9 @@ CALLSET_ENTRY (lock_freeze_mbstart, check_multiball_requirements) {
 
 
 				if ( (lock_SoundCounter++ % 2) == 0 )//check if even
-					sound_start (ST_SPEECH, SPCH_MULTIBALL_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
+					sound_start (ST_SPEECH, SPCH_MULTIBALL_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 				else
-					sound_start (ST_SPEECH, SPCH_SHOOT_LEFT_LOOP, SL_5S, PRI_GAME_QUICK5);
+					sound_start (ST_SPEECH, SPCH_SHOOT_LEFT_LOOP, SL_4S, PRI_GAME_QUICK5);
 	}  //end of if (NumBallsFrozen > (NumMBsDone % 4) )
 }//end of function
 

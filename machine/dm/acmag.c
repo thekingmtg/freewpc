@@ -96,7 +96,7 @@ void acmag_mode_init (void) {
 	acmag_mode_shots_made = 0;
 	flag_on (FLAG_IS_ACMAG_ACTIVATED);
 	++acmag_modes_achieved;
-	sound_start (ST_SPEECH, SPCH_ACMAG_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_ACMAG_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
 	lamp_tristate_flash(LM_CLAW_ACMAG);
 	task_sleep(TIME_500MS);

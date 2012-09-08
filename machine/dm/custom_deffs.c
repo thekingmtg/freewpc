@@ -43,7 +43,7 @@ CALLSET_ENTRY (custom_deffs, start_custom_ball_save_deff) {	deff_start (DEFF_BAL
 void ball_save_effect_deff(void) {
 	U8 ball_save_SoundCounter;
 	ball_save_SoundCounter = random_scaled(ball_save_TotalNumOfSounds);//from kernal/random.c
-	sound_start (ST_SPEECH, ball_save_SoundsArray[ball_save_SoundCounter], SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, ball_save_SoundsArray[ball_save_SoundCounter], SL_4S, PRI_GAME_QUICK5);
 	dmd_alloc_low_clean ();
 	sprintf ("BALL SAVE");
 	font_render_string_center (&font_lithograph, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
@@ -67,7 +67,7 @@ CALLSET_ENTRY (custom_deffs, kill_custom_shoot_reminder_deff) {	deff_stop (DEFF_
 void shoot_reminder_effect_deff(void) {
 	U8 shoot_reminder_SoundCounter;
 	shoot_reminder_SoundCounter = random_scaled(shoot_reminder_TotalNumOfSounds);//from kernal/random.c
-	sound_start (ST_SPEECH, shoot_reminder_SoundsArray[shoot_reminder_SoundCounter], SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, shoot_reminder_SoundsArray[shoot_reminder_SoundCounter], SL_4S, PRI_GAME_QUICK5);
 	dmd_alloc_low_clean ();
 	sprintf ("PLUNGE BALL");
 	font_render_string_center (&font_lithograph, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);

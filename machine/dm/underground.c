@@ -136,31 +136,31 @@ CALLSET_ENTRY (underground, computer_award) {
 	sound_start (ST_SPEECH, computerAwardsSoundsArray[computerAwards], SL_2S, PRI_GAME_QUICK5);
 	switch (computerAwards) {
 	case 0 :{
-			sound_start(ST_SPEECH, SPCH_COLLECT_BONUS, SL_5S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_COLLECT_BONUS, SL_4S, PRI_GAME_QUICK5);
 			//TODO: put bonus routine here
 			}
 	case 1 :{
-			sound_start(ST_SPEECH, SPCH_TRIPLE_CAR_CRASH, SL_5S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_TRIPLE_CAR_CRASH, SL_4S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 2 :{
-			sound_start(ST_SPEECH, SPCH_COLLECT_STANDUPS, SL_5S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_COLLECT_STANDUPS, SL_4S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 3 :{
-			sound_start(ST_SPEECH, SPCH_LIGHT_ARROWS, SL_5S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_LIGHT_ARROWS, SL_4S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 4 :{
-			sound_start(ST_SPEECH, SPCH_LIGHT_EXTRA_BALL, SL_5S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_LIGHT_EXTRA_BALL, SL_4S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 5 :{
-			sound_start(ST_SPEECH, SPCH_MAXIMIZE_FREEZES, SL_5S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_MAXIMIZE_FREEZES, SL_4S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	case 6 :{
-			sound_start(ST_SPEECH, SPCH_DOUBLE_RETINA_SCAN, SL_5S, PRI_GAME_QUICK5);
+			sound_start(ST_SPEECH, SPCH_DOUBLE_RETINA_SCAN, SL_4S, PRI_GAME_QUICK5);
 			//TODO: put routine here
 			}
 	}//end of switch

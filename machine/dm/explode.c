@@ -103,9 +103,9 @@ void explode_mode_init (void) {
 	flag_on (FLAG_IS_EXPLODE_MODE_ACTIVATED);
 	explode_mode_shots_made = 0;
 	if ( (explode_SoundCounter++ % 2) == 0 )//check if even
-		sound_start (ST_SPEECH, SPCH_EXPLODE_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_EXPLODE_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	else
-		sound_start (ST_SPEECH, SPCH_EXPLODE_HURRYUP, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_EXPLODE_HURRYUP, SL_4S, PRI_GAME_QUICK5);
 	score_zero(explode_mode_score);
 	score_zero(explode_mode_next_score);
 	score_add (explode_mode_next_score, score_table[SC_15M]);

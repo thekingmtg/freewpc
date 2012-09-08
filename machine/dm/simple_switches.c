@@ -49,7 +49,7 @@ CALLSET_ENTRY (simple_switches, sw_right_outlane, sw_left_outlane) {
 	score(SC_5770);
 	U8		outlaneSoundCounter;
 	outlaneSoundCounter = random_scaled(SSTotalNumOfSounds);//from kernal/random.c
-	sound_start (ST_SPEECH, outlaneSoundArray[outlaneSoundCounter], SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, outlaneSoundArray[outlaneSoundCounter], SL_4S, PRI_GAME_QUICK5);
 }//end of function
 
 

@@ -11,7 +11,7 @@
  * The ball is dropped down a tunnel and served to the
  * right ramp just like the Underground. The seven
  * major shots are lit for 5 mil each for three shots.
- * A 25 million award for completing all three shots for a total of 40 million.
+ * A 25 million award for completing all three shots for a total of 40 million
 
  * Scoring Description: (my rules)
  * same as above except:
@@ -117,7 +117,7 @@ void capture_simon_mode_init (void) {
 	task_sleep(TIME_500MS);
 	task_sleep(TIME_500MS);
 	task_sleep(TIME_500MS);
-	sound_start (ST_SPEECH, SPCH_SO_SCARED, SL_5S, PRI_GAME_QUICK1);
+	sound_start (ST_SPEECH, SPCH_SO_SCARED, SL_4S, PRI_GAME_QUICK1);
 	//TODO: randomize which shots are to be made
 	flag_on (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED);
 	lamp_tristate_flash(LM_SIDE_RAMP_ARROW);
@@ -173,11 +173,11 @@ CALLSET_ENTRY (capture_simon, sw_claw_capture_simon) {
  //center ramp shot made during capture_simon mode
 CALLSET_ENTRY (capture_simon, capture_simon_made) {
 	if ( (capture_simon_SoundCounter++ % 3) == 0 )
-		sound_start (ST_SPEECH, SPCH_WES_LAUGH1, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_WES_LAUGH1, SL_4S, PRI_GAME_QUICK5);
 	else if ( (capture_simon_SoundCounter % 3) == 1 )
-		sound_start (ST_SPEECH, SPCH_WES_LAUGH2, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_WES_LAUGH2, SL_4S, PRI_GAME_QUICK5);
 	else if ( (capture_simon_SoundCounter % 3) == 2 )
-		sound_start (ST_SPEECH, SPCH_WES_LAUGH3, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_WES_LAUGH3, SL_4S, PRI_GAME_QUICK5);
 
 	++capture_simon_mode_shots_made;
 	//TODO: score rolls up as time goes?

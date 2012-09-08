@@ -522,12 +522,12 @@ void side_ramp_goal_award (void) {
  ****************************************************************************/
 void ramp_sounds (void) {
 	ramp_SoundCounter = random_scaled(RampsTotalNumOfSounds);//from kernal/random.c
-	sound_start (ST_SPEECH, rampSoundsArray[ramp_SoundCounter], SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, rampSoundsArray[ramp_SoundCounter], SL_4S, PRI_GAME_QUICK5);
 }//end of function
 
 void missed_ramp_sounds (void) {
 	ramp_SoundCounter = random_scaled(missedTotalNumOfSounds);//from kernal/random.c
-	sound_start (ST_SPEECH, missedRampSoundsArray[ramp_SoundCounter], SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, missedRampSoundsArray[ramp_SoundCounter], SL_4S, PRI_GAME_QUICK5);
 }//end of function
 
 

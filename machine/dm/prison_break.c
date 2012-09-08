@@ -92,7 +92,7 @@ void prison_break_mode_init (void) {
 	prison_break_mode_shots_made = 0;
 	flag_on (FLAG_IS_PRISON_BREAK_ACTIVATED);
 	++prison_break_modes_achieved;
-	sound_start (ST_SPEECH, SPCH_CRYO_PRISON_BREAKOUT, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_CRYO_PRISON_BREAKOUT, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
 	lamp_tristate_flash(LM_CLAW_PRISON_BREAK);
 	task_sleep(TIME_500MS);

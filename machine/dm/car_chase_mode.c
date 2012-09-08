@@ -99,11 +99,11 @@ void car_chase_mode_init (void) {
 	flag_on (FLAG_IS_CARCHASE_MODE_ACTIVATED);
 	++car_chase_modes_achieved;
 	callset_invoke (carchase_mode_on); //at ramps.c
-	sound_start (ST_SPEECH, SPCH_WUSS_SPARTAN, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_WUSS_SPARTAN, SL_4S, PRI_GAME_QUICK5);
 	task_sleep_sec (2);
-	sound_start (ST_SPEECH, SPCH_EXCUSE_ME, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_EXCUSE_ME, SL_4S, PRI_GAME_QUICK5);
 	task_sleep_sec (1);
-	sound_start (ST_SPEECH, SPCH_BETWEEN_YOU_N_ME, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_BETWEEN_YOU_N_ME, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
 	score_zero(car_chase_mode_score);
 	switch (car_chase_modes_achieved ){
@@ -151,7 +151,7 @@ CALLSET_ENTRY (car_chase, car_chase_ramp_made) {
 	++car_chase_mode_shots_made;
 	U8 car_chase_SoundCounter;
 	car_chase_SoundCounter = random_scaled(car_chase_TotalNumOfSounds);//from kernal/random.c
-	sound_start (ST_SPEECH, car_chase_SoundsArray[car_chase_SoundCounter], SL_5S, PRI_GAME_QUICK2);
+	sound_start (ST_SPEECH, car_chase_SoundsArray[car_chase_SoundCounter], SL_4S, PRI_GAME_QUICK2);
 	deff_start (DEFF_CAR_CHASE_HIT_EFFECT);//under /kernel/deff.c
 
 	//TODO: score rolls up as time goes?

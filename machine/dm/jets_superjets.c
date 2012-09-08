@@ -96,7 +96,7 @@ void jet_goal_award (void) {
 
 
 void super_jet_goal_award (void) {
-	sound_start (ST_SPEECH, SPCH_SUPERJETS_COMPLETED, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SPEECH, SPCH_SUPERJETS_COMPLETED, SL_4S, PRI_GAME_QUICK5);
 	deff_start (DEFF_SUPERJETS_COMPLETED_EFFECT);
 	jet_shots_made = 0;
 	super_jet_shots_made = 0;
@@ -154,7 +154,7 @@ CALLSET_ENTRY (jets_superjets, sw_claw_super_jets) {
 	++superjets_modes_achieved;
 	score_zero (superjets_mode_score);
 	music_request (MUS_MD_SUPERJETS, PRI_GAME_MODE4);//must be higher priority than PRI_SCORES
-	sound_start (ST_SAMPLE, SPCH_SUPERJETS_ACTIVATED, SL_5S, PRI_GAME_QUICK5);
+	sound_start (ST_SAMPLE, SPCH_SUPERJETS_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
 	lamp_tristate_flash(LM_CLAW_SUPER_JETS);
 	task_sleep (TIME_500MS);

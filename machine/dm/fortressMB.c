@@ -80,15 +80,15 @@ CALLSET_ENTRY (fortressMB, end_ball) {
 //this is called from left loop shot at orbits.c
 CALLSET_ENTRY (fortressMB, Fortress_start) {
 	music_disable();
-	sound_start (ST_EFFECT, HELICOPTER, SL_5S, SP_NORMAL);
+	sound_start (ST_EFFECT, HELICOPTER, SL_4S, SP_NORMAL);
 	task_sleep (TIME_2S);
-	sound_start (ST_EFFECT, HELICOPTER, SL_5S, SP_NORMAL);
+	sound_start (ST_EFFECT, HELICOPTER, SL_4S, SP_NORMAL);
 	U8 	fortressMB_SoundCounter;
 	fortressMB_SoundCounter = random_scaled(2);//from kernal/random.c - pick number from 0 to 2
 	if (fortressMB_SoundCounter == 0)
-		sound_start (ST_SPEECH, SPCH_SOMETHING_RIGHT_PREV_LIFE, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_SOMETHING_RIGHT_PREV_LIFE, SL_4S, PRI_GAME_QUICK5);
 	else
-		sound_start (ST_SPEECH, SPCH_SEND_MANIAC, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_SEND_MANIAC, SL_4S, PRI_GAME_QUICK5);
 
 	lamp_tristate_flash(LM_FORTRESS_MULTIBALL);
 	task_sleep (TIME_2S);
@@ -112,10 +112,10 @@ CALLSET_ENTRY (fortressMB, fortressMB_jackpot_made) {
 	++fortressMB_jackpot_shots_made;
 	U8 	fortressMB_SoundCounter;
 	fortressMB_SoundCounter = random_scaled(4);//from kernal/random.c - pick number from 0 to 2
-	if (fortressMB_SoundCounter == 0) 		sound_start (ST_SPEECH, SPCH_AHHHGGG, SL_5S, PRI_GAME_QUICK5);
-	else if (fortressMB_SoundCounter == 1) 	sound_start (ST_SPEECH, SPCH_JACKPOT, SL_5S, PRI_GAME_QUICK5);
-	else if (fortressMB_SoundCounter == 2) 	sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_WES, SL_5S, PRI_GAME_QUICK5);
-	else 									sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_SLY, SL_5S, PRI_GAME_QUICK5);
+	if (fortressMB_SoundCounter == 0) 		sound_start (ST_SPEECH, SPCH_AHHHGGG, SL_4S, PRI_GAME_QUICK5);
+	else if (fortressMB_SoundCounter == 1) 	sound_start (ST_SPEECH, SPCH_JACKPOT, SL_4S, PRI_GAME_QUICK5);
+	else if (fortressMB_SoundCounter == 2) 	sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_WES, SL_4S, PRI_GAME_QUICK5);
+	else 									sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_SLY, SL_4S, PRI_GAME_QUICK5);
 	score (SC_15M);
 	score_add (fortressMB_score, score_table[SC_15M]);
 	deff_start (DEFF_FORTRESSMB_JACKPOT_EFFECT);//under /kernel/deff.c

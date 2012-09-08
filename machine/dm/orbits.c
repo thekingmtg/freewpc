@@ -103,9 +103,9 @@ CALLSET_ENTRY (orbits, ExtraBall_Light_On) {
 	left_Loop_ExtraBall_activated = TRUE;
 	lamp_tristate_on (LM_EXTRA_BALL);
 	if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-		sound_start (ST_SPEECH, SPCH_GET_THE_EXTRABALL, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_GET_THE_EXTRABALL, SL_4S, PRI_GAME_QUICK5);
 	else
-		sound_start (ST_SPEECH, SPCH_NEED_EXTRABALL, SL_5S, PRI_GAME_QUICK5);
+		sound_start (ST_SPEECH, SPCH_NEED_EXTRABALL, SL_4S, PRI_GAME_QUICK5);
 }//end of function
 
 CALLSET_ENTRY (orbits, ExtraBall_Light_Off) {
@@ -234,9 +234,9 @@ CALLSET_ENTRY (orbits, orbit_to_popper_made) {
 			sol_request(SOL_KNOCKER);
 			sound_start (ST_SAMPLE, EXTRA_BALL_SOUND, SL_2S, PRI_GAME_QUICK5);
 			if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-				sound_start (ST_SPEECH, SPCH_EXTRABALL_WES, SL_5S, PRI_GAME_QUICK5);
+				sound_start (ST_SPEECH, SPCH_EXTRABALL_WES, SL_4S, PRI_GAME_QUICK5);
 			else
-				sound_start (ST_SPEECH, SPCH_EXTRABALL_SLY, SL_5S, PRI_GAME_QUICK5);
+				sound_start (ST_SPEECH, SPCH_EXTRABALL_SLY, SL_4S, PRI_GAME_QUICK5);
 			//TODO: add an extra ball here
 			}//end of left_Loop_ExtraBall_activated
 	if (left_Loop_MultiBall_activated) callset_invoke(multiball_start);
