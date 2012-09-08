@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -30,8 +30,33 @@
 #ifndef _SYS_DMD_H
 #define _SYS_DMD_H
 
+/** The number of bits per pixel.  On true DMD games this must be 1. */
+#ifndef PINIO_DMD_PIXEL_BITS
+#define PINIO_DMD_PIXEL_BITS 1
+#endif
+
+/** The display refresh rate, in frames per second.
+    The default here is for WPC games. */
+#ifndef PINIO_DMD_REFRESH_RATE
+#define PINIO_DMD_REFRESH_RATE 122
+#endif
+
+/* The number of colors per pixel */
+#ifndef PINIO_DMD_PIXEL_COLORS
+#define PINIO_DMD_PIXEL_COLORS 4
+#endif
+
+/** Page flipping is needed when we want to use more colors than we
+ * have bits per pixel */
+#if (PINIO_DMD_PIXEL_COLORS > 1 && PINIO_DMD_PIXEL_BITS == 1)
+#define PINIO_DMD_FLIP_COUNT (LOG2(PINIO_DMD_PIXEL_COLORS)+1)
+#define PINIO_DMD_EFFECTIVE_RATE (PINIO_DMD_REFRESH_RATE / PINIO_DMD_FLIP_COUNT)
+#else
+#define PINIO_DMD_EFFECTIVE_RATE PINIO_DMD_REFRESH_RATE
+#endif
+
 /** The width of a DMD page, in bytes */
-#define DMD_BYTE_WIDTH (PINIO_DMD_WIDTH / 8)
+#define DMD_BYTE_WIDTH (PINIO_DMD_WIDTH * PINIO_DMD_PIXEL_BITS / 8)
 
 /** The size of each DMD page, in bytes */
 #define DMD_PAGE_SIZE (1UL * DMD_BYTE_WIDTH * PINIO_DMD_HEIGHT)
@@ -176,12 +201,12 @@ extern inline dmd_pagenum_t dmd_get_blank (const U8 num)
 void dmd_init (void);
 extern __fastram__ void (*dmd_rtt) (void);
 void dmd_alloc_low (void);
-void dmd_alloc_high (void);
 void dmd_alloc_pair (void);
 void dmd_map_low_high (dmd_pagenum_t page);
 void dmd_show_low (void);
 void dmd_show_high (void);
 void dmd_show_other (void);
+void deff_swap_low_high (S8 count, task_ticks_t delay);
 void dmd_flip_low_high (void);
 void dmd_show2 (void);
 void dmd_clean_page (dmd_buffer_t dbuf);
@@ -238,15 +263,14 @@ extern inline void dmd_map_overlay (void)
 
 /*
  * The parameters to a rough copy or erase operation.
- * The user parameters are given in terms of pixels, however these
- * must be converted into byte coordinates.
+ * The user parameters are completely given in terms of pixels.
+ * The x position and size are converted into a byte-based offset.
  */
 
 struct dmd_rough_args
 {
 	U8 *dst;
-	U8 bwidth;
-	U8 height;
+	union dmd_coordinate size;
 };
 
 
@@ -263,8 +287,7 @@ struct dmd_rough_args
 		extern struct dmd_rough_args dmd_rough_args; \
 		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1) + \
 			((x) / CHAR_BIT) + (U16)(y) * DMD_BYTE_WIDTH; \
-		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
-		dmd_rough_args.height = h; \
+		dmd_rough_args.size.xy = MKCOORD1 ((w) / CHAR_BIT, (h)); \
 		dmd_rough_copy1 (); \
 	} while (0)
 
@@ -283,8 +306,7 @@ __transition__ void dmd_rough_copy1 (void);
 		extern struct dmd_rough_args dmd_rough_args; \
 		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + \
 			((x) / CHAR_BIT) + (U16)(y) * DMD_BYTE_WIDTH; \
-		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
-		dmd_rough_args.height = h; \
+		dmd_rough_args.size.xy = MKCOORD1 ((w) / CHAR_BIT, (h)); \
 		dmd_rough_erase1 (); \
 	} while (0)
 
@@ -305,8 +327,7 @@ __transition__ void dmd_rough_erase1 (void);
 		extern struct dmd_rough_args dmd_rough_args; \
 		dmd_rough_args.dst = pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0) + \
 			((x) / CHAR_BIT) + (y) * DMD_BYTE_WIDTH; \
-		dmd_rough_args.bwidth = (w) / CHAR_BIT; \
-		dmd_rough_args.height = h; \
+		dmd_rough_args.size.xy = MKCOORD1 ((w) / CHAR_BIT, (h)); \
 		dmd_rough_invert1 (); \
 	} while (0)
 

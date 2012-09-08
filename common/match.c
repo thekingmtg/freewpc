@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -43,6 +43,8 @@ match_award (void)
 	add_credit ();
 	knocker_fire ();
 }
+
+#ifdef CONFIG_DMD_OR_ALPHA
 
 /*
  * Draw the constant part of the match animation once.
@@ -119,6 +121,7 @@ match_deff (void)
 	deff_exit ();
 }
 
+#endif
 
 /**
  * Return a score that says how good a particular two-digit number

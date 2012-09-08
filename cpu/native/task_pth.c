@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -44,9 +44,7 @@ extern int linux_irq_multiplier;
 
 #define PTH_USECS_PER_TICK (16000 / linux_irq_multiplier)
 
-#ifdef CONFIG_UI
 extern void ui_write_task (int, task_gid_t);
-#endif
 
 /* Some WPC per-task data must be stored separately, outside of the pth
  * context.  The aux_task_data_t structure holds this. */
@@ -64,8 +62,8 @@ aux_task_data_t task_data_table[NUM_TASKS];
 
 void task_dump (void)
 {
+#ifdef DEBUGGER
 	int i;
-
 	dbprintf ("PID         GID   ARG    FLAGS\n");
 	for (i=0; i < NUM_TASKS; i++)
 	{
@@ -79,6 +77,7 @@ void task_dump (void)
 				td->gid, td->arg.u16, td->duration);
 		}
 	}
+#endif
 }
 
 
@@ -127,34 +126,11 @@ task_pid_t task_create_gid (task_gid_t gid, task_function_t fn)
 			task_data_table[i].duration = TASK_DURATION_INF;
 			task_data_table[i].arg.u16 = 0;
 			task_data_table[i].duration = TASK_DURATION_BALL;
-#ifdef CONFIG_UI
 			ui_write_task (i, gid);
-#endif
 			return (pid);
 		}
 
 	fatal (ERR_NO_FREE_TASKS);
-}
-
-/* TODO - this function is identical to the 6809 version */
-task_pid_t task_create_gid1 (task_gid_t gid, task_function_t fn)
-{
-	task_pid_t tp = task_find_gid (gid);
-	if (tp) 
-		return (tp);
-	return task_create_gid (gid, fn);
-}
-
-
-/* TODO - this function is identical to the 6809 version */
-task_pid_t task_recreate_gid (task_gid_t gid, task_function_t fn)
-{
-	task_kill_gid (gid);
-#ifdef PARANOID
-	if (task_find_gid (gid))
-		fatal (ERR_TASK_KILL_FAILED);
-#endif
-	return task_create_gid (gid, fn);
 }
 
 void task_setgid (task_gid_t gid)
@@ -177,14 +153,9 @@ void task_sleep (task_ticks_t ticks)
 }
 
 
-/* TODO - this function is identical to the 6809 version */
 void task_sleep_sec1 (U8 secs)
 {
-	while (secs > 0)
-	{
-		task_sleep (TIME_1S);
-		secs--;
-	}
+	pth_nap (pth_time (0, secs * TIME_1S * PTH_USECS_PER_TICK));
 }
 
 
@@ -199,9 +170,7 @@ void task_exit (void)
 		if (task_data_table[i].pid == task_getpid ())
 		{
 			task_data_table[i].pid = 0;
-#ifdef CONFIG_UI
 			ui_write_task (i, 0);
-#endif
 			for (;;)
 				pth_exit (0);
 		}
@@ -251,9 +220,7 @@ void task_kill_pid (task_pid_t tp)
 		if (task_data_table[i].pid == tp)
 		{
 			task_data_table[i].pid = 0;
-#ifdef CONFIG_UI
 			ui_write_task (i, 0);
-#endif
 			if (tp != 0)
 				pth_abort (tp);
 			return;
@@ -398,11 +365,6 @@ task_gid_t task_getgid (void)
 			return task_data_table[i].gid;
 	}
 	return 255;
-}
-
-
-void task_set_rom_page (task_pid_t pid, U8 rom_page)
-{
 }
 
 

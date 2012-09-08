@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,11 +20,7 @@
 
 #include <string.h>
 #include <stdarg.h>
-#ifdef CONFIG_HOST_CYGWIN
-#include <ncurses/ncurses.h>
-#else
 #include <ncurses.h>
-#endif
 #include <freewpc.h>
 #include <simulation.h>
 
@@ -45,29 +41,14 @@ WINDOW *ball_tracker_win;
 WINDOW *cmdline_win;
 
 
-static void print_center (WINDOW *w, int x, int y, const char *format, ...)
-{
-	va_list ap;
-	int len;
-	char buf[80];
-
-	va_start (ap, format);
-	vsprintf (buf, format, ap);
-	va_end (ap);
-
-	len = strlen (buf);
-	x = x - len/2;
-	wmove (w, y, x);
-	wprintw (w, format);
-}
-
 static WINDOW * ui_window_create (int width, int height, int x, int y, const char *title)
 {
 	WINDOW *w = newwin (height, width, y, x);
 	if (title)
 	{
 		box (w, 0, 0);
-		print_center (w, width/2, 0, title);
+		wmove (w, 0, 2);
+		wprintw (w, title);
 	}
 	wrefresh (w);
 	return w;
@@ -92,6 +73,9 @@ void ui_write_debug (enum sim_log_class c, const char *buffer)
 	if (c != SLC_DEBUG_PORT)
 		wprintw (debug_win, "[SIM] ");
 	wprintw (debug_win, "%s", buffer);
+#ifndef CONFIG_DEBUG_INPUT
+	if (c != SLC_DEBUG_PORT)
+#endif
 	waddch (debug_win, '\n');
 	wrefresh (debug_win);
 }
@@ -193,7 +177,8 @@ void ui_refresh_asciidmd (unsigned char *data)
 	}
 	wrefresh (display_win);
 }
-#else
+#endif
+#if (MACHINE_ALPHANUMERIC == 1)
 void ui_refresh_display (unsigned int x, unsigned int y, char c)
 {
 	wmove (display_win, y+1, x+1);
@@ -216,13 +201,18 @@ void ui_init (void)
 	initscr ();
 	clear ();
 	int x = 0, y = 0;
+	int xwidth;
 
-	switch_win = ui_window_create (34, 10, x, y, " Switches ");
+	xwidth = 3 * ((PINIO_NUM_SWITCHES + 7) / 8) + 3;
+	xwidth = (xwidth >= 16) ? xwidth : 16;
+	switch_win = ui_window_create (xwidth, 10, x, y, " Switches ");
 	cmdline_win = ui_window_create (62, 3, x, y + 10, " Command Line ");
-	x += 33 + 1;
+	x += xwidth;
 
-	lamp_win = ui_window_create (28, 10, x, y, " Lamps ");
-	x += 27 + 1;
+	xwidth = 3 * ((PINIO_NUM_LAMPS + 7) / 8) + 3;
+	xwidth = (xwidth >= 16) ? xwidth : 16;
+	lamp_win = ui_window_create (xwidth, 10, x, y, " Lamps ");
+	x += xwidth;
 
 	sol_win = ui_window_create (20, 10, x, y, " Solenoids ");
 	triac_win = ui_window_create (12, 3, x, y+10, " Triacs ");
@@ -244,10 +234,12 @@ void ui_init (void)
 	x += 130 + 1;
 	y = 0;
 	debug_win = ui_window_create (64, 46, x, y, NULL);
-#else
+#elif (MACHINE_ALPHANUMERIC == 1)
 	display_win = ui_window_create (20, 4, x, y, " Display Panel ");
 	x = 0;
 	y += 4 + 1;
+	debug_win = ui_window_create (80, 25, x, y, NULL);
+#else
 	debug_win = ui_window_create (80, 25, x, y, NULL);
 #endif
 

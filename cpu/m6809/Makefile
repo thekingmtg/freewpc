@@ -31,10 +31,16 @@ CFLAGS += -DCONFIG_BPT
 endif
 
 # Optimization flags
-CFLAGS += -O2 -fomit-frame-pointer -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove -fgcse-after-reload -fgcse-sm -fgcse-las -ffreestanding
-CFLAGS += -DCONFIG_BIG_ENDIAN -DHAVE_FASTRAM_ATTRIBUTE
+CFLAGS += -O2 -fstrength-reduce -frerun-loop-opt -Wunknown-pragmas -foptimize-sibling-calls -fstrict-aliasing -fregmove -fgcse-after-reload -fgcse-sm -fgcse-las -ffreestanding
+CFLAGS += -DCONFIG_BIG_ENDIAN
 # TODO : should -funroll-loops be given?
 CFLAGS += $(if $(CONFIG_MALLOC), -DCONFIG_MALLOC)
+ifeq ($(CONFIG_PROFILE),y)
+CFLAGS += -pg
+else
+CFLAGS += -fomit-frame-pointer
+endif
+
 
 # Which version of the 6809 compiler to use by default.
 # This is the minimum available version.  More often than not,
@@ -49,6 +55,41 @@ KERNEL_ASM_OBJS += $(if $(CONFIG_TASK), $(C)/task_6809.o)
 KERNEL_BASIC_OBJS += $(if $(CONFIG_MALLOC), $(C)/malloc.o)
 KERNEL_ASM_OBJS += $(C)/string.o
 KERNEL_ASM_OBJS += $(C)/bcd_string.o
-KERNEL_ASM_OBJS += $(C)/irqload.o
+KERNEL_ASM_OBJS += $(if $(CONFIG_TEST), $(C)/irqload.o)
 KERNEL_ASM_OBJS += $(C)/div32.o
+KERNEL_ASM_OBJS += $(if $(CONFIG_PROFILE), $(C)/mcount.o)
 KERNEL_ASM_OBJS += $(if $(CONFIG_BPT), $(C)/breakpoint.o)
+KERNEL_ASM_OBJS += $(C)/section.o
+
+.PHONY : run
+run:
+	# Start pinmame up and let it run indefinitely.
+	$(PINMAME) $(PINMAME_MACHINE) $(PINMAME_FLAGS) &
+
+.PHONY : debug
+debug:
+	# Start pinmame up and let it run indefinitely.
+	$(PINMAME) $(PINMAME_MACHINE) -d $(PINMAME_FLAGS) &
+
+.PHONY : rund
+rund: run $(DBCON)
+	xterm -e "$(DBCON) -1" &
+
+.PHONY : rund-file
+rund-file: run $(DBCON)
+	xterm -e "$(DBCON) -1 > $(DBCON_FILE) 2>&1" &
+
+.PHONY : endrun
+endrun :
+	kill $(shell pidof $(PINMAME))
+
+.PHONY : timedrun
+timedrun:
+	$(MAKE) rund-file DBCON_FILE="test.log"
+	sleep 30
+	$(MAKE) endrun
+
+.PHONY : runcon
+runcon: $(BLDDIR)/$(GAME_ROM)
+	wpc-run $(BLDDIR)/$(GAME_ROM)
+

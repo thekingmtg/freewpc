@@ -55,115 +55,6 @@ const struct area_csum coin_csum_info = {
 extern __common__ void buyin_coin_insert (void);
 
 
-/** Reduce a credit fraction to simplest terms. */
-static inline void reduce_unit_fraction (U8 *units, U8 *units_per_credit)
-{
-	switch (*units_per_credit)
-	{
-		case 4:
-			if (*units == 2)
-			{
-				*units = 1;
-				*units_per_credit = 2;
-			}
-			break;
-
-		case 6:
-			switch (*units)
-			{
-				case 2:
-					*units = 1;
-					*units_per_credit = 3;
-					break;
-				case 4:
-					*units = 2;
-					*units_per_credit = 3;
-					break;
-			}
-			break;
-	}
-}
-
-
-/** Render the number of credits */
-void credits_render (void)
-{
-#ifdef FREE_ONLY
-	sprintf ("FREE ONLY");
-#else
-	if (price_config.free_play)
-		sprintf ("FREE PLAY");
-	else
-	{
-		if (coin_state.units != 0)
-		{
-			U8 units = coin_state.units;
-			U8 units_per_credit = price_config.units_per_credit;
-
-			/* There are fractional credits.  Reduce to the
-			 * lowest common denominator before printing. */
-
-			reduce_unit_fraction (&units, &units_per_credit);
-
-			if (coin_state.credits == 0)
-				sprintf ("%d/%d CREDIT", units, units_per_credit);
-			else
-				sprintf ("%d %d/%d CREDITS",
-					coin_state.credits, units, units_per_credit);
-		}
-		else
-		{
-			if (coin_state.credits == 1)
-				sprintf ("%d CREDIT", coin_state.credits);
-			else
-				sprintf ("%d CREDITS", coin_state.credits);
-		}
-	}
-#endif
-	if (diag_get_error_count ())
-	{
-		sprintf ("%E.");
-	}
-}
-
-
-/** Draw the current credits full screen */
-void credits_draw (void)
-{
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-
-	credits_render ();
-	font_render_string_center (&font_fixed6, 64, 9, sprintf_buffer);
-	dmd_copy_low_to_high ();
-
-	if (!has_credits_p ())
-	{
-		if (price_config.payment_method == PAY_COIN)
-			sprintf ("INSERT COINS");
-		else if (price_config.payment_method == PAY_TOKEN)
-			sprintf ("INSERT TOKENS");
-		else if (price_config.payment_method == PAY_CARD)
-			sprintf ("SWIPE CARD");
-		else if (price_config.payment_method == PAY_BILL)
-			sprintf ("INSERT BILLS");
-	}
-	else
-	{
-		sprintf ("PRESS START");
-	}
-	font_render_string_center (&font_fixed6, 64, 22, sprintf_buffer);
-}
-
-
-/** The display effect function for showing the number of credits. */
-void credits_deff (void)
-{
-	credits_draw ();
-	deff_swap_low_high (in_live_game ? 12 : 20, 2 * TIME_100MS);
-	deff_delay_and_exit (TIME_1S);
-}
-
 
 /** Update the start button lamp.  It will flash when a new game
  * can be started, or be solid on during a game.   It will be
@@ -171,7 +62,7 @@ void credits_deff (void)
 void lamp_start_update (void)
 {
 #ifdef MACHINE_START_LAMP
-	if (has_credits_p ())
+	if (!in_test && has_credits_p ())
 	{
 		if (!in_game)
 			lamp_tristate_flash (MACHINE_START_LAMP);
@@ -306,7 +197,9 @@ static void do_coin (U8 slot)
 
 	add_units (price_config.coin_units[slot]);
 	audit_increment (&system_audits.coins_added[slot]);
+#ifdef CONFIG_BUYIN
 	buyin_coin_insert ();
+#endif
 }
 
 /* TODO - use more robust drivers for the coin switches to

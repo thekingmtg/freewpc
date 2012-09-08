@@ -1,5 +1,5 @@
 /*
- * Copyright 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2009, 2010, 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,6 +26,9 @@ __fastram__ U8 wpc_rom_bank;
 
 /** The last value written to the WPC_LEDS register */
 U8 wpc_led_reg;
+
+/** The type of WPC board (DCS, WPC95, etc.) */
+const U8 wpc_machine_type = WPC_TYPE;
 
 
 /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 2010-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2010-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -114,7 +114,11 @@ void sim_key_install_shooter (char key)
 static char sim_getchar (void)
 {
 	char inbuf;
+#ifdef CONFIG_PTH
 	ssize_t res = pth_read (sim_input_fd, &inbuf, 1);
+#else
+	ssize_t res = read (sim_input_fd, &inbuf, 1);
+#endif
 	if (res <= 0)
 	{
 		task_sleep_sec (2);
@@ -148,28 +152,40 @@ static void sim_interface_thread (void)
 	int simulator_keys = 1;
 	int toggle_mode = 1;
 
+#ifndef CONFIG_UI_SDL
 	/* Put stdin in raw mode so that 'enter' doesn't have to
 	be pressed after each keystroke. */
 	keybuffering (0);
 
 	/* Let the system initialize before accepting keystrokes */
 	task_sleep_sec (3);
+#endif
 
 	if (exec_file && exec_late_flag)
 		exec_script_file (exec_file);
 
 	for (;;)
 	{
+		task_yield ();
 #ifdef CONFIG_GTK
 		gtk_poll ();
-		task_yield ();
+#endif
+#ifdef CONFIG_UI_SDL
+		ui_refresh_all ();
+		*inbuf = ui_poll_events ();
 #else
 		*inbuf = sim_getchar ();
+#endif
+
+		/* Try again if no character was read */
+		if (*inbuf == '\0')
+			continue;
 
 		/* If switch simulation is turned off, then keystrokes
 		are fed into the simulated serial port... meaning it is interpreted
 		by the game program itself, and not the simulator.  Use the
 		tilde to toggle between the two modes. */
+#ifdef CONFIG_DEBUG_INPUT
 		if (simulator_keys == 0)
 		{
 			/* Except tilde turns it off as usual. */
@@ -178,12 +194,15 @@ static void sim_interface_thread (void)
 				simlog (SLC_DEBUG, "Input directed to switch matrix.");
 				simulator_keys ^= 1;
 			}
+#ifdef CONFIG_PLATFORM_WPC
 			else
 			{
 				wpc_key_press (*inbuf);
 			}
+#endif
 			continue;
 		}
+#endif /* CONFIG_DEBUG_INPUT */
 
 		switch (*inbuf)
 		{
@@ -242,12 +261,14 @@ static void sim_interface_thread (void)
 				node_kick (&open_node);
 				break;
 
+#ifdef CONFIG_DEBUG_INPUT
 			case '`':
 				/* The tilde toggles between keystrokes being treated as switches,
 				and as input into the runtime debugger. */
 				simulator_keys ^= 1;
 				simlog (SLC_DEBUG, "Input directed to built-in debugger.");
 				break;
+#endif
 
 			case '\x1b':
 				sim_exit (0);
@@ -308,7 +329,6 @@ static void sim_interface_thread (void)
 					simlog (SLC_DEBUG, "invalid key '%c' pressed (0x%02X)",
 						*inbuf, *inbuf);
 			}
-#endif
 	}
 }
 
@@ -331,6 +351,7 @@ void keyboard_init (void)
 #ifdef MACHINE_BUYIN_SWITCH
 	sim_key_install ('2', MACHINE_BUYIN_SWITCH);
 #endif
+#ifdef CONFIG_PLATFORM_WPC
 	sim_key_install ('3', SW_LEFT_COIN);
 	sim_key_install ('4', SW_CENTER_COIN);
 	sim_key_install ('5', SW_RIGHT_COIN);
@@ -339,6 +360,12 @@ void keyboard_init (void)
 	sim_key_install ('8', SW_DOWN);
 	sim_key_install ('9', SW_UP);
 	sim_key_install ('0', SW_ENTER);
+#endif
+#ifdef CONFIG_PLATFORM_WHITESTAR
+	sim_key_install ('8', SW_RED_BUTTON);
+	sim_key_install ('9', SW_GREEN_BUTTON);
+	sim_key_install ('0', SW_BLACK_BUTTON);
+#endif
 	sim_key_install (',', SW_LEFT_BUTTON);
 	sim_key_install ('.', SW_RIGHT_BUTTON);
 #ifdef SW_COIN_DOOR_CLOSED

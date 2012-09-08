@@ -41,8 +41,11 @@ __local__ score_t jackpot_value[S_COUNT];
 
 void jackpot_reset (void)
 {
+	U8 i;
 	lamplist_apply (LAMPLIST_JACKPOTS, lamp_off);
 	lamplist_apply (LAMPLIST_JACKPOTS, lamp_flash_on);
+	for (i=0; i < S_COUNT; i++)
+		score_copy (jackpot_value[i], score_table[SC_100K]);
 }
 
 void jackpot_shot (enum shot_id id)
@@ -413,14 +416,14 @@ CALLSET_ENTRY (attack, start_player)
 /* Jet Value */
 
 __local__ U8 jet_count_goal;
-__local__ U8 jet_shots_made;
+__local__ U8 jet_count;
 score_t jet_value;
 
 void jet_level_up (void)
 {
 	if (jet_count_goal < 100)
 		jet_count_goal += 10;
-	jet_shots_made = 0;
+	jet_count = 0;
 	attack_light ();
 }
 
@@ -445,7 +448,7 @@ CALLSET_ENTRY (jet, sw_left_jet, sw_bottom_jet, sw_right_jet)
 CALLSET_ENTRY (jet, start_player)
 {
 	jet_count_goal = 30;
-	jet_shots_made = 0;
+	jet_count = 0;
 	score_copy (jet_value, score_table[SC_5K]);
 }
 

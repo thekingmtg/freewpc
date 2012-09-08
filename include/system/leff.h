@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -129,13 +129,6 @@ void leff_start_highest_priority (void);
 __noreturn__ void leff_exit (void);
 void leff_init (void);
 void leff_stop_all (void);
-
-#ifndef MACHINE_SHOOT_AGAIN_LAMP
-#define MACHINE_SHOOT_AGAIN_LAMP 0
-#endif
-#ifndef MACHINE_BALL_SAVE_LAMP
-#define MACHINE_BALL_SAVE_LAMP MACHINE_SHOOT_AGAIN_LAMP
-#endif
 
 #endif /* _SYS_LEFF_H */
 

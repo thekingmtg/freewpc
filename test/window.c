@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -72,7 +72,6 @@
 #include <preset.h>
 #include <text.h>
 
-#undef CONFIG_TEST_DURING_GAME
 //#define CONFIG_FIXED_TEST_FONT
 
 #define MAX_WIN_STACK 6
@@ -81,37 +80,32 @@
  * no window is open. */
 struct window *win_top;
 
-/* Equivalent to (win_top != NULL), but as a byte, this can
- * be tested with a single instruction.
- * IDEA: these two variables could be overlapped into a union. */
-__fastram__ enum test_mode in_test;
-
-
 /* The window stack keeps track of where you came from, so when you
  * exit a menu/window/whatever, you can go back to where you started.
  * There is a maximum depth here, which should be sufficient. */
 struct window win_stack[MAX_WIN_STACK];
 
 
-/** Push the first window onto the stack.  This ends any game in progress
- * marks 'in test'.  It also resets sound, display, and lamps. */
+/** Push the first window onto the stack.  This does not end a game
+ * if it is in progress, but instead pauses it. */
 void window_push_first (void)
 {
 	set_test_mode (TEST_DEFAULT);
-#ifdef CONFIG_TEST_DURING_GAME
-	if (!switch_poll_logical (SW_LEFT_BUTTON))
-#endif
-	{
-		end_game ();
-		/* Stop tasks that should run only until end-of-game. */
-		task_remove_duration (TASK_DURATION_GAME);
-		task_duration_expire (TASK_DURATION_GAME);
-	}
+	task_setgid (GID_TEST_MODE_STARTING);
 
-	/* Reset sound, but delay a little to allow the reset
+	timer_lock ();
+	deff_stop_all ();
+#ifdef LEFF_AMODE
+	leff_stop (LEFF_AMODE);
+#endif
+#ifdef MACHINE_START_LAMP
+	lamp_tristate_off (MACHINE_START_LAMP);
+#endif
+	sound_reset ();
+
+	/* After resetting sound, delay a little to allow the reset
 	 * to finish before we attempt to play the 'enter' sound
 	 * later. */
-	sound_reset ();
 	task_sleep (TIME_100MS);
 	callset_invoke (test_start);
 }
@@ -127,13 +121,12 @@ void window_pop_first (void)
 	 * exiting test mode; this keeps extra presses
 	 * of the escape button from adding service credits. */
 	task_sleep_sec (1);
-#ifdef CONFIG_TEST_DURING_GAME
-	if (!switch_poll_logical (SW_LEFT_BUTTON))
-#endif
-	{
+	callset_invoke (test_exit);
+	if (!in_game)
 		amode_start ();
-	}
+	timer_unlock ();
 	set_test_mode (NO_TEST);
+	/* In a game, effects will be refreshed once test flag is cleared */
 }
 
 /** Starts the window's thread function, if it exists. */
@@ -808,9 +801,7 @@ static U8 count_submenus (struct menu *m)
 
 void menu_init (void)
 {
-	struct menu *m = win_top->w_class.priv;
-
-	win_top->w_class.menu.self = m;
+	win_top->w_class.menu.self = (struct menu *)win_top->w_class.priv;
 	win_top->w_class.menu.parent = NULL;
 	menu_selection = 0;
 }
@@ -1286,42 +1277,6 @@ struct menu dev_deff_stress_test_item = {
 	.flags = M_ITEM,
 	.var = { .subwindow = { &deff_stress_window, NULL } },
 };
-
-
-/************ Symbol Test *****************/
-
-#if (MACHINE_DMD == 1)
-
-void symbol_test_init (void)
-{
-	browser_init ();
-	menu_selection = browser_min = 1;
-	browser_max = BM_LAST-1;
-}
-
-void symbol_test_draw (void)
-{
-	union dmd_coordinate coord;
-
-	browser_draw ();
-	coord.x = 96;
-	coord.y = 20;
-	bitmap_draw (coord, menu_selection);
-}
-
-struct window_ops symbol_test_window = {
-	INHERIT_FROM_BROWSER,
-	.init = symbol_test_init,
-	.draw = symbol_test_draw,
-};
-
-struct menu symbol_test_item = {
-	.name = "SYMBOL BROWSER",
-	.flags = M_ITEM,
-	.var = { .subwindow = { &symbol_test_window, NULL } },
-};
-
-#endif /* MACHINE_DMD == 1 */
 
 
 /*********** Lampsets **********************/
@@ -2187,9 +2142,6 @@ struct menu *dev_menu_items[] = {
 #endif
 	&dev_force_error_item,
 	&dev_deff_stress_test_item,
-#if (MACHINE_DMD == 1)
-	&symbol_test_item,
-#endif
 	&sched_test_item,
 #ifndef CONFIG_NATIVE
 	&irqload_test_item,
@@ -2274,7 +2226,7 @@ struct menu clear_audits_item = {
 
 void clear_coins_confirm (void)
 {
-	/* TODO */
+	/* TODO - clear coin related audits */
 	timestamp_update (&system_timestamps.coins_cleared);
 	confirm_start ();
 }
@@ -2446,9 +2398,9 @@ void presets_init (void)
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
 	font_render_string_left (&font_mono5, 1, 1, "PRESETS");
-	font_render_string_center (&font_var5, 64, 20, "PRESS ENTER TO INSTALL");
-	font_render_string_center (&font_var5, 64, 27, "PRESS START TO VIEW DETAILS");
+	font_render_string_center (&font_var5, 64, 27, "PRESS ENTER TO INSTALL");
 #endif
+	SECTION_VOIDCALL (__test2__, preset_select);
 }
 
 
@@ -2464,6 +2416,8 @@ void presets_draw (void)
 	font_render_string_right (&font_mono5, 127, 9,
 		preset_installed_p (menu_selection) ? "YES" : "NO");
 
+	task_sleep (TIME_16MS);
+	SECTION_VOIDCALL (__test2__, preset_draw_component);
 	dmd_overlay ();
 #else
 	sprintf ("%d.", menu_selection+1);
@@ -2481,19 +2435,43 @@ void presets_draw (void)
 
 void presets_enter (void)
 {
+	window_stop_thread ();
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 8, "INSTALLING PRESET");
+	font_render_string_center (&font_mono5, 64, 8, "INSTALLING");
 	preset_render_name (menu_selection);
 	print_row_center (&font_mono5, 16);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	sound_send (SND_TEST_CONFIRM);
 	preset_install_from_test ();
+	window_start_thread ();
 }
 
-void presets_start (void)
+void presets_up (void)
 {
-	far_task_create_gid (GID_WINDOW_THREAD, preset_show_components, TEST2_PAGE);
+	browser_up ();
+	SECTION_VOIDCALL (__test2__, preset_select);
+}
+
+void presets_down (void)
+{
+	browser_down ();
+	SECTION_VOIDCALL (__test2__, preset_select);
+}
+
+
+void presets_thread (void)
+{
+#if (MACHINE_DMD == 1)
+	for (;;)
+	{
+		task_sleep (TIME_700MS);
+		dmd_alloc_low_clean ();
+		presets_draw ();
+	}
+#else
+	task_exit ();
+#endif
 }
 
 struct window_ops presets_window = {
@@ -2501,7 +2479,12 @@ struct window_ops presets_window = {
 	.init = presets_init,
 	.draw = presets_draw,
 	.enter = presets_enter,
-	.start = presets_start,
+	.up = presets_up,
+	.down = presets_down,
+	.left = window_stop_thread,
+	.right = window_stop_thread,
+	.start = window_stop_thread,
+	.thread = presets_thread,
 };
 
 struct menu presets_menu_item = {
@@ -2844,15 +2827,19 @@ struct menu switch_levels_item = {
 
 void switch_item_number (U8 val)
 {
-	if (val < NUM_DEDICATED_SWITCHES)
+#ifdef CONFIG_PLATFORM_WPC
+	if (val >= WPC_SW_DIRECT && val < WPC_SW_PLAYFIELD)
 		sprintf ("D%d", val+1);
-	else if (val >= NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES)
-		sprintf ("F%d", val - (NUM_PF_SWITCHES + NUM_DEDICATED_SWITCHES) + 1);
+	else if (val >= WPC_SW_FLIPTRONIC)
+		sprintf ("F%d", val - WPC_SW_FLIPTRONIC + 1);
 	else
 	{
-		val -= NUM_DEDICATED_SWITCHES;
+		val -= WPC_SW_PLAYFIELD;
 		sprintf ("%d%d", (val / 8)+1, (val % 8)+1);
 	}
+#else
+	sprintf ("SW%d", val);
+#endif
 }
 
 void single_switch_init (void)
@@ -3108,9 +3095,7 @@ void driver_test_init (void)
 	}
 	browser_item_number = browser_decimal_item_number;
 	browser_action = sol_get_time (menu_selection);
-#ifdef NUM_POWER_DRIVES
 	browser_max = NUM_POWER_DRIVES-1;
-#endif
 	driver_update_duty ();
 }
 
@@ -3258,20 +3243,11 @@ struct menu flasher_test_item = {
 
 U8 gi_test_brightness;
 
-U8 gi_test_values[] = {
-	0,
-	TRIAC_GI_STRING(0),
-	TRIAC_GI_STRING(1),
-	TRIAC_GI_STRING(2),
-	TRIAC_GI_STRING(3),
-	TRIAC_GI_STRING(4),
-	PINIO_GI_STRINGS,
-};
-
-
 void gi_test_init (void)
 {
 	browser_init ();
+	/* menu_selection ranges from 0 to the number of strings+1; the last value
+	represnts all strings on */
 	browser_max = NUM_GI_TRIACS+1;
 	gi_test_brightness = 8;
 	gi_disable (PINIO_GI_STRINGS);
@@ -3285,25 +3261,32 @@ void gi_test_exit (void)
 void gi_test_draw (void)
 {
 	browser_draw ();
+	U8 gi;
 
 	if (menu_selection == 0)
+	{
 		browser_print_operation ("ALL OFF");
+		gi = 0;
+	}
 	else if (menu_selection == NUM_GI_TRIACS+1)
+	{
 		browser_print_operation ("ALL ON");
+		gi = PINIO_GI_STRINGS;
+	}
 	else
 	{
 		sprintf_far_string (names_of_gi + menu_selection - 1);
 		browser_print_operation (sprintf_buffer);
+		gi = 1 << (menu_selection - 1);
 	}
-
-	sprintf ("BRIGHTNESS %d", gi_test_brightness);
-	print_row_center (&font_mono5, 29);
 
 	gi_disable (PINIO_GI_STRINGS);
 #ifdef CONFIG_TRIAC
-	gi_dim (gi_test_values[menu_selection], gi_test_brightness);
+	sprintf ("BRIGHTNESS %d", gi_test_brightness);
+	print_row_center (&font_mono5, 29);
+	gi_dim (gi, gi_test_brightness);
 #else
-	gi_enable (gi_test_values[menu_selection]);
+	gi_enable (gi);
 #endif
 }
 
@@ -3671,6 +3654,27 @@ struct menu display_test_item = {
 
 #endif
 
+#ifdef LAMPLIST_ORDERED_TEST
+
+void ordered_lamp_test_init (void)
+{
+	browser_init ();
+	browser_max = PINIO_NUM_LAMPS-1;
+}
+
+struct window_ops ordered_lamp_test_window = {
+	INHERIT_FROM_BROWSER,
+	.init = ordered_lamp_test_init,
+};
+
+struct menu ordered_lamp_test_item = {
+	.name = "ORDERED LAMPS",
+	.flags = M_ITEM,
+	.var = { .subwindow = { &ordered_lamp_test_window, NULL } },
+};
+
+#endif
+
 /****************** TEST MENU **************************/
 
 struct menu *test_menu_items[] = {
@@ -3694,7 +3698,9 @@ struct menu *test_menu_items[] = {
 #if (MACHINE_DMD == 1)
 	&display_test_item,
 #endif
-	/* TODO : ordered_lamp_test_item */
+#ifdef LAMPLIST_ORDERED_TEST
+	&ordered_lamp_test_item,
+#endif
 	&lamp_row_col_test_item,
 	&dipsw_test_item,
 #ifdef MACHINE_TEST_MENU_ITEMS
@@ -3717,7 +3723,23 @@ struct menu test_menu = {
 	.var = { .submenus = test_menu_items, },
 };
 
+/**********************************************************/
+
+/* TODO - modifying game state requires some post-processing.
+   Tilt warnings and extra balls can be reset arbitrarily.
+	Does num players make sense?
+	Ball number/player up?  Better modeled as forward/backward?
+ */
+struct menu game_menu = {
+	.name = "MODIFY GAME",
+	.flags = M_ITEM | M_LETTER_PREFIX,
+	.var = { .subwindow = { &adj_browser_window, modify_game_adjustments } },
+};
+
+/**********************************************************/
+
 struct menu *main_menu_items[] = {
+	&game_menu,
 	&bookkeeping_menu,
 	&adjustments_menu,
 	&test_menu,
@@ -3727,11 +3749,13 @@ struct menu *main_menu_items[] = {
 	NULL,
 };
 
-struct menu main_menu = {
+struct menu main_menu_template = {
 	.name = "MAIN MENU",
 	.flags = M_MENU,
 	.var = { .submenus = main_menu_items, },
 };
+
+struct menu main_menu;
 
 /**********************************************************/
 
@@ -3864,7 +3888,7 @@ void sysinfo_stats1 (void) {
 }
 
 void sysinfo_stats2 (void) {
-#ifdef TASKCOUNT
+#ifdef CONFIG_DEBUG_TASKCOUNT
 	extern U16 task_max_count;
 	sprintf ("MAX TASKS %d", task_max_count);
 #else
@@ -3883,6 +3907,9 @@ scroller_item sysinfo_scroller[] = {
 
 void sysinfo_enter (void)
 {
+	memcpy (&main_menu, &main_menu_template, sizeof (struct menu));
+	if (!in_game)
+		main_menu.var.submenus++;
 	window_push (&menu_window, &main_menu);
 }
 

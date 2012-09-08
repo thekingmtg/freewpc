@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -111,7 +111,7 @@ void enter_pin_deff (void)
 			sprintf ("%d", pin_enter_timer);
 			font_render_string_right (&font_fixed6, 126, 3, sprintf_buffer);
 			dmd_show_low ();
-#else
+#elif (MACHINE_ALPHANUMERIC == 1)
 			seg_alloc_clean ();
 			seg_write_string (0, 0, "ENTER PIN");
 			sprintf ("%c", pin_chars[pin_selection]);

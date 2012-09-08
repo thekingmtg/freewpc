@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -36,10 +36,6 @@
  * legitimiately free the ball.  This logic avoids drives attached
  * to flashers or to any game-defined devices that should be avoided,
  * like the knocker or device kickout coils.
- *
- * Ball search is currently indefinite and will gladly run forever.
- * A real machine would give up after a while, or kick another ball
- * into play.
  */
 
 
@@ -226,7 +222,7 @@ void ball_search_monitor_task (void)
 		 * - ball is on the shooter switch
 		 * - either flipper button is held
 		 */
-		if (in_live_game && !in_bonus && (live_balls || !valid_playfield)
+		if (in_game && !in_test && !in_bonus && (live_balls || !valid_playfield)
 #ifdef MACHINE_SHOOTER_SWITCH
 				&& !switch_poll_logical (MACHINE_SHOOTER_SWITCH)
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,20 +24,14 @@
 typedef U8 solnum_t;
 
 #ifndef PINIO_NUM_SOLS
-#error "SOL_COUNT renamed to PINIO_NUM_SOLS"
+#error "PINIO_NUM_SOLS undefined"
 #endif
 
-#define SOL_REG_COUNT (PINIO_NUM_SOLS / 8)
+#define SOL_REG_COUNT MULTIPLEOF8(PINIO_NUM_SOLS)
 
-/* TODO - these are WPC specific */
-#define SOL_BASE_HIGH 0
-#define SOL_BASE_LOW 8
-#define SOL_BASE_GENERAL 16
-#define SOL_BASE_AUXILIARY 24
-#define SOL_BASE_FLIPTRONIC 32
-#define SOL_BASE_EXTENDED 40
-
-#define SOL_MIN_FLASHER 16
+#ifndef SOL_MIN_FLASHER
+#define SOL_MIN_FLASHER 0
+#endif
 
 extern __fastram__ U8 sol_timers[];
 extern U8 sol_duty_state[];
@@ -75,7 +69,8 @@ void sol_init (void);
 /* sol_start is a wrapper function, because the 'time' value must be scaled
 to the correct resolution.  Ticks are normally 1 per 16ms, but
 we need 1 per 4ms for solenoids, so scale accordingly. */
-__attribute__((deprecated)) extern inline void sol_start (U8 sol, U8 mask, U8 time)
+__attribute_deprecated__
+extern inline void sol_start (U8 sol, U8 mask, U8 time)
 {
 	sol_start_real (sol, mask, (4 * time));
 }
@@ -129,63 +124,21 @@ extern inline U8 *sol_get_read_reg (const solnum_t sol)
 }
 
 
-/** Return the hardware register that can be written
-to enable/disable a coil driver. */
-extern inline IOPTR sol_get_write_reg (solnum_t sol)
-{
-	switch (sol / 8)
-	{
-#ifdef CONFIG_PLATFORM_WPC
-		case 0:
-			return (IOPTR)WPC_SOL_HIGHPOWER_OUTPUT;
-		case 1:
-			return (IOPTR)WPC_SOL_LOWPOWER_OUTPUT;
-		case 2:
-			return (IOPTR)WPC_SOL_FLASHER_OUTPUT;
-		case 3:
-			return (IOPTR)WPC_SOL_GEN_OUTPUT;
-		case 4:
-#if (MACHINE_WPC95 == 1)
-			return (IOPTR)WPC95_FLIPPER_COIL_OUTPUT;
-#elif (MACHINE_FLIPTRONIC == 1)
-			return (IOPTR)WPC_FLIPTRONIC_PORT_A;
-#endif
-#ifdef MACHINE_SOL_EXTBOARD1
-		case 5:
-			return (IOPTR)WPC_EXTBOARD1;
-#endif
-#endif /* CONFIG_PLATFORM_WPC */
-		default:
-			fatal (ERR_SOL_REQUEST);
-			return (IOPTR)0;
-	}
-}
-
-
 /** Return the bit position in a hardware register
 or memory variable that corresponds to a particular
 coil driver. */
 extern inline U8 sol_get_bit (const solnum_t sol)
 {
-	return 1 << (sol % 8);
+	return single_bit_set (sol % 8);
 }
 
 
-/** Return nonzero if a solenoid's enable line is
- * inverted; i.e. writing a 0 turns it on and
- * writing a 1 turns it off.
+/*
+ * Turn on a solenoid driver immediately.
+ * It will remain on indefinitely.
+ * The hardware may not be updated instantly, however, depending
+ * on the platform driver.
  */
-extern inline U8 sol_inverted (const solnum_t sol)
-{
-#if (MACHINE_WPC95 == 1)
-	return 0;
-#else
-	return (sol >= 32) && (sol < 40);
-#endif
-}
-
-
-/** Turn on a solenoid driver immediately. */
 extern inline void sol_enable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);
@@ -193,7 +146,11 @@ extern inline void sol_enable (const solnum_t sol)
 }
 
 
-/** Turn off a solenoid driver immediately. */
+/*
+ * Turn off a solenoid driver immediately.
+ * The hardware may not be updated instantly, however, depending
+ * on the platform driver.
+ */
 extern inline void sol_disable (const solnum_t sol)
 {
 	U8 *r = sol_get_read_reg (sol);

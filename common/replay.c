@@ -170,6 +170,7 @@ void replay_code_to_boost (score_t score, U8 code)
 #endif
 
 
+#ifdef CONFIG_DMD_OR_ALPHA
 /** Draw the replay screen */
 void replay_draw (void)
 {
@@ -197,6 +198,7 @@ void replay_draw (void)
 	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
+#endif
 
 
 /** Award a single replay to the player up */
@@ -224,6 +226,7 @@ void replay_award (void)
 #endif
 
 	audit_increment (&system_audits.replays);
+	timestamp_update (&system_timestamps.last_replay);
 	replay_total_this_player++;
 	knocker_fire ();
 }
@@ -242,7 +245,7 @@ void replay_check_current (void)
 		return;
 
 	curr = (replay_score_t *)(current_score + REPLAY_SCORE_OFFSET);
-	if (unlikely (*curr > next_replay_score))
+	if (unlikely (*curr >= next_replay_score))
 	{
 		replay_award ();
 	}

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -32,15 +32,18 @@ per AC cycle */
 
 typedef U8 triacbits_t;
 
+#ifdef CONFIG_TRIAC
 void triac_rtt (void);
+void gi_dim (U8 bits, U8 brightness);
+void gi_leff_dim (U8 bits, U8 brightness);
+#endif
+
 void gi_enable (triacbits_t bits);
 void gi_disable (triacbits_t bits);
 void gi_leff_allocate (U8 triac);
 void gi_leff_free (U8 triac);
 void gi_leff_enable (U8 triac);
 void gi_leff_disable (U8 triac);
-void gi_dim (U8 bits, U8 brightness);
-void gi_leff_dim (U8 bits, U8 brightness);
 
 void gi_init (void);
 

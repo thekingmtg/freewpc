@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -50,10 +50,13 @@ typedef const lampnum_t lamplist_t[];
 /** Lampsets are identified by small integers */
 typedef U8 lamplist_id_t;
 
+/** The set of all lamps, with one bit for each */
+typedef U8 lamp_set[NUM_LAMP_COLS];
 
-extern __fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
-extern U8 lamp_flash_matrix[NUM_LAMP_COLS];
-extern __fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
+
+extern __fastram__ lamp_set lamp_matrix;
+extern lamp_set lamp_flash_matrix;
+extern __fastram__ lamp_set lamp_flash_matrix_now;
 
 extern U8 bit_matrix[BITS_TO_BYTES (MAX_FLAGS)];
 extern U8 global_bits[BITS_TO_BYTES (MAX_GLOBAL_FLAGS)];
@@ -83,12 +86,8 @@ typedef enum
 
 void lamp_init (void);
 void lamp_flash_rtt (void);
-void lamp_rtt_0 (void);
-void lamp_rtt_1 (void);
-void lamp_rtt_2 (void);
-void lamp_rtt_3 (void);
 
-__attribute__((pure)) U8 *matrix_lookup (lamp_matrix_id_t id);
+__pure__ U8 *matrix_lookup (lamp_matrix_id_t id);
 
 void lamp_on (lampnum_t lamp);
 void lamp_off (lampnum_t lamp);
@@ -105,34 +104,18 @@ void leff_toggle (lampnum_t lamp);
 bool leff_test (lampnum_t lamp);
 
 
-extern inline void flag_on (const U8 f)
-{
-	bitarray_set (bit_matrix, f);
-	log_event (SEV_INFO, MOD_LAMP, EV_BIT_ON, f);
-}
+#define flag_on(f)      bit_on (bit_matrix, __addrval(&f))
+#define flag_off(f)     bit_off (bit_matrix, __addrval(&f))
+#define flag_toggle(f)  bit_toggle (bit_matrix, __addrval(&f))
+#define flag_test(f)    bit_test (bit_matrix, __addrval(&f))
 
-extern inline void flag_off (const U8 f)
-{
-	bitarray_clear (bit_matrix, f);
-	log_event (SEV_INFO, MOD_LAMP, EV_BIT_OFF, f);
-}
+#define global_flag_on(gf)     bit_on (global_bits, __addrval(&gf))
+#define global_flag_off(gf)    bit_off (global_bits, __addrval(&gf))
+#define global_flag_toggle(gf) bit_toggle (global_bits, __addrval(&gf))
+#define global_flag_test(gf)   bit_test (global_bits, __addrval(&gf))
 
-extern inline void flag_toggle (const U8 f)
-{
-	bitarray_toggle (bit_matrix, f);
-	log_event (SEV_INFO, MOD_LAMP, EV_BIT_TOGGLE, f);
-}
-
-extern inline bool flag_test (const U8 f)
-{
-	return bitarray_test (bit_matrix, f);
-}
-
-
-#define global_flag_on(lamp)		bitarray_set (global_bits, lamp)
-#define global_flag_off(lamp)		bitarray_clear (global_bits, lamp)
-#define global_flag_toggle(lamp)	bitarray_toggle (global_bits, lamp)
-#define global_flag_test(lamp)	bitarray_test (global_bits, lamp)
+#define flag_test_and_set(f) \
+	({ U8 result = flag_test (f); if (!result) { flag_on (f); } result; })
 
 #define lamp_tristate_on(lamp) \
 	do { lamp_flash_off(lamp); lamp_on(lamp); } while (0)
@@ -185,7 +168,12 @@ void lamplist_rotate_previous (lamplist_id_t id, bitset matrix);
 void lamplist_set_count (lamplist_id_t set, U8 count);
 bool lamplist_test_all (lamplist_id_t id, lamp_boolean_operator_t op);
 
-__attribute__((noinline)) void matrix_all_on (bitset matrix);
-__attribute__((noinline)) void matrix_all_off (bitset matrix);
+__attribute__((noinline)) void lamp_set_on (lamp_set matrix);
+
+void lamp_set_zero (lamp_set dst);
+void lamp_set_copy (lamp_set dst, const lamp_set src);
+void lamp_set_add (lamp_set dst, const lamp_set src);
+void lamp_set_subtract (lamp_set dst, const lamp_set src);
+bool lamp_set_disjoint (const lamp_set a, const lamp_set b);
 
 #endif /* _SYS_LAMP_H */

@@ -148,17 +148,17 @@ verified/initialized correctly because of this */
 struct adjustment feature_adjustments[] = {
 	/* The first few feature adjustments are provided by the core
 	system but only enabled if the game supports it. */
-
+#ifdef CONFIG_BUYIN
 	{ "BUY EXTRA BALL", &yes_no_value, NO, &system_config.buy_extra_ball },
-
+#endif
 #ifdef MACHINE_LAUNCH_SWITCH
 	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
 #endif
-
+#ifdef CONFIG_FAMILY_MODE
 	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
-
-#ifdef MACHINE_HAS_NOVICE_MODE
+#endif
+#ifdef CONFIG_NOVICE_MODE
 	{ "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode },
 #endif
 
@@ -281,6 +281,17 @@ struct adjustment debug_adjustments[] = {
 };
 #endif
 
+extern U8 tilt_warnings;
+extern U8 extra_balls;
+struct adjustment modify_game_adjustments[] = {
+	{ "BALL NUMBER", &balls_per_game_value, 1, &ball_up }, /* dynamic range restrict */
+	{ "PLAYER UP", &players_per_game_value, 1, &player_up }, /* dynamic range restrict */
+	{ "NUM. PLAYERS", &players_per_game_value, 1, &num_players }, /* dynamic range restrict */
+	{ "TILT WARNINGS", &integer_value, 0, &tilt_warnings }, /* dynamic range restrict */
+	{ "EXTRA BALLS", &integer_value, 0, &extra_balls }, /* dynamic range restrict */
+	{ NULL, NULL, 0, NULL },
+};
+
 struct adjustment empty_adjustments[] = {
 	{ "EMPTY ADJ. SET", &integer_value, 0, NULL },
 	{ NULL, NULL, 0, NULL },
@@ -331,29 +342,27 @@ void adj_prepare_lookup (struct adjustment *table)
 /** Render the name of the adjustment that is located at the given
 protected memory address, and its current value, to the display.
 If there is no match, nothing is printed. */
+#ifdef CONFIG_DMD_OR_ALPHA
 void adj_name_for_preset (U8 * const nvram, const U8 value)
 {
 	if (adj_lookup == NULL)
 		return;
 
-	/* Searching through all adjustments, and then printing was known
-	to be slow at one point, so these sleeps were added.  It may not
-	be necessary now that printing is done in assembly. */
-	task_sleep (TIME_16MS);
 	while (adj_lookup->nvram != NULL)
 	{
 		if (adj_lookup->nvram == nvram)
 		{
-			task_sleep (TIME_16MS);
-			font_render_string_center (&font_mono5, 64, 16, adj_lookup->name);
+			if (adj_lookup->name[0] == '\0')
+				return;
+			font_render_string_center (&font_var5, 48, 20, adj_lookup->name);
 			adj_lookup->values->render (value);
-			print_row_center (&font_mono5, 24);
+			font_render_string_center (&font_var5, 96, 20, sprintf_buffer);
 			return;
 		}
 		adj_lookup++;
 	}
 }
-
+#endif
 
 void adj_reset_all (void)
 {
@@ -443,12 +452,14 @@ bool adj_current_hidden_p (void)
 			std_adj_p (replay_levels)))
 		return TRUE;
 
+#ifdef CONFIG_DMD_OR_ALPHA
 	/* Allow other things to be added too.  Machines or other
 	modules should return FALSE if the current adjustment should
 	not be visible.  (Note this is inverted logic from the rest of
 	this function.) */
 	if (!callset_invoke_boolean (adjustment_visible))
 		return TRUE;
+#endif
 
 	/* Otherwise, this adjustment is OK to show */
 	return FALSE;

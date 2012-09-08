@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -137,6 +137,7 @@ static __attribute__((noinline)) void triac_rtt_1 (U8 dim_bits)
 
 
 /** Update the triacs at interrupt time */
+/* RTT(name=triac_rtt freq=1) */
 void triac_rtt (void)
 {
 	/* We only need to update the triacs if dimming
@@ -179,7 +180,11 @@ void triac_update (void)
 	latch = triac_output;
 	latch &= ~gi_leff_alloc;
 	latch |= gi_leff_output;
+#ifdef CONFIG_TRIAC
+	pinio_write_triac (latch);
+#else
 	pinio_write_gi (latch);
+#endif
 }
 
 
@@ -205,11 +210,16 @@ void gi_disable (U8 triac)
 
 #ifdef CONFIG_TRIAC
 /** Enable dimming for a GI string. */
-void gi_dim (U8 triac, U8 intensity)
+void gi_dim (U8 triac, U8 brightness)
 {
 	gi_clear_dimming (triac, gi_dimming);
 	triac_output &= ~triac;
-	gi_dimming[intensity] |= triac;
+	if (brightness == 0)
+		;
+	else if (brightness < 7 && system_config.allow_dim_illum == YES)
+		gi_dimming[7 - brightness] |= triac;
+	else
+		triac_output |= triac;
 	triac_update ();
 }
 #endif

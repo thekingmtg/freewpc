@@ -28,6 +28,11 @@ typedef U8 deffnum_t;
 /** Type for a display effect function */
 typedef void (*deff_function_t) (void);
 
+#ifdef CONFIG_NO_DEFFS
+#define DEFF_FUNCTION(_func,_page) .fn=deff_exit, .page=SYS_PAGE
+#else
+#define DEFF_FUNCTION(_func,_page) .fn=_func, .page=_page
+#endif
 
 /** The flags for a normal display effect with no special requirements */
 #define D_NORMAL	0x0
@@ -102,7 +107,6 @@ void deff_restart (deffnum_t dn);
 void deff_start_highest_priority (void);
 __noreturn__ void deff_exit (void);
 __noreturn__ void deff_delay_and_exit (task_ticks_t ticks);
-void deff_swap_low_high (S8 count, task_ticks_t delay);
 void deff_start_bg (deffnum_t dn, enum _priority prio);
 void deff_update (void);
 void deff_start_sync (deffnum_t dn);
@@ -139,6 +143,7 @@ extern inline void deff_call_components (void)
 }
 
 
+#ifdef CONFIG_DMD_OR_ALPHA
 extern inline __noreturn__ void generic_deff (
 	const char *line1, const char *line2)
 {
@@ -160,7 +165,7 @@ extern inline __noreturn__ void generic_deff (
 	task_sleep_sec (2);
 	deff_exit ();
 }
-
+#endif
 
 #ifndef MACHINE_CUSTOM_AMODE
 void default_amode_deff (void);

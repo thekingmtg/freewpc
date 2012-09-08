@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -291,9 +291,6 @@ void integer_audit (audit_t val)
 	sprintf ("%ld", val);
 }
 
-void long_integer_audit (long_audit_t *val)
-{
-}
 
 void secs_audit (audit_t val)
 {
@@ -456,9 +453,6 @@ void render_audit (audit_t val, audit_format_type_t type)
 			break;
 		case AUDIT_TYPE_AVG_PER_BALL:
 			average_per_ball_audit (val);
-			break;
-		case AUDIT_TYPE_LONGINT:
-			/* TODO long_integer_audit (val); */
 			break;
 #ifndef CONFIG_NATIVE
 	/* Timestamp audits are broken in native mode because we are using

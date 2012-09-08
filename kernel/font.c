@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -71,9 +71,6 @@ __fastram__ const U8 *bitmap_src;
 #endif
 
 
-extern const font_t font_bitmap_common;
-
-
 /* Returns a pointer to the glyph data for a character 'c'
  * in the font 'font'.  This points directly to the raw bytes
  * that can be ORed into the display.
@@ -136,6 +133,7 @@ static inline void font_blit_internal (U8 *dst, U8 byte_width, const U8 shift)
 	register const U8 *src = bitmap_src;
 
 	do {
+#if (PINIO_DMD_PIXEL_BITS == 1)
 		if (shift == 0)
 		{
 			*dst ^= *src;
@@ -145,6 +143,18 @@ static inline void font_blit_internal (U8 *dst, U8 byte_width, const U8 shift)
 			dst[0] ^= *src << shift;
 			dst[1] = (*src >> (8-shift)) ^ dst[1];
 		}
+#elif (PINIO_DMD_PIXEL_BITS == 8)
+		if (*src & 0x01) dst[shift+0] = 0x01; /* TODO - current color */
+		if (*src & 0x02) dst[shift+1] = 0x01;
+		if (*src & 0x04) dst[shift+2] = 0x01;
+		if (*src & 0x08) dst[shift+3] = 0x01;
+		if (*src & 0x10) dst[shift+4] = 0x01;
+		if (*src & 0x20) dst[shift+5] = 0x01;
+		if (*src & 0x40) dst[shift+6] = 0x01;
+		if (*src & 0x80) dst[shift+7] = 0x01;
+#else
+#error
+#endif
 	
 		src++;
 		bitmap_src = src;
@@ -415,15 +425,10 @@ void fontargs_render_string_right (const char *s)
 	fontargs_render_string ();
 }
 
-
-/** Draw a bitmap from the 'symbol' font onto the display.
-The character selects which symbol to be drawn. */
-void bitmap_draw (union dmd_coordinate coord, U8 c)
+void fontargs_render_glyph (U8 c)
 {
 	sprintf_buffer[0] = c;
 	sprintf_buffer[1] = '\0';
-	font_args.font = &font_bitmap_common;
-	font_args.coord = coord;
 	fontargs_render_string ();
 }
 

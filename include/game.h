@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -44,7 +44,6 @@ void try_validate_playfield (U8 swno);
 void add_player (void);
 void start_game (void);
 void stop_game (void);
-bool verify_start_ok (void);
 void match_start (void);
 void amode_start (void);
 

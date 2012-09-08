@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -65,25 +65,24 @@
 
 #include <freewpc.h>
 
-__fastram__ U8 lamp_matrix[NUM_LAMP_COLS];
-
-U8 lamp_flash_matrix[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_flash_matrix_now[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_leff1_matrix[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_leff1_allocated[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_leff2_matrix[NUM_LAMP_COLS];
-
-__fastram__ U8 lamp_leff2_allocated[NUM_LAMP_COLS];
+__fastram__ lamp_set lamp_matrix;
+lamp_set lamp_flash_matrix;
+__fastram__ lamp_set lamp_flash_matrix_now;
+__fastram__ lamp_set lamp_leff1_matrix;
+__fastram__ lamp_set lamp_leff1_allocated;
+__fastram__ lamp_set lamp_leff2_matrix;
+__fastram__ lamp_set lamp_leff2_allocated;
 
 U8 bit_matrix[BITS_TO_BYTES (MAX_FLAGS)];
 
 U8 global_bits[BITS_TO_BYTES (MAX_GLOBAL_FLAGS)];
 
-__fastram__ U8 lamp_strobe_mask;
+#ifdef CONFIG_LAMP_STROBE16
+typedef U16 lamp_strobe_t;
+#else
+typedef U8 lamp_strobe_t;
+#endif
+__fastram__ lamp_strobe_t lamp_strobe_mask;
 
 __fastram__ U8 lamp_strobe_column;
 
@@ -98,13 +97,13 @@ U16 lamp_power_idle_timer;
 void lamp_init (void)
 {
 	/* Clear all lamps/flags */
-	matrix_all_off (lamp_matrix);
-	matrix_all_off (lamp_flash_matrix);
-	matrix_all_off (lamp_flash_matrix_now);
-	matrix_all_off (lamp_leff1_matrix);
-	matrix_all_off (lamp_leff2_matrix);
-	matrix_all_off (bit_matrix);
-	matrix_all_off (global_bits);
+	lamp_set_zero (lamp_matrix);
+	lamp_set_zero (lamp_flash_matrix);
+	lamp_set_zero (lamp_flash_matrix_now);
+	lamp_set_zero (lamp_leff1_matrix);
+	lamp_set_zero (lamp_leff2_matrix);
+	memset (bit_matrix, 0, sizeof (bit_matrix));
+	memset (global_bits, 0, sizeof (global_bits));
 
 	/* Lamp effect allocation matrices are "backwards",
 	 * in the sense that a '1' means free, and '0' means
@@ -123,102 +122,25 @@ void lamp_init (void)
 /** Runs periodically to invert any lamps in the flashing state.
  * (This is hard realtime now; it could probably be dropped in
  * priority, though.) */
+/* RTT(name=lamp_flash_rtt freq=128) */
 void lamp_flash_rtt (void)
 {
 	U16 *lamp_matrix_words = (U16 *)lamp_flash_matrix_now;
 	U16 *lamp_flash_matrix_words = (U16 *)lamp_flash_matrix;
 
 	lamp_matrix_words[0] ^= lamp_flash_matrix_words[0];
+#if (PINIO_NUM_LAMPS > 16)
 	lamp_matrix_words[1] ^= lamp_flash_matrix_words[1];
+#endif
+#if (PINIO_NUM_LAMPS > 32)
 	lamp_matrix_words[2] ^= lamp_flash_matrix_words[2];
+#endif
+#if (PINIO_NUM_LAMPS > 48)
 	lamp_matrix_words[3] ^= lamp_flash_matrix_words[3];
-}
-
-
-/** Runs periodically to update the physical lamp state. */
-void lamp_rtt (void)
-{
-	U8 bits;
-
-	/* Turn off the lamp circuits before recalculating.  But don't
-	do this in native mode, because the simulator doesn't simulate
-	well-enough. */
-#ifdef CONFIG_NATIVE
-	pinio_write_lamp_strobe (0);
-#else
-#ifdef __m6809__
-	/* On the 6809, avoid using the CLR instruction which is known to cause
-	problems in the WPC ASIC.   Also, always write ROW first to avoid
-	spurious lamps. */
-	__asm__ volatile ("clrb");
-	__asm__ volatile ("stb\t" C_STRING (WPC_LAMP_ROW_OUTPUT));
-	__asm__ volatile ("stb\t" C_STRING (WPC_LAMP_COL_STROBE));
-#else
-	pinio_write_lamp_data (0);
-	pinio_write_lamp_strobe (0);
-#endif /* __m6809__ */
-#endif /* CONFIG_NATIVE */
-
-	/* Implement lamp power saver.  When the timer is nonzero, it means
-	to keep the lamp circuits off for this many IRQ iterations. */
-	if (unlikely (lamp_power_timer))
-	{
-		--lamp_power_timer;
-		return;
-	}
-
-	/* Grab the default lamp values */
-	bits = lamp_matrix[lamp_strobe_column];
-
-	/* OR in the flashing lamp values.  These are guaranteed to be
-	 * zero for any lamps where the flash is turned off.
-	 * Otherwise, these bits are periodically inverted by the
-	 * (slower) flash rtt function above.
-	 * This means that for the flash to work, the default bit
-	 * must be OFF when the flash bit is ON.  (Use the tristate
-	 * macros to ensure this.)
-	 */
-	bits |= lamp_flash_matrix_now[lamp_strobe_column];
-
-	/* TODO : implement lamp strobing, like the newer Stern games
-	do.  Implement like DMD page flipping, alternating between 2
-	different lamp matrices rapidly to present 4 different
-	intensities.  A background task, like the flash_rtt above,
-	would toggle the intensities at a slower rate. */
-
-	/* Override with the lamp effect lamps.
-	 * Leff2 bits are low priority and used for long-running
-	 * lamp effects.  Leff1 is higher priority and used
-	 * for quick effects.  Therefore leff2 is applied first,
-	 * and leff1 may override it.
-	 */
-	bits &= lamp_leff2_allocated[lamp_strobe_column];
-	bits |= lamp_leff2_matrix[lamp_strobe_column];
-	bits &= lamp_leff1_allocated[lamp_strobe_column];
-	bits |= lamp_leff1_matrix[lamp_strobe_column];
-
-	/* Write the result to the hardware */
-	pinio_write_lamp_data (bits);
-	pinio_write_lamp_strobe (lamp_strobe_mask);
-
-	/* Advance the strobe value for the next iteration.
-	Keep this together with the above so that lamp_strobe_mask
-	is already in a register. */
-	lamp_strobe_mask <<= 1;
-	if (lamp_strobe_mask == 0)
-	{
-		/* All columns strobed : reset strobe */
-		lamp_strobe_mask++;
-		lamp_strobe_column = 0;
-
-		/* After strobing all lamps, reload the power saver timer */
-		lamp_power_timer = lamp_power_level;
-	}
-	else
-	{
-		/* Advance strobe to next position for next iteration */
-		lamp_strobe_column++;
-	}
+#endif
+#if (PINIO_NUM_LAMPS > 64)
+	lamp_matrix_words[4] ^= lamp_flash_matrix_words[4];
+#endif
 }
 
 
@@ -237,6 +159,10 @@ void lamp_power_set (U8 level)
 /* Basic bit manipulation routines.  These will
 always use the WPC shift hardware and may not be
 optimal.  The bitarray macros are preferred. */
+
+#ifdef CONFIG_SINGLE_BIT_SET_ARRAY
+U8 single_bit_set_array[8] = { 0x1, 0x2, 0x4, 0x8, 0x10, 0x20, 0x40, 0x80 };
+#endif
 
 void bit_on (bitset matrix, U8 bit)
 {
@@ -281,7 +207,7 @@ bool bit_test_all_off (const_bitset matrix)
 }
 
 
-__attribute__((pure)) U8 *matrix_lookup (lamp_matrix_id_t id)
+__pure__ U8 *matrix_lookup (lamp_matrix_id_t id)
 {
 	switch (id)
 	{
@@ -301,16 +227,10 @@ __attribute__((pure)) U8 *matrix_lookup (lamp_matrix_id_t id)
 	fatal (ERR_INVALID_MATRIX);
 }
 
-void matrix_all_on (bitset matrix)
+void lamp_set_on (lamp_set lset)
 {
-	memset (matrix, 0xFF, NUM_LAMP_COLS);
+	memset (lset, 0xFF, NUM_LAMP_COLS);
 }
-
-void matrix_all_off (bitset matrix)
-{
-	memset (matrix, 0, NUM_LAMP_COLS);
-}
-
 
 /*
  * Lamp manipulation routines
@@ -397,21 +317,21 @@ bool lamp_flash_test (lampnum_t lamp)
 void lamp_all_on (void)
 {
 	disable_interrupts ();
-	matrix_all_off (lamp_flash_matrix);
+	lamp_set_zero (lamp_flash_matrix);
 	enable_interrupts ();
-	matrix_all_on (lamp_matrix);
+	lamp_set_on (lamp_matrix);
 }
 
 
 void lamp_all_off (void)
 {
 	disable_interrupts ();
-	matrix_all_off (lamp_flash_matrix_now);
-	matrix_all_off (lamp_flash_matrix);
-	matrix_all_off (lamp_leff1_matrix);
-	matrix_all_off (lamp_leff2_matrix);
+	lamp_set_zero (lamp_flash_matrix_now);
+	lamp_set_zero (lamp_flash_matrix);
+	lamp_set_zero (lamp_leff1_matrix);
+	lamp_set_zero (lamp_leff2_matrix);
 	enable_interrupts ();
-	matrix_all_off (lamp_matrix);
+	lamp_set_zero (lamp_matrix);
 }
 
 /*
@@ -426,27 +346,27 @@ void lamp_all_off (void)
 
 void lamp_leff1_allocate_all (void)
 {
-	matrix_all_off (lamp_leff1_allocated);
+	lamp_set_zero (lamp_leff1_allocated);
 }
 
 void lamp_leff1_erase (void)
 {
-	matrix_all_off (lamp_leff1_matrix);
+	lamp_set_zero (lamp_leff1_matrix);
 }
 
 void lamp_leff1_free_all (void)
 {	
-	matrix_all_on (lamp_leff1_allocated);
+	lamp_set_on (lamp_leff1_allocated);
 }
 
 void lamp_leff2_erase (void)
 {
-	matrix_all_off (lamp_leff2_matrix);
+	lamp_set_zero (lamp_leff2_matrix);
 }
 
 void lamp_leff2_free_all (void)
 {
-	matrix_all_on (lamp_leff2_allocated);
+	lamp_set_on (lamp_leff2_allocated);
 }
 
 

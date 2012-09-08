@@ -185,7 +185,7 @@ CALLSET_ENTRY (prison_break, prison_break_made) {
  ****************************************************************************/
 void prison_break_start_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_v5prc, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
+	font_render_string_center (&font_v5prc, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "BREAKOUT");
 	font_render_string_center (&font_v5prc, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SHOOT ARROWS");
 	dmd_show_low ();
 	task_sleep_sec (2);
@@ -196,7 +196,7 @@ void prison_break_start_effect_deff(void) {
 
 void prison_break_hit_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_v5prc, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
+	font_render_string_center (&font_v5prc, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "BREAKOUT");
 	sprintf_score (prison_break_mode_last_score);
 	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
@@ -209,7 +209,7 @@ void prison_break_hit_effect_deff(void) {
 void prison_break_effect_deff(void) {
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_v5prc, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
+		font_render_string_center (&font_v5prc, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "BREAKOUT");
 		sprintf ("%d SEC LEFT,  %d HIT", prison_break_mode_timer, prison_break_mode_shots_made);
 		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
 		sprintf_score (prison_break_mode_next_score);
@@ -225,7 +225,7 @@ void prison_break_effect_deff(void) {
 
 void prison_break_end_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_v5prc, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "PRISON BREAK");
+	font_render_string_center (&font_v5prc, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "BREAKOUT");
 	sprintf("COMPLETED");
 	font_render_string_center (&font_v5prc, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();

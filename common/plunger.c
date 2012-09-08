@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -101,8 +101,6 @@ static void launch_button_pressed (void)
 }
 #endif
 
-
-
 #ifdef INCLUDE_AUTOPLUNGER
 static void timed_plunger_monitor (void)
 {
@@ -127,6 +125,7 @@ CALLSET_ENTRY (launch_button, serve_ball)
 #endif
 #endif
 }
+
 
 CALLSET_ENTRY (launch_button, sw_launch_button)
 {

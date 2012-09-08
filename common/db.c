@@ -60,9 +60,11 @@ void db_dump_all (void)
 	VOIDCALL (dump_game);
 	VOIDCALL (dump_deffs);
 	switch_queue_dump ();
-	VOIDCALL (sol_req_dump);
+#ifdef CONFIG_TRIAC
 	VOIDCALL (triac_dump);
+#endif
 	SECTION_VOIDCALL (__common__, device_debug_all);
+	VOIDCALL (leff_dump);
 }
 #endif
 
@@ -111,6 +113,7 @@ U8 button_check (U8 sw)
 
 void bpt_display (void)
 {
+#if (MACHINE_DMD == 1)
 	dmd_alloc_low_clean ();
 
 	sprintf ("%p", bpt_mem_addr);
@@ -142,6 +145,7 @@ void bpt_display (void)
 	sprintf ("C%04lX", prev_log_callset);
 	font_render_string_left (&font_bitmap8, 0, 24, sprintf_buffer);
 	dmd_show_low ();
+#endif
 }
 
 
@@ -199,8 +203,10 @@ void bpt_hit (void)
 			task_runs_long ();
 		}
 	}
+#ifdef CONFIG_DMD_OR_ALPHA
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
+#endif
 }
 #endif /* CONFIG_BPT */
 
@@ -208,24 +214,24 @@ void bpt_hit (void)
 /** Check for debug input periodically */
 void db_periodic (void)
 {
-	extern void MACHINE_DEBUGGER_HOOK (U8);
-
 #ifdef CONFIG_BPT
 	if (!in_test && button_check (SW_ESCAPE))
 		bpt_stop ();
 #endif
 
-#ifdef DEBUGGER
+#ifdef CONFIG_DEBUG_INPUT
 	if (pinio_debug_read_ready ())
 	{
 		char c = pinio_debug_read ();
 		puts_handler = puts_debug;
 		switch (c)
 		{
+#ifdef DEBUGGER
 			case 'a':
 				/* Dump all debugging information */
 				db_dump_all ();
 				break;
+#endif
 
 #ifdef CONFIG_BPT
 			case 'p':
@@ -235,11 +241,6 @@ void db_periodic (void)
 #endif
 
 			default:
-#ifdef MACHINE_DEBUGGER_HOOK
-				/* Allow the machine to define additional commands.
-				 * This function must reside in the system page. */
-				MACHINE_DEBUGGER_HOOK (c);
-#endif
 				break;
 		}
 	}
@@ -256,7 +257,7 @@ void db_init (void)
 	bpt_debounce_timer = 0x1C00;
 #endif
 
-#ifdef DEBUGGER
+#ifdef CONFIG_DEBUG_INPUT
 	/* Signal the debugger that the system has just reset. */
 	if (pinio_debug_read_ready ())
 	{
@@ -267,7 +268,14 @@ void db_init (void)
 	{
 		puts_handler = puts_parallel;
 	}
+#elif defined(CONFIG_SIM)
+	puts_handler = puts_sim;
+#else
+	extern void puts_default (const char *);
+	puts_handler = puts_default;
+#endif
 
+#ifdef DEBUGGER
 	/* Announce myself to the world. */
 	dbprintf ("FreeWPC\n");
 	dbprintf ("System Version %s.%s\n",

@@ -34,9 +34,12 @@
 extern device_properties_t device_properties_table[];
 extern int sim_installed_balls;
 
+/* Every node has an associated type object, which allows you to
+   customize how that node behaves when a ball is inserted or removed. */
 
-/* Node types for ball devices.  A single node tracks the entire device,
-   regardless of how many balls it can hold. */
+/* A device-type node tracks an entire ball device; when used, the
+   individual switch nodes are unused.  It counts the number of balls
+	in the device. */
 
 void device_type_insert (struct ball_node *node, struct ball *ball)
 {
@@ -60,25 +63,18 @@ struct ball_node_type device_type_node = {
 };
 
 
-/* Nodes for the open playfield */
+/* The open playfield node type does not require any custom behavior. */
 
 struct ball_node_type open_type_node =  {
 };
 
 
-/* Node types for single balls detected by a switch, but without a ball device */
+/* The node type for a single switch, not associated with a ball device.
+   It simply updates the state of the associated switch. */
 
 void switch_type_insert_or_remove (struct ball_node *node, struct ball *ball)
 {
 	simlog (SLC_DEBUG, "Switch %d holds %d balls", node->index, node->count);
-#ifdef CONFIG_TZ
-	if (ball->flags & 0x01)
-	{
-		simlog (SLC_DEBUG, "Slot prox ignored by Powerball");
-		sim_switch_set (node->index, 0);
-	}
-	else
-#endif
 	sim_switch_set (node->index, node->count);
 }
 
@@ -88,18 +84,41 @@ struct ball_node_type switch_type_node = {
 };
 
 
+/* Proximity switches have a separate type, for which ceramic balls do not
+   cause any action. */
+
+void prox_switch_insert_or_remove (struct ball_node *node, struct ball *ball)
+{
+	if (ball->flags & BALL_CERAMIC)
+		sim_switch_set (node->index, 0);
+	else
+		switch_type_insert_or_remove (node, ball);
+}
+
+
+struct ball_node_type proximity_switch_type_node = {
+	.insert = prox_switch_insert_or_remove,
+	.remove = prox_switch_insert_or_remove,
+};
+
+
+/* A mux type node is one which does not have a single exit point; balls
+   could go one of several places afterwards.  This is used to implement
+	divertors.  Note that there is no playfield switch at all associated
+	with these nodes.  Logically, the node is placed at the location where
+	the ball makes a choice about where to go next. */
 
 struct ball_node_type mux_type_node = {
 	.insert = NULL,
 	.remove = NULL,
 };
 
+/* Declare the basic nodes that every pinball table has. */
 
 struct ball_node open_node;
 struct ball_node device_nodes[MAX_DEVICES];
 struct ball_node switch_nodes[NUM_SWITCHES];
-
-struct ball the_ball[6]; /* TBD - don't hardcode count */
+struct ball the_ball[MACHINE_MAX_BALLS];
 
 /* Return true if a node is full (can hold no more pinballs) */
 bool node_full_p (struct ball_node *node)
@@ -139,9 +158,7 @@ void node_insert (struct ball_node *node, struct ball *ball)
 	ball->pos = offset;
 	if (node->type->insert)
 		node->type->insert (node, ball);
-#ifdef CONFIG_UI
 	ui_update_ball_tracker (ball->index, node->name);
-#endif
 	simlog (SLC_DEBUG, "node_insert: added %s to %s, count=%d", ball->name, node->name, node->count);
 
 	if (node->unlocked && !node_full_p (node->next))
@@ -149,7 +166,7 @@ void node_insert (struct ball_node *node, struct ball *ball)
 }
 
 
-/* Remove the head of the node queue. */
+/* Remove the head ball from a node queue and return it. */
 struct ball *node_remove (struct ball_node *node)
 {
 	unsigned int offset;
@@ -174,9 +191,7 @@ struct ball *node_remove (struct ball_node *node)
 	ball->node = NULL;
 	if (node->type->remove)
 		node->type->remove (node, ball);
-#ifdef CONFIG_UI
 	ui_update_ball_tracker (ball->index, "Free");
-#endif
 	simlog (SLC_DEBUG, "node_remove: took %s from %s", ball->name, node->name);
 
 	if (node->prev && node->prev->unlocked && node->prev->count != 0)
@@ -187,10 +202,13 @@ struct ball *node_remove (struct ball_node *node)
 	return ball;
 }
 
-/* The minimum delay in milliseconds */
+/* Insert a ball at a node after some number of milliseconds has expired.
+   Until then the ball is not attached to any node.
+	Use this to simulate the distance between nodes.
+	The delay period must be given as a multiple of MIN_DELAY. */
 #define MIN_DELAY 100
 
-void node_insert_delay_update (struct ball *ball)
+static void node_insert_delay_update (struct ball *ball)
 {
 	ball->timer -= MIN_DELAY;
 	if (ball->timer <= 0)
@@ -204,9 +222,6 @@ void node_insert_delay_update (struct ball *ball)
 			(time_handler_t)node_insert_delay_update, ball);
 }
 
-
-/* Insert a ball at a node after some number of milliseconds has expired.
-Until then the ball is not attached to any node. */
 void node_insert_delay (struct ball_node *dst, struct ball *ball,
 	unsigned int delay)
 {
@@ -218,7 +233,8 @@ void node_insert_delay (struct ball_node *dst, struct ball *ball,
 
 
 /* Move a ball from one location to another.  The two nodes do not
-	have to be connected via the default topology. */
+	have to be connected via the default topology.  Use this directly when
+	needing to move balls around in an arbitrary manner, as if "by hand". */
 void node_move (struct ball_node *dst, struct ball_node *src)
 {
 	struct ball *ball;
@@ -249,22 +265,24 @@ void node_move (struct ball_node *dst, struct ball_node *src)
 		node_insert (dst, ball);
 	else
 	{
-#ifdef CONFIG_UI
-	ui_update_ball_tracker (ball->index, src->name);
-#endif
+		ui_update_ball_tracker (ball->index, src->name);
 		node_insert_delay (dst, ball, src->delay);
 	}
 }
 
 
-/* To kick a node means to force a pinball that is there to move to
-	the next node. */
+/* Move a ball to its default "next" location, using the topology graph.
+   This is the normal call to make when a ball should be allowed to move on its own. */
 void node_kick (struct ball_node *node)
 {
 	node_move (node->next, node);
 }
 
 
+/* Construct a logical connection between two nodes.
+   This should only be used during initialization, to define the playfield topology.
+	It says that by default, balls travel from the source node to the sink node
+	after the given amount of delay. */
 void node_join (struct ball_node *source, struct ball_node *sink, unsigned int delay)
 {
 	source->next = sink;
@@ -314,7 +332,7 @@ void node_init (void)
 
 	/* The outhole and the shooter switches, initialized above, can
 	actually hold more pinballs than 1; they just queue up undetected.
-	They are also unlocked, meaning that they stay there until something
+	They are also locked nodes, meaning that balls stay there until something
 	forces them to move on. */
 #ifdef MACHINE_OUTHOLE_SWITCH
 	outhole_node.size = MAX_BALLS_PER_NODE;
@@ -327,8 +345,8 @@ void node_init (void)
 	node_join (&shooter_node, &open_node, 0);
 #endif
 
-	/* Initialize the open playfield node, which feeds into the trough
-	(or outhole if present). */
+	/* Initialize the open playfield node, which feeds into the trough or
+	outhole (generically called the drain node) */
 	open_node.name = "Playfield";
 	open_node.type = &open_type_node;
 	open_node.size = MAX_BALLS_PER_NODE;

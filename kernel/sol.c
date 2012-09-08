@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -110,16 +110,6 @@ struct {
 
 
 /**
- * Dump the state of the solenoid request driver.
- */
-#ifdef DEBUGGER
-void sol_req_dump (void)
-{
-}
-#endif
-
-
-/**
  * Pulse a solenoid with a specific duty/time.
  */
 void
@@ -145,7 +135,11 @@ sol_req_start_specific (U8 sol, U8 mask, U8 time)
 	req_reg_read = sol_get_read_reg (sol);
 	req_bit = sol_get_bit (sol);
 	sol_pulse_duty = mask;
-	req_inverted = sol_inverted (sol) ? 0xFF : 0x00;
+#ifdef PINIO_SOL_INVERTED
+	req_inverted = PINIO_SOL_INVERTED (sol) ? 0xFF : 0x00;
+#else
+	req_inverted = 0;
+#endif
 
 	/* This must be last, as it triggers the IRQ code */
 	sol_pulse_timer = time / 4;
@@ -305,13 +299,13 @@ void sol_request (U8 sol)
 }
 
 
-extern inline void sol_req_on (void)
+static inline void sol_req_on (void)
 {
 	writeb (req_reg_write, (*req_reg_read |= req_bit) ^ req_inverted);
 }
 
 
-extern inline void sol_req_off (void)
+static inline void sol_req_off (void)
 {
 	writeb (req_reg_write, (*req_reg_read &= ~req_bit) ^ req_inverted);
 }
@@ -323,6 +317,7 @@ extern inline void sol_req_off (void)
  * It works identically to the code for the flashers, except there can only be
  * one at a time.
  */
+/* RTT(name=sol_req_rtt   freq=4) */
 void sol_req_rtt (void)
 {
 	if (sol_pulse_timer != 0)
@@ -341,109 +336,6 @@ void sol_req_rtt (void)
 			}
 		}
 	}
-}
-
-
-/** Return 0 if the given solenoid/flasher should be off,
-else return the bitmask that reflects that solenoid's
-position in the output register. */
-extern inline U8 sol_update1 (const U8 id)
-{
-	if (MACHINE_SOL_FLASHERP (id))
-		if (likely (sol_timers[id - SOL_MIN_FLASHER] != 0))
-		{
-			sol_timers[id - SOL_MIN_FLASHER]--;
-
-			if (likely (sol_duty_state[id - SOL_MIN_FLASHER] & sol_duty_mask))
-				return 1;
-		}
-	return 0;
-}
-
-
-/** Update the value 'bits' to reflect whether a specific solenoid
-should be turned on at this instant.  'id' is the solenoid number.
-bits stores the output state for an entire bank of 8 solenoids at
-a time. */
-#define sol_contribute(id,bits) \
-	if (sol_update1 (id)) { bits |= (1 << ((id) & (CHAR_BIT - 1))); }
-
-
-/** Update a set of 8 solenoids that share the same output register.
- * base_id is the solenoid number for the first solenoid in the set.
- * asic_addr is the hardware register to be written with all 8 values
- * at once. */
-extern inline void sol_update_set (const U8 set)
-{
-	register U8 out __areg__ = *sol_get_read_reg (set * 8);
-
-	/* Update each of the 8 solenoids in the bank, updating timers
-	and calculating whether or not each should be on or off. */
-	sol_contribute (set * CHAR_BIT + 0, out);
-	sol_contribute (set * CHAR_BIT + 1, out);
-	sol_contribute (set * CHAR_BIT + 2, out);
-	sol_contribute (set * CHAR_BIT + 3, out);
-	sol_contribute (set * CHAR_BIT + 4, out);
-	sol_contribute (set * CHAR_BIT + 5, out);
-	sol_contribute (set * CHAR_BIT + 6, out);
-	sol_contribute (set * CHAR_BIT + 7, out);
-
-	/* Write the final output to the hardware */
-	pinio_write_solenoid_set (set, out);
-}
-
-
-/** Like sol_update_set, but updates the Fliptronic outputs.
- * The base_id and asic_addr are implied here. */
-extern inline void sol_update_fliptronic_powered (void)
-{
-	extern U8 fliptronic_powered_coil_outputs;
-	register U8 out __areg__ = fliptronic_powered_coil_outputs;
-
-	/* Update each of the 8 solenoids in the bank, updating timers
-	and calculating whether or not each should be on or off. */
-	sol_contribute (32, out);
-	sol_contribute (33, out);
-	sol_contribute (34, out);
-	sol_contribute (35, out);
-	sol_contribute (36, out);
-	sol_contribute (37, out);
-	sol_contribute (38, out);
-	sol_contribute (39, out);
-
-	/* Write the final output to the hardware */
-	fliptronic_powered_coil_outputs = out;
-}
-
-
-/** Realtime update of the first set of flasher outputs */
-void sol_update_rtt_0 (void)
-{
-	pinio_write_solenoid_set (0, *sol_get_read_reg (0));
-	sol_update_set (2);
-#ifdef CONFIG_PLATFORM_WPC
-	if (WPC_HAS_CAP (WPC_CAP_FLIPTRONIC))
-		sol_update_fliptronic_powered ();
-#endif
-}
-
-
-/** Realtime update of the second set of flasher outputs */
-void sol_update_rtt_1 (void)
-{
-	pinio_write_solenoid_set (1, *sol_get_read_reg (8));
-	sol_update_set (3);
-#ifdef MACHINE_SOL_EXTBOARD1
-	sol_update_set (5);
-#endif
-
-	/* Rotate the duty mask for the next iteration. */
-	/* TODO - the assembly code generated here is not ideal.
-	It could be done in two instructions, by shifting and then
-	adding the carry.  Need a way from gcc to request this. */
-	sol_duty_mask <<= 1;
-	if (sol_duty_mask == 0)
-		sol_duty_mask = 1;
 }
 
 

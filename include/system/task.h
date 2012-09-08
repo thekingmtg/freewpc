@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -34,15 +34,24 @@ extern bool task_dispatching_ok;
 #define TASK_DURATION_TEST 0x8
 
 #ifdef CONFIG_NATIVE
-
 #include <sys/time.h>
+#define USECS_PER_TICK (16000 / linux_irq_multiplier)
+#if defined(CONFIG_PTH)
 #include <pth.h>
-
 typedef pth_t task_pid_t;
+#elif defined(CONFIG_PTHREADS)
+#undef __noreturn__
+#include <pthread.h>
+#define __noreturn__ __attribute__((noreturn))
+typedef pthread_t task_pid_t;
+#else
+typedef int task_pid_t;
+#endif
+
 typedef unsigned int task_gid_t;
 typedef unsigned int task_ticks_t;
 typedef void (*task_function_t) (void);
-extern void task_set_rom_page (task_pid_t pid, U8 rom_page);
+#define task_set_rom_page(pid, page)
 
 #else /* !CONFIG_NATIVE */
 
@@ -248,10 +257,12 @@ void do_periodic (void);
 #define task_kill_peers()			task_kill_gid (task_getgid ())
 
 /** Yield control to another task, but do not impose a minimum sleep time. */
-#ifdef CONFIG_NATIVE
-#define task_yield()             pth_yield(0)
+#if defined(CONFIG_PTH)
+#define task_yield() pth_yield(0)
+#elif defined(CONFIG_PTHREADS)
+#define task_yield() sched_yield()
 #else
-#define task_yield()					task_sleep (0)
+#define task_yield() task_sleep (0)
 #endif
 
 /** Sleep for an integer number of seconds */

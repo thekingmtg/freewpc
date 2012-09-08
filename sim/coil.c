@@ -1,5 +1,5 @@
 /*
- * Copyright 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008, 2009, 2010, 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -20,6 +20,18 @@
 
 #include <freewpc.h>
 #include <simulation.h>
+
+/* This module simulates the actions of the playfield coils.
+   The CPU writes binary values to the coil outputs, but these do not directly
+	correspond to action; for example, a flipper coil needs to be pulsed for
+	a certain period of time before it raises.  Also, the CPU will typically
+	duty cycle coils, rapidly turning them on and off; the logical state of the
+	coil must then be calculated from a series of CPU writes.
+
+	Multiple "types" of coils can be defined, each with different properties.
+ */
+
+int sim_coils_all_disabled = 0;
 
 extern device_properties_t device_properties_table[];
 
@@ -117,6 +129,10 @@ void coil_clone (unsigned int parent_id, unsigned int child_id)
 }
 
 
+/* Define the action for a device-type coil.
+   When the solenoid arm reaches its maximum value, initiate
+	a ball kick on the associated device node. */
+
 void device_coil_at_max (struct sim_coil_state *c)
 {
 	node_kick (c->node);
@@ -130,6 +146,15 @@ struct sim_coil_type device_type_coil = {
 	.at_max = device_coil_at_max,
 };
 
+void device_coil_init (unsigned int id, struct ball_node *node)
+{
+	struct sim_coil_state *c = coil_states + id;
+	c->node = node;
+	c->type = &device_type_coil;
+}
+
+
+/* Define the action for a flasher output. */
 
 void flasher_coil_at_max (struct sim_coil_state *c)
 {
@@ -142,18 +167,25 @@ struct sim_coil_type flasher_type_coil = {
 	.at_max = flasher_coil_at_max,
 };
 
+
+/* Define the action for a "generic coil".
+   Use the machine description to check the solenoid number
+	against one of the predefined types.  This is a "catch-all".
+	TODO - this should be broken up into multiple smaller
+	functions that are registered against their coils at init. */
+
 void generic_coil_at_max (struct sim_coil_state *c)
 {
 	unsigned int solno = c - coil_states;
 
 #ifdef SOL_OUTHOLE
 	if (solno == SOL_OUTHOLE)
-		node_kick (&switch_nodes[MACHINE_OUTHOLE_SWITCH]);
+		node_kick (&outhole_node);
 #endif
 
 #ifdef MACHINE_LAUNCH_SOLENOID
 	if (solno == MACHINE_LAUNCH_SOLENOID)
-		node_kick (&switch_nodes[MACHINE_SHOOTER_SWITCH]);
+		node_kick (&shooter_node);
 #endif
 
 #ifdef MACHINE_KNOCKER_SOLENOID
@@ -169,6 +201,9 @@ struct sim_coil_type generic_type_coil = {
 	.off_step = -1,
 };
 
+
+/* Define the action for a flipper coil. */
+
 struct sim_coil_type flipper_power_type_coil = {
 	/* TODO - trigger EOS when coil reaches peak */
 	.max_pos = 32,
@@ -182,11 +217,16 @@ struct sim_coil_type flipper_hold_type_coil = {
 	.off_step = -1,
 };
 
+
+/* Define the action for an outhole type coil. */
+
 struct sim_coil_type outhole_type_coil = {
 	.max_pos = 40,
 	.on_step = 4,
 	.off_step = -1,
 };
+
+/* Define the action for a diverter coil. */
 
 void diverter_coil_0 (struct sim_coil_state *c)
 {
@@ -213,13 +253,6 @@ void diverter_coil_init (unsigned int id, struct ball_node *node)
 	struct sim_coil_state *c = coil_states + id;
 	c->node = node;
 	c->type = &diverter_type_coil;
-}
-
-void device_coil_init (unsigned int id, struct ball_node *node)
-{
-	struct sim_coil_state *c = coil_states + id;
-	c->node = node;
-	c->type = &device_type_coil;
 }
 
 
@@ -332,12 +365,16 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 {
 	struct sim_coil_state *c = coil_states + coil;
 
-	if (c->disabled)
+	/* Ignore all writes to a disabled device */
+	if (sim_coils_all_disabled || c->disabled)
 		return;
 
+	/* Only take action when the CPU writes a different value */
 	if (c->on != on)
 	{
 		c->on = on;
+		/* Start a periodic function, called every 1ms, to update the value
+		of this coil, if it has not already been started. */
 		if (!c->scheduled)
 		{
 			sim_time_register (1, FALSE, (time_handler_t)sim_coil_update, c);
@@ -347,7 +384,7 @@ void sim_coil_change (unsigned int coil, unsigned int on)
 }
 
 
-#ifdef MACHINE_TZ
+#ifdef MACHINE_TZ /* TODO - move to tz_sim.c */
 static void mach_coil_init (void)
 {
 	coil_states[SOL_GUMBALL_RELEASE].type = &motor_type_coil;
@@ -375,34 +412,46 @@ static void fliptronic_coil_init (U8 power_sol)
 }
 #endif
 
+
+/* Initialize the coil simulation. */
 void sim_coil_init (void)
 {
 	int devno;
 	int sol;
 
-	/* Initialize everything to zero first */
+	/* Initialize all coils/flashers to some default.  Use the machine
+	   description to guide this. */
 	for (sol = 0; sol < PINIO_NUM_SOLS; sol++)
 	{
 		char item_name[32];
 		struct sim_coil_state *c = coil_states + sol;
 		memset (c, 0, sizeof (struct sim_coil_state));
+		ui_write_solenoid (sol, 0);
 		if (MACHINE_SOL_FLASHERP (sol))
 			c->type = &flasher_type_coil;
 		else
 			c->type = &generic_type_coil;
 		c->master = c;
+
+		/* When the configuration item "coil.X.disabled" is read, this
+		will cause coil X to be disabled.  Use this to simulate a broken
+		wire.  Also, if "coils.disabled" is 1, then all coils will be
+		disabled. */
 		snprintf (item_name, sizeof (item_name), "coil.%d.disabled", sol);
 		conf_add (item_name, &c->disabled);
 	}
+	conf_add ("coils.disabled", &sim_coils_all_disabled);
 
-	/* Note coils which are attached to ball devices */
+	/* Redefine coils which are attached to ball devices, so that the
+	   action of the coil will trigger remove events on the device nodes. */
 	for (devno = 0; devno < NUM_DEVICES; devno++)
 	{
 		const device_properties_t *props = &device_properties_table[devno];
 		device_coil_init (props->sol, &device_nodes[devno]);
 	}
 
-	/* Initialize Fliptronic coils */
+	/* Redefine Fliptronic flipper coils so that the power/hold coils are
+	   tied together into a single action. */
 #if (MACHINE_FLIPTRONIC == 1)
 	fliptronic_coil_init (SOL_LL_FLIP_POWER);
 	fliptronic_coil_init (SOL_LR_FLIP_POWER);

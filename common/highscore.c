@@ -59,9 +59,6 @@ U8 high_score_position;
 /* Indicates the player number being checked */
 U8 high_score_player;
 
-#ifdef MACHINE_TZ
-	extern bool flipcode_used;
-#endif
 
 /** The default grand champion score */
 static U8 default_gc_score[HIGH_SCORE_WIDTH] =
@@ -108,6 +105,7 @@ static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
 
 extern U8 initials_data[];
 
+#ifdef CONFIG_DMD_OR_ALPHA
 
 /** Renders a single high score table entry.
  * If pos is zero, then no position is drawn. */
@@ -172,6 +170,7 @@ void high_score_draw_34 (void)
 	dmd_show_low ();
 }
 
+#endif
 
 void high_score_check_reset (void)
 {
@@ -196,7 +195,7 @@ void high_score_reset (void)
 	memcpy (high_score_table[0].initials, default_gc_initials, HIGH_SCORE_NAMESZ);
 
 	/* Reset the other high scores */
-	for (place=0; place < 4; place++)
+	for (place=0; place < NUM_HIGH_SCORES; place++)
 	{
 		memcpy (high_score_table[place+1].score, default_highest_scores[place],
 			HIGH_SCORE_WIDTH);
@@ -210,7 +209,7 @@ void high_score_reset (void)
 	high_score_check_reset ();
 }
 
-
+#ifdef CONFIG_DMD_OR_ALPHA
 void hsentry_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -267,7 +266,7 @@ void hscredits_deff (void)
 	task_sleep_sec (2);
 	deff_exit ();
 }
-
+#endif
 
 /** Check if the high scores need to be reset automatically.
  * Called during game start. */
@@ -318,12 +317,6 @@ void high_score_free (U8 position)
 void high_score_check_player (U8 player)
 {
 	U8 hs;
-	/* Invalidate the score if a flipcode was used */
-
-#ifdef MACHINE_TZ
-	if (flipcode_used)
-		return;
-#endif
 
 	for (hs = 0; hs < HS_COUNT; hs++)
 	{
@@ -396,6 +389,7 @@ void high_score_enter_initials (U8 position)
 		csum_area_update (&high_csum_info);
 
 		/* Award credits */
+		deff_start (DEFF_HSCREDITS);
 		if (position == 0)
 		{
 			high_score_award_credits (&hstd_config.champion_credits);
@@ -404,7 +398,7 @@ void high_score_enter_initials (U8 position)
 		{
 			high_score_award_credits (&hstd_config.hstd_credits[position-1]);
 		}
-		deff_start_sync (DEFF_HSCREDITS);
+		task_sleep (TIME_1500MS);
 	}
 }
 
@@ -418,6 +412,10 @@ void high_score_check (void)
 
 	/* Don't record high scores if disabled by adjustment */
 	if (hstd_config.highest_scores == OFF)
+		return;
+
+	/* Give games a chance to disable high scores in other ways */
+	if (!callset_invoke_boolean (allow_high_scores))
 		return;
 
 	dbprintf ("Checking for high scores\n");
@@ -445,5 +443,16 @@ void high_score_check (void)
 CALLSET_ENTRY (high_score, file_register)
 {
 	file_register (&high_csum_info);
+}
+
+
+CALLSET_ENTRY (high_score, sw_buyin_button)
+{
+#if 0
+	high_score_table[4].initials[0] = 0;
+	high_score_table[3].initials[0] = 1;
+	high_score_enter_initials (4);
+	high_score_enter_initials (3);
+#endif
 }
 

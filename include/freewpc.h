@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -111,8 +111,14 @@ extern U8 periodic_ok;
 #define C_STRING(x)	C_STR(x)
 #define C_STR(x)		#x
 
+/*
+ * Round a value to the next highest multiple of 8.
+ */
+#define MULTIPLEOF8(x) (((x) + 7) / 8)
+
 #ifdef CONFIG_NATIVE
 #include <platform/native.h>
+#include <native/native.h>
 #endif
 
 /* Include the standard header files that are needed
@@ -148,6 +154,7 @@ extern U8 periodic_ok;
 
 /* Build system information */
 #include <env.h>
+#include <system/io.h>
 
 /* CPU specifics */
 #include <system/irq.h>
@@ -158,16 +165,20 @@ __noreturn__ void freewpc_init (void);
 
 /* Platform specifics */
 #ifdef CONFIG_PLATFORM_WHITESTAR
-#define CPU_BOARD
 #include <platform/whitestar.h>
+#define __CPU_BOARD
 #endif
 #ifdef CONFIG_PLATFORM_WPC
-#define CPU_BOARD
 #include <platform/wpc.h>
+#define __CPU_BOARD
 #endif
-#ifdef CONFIG_PLATFORM_WPCSOUND
-#define SOUND_BOARD
-#include <platform/wpcsound.h>
+#ifdef CONFIG_PLATFORM_P2K
+#include <platform/p2k.h>
+#define __CPU_BOARD
+#endif
+#ifdef CONFIG_PLATFORM_MIN
+#include <platform/min.h>
+#define __CPU_BOARD
 #endif
 
 /* Core software structures */
@@ -180,24 +191,29 @@ __noreturn__ void freewpc_init (void);
 #endif
 
 /* Basic data structures */
-
 #include <misc.h>
-//#include <list.h>
 #include <log.h>
 
-#ifdef CPU_BOARD
 /* Hardware modules */
+#ifdef __CPU_BOARD
+#ifdef CONFIG_AC
 #include <system/ac.h>
+#endif
 #include <system/sol.h>
 #include <system/lamp.h>
 #include <system/sound.h>
 #include <system/switch.h>
 #include <system/flip.h>
 #include <system/display.h>
+#include <system/watchdog.h>
 #ifdef CONFIG_GI
 #include <system/triac.h>
 #endif
+#ifdef CONFIG_RTC
 #include <system/rtc.h>
+#else
+#define timestamp_update(x)
+#endif
 
 /* Common software structures */
 #include <priority.h>
@@ -220,11 +236,11 @@ __noreturn__ void freewpc_init (void);
 #include <serve.h>
 #include <mbmode.h>
 #include <generic.h>
+#include <lang.h>
+#include <deffdata.h>
 
 /* Uncommon software modules - TODO : shouldn't automatically include */
-#ifdef CONFIG_PLATFORM_WPC
 #include <system/debug.h>
-#endif
 #include <test.h> /* this one HAS to be here for now, for callset.c */
 
 /* Game-specific defines.  'mach' should point to the machine-specific 
@@ -253,9 +269,7 @@ __noreturn__ void freewpc_init (void);
 #endif
 #endif
 #endif
-
-#endif /* CPU_BOARD */
-
+#endif /* __CPU_BOARD */
 
 /* This is ugly, but I can't figure out any other way to get 
  * pragmas working */

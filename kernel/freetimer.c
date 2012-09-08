@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -51,8 +51,11 @@ static inline U8 *free_timer_update (U8 *timer_ptr)
 
 /** Realtime timer update function.  Each timer value is
 simply decremented by 1 tick (33ms) if it is nonzero. */
+/* RTT(name=free_timer_rtt freq=32) */
 void free_timer_rtt (void)
 {
+	if (MAX_FREE_TIMERS == 0)
+		return;
 	U8 *timer_ptr = free_timers;
 	do {
 		timer_ptr = free_timer_update (timer_ptr);
@@ -64,7 +67,7 @@ void free_timer_rtt (void)
 
 
 /** Restart a timer. */
-void free_timer_restart (free_timer_id_t tid, U8 ticks)
+void __free_timer_restart (U8 tid, U8 ticks)
 {
 	ticks /= 2;
 	free_timers[tid] = ticks;
@@ -72,7 +75,7 @@ void free_timer_restart (free_timer_id_t tid, U8 ticks)
 
 
 /** Start a timer.  If it is already started, do nothing. */
-void free_timer_start (free_timer_id_t tid, U8 ticks)
+void __free_timer_start (U8 tid, U8 ticks)
 {
 	if (free_timers[tid] == 0)
 	{
@@ -83,14 +86,14 @@ void free_timer_start (free_timer_id_t tid, U8 ticks)
 
 
 /** Stop a timer. */
-void free_timer_stop (free_timer_id_t tid)
+void __free_timer_stop (U8 tid)
 {
 	free_timers[tid] = 0;
 }
 
 
 /** Test the value of a timer. */
-U8 free_timer_test (free_timer_id_t tid)
+U8 __free_timer_test (U8 tid)
 {
 	return free_timers[tid] / 2;
 }

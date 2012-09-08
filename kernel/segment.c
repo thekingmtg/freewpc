@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2005-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -226,6 +226,20 @@ void seg_show_other (void)
 		seg_show_from (seg_writable_page + 1);
 	else
 		seg_show_from (seg_writable_page);
+}
+
+
+/** Called from a deff when it wants to toggle between two images.
+ * COUNT is the number of times to toggle.
+ * DELAY is how long to wait between each change. */
+void deff_swap_low_high (S8 count, task_ticks_t delay)
+{
+	dmd_show_low ();
+	while (--count >= 0)
+	{
+		dmd_show_other ();
+		task_sleep (delay);
+	}
 }
 
 

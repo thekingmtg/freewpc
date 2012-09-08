@@ -27,10 +27,6 @@
 #include <coin.h>
 
 
-/** Nonzero if the current score has changed and needs to be redrawn */
-bool score_update_needed;
-
-
 /** Draw the current ball number at the bottom of the display. */
 void scores_draw_status_bar (void)
 {
@@ -59,7 +55,9 @@ void scores_draw_credits (void)
 	credits_render ();
 	/* TODO - this could also be moved into a ll_ routine, but
 	it just happens to work for alphanumeric as well. */
+#ifdef CONFIG_DMD_OR_ALPHA
 	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
+#endif
 }
 
 
@@ -102,6 +100,7 @@ void scores_draw (void)
 	scores_draw_current (SCORE_DRAW_ALL);
 }
 
+#ifdef CONFIG_DMD_OR_ALPHA
 
 /** A display effect for showing all the scores, without
 flashing.  This is used when new players are added or
@@ -150,3 +149,4 @@ void scores_deff (void)
 	}
 }
 
+#endif

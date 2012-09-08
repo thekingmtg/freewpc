@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2005-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -110,6 +110,7 @@ void seg_alloc_clean (void);
 void seg_copy_low_to_high (void);
 void seg_show (void);
 void seg_show_other (void);
+void deff_swap_low_high (S8 count, task_ticks_t delay);
 void dmd_rtt (void);
 void seg_sched_transition (seg_transition_t *trans);
 void seg_reset_transition (void);

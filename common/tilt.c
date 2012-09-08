@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -35,6 +35,10 @@
 /** The number of tilt warnings that have been issued on this ball. */
 U8 tilt_warnings;
 
+/* A timer that allows tilt to settle during endball before
+   proceeding to the next ball. */
+free_timer_id_t tilt_ignore_timer;
+
 
 /** Lamp effect function for a leff that turns all lights off.
  * Used by the system-defined tilt function. */
@@ -52,44 +56,6 @@ void tilt_warning_leff (void)
 }
 
 
-/** The tilt display effect runs until explicitly cancelled. */
-void tilt_deff (void)
-{
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_cu17, 64, 13, "TILT");
-	dmd_show_low ();
-	for (;;)
-		task_sleep_sec (10);
-}
-
-
-void tilt_warning_deff (void)
-{
-	dmd_alloc_pair_clean ();
-	if (tilt_warnings % 2)
-	{
-		font_render_string_center (&font_fixed10, 64, 16, "DANGER");
-	}
-	else
-	{
-		font_render_string_center (&font_fixed10, 64, 7, "DANGER");
-		font_render_string_center (&font_fixed10, 64, 23, "DANGER");
-	}
-	deff_swap_low_high (24, TIME_66MS);
-	deff_exit ();
-}
-
-
-void slam_tilt_deff (void)
-{
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, 64, 13, "SLAM TILT");
-	dmd_show_low ();
-	task_sleep_sec (3);
-	deff_exit ();
-}
-
-
 CALLSET_ENTRY (tilt, sw_tilt)
 {
 	extern U8 in_tilt;
@@ -99,7 +65,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 	 * moving, so we can delay endball. */
 	if (in_tilt)
 	{
-		free_timer_restart (TIM_IGNORE_TILT, TIME_2S);
+		free_timer_restart (tilt_ignore_timer, TIME_2S);
 		return;
 	}
 
@@ -114,15 +80,15 @@ CALLSET_ENTRY (tilt, sw_tilt)
 #endif
 		deff_start (DEFF_TILT);
 		leff_start (LEFF_TILT);
-		free_timer_restart (TIM_IGNORE_TILT, TIME_2S);
+		free_timer_restart (tilt_ignore_timer, TIME_2S);
 		in_tilt = TRUE;
+		set_valid_playfield ();
+		flipper_disable ();
+		callset_invoke (tilt);
 		task_remove_duration (TASK_DURATION_LIVE);
 		task_duration_expire (TASK_DURATION_LIVE);
-		flipper_disable ();
-		set_valid_playfield ();
 		audit_increment (&system_audits.tilts);
 		audit_increment (&system_audits.plumb_bob_tilts);
-		callset_invoke (tilt);
 	}
 	else
 	{
@@ -136,6 +102,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 
 CALLSET_ENTRY (tilt, sw_slam_tilt)
 {
+#ifdef SW_COIN_DOOR_CLOSED
 	/* Ignore slam tilt switch entirely while coin door is open,
 	and configured for tournament mode.  This is to avoid inadvertent slam tilts
 	while dealing with problems. */
@@ -145,6 +112,7 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	/* Ignore right after a coin door open/close */
 	if (nonball_event_did_follow (sw_coin_door_closed, sw_slam_tilt))
 		return;
+#endif
 
 	/* Kill the current game */
 	stop_game ();
@@ -164,12 +132,39 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 	if (price_config.slamtilt_penalty)
 		remove_credit ();
 
-	while (deff_get_active () == DEFF_SLAM_TILT)
-		task_sleep (TIME_66MS);
+	/* Wait for the switch to clear before rebooting. */
+#ifdef SW_SLAM_TILT
+	task_sleep_sec (1);
+	for (;;)
+	{
+		task_sleep (TIME_500MS);
+		if (!switch_poll (SW_SLAM_TILT))
+			break;
+	}
+#endif
+	warm_reboot ();
+}
 
-	/* TODO: wait for slam switch to become stable, to avoid
-	 * endless restarts */
-	 warm_reboot ();
+
+CALLSET_ENTRY (tilt, bonus_complete)
+{
+	/* Clear the tilt flag.  Note, this is not combined
+	with the above to handle tilt while bonus is running. */
+	if (in_tilt)
+	{
+		/* Wait for tilt bob to settle */
+		while (free_timer_test (tilt_ignore_timer))
+			task_sleep (TIME_100MS);
+
+		/* Cancel the tilt effects */
+#ifdef DEFF_TILT
+		deff_stop (DEFF_TILT);
+#endif
+#ifdef LEFF_TILT
+		leff_stop (LEFF_TILT);
+#endif
+		in_tilt = FALSE;
+	}
 }
 
 

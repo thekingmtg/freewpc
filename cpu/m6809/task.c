@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -227,10 +227,12 @@ void task_dump (void)
 				malloc_chunk_dump (tp);
 			}
 #endif
+#ifdef CONFIG_EXPAND_STACK
 			else if (tp->state & BLOCK_STACK)
 			{
 				dbprintf ("aux stack\n");
 			}
+#endif
 			else
 			{
 				dbprintf ("???\n");
@@ -438,31 +440,6 @@ task_t *task_create_gid (task_gid_t gid, task_function_t fn)
 #endif
 	log_event (SEV_DEBUG, MOD_TASK, EV_TASK_START, gid);
 	return (tp);
-}
-
-
-/** Create a task, but not if a task with the same GID already exists.
- * The previous task will continue to run. */
-task_t *task_create_gid1 (task_gid_t gid, task_function_t fn)
-{
-	task_t *tp = task_find_gid (gid);
-	if (tp) 
-		return (tp);
-	return task_create_gid (gid, fn);
-}
-
-
-/** Create a task with a given GID, ensuring that only one task
- * with that GID exists.  Any tasks with the same GID are killed
- * prior to starting the new task.  */
-task_t *task_recreate_gid (task_gid_t gid, task_function_t fn)
-{
-	task_kill_gid (gid);
-#ifdef PARANOID
-	if (task_find_gid (gid))
-		fatal (ERR_TASK_KILL_FAILED);
-#endif
-	return task_create_gid (gid, fn);
 }
 
 
@@ -694,16 +671,6 @@ void task_set_pointer_arg (task_t *tp, void *arg)
 }
 
 
-/** Allocate stack size from another task.  This should only be
-called immediately after the task is created before it gets a chance
-to run. */
-void *task_alloca (task_t *tp, U8 size)
-{
-	tp->stack_size += size;
-	return &tp->stack[TASK_STACK_SIZE - tp->stack_size];
-}
-
-
 /**
  * The task dispatcher.  This function selects a new task to run.
  *
@@ -746,7 +713,7 @@ void task_dispatcher (task_t *tp)
 		{
 			/* Call the debugger.  This is not implemented as a true
 			'idle' event below because it should _always_ be called,
-			even when 'sys_init_complete' is not true.  This lets us
+			even when 'periodic_ok' is not true.  This lets us
 			debug very early initialization. */
 			db_periodic ();
 

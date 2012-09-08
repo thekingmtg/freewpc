@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -32,46 +32,6 @@
 ought to generate a warning message */
 
 U8 live_balls_before_door_open;
-
-void coin_door_buttons_deff (void)
-{
-	dmd_alloc_low_clean ();
-#if (MACHINE_DMD == 1)
-	font_render_string_center (&font_var5, 64, 3, "COIN DOOR IS CLOSED");
-#endif
-	font_render_string_center (&font_var5, 64, 10, "OPEN COIN DOOR");
-	font_render_string_center (&font_var5, 64, 17, "TO USE BUTTONS");
-	dmd_show_low ();
-	task_sleep_sec (3);
-	deff_exit ();
-}
-
-
-void coin_door_power_deff (void)
-{
-	U8 n;
-	for (n=0; n < 5; n++)
-	{
-		dmd_alloc_low_clean ();
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
-
-		dmd_alloc_low_clean ();
-#if (MACHINE_DMD == 1)
-		font_render_string_center (&font_fixed6, 64, 6, "COIN DOOR IS OPEN");
-		font_render_string_center (&font_fixed6, 64, 16, "HIGH POWER");
-		font_render_string_center (&font_fixed6, 64, 26, "IS DISABLED");
-#else
-		font_render_string_center (&font_fixed6, 64, 10, "HIGH POWER");
-		font_render_string_center (&font_fixed6, 64, 21, "IS DISABLED");
-#endif
-		dmd_show_low ();
-		sound_send (SND_TEST_ALERT);
-		task_sleep (TIME_300MS);
-	}
-	task_sleep_sec (3);
-	deff_exit ();
-}
 
 
 static bool coin_door_warning_needed (void)
@@ -112,22 +72,30 @@ CALLSET_ENTRY (service, sw_down)
 {
 	if (coin_door_warning_needed ())
 		return;
+#ifdef CONFIG_VOLUME_CONTROL
 	else if (!in_test)
 		button_invoke (SW_VOLUME_DOWN, volume_down, TIME_500MS, TIME_100MS);
 		/* callset_invoke (volume_down) */
+#endif
+#ifdef CONFIG_DMD_OR_ALPHA
 	else	
 		test_down_button ();
+#endif
 }
 
 CALLSET_ENTRY (service, sw_up)
 {
 	if (coin_door_warning_needed ())
 		return;
+#ifdef CONFIG_VOLUME_CONTROL
 	else if (!in_test)
 		button_invoke (SW_VOLUME_UP, volume_up, TIME_500MS, TIME_100MS);
 		/* callset_invoke (volume_up) */
+#endif
+#ifdef CONFIG_DMD_OR_ALPHA
 	else
 		test_up_button ();
+#endif
 }
 
 /**************************************************************/
@@ -181,6 +149,7 @@ CALLSET_ENTRY (coin_door, amode_start)
 
 CALLSET_ENTRY (coin_door, sw_coin_door_closed)
 {
+#ifdef SW_COIN_DOOR_CLOSED
 	/* Be kind and ignore slam tilt switch briefly after the
 	coin door is opened/closed */
 	event_can_follow (sw_coin_door_closed, sw_slam_tilt, TIME_5S);
@@ -189,6 +158,7 @@ CALLSET_ENTRY (coin_door, sw_coin_door_closed)
 		coin_door_closed ();
 	else
 		coin_door_opened ();
+#endif
 }
 
 CALLSET_BOOL_ENTRY (coin_door, ball_drain)

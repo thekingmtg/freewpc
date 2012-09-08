@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -33,13 +33,6 @@
 #define HAVE_INTERRUPT_ATTRIBUTE
 #endif
 
-/* Only CPU game ROMs have nvram and locals */
-#ifdef CONFIG_PLATFORM_WPC
-#define HAVE_NVRAM_SECTION
-#define HAVE_LOCAL_SECTION
-#define HAVE_PERMANENT_SECTION
-#endif
-
 /** noreturn is a standard GCC attribute and is always
  * available.  This is just shorthand. */
 #define __noreturn__ __attribute__((noreturn))
@@ -48,30 +41,10 @@
  * or may not be available depending on the compiler
  * version used. */
 
-#ifdef HAVE_FASTRAM_ATTRIBUTE
 #define __fastram__ __attribute__((section("direct")))
-#else
-#define __fastram__
-#endif
-
-#ifdef HAVE_NVRAM_SECTION
 #define __nvram__ __attribute__((section ("nvram")))
-#else
-#define __nvram__
-#endif
-
-#ifdef HAVE_LOCAL_SECTION
 #define __local__ __attribute__((section ("local")))
-#else
-#define __local__
-#endif
-
-#ifdef HAVE_PERMANENT_SECTION
 #define __permanent__ __attribute__((section ("permanent")))
-#else
-#define __permanent__
-#endif
-
 
 /** Section declaration modifiers.  These attributes are used
  * on function prototypes and data externs to denote which
@@ -118,6 +91,20 @@
 #define __leff__
 #endif
 
+#ifndef __attribute_deprecated__
+#ifndef CONFIG_NO_DEPRECATED
+#define __attribute_deprecated__ __attribute__((__deprecated__))
+#else
+#define __attribute_deprecated__
+#endif
+#endif
+
+#ifndef CONFIG_NO_PURE
+#define __pure__ __attribute__((pure))
+#else
+#define __pure__
+#endif
+
 #ifdef HAVE_INTERRUPT_ATTRIBUTE
 #define __interrupt__ __attribute__((interrupt))
 #else
@@ -154,8 +141,11 @@ the target CPU */
 
 /* barrier() is used in several places to tell the compiler not
 to perform certain optimizations across both sides of the barrier. */
-#define barrier() asm ("; nop" ::: "memory")
-
+#ifdef __m6809__
+#define barrier() asm ("; barrier" ::: "memory")
+#else
+#define barrier()
+#endif
 
 /* Some versions of the 6809 C compiler have issues.
  * Use __GCC6809_AT_LEAST__ to test for a minimum version. */
@@ -189,55 +179,43 @@ do { \
 } while (0)
 
 
-/***************************************************************
- * I/O accessor functions
+/* Far data accessor functions
  *
- * The intent of these functions is to encapsulate all I/O
- * reads and writes, so that they can be simulated in
- * environments where a direct memory map is not present.
- ***************************************************************/
+ * Inside any banked function which needs to access caller data
+ * that might be in a different bank, first call far_read_access()
+ * as the very first statement in the function.  Thereafter, you
+ * can use far_read() to get access to caller data through a paged
+ * pointer.
+ *
+ * The syntax is far_read (ptr, field), where ptr is a pointer
+ * to a struct in a banked area, and field identifies which part
+ * of the struct needs to be read.
+ */
 
-#ifdef CONFIG_MMIO
-extern inline void writeb (IOPTR addr, U8 val)
-{
-	*(volatile U8 *)addr = val;
-	barrier ();
-}
+#define __fardata__
+
+#ifdef __m6809__
+#define far_read_access() \
+	U8 __caller_page; asm ("sta\t%0" : "=m"(__caller_page))
 #else
-void writeb (IOPTR addr, U8 val);
+#define far_read_access()
 #endif
 
-extern inline void writew (IOPTR addr, U16 val)
-{
-#ifdef CONFIG_MMIO
-	*(volatile U16 *)addr = val;
-	barrier ();
+#ifdef __m6809__
+#define far_read(ptr, __field) \
+	(__builtin_choose_expr ( (sizeof (ptr->__field) == 1), \
+		(far_read8 (&ptr->__field, __caller_page)), \
+		(typeof (ptr->__field))(far_read16 (&ptr->__field, __caller_page))))
 #else
-	writeb (addr, val >> 8);
-	writeb (addr+1, val & 0xFF);
-#endif
-}
-
-
-#ifdef CONFIG_MMIO
-extern inline U8 readb (IOPTR addr)
-{
-	return *(volatile U8 *)addr;
-}
-#else
-U8 readb (IOPTR addr);
+#define far_read(__ptr, __field) (__ptr->__field)
 #endif
 
-
-extern inline void io_toggle_bits (U16 addr, U8 val)
-{
-#ifdef CONFIG_NATIVE
-	U8 reg = readb (addr);
-	reg ^= val;
-	writeb (addr, val);
-#else
-	*(volatile U8 *)addr ^= val;
-#endif
-}
+/* Types for linker variables.
+   You can declare flags, global flags, and timers using the types below.
+   They are resolved to IDs at link time.  Each type is associated with
+   a pseudo-section. */
+#define flag_t          __attribute__((section(".flag"))) U8
+#define global_flag_t   __attribute__((section(".globalflag"))) U8
+#define free_timer_id_t __attribute__((section(".freetimer"))) U8
 
 #endif /* _ENV_H */

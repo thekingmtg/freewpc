@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -118,6 +118,7 @@ enum test_mode
 #endif
 };
 
+
 extern enum test_mode in_test;
 
 extern inline void set_test_mode (enum test_mode mode)
@@ -131,6 +132,7 @@ extern struct adjustment pricing_adjustments[];
 extern struct adjustment hstd_adjustments[];
 extern struct adjustment printer_adjustments[];
 extern struct adjustment debug_adjustments[];
+extern struct adjustment modify_game_adjustments[];
 extern struct adjustment empty_adjustments[];
 
 __test2__ const struct adjustment *adj_get (U8 num);
@@ -157,7 +159,6 @@ typedef enum
 	AUDIT_TYPE_TOTAL_EARNINGS,
 	AUDIT_TYPE_AVG_PER_GAME,
 	AUDIT_TYPE_AVG_PER_BALL,
-	AUDIT_TYPE_LONGINT,
 	AUDIT_TYPE_TIMESTAMP,
 	AUDIT_TYPE_TIME_PER_BALL,
 	AUDIT_TYPE_TIME_PER_CREDIT,

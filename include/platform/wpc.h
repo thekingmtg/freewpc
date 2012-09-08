@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -38,38 +38,6 @@
 /***************************************************************
  * Memory usage
  ***************************************************************/
-
-#ifdef __m6809__
-
-/** AREA_DECL is used to expose a linker area name within the C
- * variable namespace.  It appears an external name.  The asm syntax
- * is needed so that the normal appending of an underscore does not
- * occur. */
-#define ASM_DECL(name) name asm (#name)
-#define AREA_DECL(name) extern U8 ASM_DECL (s_ ## name); extern U8 ASM_DECL (l_ ## name);
-
-/** Return the base address of a linker area.  This has type (U8 *). */
-#define AREA_BASE(name) (&s_ ## name)
-
-/** Return the runtime size of a linker area.  This has type U16.
- * This is not the maximum allowable space for the area, but rather
- * reflects how many actual variables have been mapped there. */
-#define AREA_SIZE(name) ((U16)(&l_ ## name))
-
-/* Define externs for all of these areas.  AREA_BASE and AREA_SIZE can
- * only be called on these. */
-AREA_DECL(direct)
-AREA_DECL(ram)
-AREA_DECL(local)
-AREA_DECL(heap)
-AREA_DECL(stack)
-AREA_DECL(permanent)
-AREA_DECL(nvram)
-
-#else
-#define AREA_SIZE(name) 0
-#endif /* __m6809__ */
-
 
 /** The total size of RAM  -- 8K */
 #define RAM_SIZE 			0x2000UL
@@ -287,10 +255,10 @@ extern inline void pinio_dmd_window_flip (void)
 #ifdef CONFIG_NATIVE
 /* In native mode, the DMD is emulated using ordinary character
    buffers. */
-extern U8 *linux_dmd_low_page;
-extern U8 *linux_dmd_high_page;
+extern U8 *pinio_dmd_low_page;
+extern U8 *pinio_dmd_high_page;
 #define pinio_dmd_window_ptr(w) \
-	((w == PINIO_DMD_WINDOW_0) ? linux_dmd_low_page : linux_dmd_high_page)
+	((w == PINIO_DMD_WINDOW_0) ? pinio_dmd_low_page : pinio_dmd_high_page)
 #else
 /* WPC can map up to 2 of the DMD pages into address space at
  * 0x3800 and 0x3A00.  Additionally, on WPC-95, 4 more pages
@@ -302,12 +270,6 @@ extern U8 *linux_dmd_high_page;
  */
 #define pinio_dmd_window_ptr(w) ((U8 *)0x3000 + ((w) * 0x200))
 #endif
-
-
-/* Define addresses for the two page buffer locations we
- * call low and high.  This define is DEPRECATED. */
-#define DMD_LOW_BASE pinio_dmd_window_ptr (PINIO_DMD_WINDOW_0)
-#define DMD_HIGH_BASE pinio_dmd_window_ptr (PINIO_DMD_WINDOW_1)
 
 
 /**
@@ -738,6 +700,13 @@ extern inline void pinio_write_gi (U8 val)
 /********************************************/
 
 #define PINIO_NUM_SOLS 48
+#define SOL_BASE_HIGH 0
+#define SOL_BASE_LOW 8
+#define SOL_BASE_GENERAL 16
+#define SOL_BASE_AUXILIARY 24
+#define SOL_BASE_FLIPTRONIC 32
+#define SOL_BASE_EXTENDED 40
+#define SOL_MIN_FLASHER 16
 
 extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 {
@@ -770,14 +739,44 @@ extern inline void pinio_write_solenoid_set (U8 set, U8 val)
 	}
 }
 
-extern inline void pinio_write_solenoid (U8 solno, U8 val)
-{
-}
 
-extern inline U8 pinio_read_solenoid (U8 solno)
+/** Return the hardware register that can be written
+to enable/disable a coil driver. */
+extern inline IOPTR sol_get_write_reg (U8 sol)
 {
+	switch (sol / 8)
+	{
+		case 0:
+			return (IOPTR)WPC_SOL_HIGHPOWER_OUTPUT;
+		case 1:
+			return (IOPTR)WPC_SOL_LOWPOWER_OUTPUT;
+		case 2:
+			return (IOPTR)WPC_SOL_FLASHER_OUTPUT;
+		case 3:
+			return (IOPTR)WPC_SOL_GEN_OUTPUT;
+#if (MACHINE_WPC95 == 1)
+		case 4:
+			return (IOPTR)WPC95_FLIPPER_COIL_OUTPUT;
+#elif (MACHINE_FLIPTRONIC == 1)
+		case 4:
+			return (IOPTR)WPC_FLIPTRONIC_PORT_A;
+#endif
+#ifdef MACHINE_SOL_EXTBOARD1
+		case 5:
+			return (IOPTR)WPC_EXTBOARD1;
+#endif
+	}
 	return 0;
 }
+
+
+/** Return nonzero if a solenoid's enable line is inverted; i.e.
+ * writing a 0 turns it on and writing a 1 turns it off.
+ */
+#if (MACHINE_WPC95 == 0)
+#define PINIO_SOL_INVERTED(sol) \
+	(((sol) >= SOL_BASE_FLIPTRONIC) && ((sol) < (SOL_BASE_FLIPTRONIC+8)))
+#endif
 
 
 /********************************************/
@@ -834,6 +833,16 @@ extern inline U8 pinio_read_sound (void)
 /********************************************/
 /* Switches                                 */
 /********************************************/
+
+#define WPC_SW_DIRECT 0
+#define WPC_SW_PLAYFIELD 8
+#define WPC_SW_FLIPTRONIC 72
+
+#if (MACHINE_FLIPTRONIC == 1)
+#define PINIO_NUM_SWITCHES 80
+#else
+#define PINIO_NUM_SWITCHES 72
+#endif
 
 extern inline void pinio_write_switch_column (U8 val)
 {

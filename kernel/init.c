@@ -39,10 +39,7 @@ U8 periodic_ok;
 running.  The splash screen is kept until this reverts to zero. */
 U8 sys_init_pending_tasks;
 
-#ifdef CONFIG_PLATFORM_WPC
-const U8 wpc_machine_type = WPC_TYPE;
-#endif
-
+/* RTT(name=advance_time_rtt freq=16 inline=1) */
 
 /**
  * Handle a warm reboot.
@@ -57,8 +54,11 @@ __noreturn__ void warm_reboot (void)
 #ifdef __m6809__
 	start ();
 #else
-	disable_interrupts ();
-	freewpc_init ();
+#ifdef CONFIG_SIM
+	sim_exit (1);
+#else
+	exit (1);
+#endif
 #endif
 }
 
@@ -89,7 +89,11 @@ __noreturn__ void freewpc_init (void)
 
 	/* Initialize the real-time scheduler.  The periodic functions
 	are scheduled at compile-time  using the 'gensched' utility. */
+#ifdef CONFIG_GEN_RTT
+	VOIDCALL (rtt_init);
+#else
 	VOIDCALL (tick_init);
+#endif
 
 	/* Initialize the hardware.
 	 * After each init call, tickle the watchdog (IRQ isn't enabled yet)
@@ -113,8 +117,10 @@ __noreturn__ void freewpc_init (void)
 	gi_init ();
 	pinio_watchdog_reset ();
 #endif
+#ifdef CONFIG_DMD_OR_ALPHA
 	display_init ();
 	pinio_watchdog_reset ();
+#endif
 	switch_init ();
 	pinio_watchdog_reset ();
 	flipper_init ();
@@ -144,6 +150,16 @@ __noreturn__ void freewpc_init (void)
 	log_init ();
 
 #ifdef CONFIG_NATIVE
+	{
+		void realtime_loop (void);
+
+		/* This is done here, because the task subsystem isn't ready
+		inside main () */
+		task_create_gid_while (GID_LINUX_REALTIME, realtime_loop,
+			TASK_DURATION_INF);
+	}
+#endif
+#ifdef CONFIG_SIM
 	/* Notify the simulator when the core OS is up and running. */
 	sim_init ();
 #endif
@@ -167,7 +183,9 @@ __noreturn__ void freewpc_init (void)
 	order of invocation.  For most things the order doesn't matter. */
 	deff_init ();
 	leff_init ();
+#ifdef CONFIG_TEST
 	test_init ();
+#endif
 	adj_init ();
 	callset_invoke (init);
 

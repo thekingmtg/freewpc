@@ -1,7 +1,7 @@
 
 #include <freewpc.h>
 
-__local__ U8 jet_shots_made;
+__local__ U8 jet_count;
 
 __local__ U8 jet_goal;
 
@@ -12,10 +12,10 @@ void jet_deff (void)
 {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_mono5, 96, 5, "JET BUMPER");
-	sprintf ("%d", jet_shots_made);
+	sprintf ("%d", jet_count);
 	font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
 
-	if (jet_shots_made == jet_goal)
+	if (jet_count == jet_goal)
 		sprintf ("BONUS AWARDED");
 	else
 		sprintf ("BONUS AT %d", jet_goal);
@@ -35,7 +35,7 @@ void jet_flasher (void)
 
 void jet_goal_reset (void)
 {
-	jet_shots_made = 0;
+	jet_count = 0;
 	jet_goal = 25;
 }
 
@@ -43,7 +43,7 @@ void jet_goal_reset (void)
 void jet_goal_award (void)
 {
 	sound_start (ST_SAMPLE, MUS_TICKET_BOUGHT, SL_1S, PRI_GAME_QUICK5);
-	jet_shots_made = 0;
+	jet_count = 0;
 	if (jet_goal < 50)
 		jet_goal += 5;
 }
@@ -51,13 +51,13 @@ void jet_goal_award (void)
 
 CALLSET_ENTRY (jets, sw_left_jet, sw_upper_jet, sw_lower_jet)
 {
-	++jet_shots_made;
+	++jet_count;
 	score (SC_5K);
 	deff_start (DEFF_JET);
 	task_sleep (TIME_16MS);
 	task_create_gid1 (GID_JET_FLASHER, jet_flasher);
 
-	if (jet_shots_made == jet_goal)
+	if (jet_count == jet_goal)
 	{
 		jet_goal_award ();
 	}

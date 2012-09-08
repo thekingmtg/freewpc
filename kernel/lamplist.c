@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -265,8 +265,8 @@ bool lamplist_test_any (lamplist_id_t id, lamp_boolean_operator_t op)
 }
 
 
-static __attribute__((pure))
-lamp_boolean_operator_t matrix_test_operator (const bitset matrix)
+static __pure__
+lamp_boolean_operator_t matrix_test_operator (const lamp_set matrix)
 {
 	if (matrix == lamp_matrix)
 	{

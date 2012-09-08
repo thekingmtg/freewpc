@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -101,7 +101,7 @@ void fontargs_render_string_right (const char *);
 void fontargs_render_string_left (const char *);
 void bitmap_blit (const U8 *blit_data, U8 x, U8 y);
 void bitmap_blit2 (const U8 *blit_data, U8 x, U8 y);
-void bitmap_draw (union dmd_coordinate coord, U8 c);
+void fontargs_render_glyph (U8 c);
 
 /**
  * Helper macros for packing two 8-bit coordinates
@@ -150,6 +150,20 @@ do { \
 do { \
 	DECL_FONTARGS(f,x,y,s); \
 	fontargs_render_string_right (s); \
+} while (0)
+
+
+#define font_render_glyph(f,x,y,c) \
+do { \
+	DECL_FONTARGS(f,x,y,sprintf_buffer); \
+	fontargs_render_glyph (c); \
+} while (0)
+
+#define bitmap_draw(_coord, _c) \
+do { \
+	font_args.font = &font_symbol; \
+	font_args.coord = _coord; \
+	fontargs_render_glyph (_c); \
 } while (0)
 
 #endif /* _SYS_FONT_H */

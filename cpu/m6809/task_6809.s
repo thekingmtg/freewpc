@@ -1,5 +1,5 @@
 ;;;
-;;; Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+;;; Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
 ;;;
 ;;; This file is part of FreeWPC.
 ;;;
@@ -171,8 +171,6 @@ _stack_large_error:
 	stb	,x+
 	clr	,x
 	jsr	_dbprintf1
-	cmps	#STACK_BASE
-	blt	_stack_large_error
 #endif
 	ldb	#ERR_TASK_STACK_OVERFLOW
 	jmp	_fatal
@@ -204,8 +202,8 @@ _task_restore:
 
 	; Compute the number of extra bytes that were saved
 	; for adjusting the stack pointer
-	pshs	b
-	suba	,s+
+	stb	*m0
+	suba	*m0
 	nega
 
 	; Set the destination address
@@ -282,6 +280,7 @@ _task_create:
 	puls	u,pc
 
 
+#ifdef CONFIG_TASK_FORK
 	;-----------------------------------------------------
 	; task_fork - an implementation of the UNIX fork()
 	; system call.  It is similar to task_create,
@@ -334,6 +333,7 @@ _task_fork_entry:
 	ldx	UREG_SAVE_OFF,x
 	clrb
 	jmp	,x
+#endif /* CONFIG_TASK_FORK */
 
 
 	;-----------------------------------------------------

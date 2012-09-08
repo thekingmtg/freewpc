@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -67,6 +67,11 @@ U8 deff_running;
 /** The priority of the running display effect */
 U8 deff_prio;
 
+/** Display effect data management (see deffdata.h) */
+U8 deff_data_pending[MAX_DEFF_DATA];
+U8 deff_data_pending_count;
+U8 deff_data_active[MAX_DEFF_DATA];
+U8 deff_data_active_count;
 
 #define MAX_QUEUED_DEFFS 8
 
@@ -107,8 +112,10 @@ U8 deff_get_active (void)
 static void deff_stop_task (void)
 {
 	deff_debug ("deff_stop_task\n");
+#ifdef CONFIG_DMD
 	/* TODO : if (!task_find_gid (GID_DEFF_EXITING)) -- not working yet */
 		dmd_reset_transition ();
+#endif
 	kickout_unlock (KLOCK_DEFF);
 }
 
@@ -129,9 +136,11 @@ static void deff_start_task (const deff_t *deff)
 		kickout_lock (KLOCK_DEFF);
 
 	/* If this deff wants to show the last score, hold
-	 * on to that value */
+	 * on to that value.  Newer deffs can use the deff data
+	 * functions to load arbitrary data, not just scores. */
 	if (deff->flags & D_SCORE)
 		score_deff_set ();
+	deff_data_load ();
 
 	/* Create a task for the new deff */
 	tp = task_create_gid (GID_DEFF, deff->fn);
@@ -276,6 +285,14 @@ void deff_queue_service (void)
 		}
 	}
 
+	/* Delay updating background effect briefly, to allow
+	synchronous callers to do something else */
+	if (task_getgid () == GID_DEFF_EXITING)
+	{
+		dbprintf ("deff_update delayed on exit\n");
+		task_sleep (TIME_133MS);
+	}
+
 	/* No queued effect can run now, so try a background update */
 	deff_update ();
 }
@@ -393,21 +410,6 @@ __noreturn__ void deff_delay_and_exit (task_ticks_t ticks)
 }
 
 
-/** Called from a deff when it wants to toggle between two images
- * on the low and high mapped pages, both in mono mode.
- * COUNT is the number of times to toggle.
- * DELAY is how long to wait between each change. */
-void deff_swap_low_high (S8 count, task_ticks_t delay)
-{
-	dmd_show_low ();
-	while (--count >= 0)
-	{
-		dmd_show_other ();
-		task_sleep (delay);
-	}
-}
-
-
 /** Lower the priority of the currently running display effect.
 This may cause it to be preempted by something more important. */
 void deff_nice (enum _priority prio)
@@ -443,8 +445,10 @@ void deff_stop_all (void)
 	deff_running = deff_prio = 0;
 	deff_queue_reset ();
 
+#ifdef CONFIG_DMD_OR_ALPHA
 	dmd_alloc_low_clean ();
 	dmd_show_low ();
+#endif
 
 	deff_init ();
 }
@@ -483,6 +487,10 @@ void deff_update (void)
 {
 	deffnum_t previous;
 
+#ifdef CONFIG_NO_DEFFS
+	return;
+#endif
+
 	/* If there is a transient effect running, then
 	don't try anything.  We'll update the background automatically
 	when the foreground exits. */
@@ -517,11 +525,16 @@ void deff_update (void)
 /** Start a display effect and wait for it to finish before returning. */
 void deff_start_sync (deffnum_t dn)
 {
-	deff_start (dn);
-	if (deff_get_active () != dn)
-		nonfatal (ERR_FAILED_DEFF);
+	U8 n;
+	for (n=0; n < 24; n++)
+	{
+		deff_start (dn);
+		if (deff_get_active () == dn)
+			break;
+		task_sleep (TIME_166MS);
+	}
 	while (deff_get_active () == dn)
-		task_sleep (TIME_100MS);
+		task_sleep (TIME_66MS);
 }
 
 

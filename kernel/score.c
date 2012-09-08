@@ -50,6 +50,9 @@ score_t deff_score;
 /** The last multiplier as displayed */
 U8 deff_multiplier;
 
+/** Nonzero if the current score has changed and needs to be redrawn */
+bool score_update_needed;
+
 
 /** Clears a score */
 void score_zero (score_t s)
@@ -144,7 +147,7 @@ I8 score_compare (const score_t s1, const score_t s2)
 /** Adds to the current score.  The input score is given as a BCD-string. */
 static void score_award (const bcd_t *s)
 {
-	if (in_tilt)
+	if (in_tilt || in_test)
 		return;
 	if (!in_game)
 	{
@@ -164,9 +167,9 @@ void score_award_compact (U8 offset, bcd_t val)
 {
 	U8 mult;
 
-	if (in_tilt)
+	if (in_tilt || in_test)
 		return;
-	if (!in_live_game)
+	if (!in_game)
 	{
 		nonfatal (ERR_SCORE_NOT_IN_GAME);
 		return;
@@ -264,6 +267,7 @@ void score_multiplier_set (U8 m)
 CALLSET_ENTRY (score, start_ball)
 {
 	score_multiplier_set (1);
+	score_update_request ();
 }
 
 CALLSET_ENTRY (score, factory_reset)

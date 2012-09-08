@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -65,7 +65,7 @@ signal_readings_t *signal_readings[MAX_SIGNALS] = { NULL, };
  * The last known value of each signal.  This does not
  * provide any history.  Each signal is stored as a single bit.
  */
-uint32_t signal_states[(MAX_SIGNALS + 32) / 32] = { 0, };
+uint32_t signal_states[(MAX_SIGNALS + 31) / 32] = { 0, };
 
 
 /** A list of the signals currently being captured */
@@ -84,12 +84,13 @@ uint64_t signal_trace_start_time;
 double signal_value (uint32_t signo);
 
 
+#ifdef CONFIG_AC
 double signal_ac_angle_value (uint32_t offset)
 {
 	extern double sim_zc_angle (void);
 	return sim_zc_angle ();
 }
-
+#endif
 
 double signal_sol_voltage_value (uint32_t offset)
 {
@@ -109,10 +110,12 @@ const value_signal signal_value_table[] = {
 	to 1.0, depending on the current phase of the AC cycle. */
 	signal_sol_voltage_value,
 
+#ifdef CONFIG_AC
 	/* SIGNO_AC_ANGLE is similar, but just returns the -1.0 to 1.0 value
 	that represents the phase angle, without consideration for any particular
 	solenoid line. */
 	signal_ac_angle_value,
+#endif
 };
 
 
@@ -290,7 +293,6 @@ void signal_write (void)
 void signal_update (signal_number_t signo, unsigned int state)
 {
 	signal_readings_t *sigrd;
-	simulated_time_interval_t last_change_time;
 
 	/* Update last state */
 	if (state)
@@ -316,10 +318,16 @@ void signal_update (signal_number_t signo, unsigned int state)
 
 	/* See what time the signal last changed state.  By comparing this
 	to the current time, we can say how long it held its last value. */
+#if 0
+	simulated_time_interval_t last_change_time;
 	if (sigrd->count == 0)
 		last_change_time = 0;
 	else
 		last_change_time = sigrd->t[sigrd->count - 1];
+	/* Print the last signal state */
+	simlog (SLC_DEBUG, "Signo(%d) was %s for %ldms", signo, !state ? "high" : "low",
+		realtime_read () - last_change_time);
+#endif
 
 	/* Allocate a new block if the previous block is full. */
 	if (sigrd->count == MAX_READINGS)
@@ -330,11 +338,6 @@ void signal_update (signal_number_t signo, unsigned int state)
 		sigrd = sigrd->next = new_sigrd;
 	}
 
-#if 0
-	/* Print the last signal state */
-	simlog (SLC_DEBUG, "Signo(%d) was %s for %ldms", signo, !state ? "high" : "low",
-		realtime_read () - last_change_time);
-#endif
 
 	/* Save the new state along with the timestamp of the change */
 	sigrd->t[sigrd->count++] = realtime_read ();

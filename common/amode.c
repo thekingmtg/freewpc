@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -62,6 +62,7 @@ void amode_flipper_sound (void)
 	}
 }
 
+#ifdef CONFIG_DMD_OR_ALPHA
 
 void amode_sleep_sec (U8 secs)
 {
@@ -145,7 +146,6 @@ void amode_freeplay_page (void)
 	amode_page_end (0);
 }
 
-
 void amode_high_score_page (void)
 {
 	if (hstd_config.highest_scores == ON)
@@ -173,13 +173,15 @@ void amode_date_time_page (void)
 
 void amode_kill_music (void)
 {
-//	music_set (MUS_OFF);
+	music_set (MUS_OFF);
 	amode_page_end (0);
 }
 
+#endif
 
 
 void (*amode_page_table[]) (void) = {
+#ifdef CONFIG_DMD_OR_ALPHA
 	amode_score_page,
 #if (MACHINE_DMD == 1)
 	amode_logo_page,
@@ -194,6 +196,7 @@ void (*amode_page_table[]) (void) = {
 #ifdef MACHINE_AMODE_EFFECTS
 	MACHINE_AMODE_EFFECTS
 #endif
+#endif /* CONFIG_DMD_OR_ALPHA */
 };
 
 
@@ -226,7 +229,6 @@ __attribute__((noinline)) void amode_page_change (S8 delta)
 
 	amode_page_changed = 1;
 }
-
 
 CALLSET_ENTRY (amode, sw_left_button)
 {

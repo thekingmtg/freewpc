@@ -34,8 +34,8 @@ struct coin_state
 	U8 total_units;
 };
 
-__common__ void credits_render (void);
-__common__ void credits_draw (void);
+__effect__ void credits_render (void);
+__effect__ void credits_draw (void);
 __common__ void lamp_start_update (void);
 __common__ void add_credit (void);
 __common__ bool has_credits_p (void);
@@ -48,5 +48,12 @@ extern inline U8 get_credits (void)
 	extern struct coin_state coin_state;
 	return coin_state.credits;
 }
+
+extern inline U8 get_units (void)
+{
+	extern struct coin_state coin_state;
+	return coin_state.units;
+}
+
 
 #endif /* _COIN_H */

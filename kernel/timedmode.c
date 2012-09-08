@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2008-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -123,8 +123,8 @@ void timed_mode_begin (struct timed_mode_ops *ops)
  */
 void timed_mode_end (struct timed_mode_ops *ops)
 {
-	timed_mode_exit_handler (ops);
 	task_kill_gid (ops->gid);
+	timed_mode_exit_handler (ops);
 }
 
 

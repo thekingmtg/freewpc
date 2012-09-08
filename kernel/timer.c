@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -36,7 +36,6 @@
 
 
 #define TIMER_FREERUNNING_GRAN	TIME_100MS
-#define TIMER_PAUSABLE_GRAN		TIME_100MS
 
 /**
  * When nonzero, system timers are paused.  This feature can allow you to pause
@@ -78,13 +77,16 @@ void timer_unlock (void)
  *
  * Returns TRUE if timers should not run for some reason.
  * Returns FALSE if timers should continue to run.
+ *
+ * In a game, timers will normally run, so most of the time, this
+ * entire function will be executed; thus, it is mostly useless to
+ * try to optimize this by moving things around.  The best way to
+ * optimize this is to reduce the total number of checks by
+ * usign timer locks.
  */
 bool system_timer_pause (void)
 {
-	if (!in_game || in_bonus || !valid_playfield)
-		return TRUE;
-
-	if (timer_lock_count)
+	if (!in_game || !valid_playfield || timer_lock_count)
 		return TRUE;
 
 	if (global_flag_test (GLOBAL_FLAG_BALL_AT_PLUNGER) && single_ball_play ())

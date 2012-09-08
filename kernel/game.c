@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006, 2007, 2008, 2009, 2010, 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -64,6 +64,11 @@ __fastram__ U8 in_bonus;
 
 /** Nonzero if the current game is currently in tilt mode */
 __fastram__ U8 in_tilt;
+
+/* Equivalent to (win_top != NULL), but as a byte, this can
+ * be tested with a single instruction.
+ * IDEA: these two variables could be overlapped into a union. */
+__fastram__ enum test_mode in_test;
 
 /** Nonzero if the current ball has reached valid playfield; i.e.
  * ball loss is allowed to end the ball.  When zero,
@@ -138,7 +143,7 @@ void dump_game (void)
 /** Handles the end game condition.
  * This is called directly from the trough update function during
  * endball.  It is also called by test mode when it starts up. */
-void end_game (void)
+static void end_game_task (void)
 {
 	U8 was_in_game = in_game;
 
@@ -176,6 +181,20 @@ void end_game (void)
 		deff_start (DEFF_GAME_OVER);
 		amode_start ();
 	}
+	task_exit ();
+}
+
+void end_game (void)
+{
+	/* To limit stack size, spawn this in a separate
+	 * task context.  We are already nested pretty deeply here, and
+	 * end game effects will need to sleep to do synchronous deffs.  I've
+	 * observed stack overflow here when running the stress test.
+	 * Ensure that this task doesn't get killed due to any duration
+	 * change - notably entering test mode. */
+	task_remove_duration (TASK_DURATION_GAME);
+	task_create_gid1 (GID_END_GAME, end_game_task);
+	task_sleep (TIME_16MS);
 }
 
 
@@ -235,24 +254,7 @@ void end_ball (void)
 	music_disable ();
 	if (!in_tilt)
 		callset_invoke (bonus);
-
-	/* Clear the tilt flag.  Note, this is not combined
-	with the above to handle tilt while bonus is running. */
-	if (in_tilt)
-	{
-		/* Wait for tilt bob to settle */
-		while (free_timer_test (TIM_IGNORE_TILT))
-			task_sleep (TIME_100MS);
-
-		/* Cancel the tilt effects */
-#ifdef DEFF_TILT
-		deff_stop (DEFF_TILT);
-#endif
-#ifdef LEFF_TILT
-		leff_stop (LEFF_TILT);
-#endif
-		in_tilt = FALSE;
-	}
+	callset_invoke (bonus_complete);
 
 	/* Stop tasks that should run only until end-of-ball. */
 	task_remove_duration (TASK_DURATION_BALL);
@@ -326,10 +328,8 @@ void end_ball (void)
 		}
 	}
 
-	/* After the max balls per game have been played, go into
-	 * end game */
+	/* After the max balls per game have been played, go into end game */
 	end_game ();
-
 done:
 #ifdef DEBUGGER
 	/* Dump the game state */
@@ -568,7 +568,7 @@ void start_game (void)
 {
 	if (!in_game)
 	{
-		task_kill_gid (GID_END_BALL);
+		task_kill_gid (GID_END_GAME);
 		in_game = TRUE;
 		in_bonus = FALSE;
 		in_tilt = FALSE;
@@ -601,7 +601,7 @@ void start_game (void)
 /**
  * stop_game is called whenever a game is restarted, or test mode
  * is entered.  It is functionally equivalent to end_game aside
- * from normal end * game features like match, high score check, etc.
+ * from normal end game features like match, high score check, etc.
  */
 void stop_game (void)
 {
@@ -625,11 +625,17 @@ void stop_game (void)
 	callset_invoke (stop_game);
 	deff_stop_all ();
 	leff_stop_all ();
+
+	/* Forcibly stop tasks that should run only during a game.
+	Do this last, so that the stop_game event handlers gives modules
+	a chance to do cleanup before this happens. */
+	task_remove_duration (TASK_DURATION_GAME);
+	task_duration_expire (TASK_DURATION_GAME);
 }
 
 
 /** Perform final checks before allowing a game to start. */
-bool verify_start_ok (void)
+static bool verify_start_ok (void)
 {
 #ifndef DEVNO_TROUGH
 	return FALSE;
@@ -642,6 +648,7 @@ bool verify_start_ok (void)
 	/* check ball devices stable */
 	if (!in_game && !device_check_start_ok ())
 		return FALSE;
+
 #ifdef MACHINE_TZ
 	/* Don't allow the game to start if we are still
 	 * loading balls into the gumball */
@@ -649,7 +656,10 @@ bool verify_start_ok (void)
 	if (gumball_enable_from_trough)
 		return FALSE;
 #endif
-	return TRUE;
+
+	/* Give other modules a chance to decide if game start
+	is OK.  Return FALSE whenever start should be denied. */
+	return callset_invoke_boolean (game_start_allowed);
 }
 
 
@@ -669,8 +679,8 @@ CALLSET_ENTRY (game, start_button_handler)
 	}
 
 	/* If a game is already in progress and is tilted, do not allow
-	further players to be added */
-	if (in_tilt)
+	further players to be added.  Also do not allow when in test mode. */
+	if (in_test || in_tilt)
 		return;
 
 	/* See if a game is already in progress. */

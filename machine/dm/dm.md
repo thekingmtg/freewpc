@@ -275,7 +275,7 @@ H2: Bottom Popper, time(TIME_200MS)
 H3: Launch, launch, nosearch, duty(SOL_DUTY_100), time(TIME_133MS)
 
 H4: Top Popper, time(TIME_100MS)
-H5: Diverter Power, duty(SOL_DUTY_50), time(TIME_133MS)
+H5: Diverter Power, duty(SOL_DUTY_100)
 H6: Not Used
 H7: Knocker, knocker, time(TIME_16MS)
 
@@ -355,7 +355,10 @@ Top Sling: driver(jet), sw=SW_TOP_SLING, sol=SOL_TOP_SLING, ontime=3, offtime=16
 # power_pulse_ms --Durations of the pulse for the full power solenoid (in ms) 
 # 					must be divisible by the value used by the schedule_ms parameter
 # schedule_ms  --try 32 first as highest number, then experiment from there
-Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=192,	schedule_ms=32, includetest(yes)
+#Diverter: driver(divhold2), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, power_pulse_ms=100,	includetest(yes)
+
+Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=128, schedule_ms=16, includetest(yes)
+
 
 
 
@@ -376,7 +379,7 @@ TopSol: driver(spsol), sol=SOL_TOP_POPPER, sw=SW_TOP_POPPER, ontime=8, offtime=1
 # like on AFM, but it will work fine here too.  The elevator motor can turn either way 
 # and raises and lowers the elevator as it continually runs.  It is stopped at the top or bottom
 # by limit switches being made up
-#Elevator: driver(motorbank), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_INDEX, down_sw_event=SW_ELEVATOR_HOLD
+Elevator: driver(motorbank), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_INDEX, down_sw_event=SW_ELEVATOR_HOLD
 
 
 # driver designed for TZ mini playfield magnets

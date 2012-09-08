@@ -1,5 +1,5 @@
 /*
- * Copyright 2006, 2007, 2008, 2009 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2012 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -26,12 +26,6 @@
  * non-volatile memory.
  */
 typedef U16 audit_t;
-
-/**
- * Some audits need more than 16-bits.  These are called
- * long audits and are stored as 3-byte binary-coded decimal.
- */
-typedef U8 long_audit_t[3];
 
 
 /*
@@ -128,7 +122,7 @@ typedef struct
 	struct date coins_cleared; /* done */
 	struct date factory_reset; /* done */
 	struct date last_game_start; /* done */
-	struct date last_replay;
+	struct date last_replay; /* done */
 	struct date last_hstd_reset;
 	struct date champion_reset;
 	struct date last_printout; /* done */

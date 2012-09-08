@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -136,6 +136,9 @@ U8 dmd_phase_table[] = {
 	0, 1, 1, 0, 1, 1
 };
 
+#if PINIO_DMD_PIXEL_BITS == 8
+U8 dmd_current_color;
+#endif
 
 void dmd_new_rtt (void)
 {
@@ -156,6 +159,9 @@ void dmd_init (void)
 	dmd_phase_ptr = dmd_phase_table;
 	dmd_in_transition = FALSE;
 	dmd_transition = NULL;
+#if PINIO_DMD_PIXEL_BITS == 8
+	dmd_current_color = 1;
+#endif
 
 	/* If DMD_BLANK_PAGE_COUNT is defined, this says how
 	 * many DMD pages should not be allocatable, but should be
@@ -241,29 +247,8 @@ static __attribute__((noinline)) dmd_pagenum_t dmd_alloc (void)
 }
 
 
-/**
- * Allocate and map a single page, for a mono image.
- *
- * Since the image is mono, we map the same page into both the low
- * and high pages.
- */
-void dmd_alloc_low (void)
-{
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_0,
-		dmd_alloc ());
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_1,
-		pinio_dmd_window_get (PINIO_DMD_WINDOW_0));
-}
-
-
-/** Allocate and map a single page, into the 'high' region. */
-void dmd_alloc_high (void)
-{
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_1, dmd_alloc ());
-}
-
-
 /** Map a consecutive display page pair into windows 0 & 1 */
+__attribute__((noinline))
 void dmd_map_low_high (dmd_pagenum_t page)
 {
 	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, page);
@@ -276,10 +261,23 @@ void dmd_map_low_high (dmd_pagenum_t page)
  */
 void dmd_alloc_pair (void)
 {
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_0, dmd_alloc ());
-	pinio_dmd_window_set (PINIO_DMD_WINDOW_1,
-		pinio_dmd_window_get (PINIO_DMD_WINDOW_0) + 1);
+	dmd_pagenum_t page = dmd_alloc ();
+	dmd_map_low_high (page);
 }
+
+/**
+ * Allocate and map a single page, for a mono image.
+ */
+void dmd_alloc_low (void)
+{
+	if (0) {
+		dmd_pagenum_t page = dmd_alloc ();
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_0, page);
+		pinio_dmd_window_set (PINIO_DMD_WINDOW_1, page);
+	}
+	dmd_alloc_pair ();
+}
+
 
 
 /**
@@ -336,6 +334,20 @@ void dmd_show_other (void)
 	dmd_visible_pages.pair ^= 0x0101;
 }
 
+/** Called from a deff when it wants to toggle between two images
+ * on the low and high mapped pages, both in mono mode.
+ * COUNT is the number of times to toggle.
+ * DELAY is how long to wait between each change. */
+void deff_swap_low_high (S8 count, task_ticks_t delay)
+{
+	dmd_show_low ();
+	while (--count >= 0)
+	{
+		dmd_show_other ();
+		task_sleep (delay);
+	}
+}
+
 
 /**
  * Show a 4-color image.
@@ -382,7 +394,11 @@ void dmd_clean_page (dmd_buffer_t dbuf)
 
 void dmd_fill_page_low (void)
 {
+#if PINIO_DMD_PIXEL_BITS == 1
 	memset (dmd_low_buffer, 0xFF, DMD_PAGE_SIZE);
+#else
+	memset (dmd_low_buffer, dmd_current_color, DMD_PAGE_SIZE);
+#endif
 }
 
 

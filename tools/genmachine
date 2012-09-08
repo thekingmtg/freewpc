@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-# Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+# Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
 #
 # This file is part of FreeWPC.
 #
@@ -100,6 +100,7 @@ my %BinaryProperties = (
 		"opto" => 1, 
 		"edge" => 1,
 		"noplay" => 1,
+		"novalid" => 1,
 		"ingame" => 1,
 		"intest" => 1,
 		"button" => 1,
@@ -123,6 +124,7 @@ my %BinaryProperties = (
 		"buyin" => $GLOBAL_OBJECT,
 		"extra-ball" => $GLOBAL_OBJECT,
 		"shoot-again" => $GLOBAL_OBJECT,
+		"ball-save" => $GLOBAL_OBJECT,
 		"cabinet" => 1,
 	},
 	"drives" => {
@@ -244,6 +246,13 @@ my %FixedMaxima = (
 	"deffs", "leffs", "lamplists", "gi", "fonts");
 
 
+# The contexts which are emitted as ordinary variable declarations.
+my %VarDecl = (
+	"flags" => "flag_t",
+	"globalflags" => "global_flag_t",
+	"timers" => "free_timer_id_t",
+);
+
 ###################################################################
 
 #
@@ -303,7 +312,7 @@ sub check_define_global {
 
 sub close_switch_or_lamp {
 	my ($def) = @_;
-	$def->{'ID'} =~ m/(.)(.)/;
+	$def->{'ID'} =~ m/(.)(.*)/;
 	my ($first, $second) = ($1, $2);
 	if ($first eq "D") {
 		$def->{'number'} = $second - 1;
@@ -614,7 +623,7 @@ LINE:
 
 		else {
 			# Handle lines that aren't data definitions.
-			error "unrecognized element at line " . $lineno . "\n";
+			error "unrecognized element $_ at line " . $lineno . "\n";
 		}
 	}
 	close FH;
@@ -638,7 +647,10 @@ sub machine_finish {
 		}
 	}
 
-	# TODO : Are there any GLOBAL_OBJECTS that aren't defined?
+	# Are there any GLOBAL_OBJECTS that aren't defined?
+	if (!defined $m->{'*lamps:ball-save'}) {
+		$m->{'*lamps:ball-save'} = $m->{'*lamps:shoot-again'};
+	}
 }
 
 
@@ -684,6 +696,20 @@ sub print_c_ident {
 	}
 }
 
+sub machine_write_var_decls {
+	print $START_SOURCE;
+	foreach $context (keys %ContextPrefixes) {
+		my $type = $VarDecl{$context};
+		next if (!defined $type);
+		my $mc = $m->{$context};
+		foreach my $def (unique ($mc)) {
+			print "$type " . $def->{'c_ident'} . ";\n";
+		}
+		print "\n";
+	}
+	print $END_SOURCE;
+}
+
 sub machine_write_defines {
 	# Print object IDs
 	foreach $context (keys %ContextPrefixes) {
@@ -691,10 +717,16 @@ sub machine_write_defines {
 		my $indexRe = $contextDefinitionRe{$context};
 		my $number = -1;
 		$indexRe = "[0-9]+" if ($indexRe eq "AUTO");
+		my $type = $VarDecl{$context};
 		print "/* Definitions of $context */\n";
 		foreach my $def (unique ($mc)) {
 			$number = $def->{'number'};
-			print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
+			if (defined $type) {
+				print "extern U8 " . $def->{'c_ident'} . ";\n";
+			}
+			else {
+				print "#define " . $def->{'c_ident'} . " " .  $number . "\n";
+			}
 		}
 		my $max = $ContextMaxima{$context};
 		if (defined $max) {
@@ -734,6 +766,7 @@ sub machine_write_defines {
 	print_c_ident ($m->{'*lamps:start'}, "MACHINE_START_LAMP");
 	print_c_ident ($m->{'*lamps:buyin'}, "MACHINE_BUYIN_LAMP");
 	print_c_ident ($m->{'*lamps:shoot-again'}, "MACHINE_SHOOT_AGAIN_LAMP");
+	print_c_ident ($m->{'*lamps:ball-save'}, "MACHINE_BALL_SAVE_LAMP");
 	print_c_ident ($m->{'*lamps:extra-ball'}, "MACHINE_EXTRA_BALL_LAMP");
 
 	print_c_ident ($m->{'*drives:launch'}, "MACHINE_LAUNCH_SOLENOID");
@@ -1005,13 +1038,18 @@ sub machine_write_switch_decls {
 
 		if (defined $sw->{'noscore'}) {
 			$sw->{'playfield'} = undef;
-			$sw->{'noplay'} = 1;
+			$sw->{'novalid'} = 1;
 			$sw->{'intest'} = 1;
+		}
+
+		if (defined $sw->{'noplay'}) {
+			warning "deprecated property 'noplay' seen on switch " . $sw->{'name'} . " ; use 'novalid' instead.";
+			$sw->{'novalid'} = 1;
 		}
 
 		add_flag ($sw, "opto", "flags", "SW_OPTICAL");
 		add_flag ($sw, "edge", "flags", "SW_EDGE");
-		add_flag ($sw, "noplay", "flags", "SW_NOVALID");
+		add_flag ($sw, "novalid", "flags", "SW_NOVALID");
 		add_flag ($sw, "ingame", "flags", "SW_IN_GAME");
 		add_flag ($sw, "intest", "flags", "SW_IN_TEST");
 		add_flag ($sw, "playfield", "flags", "SW_PLAYFIELD");
@@ -1157,8 +1195,12 @@ END
 
 sub machine_lamp_get_value {
 	my ($lampid) = @_;
-	return $lampid if ($lampid =~ /^MACHINE_/);
-	$lamp = ($m->{'lamps'})->{$lampid};
+	if ($lampid =~ /^%(.*)$/) {
+		$lamp = $m->{"*lamps:$1"};
+	}
+	else {
+		$lamp = ($m->{'lamps'})->{$lampid};
+	}
 	die "undefined lamp $lampid" if (!defined $lamp);
 	return $lamp->{'number'};
 }
@@ -1290,7 +1332,7 @@ sub machine_write_lamplist_decls {
 		print "};\n\n";
 		$ls->{'value'} = $lamplist;
 
-		if ($ls->{'set'} == 1) {
+		if (1) {
 			$c_decl = $ls->{'c_decl'};
 			$c_decl =~ s/lamplist/lampset/g;
 			print "const U8 " . $c_decl . "[] = {\n   ";
@@ -1325,7 +1367,7 @@ sub machine_write_lamplist_decls {
 
 	print "const U8 * lampset_table[] = {\n";
 	for $ls (unique ($m->{"lamplists"})) {
-		if ($ls->{'set'} == 1) {
+		if (1) {
 			$name = $ls->{'c_decl'};
 			$name =~ s/lamplist/lampset/g;
 		}
@@ -1386,8 +1428,7 @@ sub machine_write_deff_decls {
 		print "   [" . $deff->{'c_ident'} . "] = {\n";
 		print "      .flags = $flags,\n";
 		print "      .prio = $prio,\n";
-		print "      .fn = " . $deff->{'c_decl'} . ",\n";
-		print "      .page = $page\n";
+		print "      DEFF_FUNCTION (" . $deff->{'c_decl'} . ", " . $page . ")\n";
 		print "   },\n";
 	}
 	print "};\n";
@@ -1535,6 +1576,13 @@ elsif ($command eq "fonts") {
 #######################################################
 elsif ($command eq "drives") {
 	machine_write_solenoid_decls ();
+}
+
+#######################################################
+#  generate build/mach-vars.c
+#######################################################
+elsif ($command eq "vars") {
+	machine_write_var_decls ();
 }
 
 elsif ($command eq "dump") {

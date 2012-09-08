@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -28,7 +28,6 @@
  */
 
 #include <freewpc.h>
-#include <xbmprog.h>
 
 /**
  * The way that images are accessed is very different in 6809 vs. native mode.

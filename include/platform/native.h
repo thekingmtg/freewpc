@@ -1,5 +1,5 @@
 /*
- * Copyright 2007, 2008, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2007, 2008, 2009, 2010, 2011 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -59,6 +59,11 @@ extern inline U8 far_indirect_call_value_handler (value_function address, U8 pag
 	return address ();
 }
 
+/**
+ * Load the low-order 8-bits of an address into a byte register for
+ * a function argument.
+ */
+#define __addrval(p) (((int)p) & 0xFF)
 
 #endif /* _PLATFORM_NATIVE_H */
 

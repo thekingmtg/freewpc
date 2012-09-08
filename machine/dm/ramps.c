@@ -130,7 +130,6 @@ void ramps_reset (void) {
 	center_ramp_counter = 0;
 	side_ramp_counter = 0;
 	all_ramp_counter = 0;
-		left_Ramp_QuickFreeze_activated = FALSE;
 		left_Ramp_CarChase_activated = FALSE;
 		left_Ramp_Explode_activated = FALSE;
 		left_Ramp_Jackpot_activated = FALSE;
@@ -139,11 +138,11 @@ void ramps_reset (void) {
 	center_Ramp_Arrow_activated = FALSE;
 		side_Ramp_Jackpot_activated = FALSE;
 		side_Ramp_Arrow_activated = FALSE;
-	right_Ramp_ClawReady_activated = FALSE;
 	right_Ramp_CarChase_activated = FALSE;
 	right_Ramp_Explode_activated = FALSE;
 	right_Ramp_Jackpot_activated = FALSE;
 	right_Ramp_Arrow_activated = FALSE;
+//		if (right_Ramp_ClawReady_activated) callset_invoke (RRamp_ClawReady_On);
 }//end of function
 
 void players_ramps_reset (void) {
@@ -153,11 +152,15 @@ void players_ramps_reset (void) {
 	center_ramp_goal = RAMPS_EASY_GOAL;
 	side_ramp_goal = RAMPS_EASY_GOAL;
 	all_ramp_goal = (RAMPS_EASY_GOAL * 5);
+	left_Ramp_QuickFreeze_activated = FALSE;
+	right_Ramp_ClawReady_activated = FALSE;
 	ramps_reset();
 }//end of function
 
 CALLSET_ENTRY (ramps, start_player) { players_ramps_reset(); }
 CALLSET_ENTRY (ramps, start_ball) { ramps_reset(); }
+CALLSET_ENTRY (ramps, end_ball) { diverter_stop(); }
+
 
 
 /****************************************************************************
@@ -264,9 +267,7 @@ CALLSET_ENTRY (ramps, RRamp_ClawReady_On) {
 	right_Ramp_ClawReady_activated = TRUE;
 	lamp_tristate_on (LM_CLAW_READY);
 	flasher_pulse (FLASH_DIVERTER_FLASHER);
-	//TODO:
-	diverter_start();//defined in divhold.ct
-//	diverter_service();
+	diverter_start();//defined in divhold2.ct
 }//end of function
 
 //called by claw after ball is passed to it from elevator
@@ -274,8 +275,7 @@ CALLSET_ENTRY (ramps, RRamp_ClawReady_Off) {
 	right_Ramp_ClawReady_activated = FALSE;
 	lamp_tristate_off (LM_CLAW_READY);
 	flasher_pulse (FLASH_DIVERTER_FLASHER);
-	diverter_stop();//defined in divhold.ct
-//	diverter_service();
+	diverter_stop();//defined in divhold2.ct
 }//end of function
 
 

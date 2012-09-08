@@ -1,6 +1,6 @@
 #--------------------------------------------------------------------------
 # Machine description for The Machine: Bride of Pinbot
-# (C) Copyright 2007, 2009, 2010 by Brian Dominy <brian@oddchange.com>
+# (C) Copyright 2007, 2009, 2010, 2011 by Brian Dominy <brian@oddchange.com>
 #
 # See tools/genmachine for more information about the format of this file.
 #--------------------------------------------------------------------------
@@ -30,8 +30,6 @@ include platform/wpc/wpc89.md
 #define MACHINE_MUSIC_PLUNGER
 #define MACHINE_REPLAY_SCORE_CHOICES       10
 #define MACHINE_REPLAY_START_CHOICE        5
-#define MACHINE_DEBUGGER_HOOK
-#define MACHINE_OUTHOLE_KICK_HOOK
 define MACHINE_BALL_SAVE_TIME             0
 define MACHINE_MAX_BALLS                  2
 
@@ -122,7 +120,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 # name.  Options can be given in any order:
 #    ingame - only service the switch during a game
 #    intest - also service the switch in test mode
-#    noplay - tripping this switch does NOT mark ball in play
+#    novalid - tripping this switch does NOT mark ball in play
 #    standup - this is a standup
 #    button - this is a button
 #    edge - this switch should be serviced on either transition
@@ -142,13 +140,13 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 11: Right Flipper, button, intest, c_decl(sw_right_button)
 12: Left Flipper, button, intest, c_decl(sw_left_button)
 13: Start Button, start-button, intest
-14: Plumb bob tilt, c_decl(sw_tilt), cabinet, tilt, ingame, noplay
+14: Plumb bob tilt, c_decl(sw_tilt), cabinet, tilt, ingame, novalid
 15: Left Outlane
 16: Left Inlane
 17: Right Inlane
 18: Right Outlane
 21: Slam Tilt, slam-tilt, ingame, cabinet
-23: Ticket Opto, cabinet, opto, noplay
+23: Ticket Opto, cabinet, opto, novalid
 25: Trough Right, noscore
 26: Trough Center, noscore
 27: Trough Left, noscore
@@ -168,7 +166,7 @@ define MACHINE_HIGH_SCORES { 0x00, 0x10, 0x00, 0x00, 0x00 }, { 0x00, 0x09, 0x00,
 46: Under Playfield Kickback
 47: Enter Head
 51: Spinner, ingame
-52: Shooter, shooter, edge, noplay, debounce(TIME_200MS)
+52: Shooter, shooter, edge, novalid, debounce(TIME_200MS)
 53: UR Jet, ingame, c_decl(jet_hit)
 54: UL Jet, ingame, c_decl(jet_hit)
 55: Lower Jet, ingame, c_decl(jet_hit)
