@@ -88,7 +88,7 @@ CALLSET_ENTRY (inlanes, sw_left_inlane) {
 	score(SC_5770);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
 	if (left_inlane_Access_Claw_activated)	{
-		callset_invoke(RRamp_ClawReady_On);//at ramps.c - diverter moved there
+		callset_invoke(rramp_clawread_on);//at ramps.c - diverter moved there
 		callset_invoke(Access_Claw_Light_Off);
 		sound_start (ST_SPEECH, SPCH_CRYOCLAW_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	}

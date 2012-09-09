@@ -114,27 +114,27 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 42: Right Ramp Car Chase, 		yellow, 	x(24), 		y(13)
 43: Quick Freeze, 				yellow, 	x(24), 		y(10)
 44: Left Ramp Car Chase, 		yellow, 	x(23), 		y(9)
-45: Extra Ball, yellow, x(24), y(9)
-46: Start Multiball, red, x(23), y(8)
-47: Car Crash Bottom, red, x(23), y(4)
-48: Left Loop Explode, white, x(22), y(7)
-51: Underground Arrow, white, x(11), y(10)
-52: Underground Jackpot, white, x(12), y(9)
-53: Standup 2, orange, x(13), y(8)
-54: Left Ramp Arrow, white, x(14), y(7)
-55: Side Ramp Jackpot, white, x(16), y(9)
-56: Side Ramp Arrow, orange, x(15), y(9)
-57: left Loop Arrow, red, extra-ball, x(14), y(4)
-58: Center Ramp Jackpot, orange, x(10), y(9)
-61: Claw Capture Simon,red, x(1), y(7)
-62: Claw Super Jets,orange, x(3), y(6)
-63: Claw Prison Break,yellow, x(4), y(5)
-64: Claw Freeze, yellow, x(5), y(2)
-65: Claw Acmag, yellow, x(5), y(1)
-66: Middle Rollover, green, x(2), y(14)
-67: Top Rollover, green, x(2), y(15)
-68: Lower Rollover, green, x(2), y(17)
-71: Super Jackpot,yellow, x(7), y(11)
+45: Extra Ball, extra-ball, 	yellow, 	x(24), 		y(9)
+46: Start Multiball, 			red, 		x(23), 		y(8)
+47: Car Crash Bottom, 			red, 		x(23), 		y(4)
+48: Left Loop Explode, 			white, 		x(22), 		y(7)
+51: Underground Arrow, 			white, 		x(11), 		y(10)
+52: Underground Jackpot, 		white, 		x(12), 		y(9)
+53: Standup 2, 					orange, 	x(13), 		y(8)
+54: Left Ramp Arrow, 			white, 		x(14), 		y(7)
+55: Side Ramp Jackpot, 			white, 		x(16), 		y(9)
+56: Side Ramp Arrow, 			orange, 	x(15), 		y(9)
+57: left Loop Arrow, 			red, 		x(14), 		y(4)
+58: Center Ramp Jackpot, 		orange, 	x(10), 		y(9)
+61: Claw Capture Simon,			red, 		x(1), 		y(7)
+62: Claw Super Jets,			orange, 	x(3), 		y(6)
+63: Claw Prison Break,			yellow, 	x(4), 		y(5)
+64: Claw Freeze, 				yellow, 	x(5), 		y(2)
+65: Claw Acmag, 				yellow, 	x(5), 		y(1)
+66: Middle Rollover, 			green, 		x(2), 		y(14)
+67: Top Rollover, 				green, 		x(2), 		y(15)
+68: Lower Rollover, 			green, 		x(2), 		y(17)
+71: Super Jackpot,				yellow, 	x(7), 		y(11)
 72: Computer,yellow, x(8), y(11)
 73: Demo Time, yellow, x(9), y(11)
 74: Not Used 1
@@ -617,9 +617,9 @@ Explode Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Explode Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Explode End: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-#fortressMB jackpot effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-#fortressMB start effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-#fortressMB effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortressMB jackpot effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortressMB start effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortressMB effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 Jets Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
 Jets Completed Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE

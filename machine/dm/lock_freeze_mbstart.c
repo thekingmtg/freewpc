@@ -132,10 +132,10 @@ CALLSET_ENTRY (lock_freeze_mbstart, check_multiball_requirements) {
 
 //this is called from left loop shot at orbits.c
 CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
-	if 		( (NumMBsDone % 4) == 1) 	callset_invoke (Fortress_start);//goto fortressMB.c
-	else if ( (NumMBsDone % 4) == 2) 	callset_invoke (Museum_start);//goto museumMB.c
-	else if ( (NumMBsDone % 4) == 3) 	callset_invoke (Cryoprison_start);//goto cryoprisonMB.c
-	else 								callset_invoke (Wasteland_start);//goto wastelandMB.c
+	if 		( (NumMBsDone % 4) == 1) 	callset_invoke (fortress_start);//goto fortressMB.c
+	else if ( (NumMBsDone % 4) == 2) 	callset_invoke (museum_start);//goto museumMB.c
+	else if ( (NumMBsDone % 4) == 3) 	callset_invoke (cryoprison_start);//goto cryoprisonMB.c
+	else 								callset_invoke (wasteland_start);//goto wastelandMB.c
 	//turn off freeze light and reset counter for next MB
 	NumMBsDone++;
 	++NumBallsNeededForNextMB;

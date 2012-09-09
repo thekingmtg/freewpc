@@ -59,26 +59,23 @@ ROM_PAGE_COUNT = 32
 #
 # note: if we put tabs in between the file names you will get a linker error
 # note: continue line with a '\' --make sure to leave off on last line or you will get a linker error
-GAME2_OBJS = 
 GAME_TEST_OBJS =
 GAME_INCLUDES =
 
 
 #all files here have NO deffs and may be frequently called
-GAME_OBJS =	inlanes.o   eyeball.o   eject.o   lock_freeze_mbstart.o   orbits.o   \
-ramps.o     rollovers.o   simple_switches.o   \
-underground.o        
-#	call_tester.o  
+GAME_OBJS =	simple_switches.o   eyeball.o  \
+eject.o  underground.o  rollovers.o  orbits.o   ramps.o   inlanes.o   
 
-#all files here have NO deffs and are infrequently called
-GAME3_OBJS = ball_handling.o   sound_handler.o  
+
+#all files here have NO deffs and are less frequently called
+GAME2_OBJS = lock_freeze_mbstart.o   sound_handler.o  
+#ball_handling.o   
+
 
 #all files here that have deffs
-GAME_PAGED_OBJS = acmag.o   capture_simon.o   car_chase_mode.o   car_crash.o \
-custom_deffs.o   dm_amode.o   explode.o \
-fortressMB.o \
-jets_superjets.o   prison_break.o   standupfrenzy.o 
-
+GAME_PAGED_OBJS = fortressMB.o acmag.o  custom_deffs.o   capture_simon.o   car_chase_mode.o   car_crash.o \
+explode.o   jets_superjets.o   prison_break.o   standupfrenzy.o  dm_amode.o   
 
 
 #listing of images used

@@ -78,7 +78,8 @@ CALLSET_ENTRY (fortressMB, end_ball) {
  ***************************************************************************/
 
 //this is called from left loop shot at orbits.c
-CALLSET_ENTRY (fortressMB, Fortress_start) {
+
+CALLSET_ENTRY (fortressMB, fortress_start) {
 	music_disable();
 	sound_start (ST_EFFECT, HELICOPTER, SL_4S, SP_NORMAL);
 	task_sleep (TIME_2S);

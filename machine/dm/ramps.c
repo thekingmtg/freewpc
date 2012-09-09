@@ -263,12 +263,13 @@ CALLSET_ENTRY (ramps, RRamp_Arrow_Light_Off) {
 }//end of function
 
 //called by left inlane --see inlanes.c
-CALLSET_ENTRY (ramps, RRamp_ClawReady_On) {
+CALLSET_ENTRY (ramps, rramp_clawread_on) {
 	right_Ramp_ClawReady_activated = TRUE;
 	lamp_tristate_on (LM_CLAW_READY);
 	flasher_pulse (FLASH_DIVERTER_FLASHER);
 	diverter_start();//defined in divhold2.ct
 }//end of function
+
 
 //called by claw after ball is passed to it from elevator
 CALLSET_ENTRY (ramps, RRamp_ClawReady_Off) {
