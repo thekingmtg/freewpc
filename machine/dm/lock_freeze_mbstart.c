@@ -38,7 +38,7 @@ void lock_reset (void) {
 	is_ball_three_frozen = FALSE;
 	is_ball_four_frozen = FALSE;
 	NumBallsFrozen = 0;
-	callset_invoke (Multiball_Light_Off);//goto orbits.c to turn off light and flag
+	callset_invoke (multiball_light_off);//goto orbits.c to turn off light and flag
 }//end of reset
 
 void player_reset (void) {
@@ -112,7 +112,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, check_multiball_requirements) {
 	//Cryoprison Multiball	= 3 ball min needs to be frozen
 	//Wasteland Multiball 	= 4 ball min needs to be frozen
 	if (NumBallsFrozen > (NumMBsDone % 4) ) { // % is modulus
-				callset_invoke (Multiball_Light_On);//goto orbits.c
+				callset_invoke (multiball_light_on);//goto orbits.c
 
 
 				//music_disable();

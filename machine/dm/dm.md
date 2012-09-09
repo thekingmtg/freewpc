@@ -38,7 +38,6 @@ define MACHINE_START_BALL_MUSIC   MUS_PLUNGER
 define MACHINE_BALL_IN_PLAY_MUSIC 	MUS_BG 
 define MACHINE_BALL_SAVE_TIME       4
 define MACHINE_MAX_BALLS            5
-define MACHINE_BALL_SAVE_LAMP LM_SHOOT_AGAIN
 	#see code changes in ballsave.c
 define CUSTOM_BALL_SAVE_DEFF
 	#see code changes in shootalert.c
@@ -87,70 +86,70 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 
 #TODO colors of lights 
 [lamps]
-11: Ball Save, amber ,x(28), y( 6)
-12: Fortress Multiball, amber ,x(33), y( 9)
-13: Museum Multiball, amber ,x(31), y( 9)
-14: Cryoprison Multiball, amber ,x(29), y( 9)
-15: Wasteland Multiball, amber ,x(30), y( 9)
-16: Shoot Again, amber ,x(34), y( 9)
-17: Access Claw, amber ,x(27), y(1)
-18: Left Ramp Explode, amber ,x(22), y( 9)
-21: Right Ramp Jackpot, red ,x(22), y(14)
-22: Right Loop Explode, amber ,x(23), y(15)
-23: Light Quick Freeze, amber ,x(27), y(15)
-24: Freeze 4, amber ,x(26), y(14)
-25: Claw Ready, amber ,x(25), y(12)
-26: Freeze 3, amber ,x(28), y(12)
-27: Freeze 2, amber ,x(28), y( 6)
-28: Freeze 1, red ,x(26), y( 2)
-31: Right Loop Jackpot, red ,x(21), y(16)
-32: Standup 5, red, x(19), y(15)
-33: Right Ramp Arrow, white ,x(19), y(14)
-34: Left Ramp Jackpot, white ,x(20), y( 8)
-35: Left Loop Jackpot, white ,x(19), y( 6)
-36: Car Crash Top, red ,x(20), y( 2)
-37: Standup 1, yellow ,x(21), y( 5)
-38: Car Crash Center, white ,x(22), y( 3)
-41: Right Ramp Explode, yellow ,x(23), y(14)
-42: Right Ramp Car Chase, yellow ,x(24), y(13)
-43: Quick Freeze, yellow ,x(24), y(10)
-44: Left Ramp Car Chase, yellow ,x(23), y( 9)
-45: Extra Ball, yellow ,x(24), y( 9)
-46: Start Multiball, red ,x(23), y( 8)
-47: Car Crash Bottom, red , shoot-again, x(23), y( 4)
-48: Left Loop Explode, white ,x(22), y( 7)
-51: Underground Arrow, white ,x(11), y(10)
-52: Underground Jackpot, white ,x(12), y( 9)
-53: Standup 2, orange ,x(13), y( 8)
-54: Left Ramp Arrow, white ,x(14), y( 7)
-55: Side Ramp Jackpot, white ,x(16), y( 9)
-56: Side Ramp Arrow, orange ,x(15), y( 9)
-57: left Loop Arrow, red , extra-ball, x(14), y( 4)
-58: Center Ramp Jackpot, orange ,x(10), y( 9)
-61: Claw Capture Simon,red, x( 1), y( 7)
-62: Claw Super Jets,orange, x( 3), y( 6)
-63: Claw Prison Break,yellow, x( 4), y( 5 )
-64: Claw Freeze, yellow ,x( 5), y( 2)
-65: Claw Acmag, yellow ,x( 5), y( 1)
-66: Middle Rollover, green ,x( 2), y(14)
-67: Top Rollover, green ,x( 2), y(15)
-68: Lower Rollover, green ,x( 2), y(17)
-71: Super Jackpot,yellow, x( 7), y(11)
-72: Computer,yellow, x( 8), y(11)
-73: Demo Time, yellow, x( 9), y(11)
-74: Not Used
-75: Not Used 
+11: Ball Save, 					amber, 		x(28), 		y(6)
+12: Fortress Multiball, 		amber, 		x(33), 		y(9)
+13: Museum Multiball, 			amber, 		x(31), 		y(9)
+14: Cryoprison Multiball, 		amber, 		x(29), 		y(9)
+15: Wasteland Multiball, 		amber, 		x(30), 		y(9)
+16: Shoot Again, ball-save, 	amber, 		x(34), 		y(9)
+17: Access Claw, 				amber, 		x(27), 		y(1)
+18: Left Ramp Explode, 			amber, 		x(22), 		y(9)
+21: Right Ramp Jackpot, 		red, 		x(22), 		y(14)
+22: Right Loop Explode, 		amber, 		x(23), 		y(15)
+23: Light Quick Freeze, 		amber, 		x(27), 		y(15)
+24: Freeze 4, 					amber, 		x(26), 		y(14)
+25: Claw Ready, 				amber, 		x(25), 		y(12)
+26: Freeze 3, 					amber, 		x(28), 		y(12)
+27: Freeze 2, 					amber, 		x(28), 		y(6)
+28: Freeze 1, 					red, 		x(26), 		y(2)
+31: Right Loop Jackpot, 		red, 		x(21), 		y(16)
+32: Standup 5, 					red, 		x(19), 		y(15)
+33: Right Ramp Arrow, 			white, 		x(19), 		y(14)
+34: Left Ramp Jackpot, 			white, 		x(20), 		y(8)
+35: Left Loop Jackpot, 			white, 		x(19), 		y(6)
+36: Car Crash Top, 				red, 		x(20), 		y(2)
+37: Standup 1, 					yellow, 	x(21), 		y(5)
+38: Car Crash Center, 			white, 		x(22), 		y(3)
+41: Right Ramp Explode, 		yellow, 	x(23), 		y(14)
+42: Right Ramp Car Chase, 		yellow, 	x(24), 		y(13)
+43: Quick Freeze, 				yellow, 	x(24), 		y(10)
+44: Left Ramp Car Chase, 		yellow, 	x(23), 		y(9)
+45: Extra Ball, yellow, x(24), y(9)
+46: Start Multiball, red, x(23), y(8)
+47: Car Crash Bottom, red, x(23), y(4)
+48: Left Loop Explode, white, x(22), y(7)
+51: Underground Arrow, white, x(11), y(10)
+52: Underground Jackpot, white, x(12), y(9)
+53: Standup 2, orange, x(13), y(8)
+54: Left Ramp Arrow, white, x(14), y(7)
+55: Side Ramp Jackpot, white, x(16), y(9)
+56: Side Ramp Arrow, orange, x(15), y(9)
+57: left Loop Arrow, red, extra-ball, x(14), y(4)
+58: Center Ramp Jackpot, orange, x(10), y(9)
+61: Claw Capture Simon,red, x(1), y(7)
+62: Claw Super Jets,orange, x(3), y(6)
+63: Claw Prison Break,yellow, x(4), y(5)
+64: Claw Freeze, yellow, x(5), y(2)
+65: Claw Acmag, yellow, x(5), y(1)
+66: Middle Rollover, green, x(2), y(14)
+67: Top Rollover, green, x(2), y(15)
+68: Lower Rollover, green, x(2), y(17)
+71: Super Jackpot,yellow, x(7), y(11)
+72: Computer,yellow, x(8), y(11)
+73: Demo Time, yellow, x(9), y(11)
+74: Not Used 1
+75: Not Used 2
 76: Standup 4, yellow, x(18), y(13)
 77: Standup 3, orange, x(17), y(10)
-78: Retina Scan, red, x(23), y( 1)
-81: Center Ramp Middle, yellow ,x( 6), y( 9)
-82: Center Ramp Outer, white ,x( 6), y( 8)
-83: Center Ramp Inner, yellow ,x( 6), y( 9)
-84: Center Ramp Arrow, red ,x( 9), y( 9)
+78: Retina Scan, red, x(23), y(1)
+81: Center Ramp Middle, yellow ,x(6), y(9)
+82: Center Ramp Outer, white ,x(6), y(8)
+83: Center Ramp Inner, yellow ,x(6), y(9)
+84: Center Ramp Arrow, red ,x(9), y(9)
 85: Right Loop Arrow, yellow ,x(16), y(18)
 86: Buy In Button, yellow, buyin, cabinet, x(33), y(18)
 87: Ball Launch, yellow, launch, cabinet, x(34), y(16)
-88: Start Button, yellow, start, cabinet, x( 1), y( 1)
+88: Start Button, yellow, start, cabinet, x(1), y(1)
 
 ##########################################################################
 # Switch Description
@@ -158,7 +157,7 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 # name.  Options can be given in any order:
 #    ingame - only service the switch during a game
 #    intest - also service the switch in test mode
-#    noplay - tripping this switch does NOT mark ball in play
+#    novalid - tripping this switch does NOT mark ball in play
 #    standup - this is a standup
 #    button - this is a button
 #    edge - this switch should be serviced on either transition
@@ -177,33 +176,33 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 [switches]
 
 #must be named this
-11: Launch Button, launch-button, cabinet, noplay
+11: Launch Button, launch-button, cabinet, novalid
 
-12: Left Handle Button, cabinet, noplay
-13: Start Button, start-button, cabinet, intest, noplay, debounce(TIME_100MS)
-14: Tilt, tilt, ingame, noplay, cabinet, sound(TILT)
+12: Left Handle Button, cabinet, novalid
+13: Start Button, start-button, cabinet, intest, novalid, debounce(TIME_100MS)
+14: Tilt, tilt, ingame, novalid, cabinet, sound(TILT)
 15: Left Outlane, ingame 
 16: Left Inlane, ingame
 17: Right Inlane, ingame
 18: Right Outlane, ingame
-21: Slam Tilt, slam-tilt, ingame, noplay, cabinet, sound(TILT)
-22: Coin Door Closed, noplay, cabinet
-23: Buyin Button, buyin-button, cabinet, noplay
-24: Always Closed, noplay
-25: Claw Position 1, opto, noscore, noplay
-26: Claw Position 2, opto, noscore, noplay
+21: Slam Tilt, slam-tilt, ingame, novalid, cabinet, sound(TILT)
+22: Coin Door Closed, novalid, cabinet
+23: Buyin Button, buyin-button, cabinet, novalid
+24: Always Closed, novalid
+25: Claw Position 1, opto, noscore, novalid
+26: Claw Position 2, opto, noscore, novalid
 
 #must be named this
-27: Shooter, shooter, noscore, noplay, edge
+27: Shooter, shooter, noscore, novalid, edge
 
-28: Not Used, noplay
-31: Trough 1, noscore, noplay, opto
-32: Trough 2, noscore, noplay, opto
-33: Trough 3, noscore, noplay, opto
-34: Trough 4, noscore, noplay, opto
-35: Trough 5, noscore, noplay, opto
-36: Trough Jam, noscore, noplay, opto
-37: Not Used, noplay
+28: Not Used 1, novalid
+31: Trough 1, noscore, novalid, opto
+32: Trough 2, noscore, novalid, opto
+33: Trough 3, noscore, novalid, opto
+34: Trough 4, noscore, novalid, opto
+35: Trough 5, noscore, novalid, opto
+36: Trough Jam, noscore, novalid, opto
+37: Not Used 2, novalid
 38: Standup 5, ingame, standup
 41: Left Sling, ingame, c_decl(sw_sling)
 42: Right Sling, ingame, c_decl(sw_sling)
@@ -216,7 +215,7 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 51: Left Ramp Enter, ingame
 52: Left Ramp Exit, ingame
 53: Center Ramp, ingame
-54: Upper Rebound, ingame, noplay
+54: Upper Rebound, ingame, novalid
 55: Left Loop, ingame 
 56: Standup 2, standup, ingame
 57: Standup 3, standup, ingame
@@ -227,12 +226,12 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 64: Center Rollover, ingame
 65: Right Rollover, ingame
 66: Eject, ingame
-67: Elevator Index, ingame, noplay, opto
-68: Not Used, noplay
+67: Elevator Index, ingame, novalid, opto
+68: Not Used 3, novalid
 71: Chase Car 1, opto, ingame
 72: Chase Car  2, opto, ingame
-73: Top Popper, opto, ingame, noplay
-74: Elevator Hold, opto, noplay
+73: Top Popper, opto, ingame, novalid
+74: Elevator Hold, opto, novalid
 75: Elevator Ramp, ingame
 76: Bottom Popper, opto, ingame, edge, debounce(TIME_200MS)
 77: Eyeball Standup, standup, ingame
@@ -276,7 +275,7 @@ H3: Launch, launch, nosearch, duty(SOL_DUTY_100), time(TIME_133MS)
 
 H4: Top Popper, time(TIME_100MS)
 H5: Diverter Power, duty(SOL_DUTY_100)
-H6: Not Used
+H6: Not Used 1
 H7: Knocker, knocker, time(TIME_16MS)
 
 #L = low power J127
@@ -289,7 +288,7 @@ L5: Right Jet, duty(SOL_DUTY_100)
 #this resets the cpu at 50 and no time
 L6: Eject, duty(SOL_DUTY_75), time(TIME_133MS)
 L7: Diverter Hold, nosearch
-L8: : Not Used
+L8: : Not Used 2
 
 # G = J126 on Power Driver Board
 G1: Claw Flasher, flash, nosearch
@@ -479,8 +478,6 @@ Subway VUK: Bottom Popper, Bottom Popper
 
 Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Trough 5
 
-#Elevator:
-
 
 
 
@@ -572,17 +569,19 @@ GC: DAD, 000.900.000
 # Per-player bit flags.
 ##########################################################################
 [flags]
-is acmag activated:
-is CapSim SideRamp Activated:
-is CapSim LeftRamp Activated:
-is CapSim RightRamp Activated:
-is CapSim Under Activated:
-is CapSim CenterRamp Activated:
-is CapSim LeftOrb Activated:
-is CapSim RightOrb Activated:
-is Carchase Mode Activated:
-is Explode Mode Activated:
-is Prison Break Activated:
+IS_ACMAG_ACTIVATED:
+IS_CARCHASE_MODE_ACTIVATED:
+IS_EXPLODE_MODE_ACTIVATED:
+IS_PRISON_BREAK_ACTIVATED:
+
+IS_CAPSIM_SIDERAMP_ACTIVATED:
+IS_CAPSIM_LEFTRAMP_ACTIVATED:
+IS_CAPSIM_RIGHTRAMP_ACTIVATED:
+IS_CAPSIM_UNDER_ACTIVATED:
+IS_CAPSIM_CENTERRAMP_ACTIVATED:
+IS_CAPSIM_LEFTORB_ACTIVATED:
+IS_CAPSIM_RIGHTORB_ACTIVATED:
+
 
 #global_flag_test (GLOBAL_FLAG_IS_PRISONBREAK_ACTIVATED)
 #global_flag_off (GLOBAL_FLAG_IS_PRISONBREAK_ACTIVATED);
@@ -618,9 +617,9 @@ Explode Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Explode Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Explode End: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-fortressMB jackpot effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-fortressMB start effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-fortressMB effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+#fortressMB jackpot effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+#fortressMB start effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+#fortressMB effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 Jets Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
 Jets Completed Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
@@ -633,19 +632,19 @@ Prison Break Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTA
 Prison Break Start Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Prison Break End Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-Rollovers Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-All Rollovers Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 
 #############custom_deffs.c###############################################################
 Ball Save Effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Shoot Reminder Effect:			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Troubleshooting:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Freeze Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Clw Inlanes Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Qf Inlanes Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Eyeball Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Shoot Reminder Effect:			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Troubleshooting:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Eject Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Underground Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Rollovers Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+All Rollovers Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 #############custom_deffs.c###############################################################
 
 
@@ -725,5 +724,4 @@ Standup Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 [fonts]
 lithograph:
 steel:
-Adore64:
 v5prc:

@@ -113,13 +113,14 @@ CALLSET_ENTRY (orbits, ExtraBall_Light_Off) {
 	lamp_tristate_off (LM_EXTRA_BALL);
 }//end of function
 
-//lit by required number of freezes accomplished
-CALLSET_ENTRY (orbits, Multiball_Light_On) {
+//lit by required number of freezes accomplished - called by lock_freeze_mbstart.c
+//note well: capitalizing this will make some errors in the compiler
+CALLSET_ENTRY (orbits, multiball_light_on) {
 	left_Loop_MultiBall_activated = TRUE;
 	lamp_tristate_on (LM_START_MULTIBALL);
 }//end of function
 
-CALLSET_ENTRY (orbits, Multiball_Light_Off) {
+CALLSET_ENTRY (orbits, multiball_light_off) {
 	left_Loop_MultiBall_activated = FALSE;
 	lamp_tristate_off (LM_START_MULTIBALL);
 }//end of function

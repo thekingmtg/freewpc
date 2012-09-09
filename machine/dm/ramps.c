@@ -202,7 +202,7 @@ CALLSET_ENTRY (ramps, carcrash_mode_off) {
  * playfield lights and flags - LEFT RAMP
  ***************************************************************************/
 // called by right inlane switch --see inlanes.c
-// or
+// orF
 // called by certain number of standups made --see standupfrenzy.c
 CALLSET_ENTRY (ramps, Activate_left_Ramp_QuickFreeze) {
 	left_Ramp_QuickFreeze_activated = TRUE;

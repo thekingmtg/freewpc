@@ -153,7 +153,7 @@ CALLSET_ENTRY (explode, explode_made) {
 	score_mul (explode_mode_temp_score, explode_mode_timer);
 	score_zero(explode_mode_last_score);
 	score_add (explode_mode_last_score, explode_mode_temp_score);
-	score (explode_mode_temp_score);
+	score_long (explode_mode_temp_score);
 	//bonus here
 
 /*	switch (explode_mode_shots_made) {

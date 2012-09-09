@@ -28,7 +28,7 @@ void player_eject_reset (void) {
 	eject_killer_counter = 0;
 }//end of function
 
-CALLSET_ENTRY (eyeball_explode, start_player) 	{ player_eject_reset(); }
+CALLSET_ENTRY (eject, start_player) 	{ player_eject_reset(); }
 
 
 /****************************************************************************
@@ -41,11 +41,11 @@ void eject_killer_task (void){
 }//end of function
 
 
-CALLSET_ENTRY (eyeball_explode, sw_eject) {
+CALLSET_ENTRY (eject, sw_eject) {
 	if (eject_killer_counter++ == 1) {
 		sound_start (ST_SAMPLE, RETINA_SCAN_LONG, SL_4S, PRI_GAME_QUICK1);
 		score (SC_5M);
-		callset_invoke(start_eyeball_deff);
+		callset_invoke(start_eject_deff);
 		lamp_tristate_flash(LM_RETINA_SCAN);
 		task_sleep (TIME_500MS);
 		task_sleep (TIME_500MS);

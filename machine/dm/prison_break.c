@@ -109,7 +109,7 @@ void prison_break_mode_init (void) {
 	//TODO: store standard arrow status?
 	lamp_tristate_flash(LM_UNDERGROUND_ARROW);
 	lamp_tristate_flash(LM_SIDE_RAMP_ARROW);
-	score (prison_break_mode_last_score);
+	score_long (prison_break_mode_last_score);
 }//end of function
 
 

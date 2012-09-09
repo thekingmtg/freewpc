@@ -108,10 +108,11 @@ CALLSET_ENTRY (underground, underground_Arrow_Light_Off) {
 CALLSET_ENTRY (underground, sw_bottom_popper) {
 	++underground_shots_made;
 	score (SC_100K);//located in kernal/score.c
-	U8		underground_SoundCounter;
-if ( (underground_SoundCounter++ % 2) == 0 )//check if even
+	U8	underground_SoundCounter;
+	underground_SoundCounter = random_scaled(2);//from kernal/random.c
+	if (underground_SoundCounter == 0 )
 		sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
-	else
+	else if (underground_SoundCounter == 1 )
 		sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
 	if(flag_test (FLAG_IS_PRISON_BREAK_ACTIVATED) )  callset_invoke(prison_break_made);
 	if(flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED) )

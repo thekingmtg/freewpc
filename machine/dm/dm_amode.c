@@ -33,7 +33,6 @@ void show_driver_animation (void) {
 void show_rocket_animation (void) {
 	/* Show driver animation */
 	U16 fno;
-	U8 i;
 		for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno ++) {
 			/* We are drawing a full frame, so a clean isn't needed */
 			dmd_alloc_pair ();

@@ -6,7 +6,7 @@
 typeset -i count
 typeset -i mincount
 
-machines="tz corvette wcs funhouse t2 afm bop tester"
+machines="tz corvette wcs funhouse t2 afm bop tester min p2ktest tspp"
 sim_options="n y"
 gcc_options="4.3.4"
 debugger_options="y n"
@@ -37,6 +37,9 @@ case $option in
 		;;
 	--nobpt)
 		bpt_options="n"
+		;;
+	--sys*)
+		machines="tester"
 		;;
 	--fast)
 		machines="funhouse t2 tz wcs afm"
@@ -95,7 +98,7 @@ for sim in $sim_options; do
 					export GCC_VERSION=$gcc
 					export CONFIG_SIM
 					export CONFIG_BPT
-					make $make_options DOTCONFIG="" $target 2>&1 > /dev/null
+					make $make_options CONFIG="" $target 2>&1 > /dev/null
 					rc="$?"
 
 					if [ -f err ]; then
