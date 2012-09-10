@@ -142,7 +142,9 @@ void ramps_reset (void) {
 	right_Ramp_Explode_activated = FALSE;
 	right_Ramp_Jackpot_activated = FALSE;
 	right_Ramp_Arrow_activated = FALSE;
-//		if (right_Ramp_ClawReady_activated) callset_invoke (RRamp_ClawReady_On);
+		//if (right_Ramp_ClawReady_activated) callset_invoke (rramp_clawread_on);
+		//else
+			callset_invoke (rramp_clawready_off);
 }//end of function
 
 void players_ramps_reset (void) {
@@ -272,7 +274,7 @@ CALLSET_ENTRY (ramps, rramp_clawread_on) {
 
 
 //called by claw after ball is passed to it from elevator
-CALLSET_ENTRY (ramps, RRamp_ClawReady_Off) {
+CALLSET_ENTRY (ramps, rramp_clawready_off) {
 	right_Ramp_ClawReady_activated = FALSE;
 	lamp_tristate_off (LM_CLAW_READY);
 	flasher_pulse (FLASH_DIVERTER_FLASHER);
