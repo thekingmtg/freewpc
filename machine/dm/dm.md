@@ -48,14 +48,8 @@ define MACHINE_CUSTOM_AMODE
 	#for custom attract mode display effects <--in amode.c
 define MACHINE_AMODE_EFFECTS
 
-
-
-	#problem in plunger.c and serve.c
-	#this should make auto fire work for multi-ball, auto save and pushing plunger button
-#define INCLUDE_AUTOPLUNGER
-#define HAVE_AUTO_SERVE
 	#this is for fixing ballsave.c
-define MACHINE_DEMOLITION_MAN
+#define MACHINE_DEMOLITION_MAN
 
 
 
@@ -86,70 +80,70 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 
 #TODO colors of lights 
 [lamps]
-11: Ball Save, 					amber, 		x(28), 		y(6)
-12: Fortress Multiball, 		amber, 		x(33), 		y(9)
-13: Museum Multiball, 			amber, 		x(31), 		y(9)
-14: Cryoprison Multiball, 		amber, 		x(29), 		y(9)
-15: Wasteland Multiball, 		amber, 		x(30), 		y(9)
-16: Shoot Again, ball-save, 	amber, 		x(34), 		y(9)
-17: Access Claw, 				amber, 		x(27), 		y(1)
-18: Left Ramp Explode, 			amber, 		x(22), 		y(9)
-21: Right Ramp Jackpot, 		red, 		x(22), 		y(14)
-22: Right Loop Explode, 		amber, 		x(23), 		y(15)
-23: Light Quick Freeze, 		amber, 		x(27), 		y(15)
-24: Freeze 4, 					amber, 		x(26), 		y(14)
-25: Claw Ready, 				amber, 		x(25), 		y(12)
-26: Freeze 3, 					amber, 		x(28), 		y(12)
-27: Freeze 2, 					amber, 		x(28), 		y(6)
-28: Freeze 1, 					red, 		x(26), 		y(2)
-31: Right Loop Jackpot, 		red, 		x(21), 		y(16)
-32: Standup 5, 					red, 		x(19), 		y(15)
-33: Right Ramp Arrow, 			white, 		x(19), 		y(14)
-34: Left Ramp Jackpot, 			white, 		x(20), 		y(8)
-35: Left Loop Jackpot, 			white, 		x(19), 		y(6)
-36: Car Crash Top, 				red, 		x(20), 		y(2)
-37: Standup 1, 					yellow, 	x(21), 		y(5)
-38: Car Crash Center, 			white, 		x(22), 		y(3)
-41: Right Ramp Explode, 		yellow, 	x(23), 		y(14)
-42: Right Ramp Car Chase, 		yellow, 	x(24), 		y(13)
-43: Quick Freeze, 				yellow, 	x(24), 		y(10)
-44: Left Ramp Car Chase, 		yellow, 	x(23), 		y(9)
-45: Extra Ball, extra-ball, 	yellow, 	x(24), 		y(9)
-46: Start Multiball, 			red, 		x(23), 		y(8)
-47: Car Crash Bottom, 			red, 		x(23), 		y(4)
-48: Left Loop Explode, 			white, 		x(22), 		y(7)
-51: Underground Arrow, 			white, 		x(11), 		y(10)
-52: Underground Jackpot, 		white, 		x(12), 		y(9)
-53: Standup 2, 					orange, 	x(13), 		y(8)
-54: Left Ramp Arrow, 			white, 		x(14), 		y(7)
-55: Side Ramp Jackpot, 			white, 		x(16), 		y(9)
-56: Side Ramp Arrow, 			orange, 	x(15), 		y(9)
-57: left Loop Arrow, 			red, 		x(14), 		y(4)
-58: Center Ramp Jackpot, 		orange, 	x(10), 		y(9)
-61: Claw Capture Simon,			red, 		x(1), 		y(7)
-62: Claw Super Jets,			orange, 	x(3), 		y(6)
-63: Claw Prison Break,			yellow, 	x(4), 		y(5)
-64: Claw Freeze, 				yellow, 	x(5), 		y(2)
-65: Claw Acmag, 				yellow, 	x(5), 		y(1)
-66: Middle Rollover, 			green, 		x(2), 		y(14)
-67: Top Rollover, 				green, 		x(2), 		y(15)
-68: Lower Rollover, 			green, 		x(2), 		y(17)
-71: Super Jackpot,				yellow, 	x(7), 		y(11)
-72: Computer,yellow, x(8), y(11)
-73: Demo Time, yellow, x(9), y(11)
+11: Ball Save, 						red, 		x(28), 		y(6)
+12: Fortress Multiball, 			white, 		x(33), 		y(9)
+13: Museum Multiball, 				white, 		x(31), 		y(9)
+14: Cryoprison Multiball, 			white, 		x(29), 		y(9)
+15: Wasteland Multiball, 			white, 		x(30), 		y(9)
+16: Shoot Again, ball-save, 		red, 		x(34), 		y(9)
+17: Access Claw, 					yellow, 	x(27), 		y(1)
+18: Left Ramp Explode, 				yellow, 	x(22), 		y(9)
+21: Right Ramp Jackpot, 			red, 		x(22), 		y(14)
+22: Right Loop Explode, 			yellow,		x(23), 		y(15)
+23: Light Quick Freeze, 			yellow, 	x(27), 		y(15)
+24: Freeze 4, 						white, 		x(26), 		y(14)
+25: Claw Ready, 					yellow, 	x(25), 		y(12)
+26: Freeze 3, 						white, 		x(28), 		y(12)
+27: Freeze 2, 						white, 		x(28), 		y(6)
+28: Freeze 1, 						white, 		x(26), 		y(2)
+31: Right Loop Jackpot, 			red, 		x(21), 		y(16)
+32: Standup 5, 						blue, 		x(19), 		y(15)
+33: Right Ramp Arrow, 				red, 		x(19), 		y(14)
+34: Left Ramp Jackpot, 				red, 		x(20), 		y(8)
+35: Left Loop Jackpot, 				red, 		x(19), 		y(6)
+36: Car Crash Top, 					yellow, 	x(20), 		y(2)
+37: Standup 1, 						blue, 		x(21), 		y(5)
+38: Car Crash Center, 				yellow, 	x(22), 		y(3)
+41: Right Ramp Explode, 			yellow, 	x(23), 		y(14)
+42: Right Ramp Car Chase, 			yellow, 	x(24), 		y(13)
+43: Quick Freeze, 					yellow, 	x(24), 		y(10)
+44: Left Ramp Car Chase, 			yellow, 	x(23), 		y(9)
+45: Extra Ball, extra-ball, 		yellow, 	x(24), 		y(9)
+46: Start Multiball, 				yellow, 	x(23), 		y(8)
+47: Car Crash Bottom, 				yellow, 	x(23), 		y(4)
+48: Left Loop Explode, 				yellow, 	x(22), 		y(7)
+51: Underground Arrow, 				red, 		x(11), 		y(10)
+52: Underground Jackpot, 			red, 		x(12), 		y(9)
+53: Standup 2, 						blue, 		x(13), 		y(8)
+54: Left Ramp Arrow, 				red, 		x(14), 		y(7)
+55: Side Ramp Jackpot, 				red, 		x(16), 		y(9)
+56: Side Ramp Arrow, 				red, 		x(15), 		y(9)
+57: left Loop Arrow, 				red, 		x(14), 		y(4)
+58: Center Ramp Jackpot, 			red, 		x(10), 		y(9)
+61: Claw Capture Simon,				red, 		x(1), 		y(7)
+62: Claw Super Jets,				red, 		x(3), 		y(6)
+63: Claw Prison Break,				red, 		x(4), 		y(5)
+64: Claw Freeze, 					red, 		x(5), 		y(2)
+65: Claw Acmag, 					red, 		x(5), 		y(1)
+66: Middle Rollover, 				green, 		x(2), 		y(14)
+67: Top Rollover, 					green, 		x(2), 		y(15)
+68: Lower Rollover, 				green, 		x(2), 		y(17)
+71: Super Jackpot,					yellow, 	x(7), 		y(11)
+72: Computer,						blue, 		x(8), 		y(11)
+73: Demo Time, 						yellow, 	x(9), 		y(11)
 74: Not Used 1
 75: Not Used 2
-76: Standup 4, yellow, x(18), y(13)
-77: Standup 3, orange, x(17), y(10)
-78: Retina Scan, red, x(23), y(1)
-81: Center Ramp Middle, yellow ,x(6), y(9)
-82: Center Ramp Outer, white ,x(6), y(8)
-83: Center Ramp Inner, yellow ,x(6), y(9)
-84: Center Ramp Arrow, red ,x(9), y(9)
-85: Right Loop Arrow, yellow ,x(16), y(18)
-86: Buy In Button, yellow, buyin, cabinet, x(33), y(18)
-87: Ball Launch, yellow, launch, cabinet, x(34), y(16)
-88: Start Button, yellow, start, cabinet, x(1), y(1)
+76: Standup 4, 						blue, 		x(18), 		y(13)
+77: Standup 3, 						blue, 		x(17), 		y(10)
+78: Retina Scan, 					yellow, 	x(23), 		y(1)
+81: Center Ramp Middle, 			red,		x(6), 		y(9)
+82: Center Ramp Outer, 				red,		x(6), 		y(8)
+83: Center Ramp Inner, 				red, 		x(6), 		y(9)
+84: Center Ramp Arrow, 				red, 		x(9), 		y(9)
+85: Right Loop Arrow, 				red, 		x(16), 		y(18)
+86: Buy In Button, buyin, cabinet, 	yellow, 	x(33), 		y(18)
+87: Ball Launch, launch, cabinet, 	red, 		x(34), 		y(16)
+88: Start Button, start, cabinet, 	yellow, 	x(1), 		y(1)
 
 ##########################################################################
 # Switch Description
@@ -230,9 +224,9 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 68: Not Used 3, novalid
 71: Chase Car 1, opto, ingame
 72: Chase Car  2, opto, ingame
-73: Top Popper, opto, ingame, novalid
+73: Top Popper, opto, ingame, edge
 74: Elevator Hold, opto, novalid
-75: Elevator Ramp, ingame
+75:  Not Used 4, novalid
 76: Bottom Popper, opto, ingame, edge, debounce(TIME_200MS)
 77: Eyeball Standup, standup, ingame
 78: Standup 1, standup, ingame
@@ -354,9 +348,9 @@ Top Sling: driver(jet), sw=SW_TOP_SLING, sol=SOL_TOP_SLING, ontime=3, offtime=16
 # power_pulse_ms --Durations of the pulse for the full power solenoid (in ms) 
 # 					must be divisible by the value used by the schedule_ms parameter
 # schedule_ms  --try 32 first as highest number, then experiment from there
-#Diverter: driver(divhold2), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, power_pulse_ms=100,	includetest(yes)
-
-Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=128, schedule_ms=16, includetest(yes)
+#100x16 no 120x4 too strong
+#32, 64, 96, 128
+Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=96, schedule_ms=32, includetest(yes)
 
 
 
@@ -378,7 +372,11 @@ TopSol: driver(spsol), sol=SOL_TOP_POPPER, sw=SW_TOP_POPPER, ontime=8, offtime=1
 # like on AFM, but it will work fine here too.  The elevator motor can turn either way 
 # and raises and lowers the elevator as it continually runs.  It is stopped at the top or bottom
 # by limit switches being made up
-Elevator: driver(motorbank), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_INDEX, down_sw_event=SW_ELEVATOR_HOLD
+#Elevator: driver(motorbank), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HOLD, down_sw_event=SW_ELEVATOR_INDEX
+
+Elevator: driver(motorbank2), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HOLD, down_sw_event=SW_ELEVATOR_INDEX, initial_position=MOTOR_BANK_DOWN
+
+#note - spaces between parameters and arguments will cause crashes
 
 
 # driver designed for TZ mini playfield magnets
