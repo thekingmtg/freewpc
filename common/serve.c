@@ -250,7 +250,6 @@ CALLSET_ENTRY (serve, dev_trough_kick_success)
  */
 CALLSET_ENTRY (serve, sw_shooter)
 {
-#ifndef MACHINE_DEMOLITION_MAN
 	#ifdef MACHINE_SHOOTER_SWITCH
 		if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
 			return;
@@ -262,10 +261,10 @@ CALLSET_ENTRY (serve, sw_shooter)
 		/* TODO - this might be game specific. For example, Simpsons Pinball
 		Party would give you a manual skill shot here except during
 		multiball. */
+		task_sleep (TIME_200MS);
 		launch_ball ();
 	}
 	#endif
-#endif
 }
 
 
