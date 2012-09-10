@@ -66,7 +66,7 @@ GAME_INCLUDES =
 #all files here have NO deffs and may be frequently called
 GAME_OBJS =	simple_switches.o   eyeball.o  \
 eject.o  underground.o  rollovers.o  orbits.o   ramps.o   inlanes.o   
-
+#elevator.o
 
 #all files here have NO deffs and are less frequently called
 GAME2_OBJS = lock_freeze_mbstart.o   sound_handler.o  
