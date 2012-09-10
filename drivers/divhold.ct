@@ -104,7 +104,8 @@ extern inline void @self_service (void)
 		diverter_sol_disable(@power_sol, out);
 		diverter_sol_disable(@hold_sol, out);
 #else
-		sol_disable (@power_sol | @hold_sol);
+		sol_disable (@power_sol);
+		sol_disable (@hold_sol);
 #endif
 	} 
 	
@@ -114,7 +115,8 @@ extern inline void @self_service (void)
 		diverter_sol_enable(@power_sol, out);
 		diverter_sol_enable(@hold_sol, out);
 #else
-		sol_enable (@power_sol | @hold_sol);
+		sol_enable (@power_sol);
+		sol_enable (@hold_sol);
 #endif
 		
 		if (--@self_timer == 0)
