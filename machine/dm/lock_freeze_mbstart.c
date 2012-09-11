@@ -97,7 +97,7 @@ CALLSET_ENTRY (lock_freeze_mbstart, increment_freeze) {
 			break;
 	}//end of switch
 	callset_invoke(start_freeze_deff);
-	callset_invoke(DeActivate_left_Ramp_QuickFreeze);//goto ramps.c
+	callset_invoke(deactivate_left_ramp_quickfreeze);//goto ramps.c
 	callset_invoke(light_quick_freeze_light_off);//goto inlanes.c
 	callset_invoke(check_multiball_requirements);
 }//end of function

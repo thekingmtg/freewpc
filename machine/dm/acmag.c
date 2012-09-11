@@ -95,6 +95,7 @@ void acmag_mode_init (void) {
 	score (SC_250K);
 	acmag_mode_shots_made = 0;
 	flag_on (FLAG_IS_ACMAG_ACTIVATED);
+	callset_invoke (center_ramp_arrow_update);
 	++acmag_modes_achieved;
 	sound_start (ST_SPEECH, SPCH_ACMAG_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
@@ -116,6 +117,7 @@ void acmag_mode_init (void) {
 
 void acmag_mode_expire (void) {
 	flag_off (FLAG_IS_ACMAG_ACTIVATED);
+	callset_invoke (center_ramp_arrow_update);
 }//end of function
 
 

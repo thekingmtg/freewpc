@@ -74,7 +74,13 @@ struct timed_mode_ops prison_break_mode = {
  * initialize  and exit
  ***************************************************************************/
 void prison_break_reset (void) {
-	flag_off (FLAG_IS_PRISON_BREAK_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_SIDERAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_LEFTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_RIGHTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_UNDER_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_CENTERRAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_LEFTORB_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED);
 }//end of function
 
 
@@ -90,7 +96,6 @@ void prison_break_player_reset (void) {
 
 void prison_break_mode_init (void) {
 	prison_break_mode_shots_made = 0;
-	flag_on (FLAG_IS_PRISON_BREAK_ACTIVATED);
 	++prison_break_modes_achieved;
 	sound_start (ST_SPEECH, SPCH_CRYO_PRISON_BREAKOUT, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
@@ -106,16 +111,28 @@ void prison_break_mode_init (void) {
 		case 3: score_add(prison_break_mode_next_score, score_table[SC_8M]); break;
 		default: score_add(prison_break_mode_next_score, score_table[SC_8M]);
 	}//end of switch
-	//TODO: store standard arrow status?
-	lamp_tristate_flash(LM_UNDERGROUND_ARROW);
-	lamp_tristate_flash(LM_SIDE_RAMP_ARROW);
+	flag_on (FLAG_IS_PBREAK_SIDERAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_LEFTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_RIGHTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_UNDER_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_CENTERRAMP_ACTIVATED);
+	flag_on (FLAG_IS_PBREAK_LEFTORB_ACTIVATED);
+	flag_on (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED);
+	callset_invoke(all_arrow_update);
 	score_long (prison_break_mode_last_score);
 }//end of function
 
 
 
 void prison_break_mode_expire (void) {
-	flag_off (FLAG_IS_PRISON_BREAK_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_SIDERAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_LEFTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_RIGHTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_UNDER_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_CENTERRAMP_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_LEFTORB_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED);
+	callset_invoke(all_arrow_update);
 }//end of function
 
 

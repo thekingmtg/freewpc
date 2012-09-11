@@ -79,7 +79,7 @@ void eyeball_goal_award (void) {
 
 
 void eyeball_eb_award (void) {
-		callset_invoke(ExtraBall_Light_On);
+		callset_invoke(extraball_light_on);
 		eyeball_eb_shots_made = 0;
 		sound_start (ST_SPEECH, SPCH_LOVE_WHEN_THAT_HAPPENS, SL_2S, PRI_GAME_QUICK5);
 		if (eyeball_eb_goal < EYE_EB_GOAL_MAX)  eyeball_eb_goal += EYE_EB_GOAL_STEP;

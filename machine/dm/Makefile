@@ -65,7 +65,7 @@ GAME_INCLUDES =
 
 #all files here have NO deffs and may be frequently called
 GAME_OBJS =	simple_switches.o   eyeball.o  \
-eject.o  underground.o  rollovers.o  orbits.o   ramps.o   inlanes.o   
+eject.o  underground.o  rollovers.o  orbits.o   ramps.o   inlanes.o   arrow_handler.o
 #elevator.o
 
 #all files here have NO deffs and are less frequently called
@@ -74,7 +74,7 @@ GAME2_OBJS = lock_freeze_mbstart.o   sound_handler.o
 
 
 #all files here that have deffs
-GAME_PAGED_OBJS = fortressMB.o acmag.o  custom_deffs.o   capture_simon.o   car_chase_mode.o   car_crash.o \
+GAME_PAGED_OBJS = fortress.o acmag.o  custom_deffs.o   capture_simon.o   car_chase_mode.o   car_crash.o \
 explode.o   jets_superjets.o   prison_break.o   standupfrenzy.o  dm_amode.o   
 
 

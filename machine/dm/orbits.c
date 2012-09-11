@@ -50,10 +50,8 @@ __boolean 		left_Loop_ExtraBall_activated;
 __boolean 		left_Loop_MultiBall_activated;
 __boolean 		left_Loop_Explode_activated;
 __boolean 		left_Loop_Jackpot_activated;
-__boolean 		left_Loop_Arrow_activated;
 __boolean 			right_Loop_Explode_activated;
 __boolean 			right_Loop_Jackpot_activated;
-__boolean 			right_Loop_Arrow_activated;
 
 //external variables
 
@@ -76,11 +74,9 @@ void orbits_reset (void) {
 	left_Loop_MultiBall_activated = FALSE;
 	left_Loop_Explode_activated = FALSE;
 	left_Loop_Jackpot_activated = FALSE;
-	left_Loop_Arrow_activated = FALSE;
 
 	right_Loop_Explode_activated = FALSE;
 	right_Loop_Jackpot_activated = FALSE;
-	right_Loop_Arrow_activated = FALSE;
 }//end of function
 
 void player_orbits_reset (void) {
@@ -99,7 +95,7 @@ CALLSET_ENTRY (orbits, start_ball) { orbits_reset(); }
  * playfield lights and flags
  ***************************************************************************/
 //lit by 5 MTL rollovers --see rollovers.c
-CALLSET_ENTRY (orbits, ExtraBall_Light_On) {
+CALLSET_ENTRY (orbits, extraball_light_on) {
 	left_Loop_ExtraBall_activated = TRUE;
 	lamp_tristate_on (LM_EXTRA_BALL);
 	if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
@@ -108,7 +104,7 @@ CALLSET_ENTRY (orbits, ExtraBall_Light_On) {
 		sound_start (ST_SPEECH, SPCH_NEED_EXTRABALL, SL_4S, PRI_GAME_QUICK5);
 }//end of function
 
-CALLSET_ENTRY (orbits, ExtraBall_Light_Off) {
+CALLSET_ENTRY (orbits, extraball_light_off) {
 	left_Loop_ExtraBall_activated = FALSE;
 	lamp_tristate_off (LM_EXTRA_BALL);
 }//end of function
@@ -126,61 +122,61 @@ CALLSET_ENTRY (orbits, multiball_light_off) {
 }//end of function
 
 //lit by eyeball mode start --see eyeball_explode.c
-CALLSET_ENTRY (orbits, Activate_Explode_Inserts) {
-	left_Loop_Arrow_activated = TRUE;
-	right_Loop_Arrow_activated = TRUE;
+CALLSET_ENTRY (orbits, activate_explode_inserts) {
+	left_Loop_Explode_activated = TRUE;
+	right_Loop_Explode_activated = TRUE;
 	lamp_tristate_flash (LM_LEFT_LOOP_EXPLODE);
 	lamp_tristate_flash (LM_RIGHT_LOOP_EXPLODE);
 }//end of function
 
-CALLSET_ENTRY (orbits, DeActivate_Explode_Inserts) {
-	left_Loop_Arrow_activated = FALSE;
-	right_Loop_Arrow_activated = FALSE;
+CALLSET_ENTRY (orbits, deactivate_explode_inserts) {
+	left_Loop_Explode_activated = FALSE;
+	right_Loop_Explode_activated = FALSE;
 	lamp_tristate_off (LM_LEFT_LOOP_EXPLODE);
 	lamp_tristate_off (LM_RIGHT_LOOP_EXPLODE);
 }//end of function
 
 //lit by multiball modes --TODO:
-CALLSET_ENTRY (orbits, LL_Jackpot_Light_On) {
+CALLSET_ENTRY (orbits, ll_jackpot_light_on) {
 	left_Loop_Jackpot_activated = TRUE;
 	lamp_tristate_on (LM_LEFT_LOOP_JACKPOT);
 }//end of function
 
-CALLSET_ENTRY (orbits, LL_Jackpot_Light_Off) {
+CALLSET_ENTRY (orbits, ll_jackpot_light_off) {
 	left_Loop_Jackpot_activated = FALSE;
 	lamp_tristate_off (LM_LEFT_LOOP_JACKPOT);
 }//end of function
 
 //lit by multiball modes --TODO:
-CALLSET_ENTRY (orbits, RL_Jackpot_Light_On) {
+CALLSET_ENTRY (orbits, rl_jackpot_light_on) {
 	right_Loop_Jackpot_activated = TRUE;
 	lamp_tristate_on (LM_RIGHT_LOOP_JACKPOT);
 }//end of function
 
-CALLSET_ENTRY (orbits, RL_Jackpot_Light_Off) {
+CALLSET_ENTRY (orbits, rl_jackpot_light_off) {
 	right_Loop_Jackpot_activated = FALSE;
 	lamp_tristate_off (LM_RIGHT_LOOP_JACKPOT);
 }//end of function
 
 //lit by combo shots --TODO:
-CALLSET_ENTRY (orbits, LL_Arrow_Light_On) {
-	left_Loop_Arrow_activated = TRUE;
+CALLSET_ENTRY (orbits, ll_arrow_light_on) {
+	flag_on (FLAG_IS_L_LOOP_ARROW_ACTIVATED);
 	lamp_tristate_on (LM_LEFT_LOOP_ARROW);
 }//end of function
 
-CALLSET_ENTRY (orbits, LL_Arrow_Light_Off) {
-	left_Loop_Arrow_activated = FALSE;
+CALLSET_ENTRY (orbits, ll_arrow_light_off) {
+	flag_off (FLAG_IS_L_LOOP_ARROW_ACTIVATED);
 	lamp_tristate_off (LM_LEFT_LOOP_ARROW);
 }//end of function
 
 //lit by combo shots --TODO:
-CALLSET_ENTRY (orbits, RL_Arrow_Light_On) {
-	right_Loop_Arrow_activated = TRUE;
+CALLSET_ENTRY (orbits, rl_arrow_light_on) {
+	flag_on (FLAG_IS_R_LOOP_ARROW_ACTIVATED);
 	lamp_tristate_on (LM_RIGHT_LOOP_ARROW);
 }//end of function
 
-CALLSET_ENTRY (orbits, RL_Arrow_Light_Off) {
-	right_Loop_Arrow_activated = FALSE;
+CALLSET_ENTRY (orbits, rl_arrow_light_off) {
+	flag_off (FLAG_IS_R_LOOP_ARROW_ACTIVATED);
 	lamp_tristate_off (LM_RIGHT_LOOP_ARROW);
 }//end of function
 
@@ -231,7 +227,7 @@ CALLSET_ENTRY (orbits, orbit_to_popper_made) {
 	sound_start (ST_EFFECT, RACE_BY_3, SL_2S, PRI_GAME_QUICK5);
 	//extra ball shot made
 	if (left_Loop_ExtraBall_activated ) {
-			callset_invoke(ExtraBall_Light_Off);
+			callset_invoke(extraball_light_off);
 			sol_request(SOL_KNOCKER);
 			sound_start (ST_SAMPLE, EXTRA_BALL_SOUND, SL_2S, PRI_GAME_QUICK5);
 			if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
@@ -244,6 +240,8 @@ CALLSET_ENTRY (orbits, orbit_to_popper_made) {
 	//TODO: random top popper award
 }//end of function
 
+
+
 CALLSET_ENTRY (orbits, left_orbit_shot_made) {
 	++left_loop_counter;
 	++all_loop_counter;
@@ -251,10 +249,17 @@ CALLSET_ENTRY (orbits, left_orbit_shot_made) {
 	score (SC_100K);//located in kernal/score.c
 	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) callset_invoke(explode_made);
 	if(flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED) )  callset_invoke(capture_simon_made);
+	if(flag_test (FLAG_IS_PBREAK_LEFTORB_ACTIVATED) )  callset_invoke(prison_break_made);
+	if (flag_test (FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) {
+		//TODO: combo shot detection
+	}
 
-	//TODO: jackpot and combo shot detection
+
+	//TODO: jackpot shot detection
 	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
 }//end of function
+
+
 
 CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 	++right_loop_counter;
@@ -263,7 +268,15 @@ CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) callset_invoke(explode_made);
 	if(flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED) )  callset_invoke(capture_simon_made);
-		//TODO: jackpot and combo shot detection
+	if(flag_test (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED) )  callset_invoke(prison_break_made);
+
+
+//	if (flag_test (FLAG_IS_L_LOOP_COMBO_ACTIVATED) ) {
+		//TODO: combo shot detection
+//	}
+
+
+	//TODO: jackpot and combo shot detection
 	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
 }//end of function
 

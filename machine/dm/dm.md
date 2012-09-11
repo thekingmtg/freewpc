@@ -323,14 +323,14 @@ X8: Right Ramp Up Flasher, flash, nosearch
 #
 ##########################################################################
 [templates]
-Left Sling: 	driver(sling), 	sw=SW_LEFT_SLING, 	sol=SOL_LEFT_SLING, 	ontime=3, offtime=16
-Right Sling: 	driver(sling), 	sw=SW_RIGHT_SLING, 	sol=SOL_RIGHT_SLING, 	ontime=3, offtime=16
-Left Jet: 		driver(jet), 	sw=SW_LEFT_JET, 	sol=SOL_LEFT_JET, 		ontime=3, offtime=16
-Right Jet: 		driver(jet), 	sw=SW_RIGHT_JET, 	sol=SOL_RIGHT_JET, 		ontime=3, offtime=16
-Top Sling: 		driver(jet), 	sw=SW_TOP_SLING, 	sol=SOL_TOP_SLING, 		ontime=3, offtime=16
-Diverter: 		driver(divhold), power_sol=SOL_DIVERTER_POWER, 	hold_sol=SOL_DIVERTER_HOLD, 	mode=0, 	power_pulse_ms=96, 	schedule_ms=32, 	includetest(yes)
-SubwayVUK: 		driver(spsol), 	sol=SOL_BOTTOM_POPPER, 	sw=SW_BOTTOM_POPPER, 	ontime=8, offtime=15, auto=1
-TopSol: 		driver(spsol), 	sol=SOL_TOP_POPPER, 	sw=SW_TOP_POPPER, 		ontime=8, offtime=15, auto=1
+Left Sling: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
+Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
+Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
+Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
+Top Sling: driver(jet), sw=SW_TOP_SLING, sol=SOL_TOP_SLING, ontime=3, offtime=16
+Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=96, schedule_ms=32, includetest(yes)
+SubwayVUK: driver(spsol), sol=SOL_BOTTOM_POPPER, sw=SW_BOTTOM_POPPER, ontime=8, offtime=15, auto=1
+TopSol: driver(spsol), sol=SOL_TOP_POPPER, sw=SW_TOP_POPPER, ontime=8, offtime=15, auto=1
 
 Elevator: driver(motorbank2), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HOLD, down_sw_event=SW_ELEVATOR_INDEX, initial_position=MOTOR_BANK_DOWN, includetest(yes)
 
@@ -523,7 +523,6 @@ GC: DAD, 000.900.000
 IS_ACMAG_ACTIVATED:
 IS_CARCHASE_MODE_ACTIVATED:
 IS_EXPLODE_MODE_ACTIVATED:
-IS_PRISON_BREAK_ACTIVATED:
 
 IS_CAPSIM_SIDERAMP_ACTIVATED:
 IS_CAPSIM_LEFTRAMP_ACTIVATED:
@@ -533,9 +532,33 @@ IS_CAPSIM_CENTERRAMP_ACTIVATED:
 IS_CAPSIM_LEFTORB_ACTIVATED:
 IS_CAPSIM_RIGHTORB_ACTIVATED:
 
+IS_PBREAK_SIDERAMP_ACTIVATED:
+IS_PBREAK_LEFTRAMP_ACTIVATED:
+IS_PBREAK_RIGHTRAMP_ACTIVATED:
+IS_PBREAK_UNDER_ACTIVATED:
+IS_PBREAK_CENTERRAMP_ACTIVATED:
+IS_PBREAK_LEFTORB_ACTIVATED:
+IS_PBREAK_RIGHTORB_ACTIVATED:
 
-#global_flag_test (GLOBAL_FLAG_IS_PRISONBREAK_ACTIVATED)
-#global_flag_off (GLOBAL_FLAG_IS_PRISONBREAK_ACTIVATED);
+IS_COMBO_SIDERAMP_ACTIVATED:
+IS_COMBO_LEFTRAMP_ACTIVATED:
+IS_COMBO_RIGHTRAMP_ACTIVATED:
+IS_COMBO_UNDER_ACTIVATED:
+IS_COMBO_CENTERRAMP_ACTIVATED:
+IS_COMBO_LEFTORB_ACTIVATED:
+IS_COMBO_RIGHTORB_ACTIVATED:
+
+IS_UGROUND_ARROW_ACTIVATED:
+IS_L_LOOP_ARROW_ACTIVATED:
+IS_R_LOOP_ARROW_ACTIVATED:
+IS_L_RAMP_ARROW_ACTIVATED:
+IS_C_RAMP_ARROW_ACTIVATED:
+IS_S_RAMP_ARROW_ACTIVATED:
+IS_R_RAMP_ARROW_ACTIVATED:
+
+
+#flag_test (FLAG_IS_R_LOOP_ARROW_ACTIVATED)
+#flag_off (FLAG_IS_R_LOOP_ARROW_ACTIVATED);
 
 ##########################################################################
 # System-wide bit flags.
@@ -568,9 +591,9 @@ Explode Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Explode Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Explode End: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-fortressMB jackpot effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-fortressMB start effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-fortressMB effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortress jackpot effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortress start effect:			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+fortress effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
 Jets Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
 Jets Completed Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
@@ -579,7 +602,7 @@ Superjets Completed Effect: 	page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
 
 
 Prison Break Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Prison Break Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
+Prison Break Hit Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Prison Break Start Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 Prison Break End Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 

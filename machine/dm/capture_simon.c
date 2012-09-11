@@ -120,15 +120,13 @@ void capture_simon_mode_init (void) {
 	sound_start (ST_SPEECH, SPCH_SO_SCARED, SL_4S, PRI_GAME_QUICK1);
 	//TODO: randomize which shots are to be made
 	flag_on (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED);
-	lamp_tristate_flash(LM_SIDE_RAMP_ARROW);
 	flag_on (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED);
-	lamp_tristate_flash(LM_LEFT_RAMP_ARROW);
 	flag_on (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED);
-	lamp_tristate_flash(LM_RIGHT_RAMP_ARROW);
 	flag_off (FLAG_IS_CAPSIM_UNDER_ACTIVATED);
 	flag_off (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED);
 	flag_off (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED);
 	flag_off (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED);
+	callset_invoke(all_arrow_update);
 }//end of function
 
 
@@ -142,6 +140,7 @@ void capture_simon_mode_expire (void) {
 	flag_off (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED);
 	flag_off (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED);
 	flag_off (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED);
+	callset_invoke(all_arrow_update);
 }//end of function
 
 
@@ -168,6 +167,7 @@ CALLSET_ENTRY (capture_simon, start_ball) 		{ capture_simon_reset(); }
 CALLSET_ENTRY (capture_simon, sw_claw_capture_simon) {
 	timed_mode_begin (&capture_simon_mode);//start mode
 }//end of function
+
 
 
  //center ramp shot made during capture_simon mode
@@ -210,18 +210,15 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 	if (capture_simon_mode_shots_made == 1) {
 		flag_on (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED);
 		flag_on (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED);
-		lamp_tristate_flash(LM_LEFT_RAMP_ARROW);
-		lamp_tristate_flash(LM_RIGHT_RAMP_ARROW);
 		flag_off (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED);
-		lamp_tristate_off(LM_SIDE_RAMP_ARROW);
 		flag_off (FLAG_IS_CAPSIM_UNDER_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED);
+		callset_invoke(all_arrow_update);
 		deff_start (DEFF_CAPTURE_SIMON_HIT_EFFECT);
 	}
 	else if (capture_simon_mode_shots_made == 2) {
-		lamp_tristate_flash(LM_SIDE_RAMP_ARROW);
 		flag_on (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED);
@@ -229,17 +226,14 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 		flag_off (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED);
-		lamp_tristate_off(LM_LEFT_RAMP_ARROW);
-		lamp_tristate_off(LM_RIGHT_RAMP_ARROW);
+		callset_invoke(all_arrow_update);
 		deff_start (DEFF_CAPTURE_SIMON_HIT_EFFECT);
 	}
 		//IF FINAL CAPTURE SIMON SHOT MADE
 	else if (capture_simon_mode_shots_made >= 3) {
-		lamp_tristate_off(LM_SIDE_RAMP_ARROW);
-		lamp_tristate_off(LM_LEFT_RAMP_ARROW);
-		lamp_tristate_off(LM_RIGHT_RAMP_ARROW);
 		score (SC_50M);
 		deff_start (DEFF_CAPTURE_SIMON_END_EFFECT);
+		capture_simon_mode_exit();
 		}
 
 }//end of function

@@ -109,7 +109,7 @@ void explode_mode_init (void) {
 	score_zero(explode_mode_score);
 	score_zero(explode_mode_next_score);
 	score_add (explode_mode_next_score, score_table[SC_15M]);
-	callset_invoke(Activate_Explode_Inserts);
+	callset_invoke(activate_explode_inserts);
 	++explode_modes_achieved_counter;
 }//end of function
 
@@ -117,7 +117,7 @@ void explode_mode_init (void) {
 
 void explode_mode_expire (void) {
 	flag_off (FLAG_IS_EXPLODE_MODE_ACTIVATED);
-	callset_invoke(DeActivate_Explode_Inserts);//sent to ramps.c and orbits.c
+	callset_invoke(deactivate_explode_inserts);//sent to ramps.c and orbits.c
 }//end of function
 
 

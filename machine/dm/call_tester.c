@@ -23,15 +23,15 @@ ALLSET_ENTRY (calltester, acmag_made){ } 	//needed by ramps.c
 
 #ifndef RAMPS
 //ramps.c
-CALLSET_ENTRY (calltester, RRamp_ClawReady_On) { } 					//needed by inlanes.c
-CALLSET_ENTRY (calltester, Activate_left_Ramp_QuickFreeze) { } 		//needed by inlanes.c
-CALLSET_ENTRY (calltester, DeActivate_left_Ramp_QuickFreeze) { } 		//needed by inlanes.c
-CALLSET_ENTRY (calltester, ExtraBall_Light_On) { }					//needed by rollovers.c
-CALLSET_ENTRY (calltester, Access_Claw_Light_On) { } 				//needed by rollovers.c
-CALLSET_ENTRY (calltester, CRamp_Jackpot_Light_On) { } 				//needed by fortressMB
-CALLSET_ENTRY (calltester, CRamp_Jackpot_Light_Off) { } 			//needed by fortressMB
-CALLSET_ENTRY (calltester, Activate_Explode_Inserts) { }
-CALLSET_ENTRY (calltester, DeActivate_Explode_Inserts) { }
+CALLSET_ENTRY (calltester, rramp_clawready_on) { } 					//needed by inlanes.c
+CALLSET_ENTRY (calltester, activate_left_ramp_quickfreeze) { } 		//needed by inlanes.c
+CALLSET_ENTRY (calltester, deactivate_left_ramp_quickfreeze) { } 		//needed by inlanes.c
+CALLSET_ENTRY (calltester, extraball_light_on) { }					//needed by rollovers.c
+CALLSET_ENTRY (calltester, access_claw_light_on) { } 				//needed by rollovers.c
+CALLSET_ENTRY (calltester, cramp_jackpot_light_on) { } 				//needed by fortressMB
+CALLSET_ENTRY (calltester, cramp_jackpot_light_off) { } 			//needed by fortressMB
+CALLSET_ENTRY (calltester, activate_explode_inserts) { }
+CALLSET_ENTRY (calltester, deactivate_explode_inserts) { }
 #endif
 
 #ifndef EYE
@@ -63,7 +63,7 @@ ALLSET_ENTRY (calltester, prison_break_made){ } 	 //needed by ramps.c
 
 #ifndef FORTRESS
 //fortressMB.c
-ALLSET_ENTRY (calltester, fortressMB_jackpot_made){ } 	 //needed by ramps.c
+ALLSET_ENTRY (calltester, fortress_jackpot_made){ } 	 //needed by ramps.c
 #endif
 
 

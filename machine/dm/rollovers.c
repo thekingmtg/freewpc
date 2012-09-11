@@ -90,10 +90,10 @@ void all_rollover_made (void){
 	score (SC_500K);
 	//light access claw
 	if (rollover_bonus_multiplier < max_rollover_bonus_multiplier) ++rollover_bonus_multiplier;
-	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(ExtraBall_Light_On);
+	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(extraball_light_on);
 	//TODO: DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
 	callset_invoke(start_all_rollovers_deff);//at custom_deffs.c
-	callset_invoke(Access_Claw_Light_On);//at inlanes.c
+	callset_invoke(access_claw_light_on);//at inlanes.c
 }//end of function
 
 

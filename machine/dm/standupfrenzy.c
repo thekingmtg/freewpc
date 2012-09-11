@@ -219,7 +219,7 @@ void standupHandler1 (U8 target, U8 lamp) {
 		score (SC_500K);
 		if (standup_num_of_hits >= standup_goal) {
 			sound_start (ST_SPEECH, SPCH_QUICK_FREEZE_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
-			callset_invoke(Activate_left_Ramp_QuickFreeze);//sent to ramps.c  --left ramp
+			callset_invoke(activate_left_ramp_quickfreeze);//sent to ramps.c  --left ramp
 			if (standup_goal < standup_goal_max ) standup_goal += standup_goal_increment;
 			}
 		//if 5th light out then reset all lights back on

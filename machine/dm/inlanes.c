@@ -65,7 +65,7 @@ CALLSET_ENTRY (inlanes, start_player) {  new_player_inlanes_reset(); }
  * random award from computer (subway shot) or completing certain number of
  * arrow shots
  ***************************************************************************/
-CALLSET_ENTRY (inlanes, Access_Claw_Light_On) {
+CALLSET_ENTRY (inlanes, access_claw_light_on) {
 	left_inlane_Access_Claw_activated = TRUE;
 	lamp_tristate_flash(LM_ACCESS_CLAW);
 	task_sleep (TIME_500MS);
@@ -75,7 +75,7 @@ CALLSET_ENTRY (inlanes, Access_Claw_Light_On) {
 
 
 
-CALLSET_ENTRY (inlanes, Access_Claw_Light_Off) {
+CALLSET_ENTRY (inlanes, access_claw_light_off) {
 	left_inlane_Access_Claw_activated = FALSE;
 	lamp_tristate_flash(LM_ACCESS_CLAW);
 	task_sleep (TIME_500MS);
@@ -89,7 +89,7 @@ CALLSET_ENTRY (inlanes, sw_left_inlane) {
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
 	if (left_inlane_Access_Claw_activated)	{
 		callset_invoke(rramp_clawread_on);//at ramps.c - diverter moved there
-		callset_invoke(Access_Claw_Light_Off);
+		callset_invoke(access_claw_light_off);
 		sound_start (ST_SPEECH, SPCH_CRYOCLAW_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	}
 }//end of function
@@ -125,6 +125,6 @@ CALLSET_ENTRY (inlanes, light_quick_freeze_light_off) {
 CALLSET_ENTRY (inlanes, sw_right_inlane) {
 	score(SC_5770);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
-	if (right_inlane_Light_Quick_Freeze_activated) callset_invoke(Activate_left_Ramp_QuickFreeze);
+	if (right_inlane_Light_Quick_Freeze_activated) callset_invoke(activate_left_ramp_quickfreeze);
 }//end of function
 

@@ -46,7 +46,6 @@ const sound_code_t computerAwardsSoundsArray[] = {	COMPUTER1, 				COMPUTER_ADDIN
 U8 		underground_shots_made;
 U8 		underground_goal;
 __boolean 		is_underground_Jackpot_activated;
-__boolean 		is_underground_Arrow_activated;
 //this will be external and in combo function when written
 __boolean 		next_combo_total;
 U8				computerAwards;
@@ -63,7 +62,6 @@ void underground_reset (void) {
 	underground_shots_made = 0;
 	underground_goal = 0;
 	is_underground_Jackpot_activated = FALSE;
-	is_underground_Arrow_activated = FALSE;
 }//end of function
 
 void player_underground_reset(void) {
@@ -80,24 +78,23 @@ CALLSET_ENTRY (underground, start_ball) { underground_reset(); }
  * playfield lights and flags
  ***************************************************************************/
 //lit by multiball modes --TODO:
-CALLSET_ENTRY (underground, underground_Jackpot_Light_On) {
+CALLSET_ENTRY (underground, underground_jackpot_light_on) {
 	is_underground_Jackpot_activated = TRUE;
 	lamp_tristate_on (LM_UNDERGROUND_JACKPOT);
 }//end of function
 
-CALLSET_ENTRY (underground, underground_Jackpot_Light_Off) {
+CALLSET_ENTRY (underground, underground_jackpot_light_off) {
 	is_underground_Jackpot_activated = FALSE;
 	lamp_tristate_off (LM_UNDERGROUND_JACKPOT);
 }//end of function
 
-//lit by combo shots --TODO:
-CALLSET_ENTRY (underground, underground_Arrow_Light_On) {
-	is_underground_Arrow_activated = TRUE;
+CALLSET_ENTRY (underground, underground_arrow_light_on) {
+	flag_on (FLAG_IS_UGROUND_ARROW_ACTIVATED);
 	lamp_tristate_on (LM_UNDERGROUND_ARROW);
 }//end of function
 
-CALLSET_ENTRY (underground, underground_Arrow_Light_Off) {
-	is_underground_Arrow_activated = FALSE;
+CALLSET_ENTRY (underground, underground_arrow_light_off) {
+	flag_off (FLAG_IS_UGROUND_ARROW_ACTIVATED);
 	lamp_tristate_off (LM_UNDERGROUND_ARROW);
 }//end of function
 
@@ -114,18 +111,22 @@ CALLSET_ENTRY (underground, sw_bottom_popper) {
 		sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
 	else if (underground_SoundCounter == 1 )
 		sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
-	if(flag_test (FLAG_IS_PRISON_BREAK_ACTIVATED) )  callset_invoke(prison_break_made);
-	if(flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED) )
-		callset_invoke(capture_simon_made);
+	if (flag_test (FLAG_IS_PBREAK_UNDER_ACTIVATED) )  	callset_invoke(prison_break_made);
+	if (flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED) )	callset_invoke(capture_simon_made);
 	//TODO: jackpot and combo shot detection
 	//	if (is_underground_Jackpot_activated) //during multiball
-	//	if (is_underground_Arrow_activated) //from combo shot
+
+
+//	if (flag_test(FLAG_IS_COMBO_UNDER_ACTIVATED) ) {
+	//call combo shot updater and underground_arrowhandler
+//	}
+
 	if (next_combo_total) callset_invoke(computer_award);
 	//if nothing special, do normal display effects
-	if(		!flag_test (FLAG_IS_PRISON_BREAK_ACTIVATED)
+	if(		!flag_test (FLAG_IS_PBREAK_UNDER_ACTIVATED)
 		&& 	!flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
 		&& 	!next_combo_total
-		&& 	!is_underground_Arrow_activated
+		&& 	!flag_test (FLAG_IS_UGROUND_ARROW_ACTIVATED)
 		&& 	!is_underground_Jackpot_activated)
 						callset_invoke(start_underground_deff);
 }//end of function
