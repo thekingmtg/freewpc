@@ -50,6 +50,7 @@ enum @self_state {
 
 extern enum @self_state @self_state;
 
+void @self_stop (void);
 void @self_move_up (void);
 void @self_move_down (void);
 
