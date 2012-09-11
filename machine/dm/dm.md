@@ -5,7 +5,6 @@
 # This file describes many characteristics of a pinball machine,
 # mostly physical stuff, although some rules can be coded here also.
 #--------------------------------------------------------------------------
-
 ##########################################################################
 # General section (before a [section] header is given.
 # Miscellaneous parameters are specified here.
@@ -34,40 +33,19 @@ include platform/wpc/wpc-dcs.md
 define MACHINE_HAS_FLIPPER_GUN_HANDLES
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_START_BALL_MUSIC   MUS_PLUNGER
-	#this is triggered after the first playfield switch is made
 define MACHINE_BALL_IN_PLAY_MUSIC 	MUS_BG 
 define MACHINE_BALL_SAVE_TIME       4
 define MACHINE_MAX_BALLS            5
-	#see code changes in ballsave.c
-define CUSTOM_BALL_SAVE_DEFF
-	#see code changes in shootalert.c
-define CUSTOM_SHOOT_REMINDER_DEFF
-
-	#for custom attract mode lighting effects <--in game.c::leff_start (LEFF_AMODE)
 define MACHINE_CUSTOM_AMODE
-	#for custom attract mode display effects <--in amode.c
 define MACHINE_AMODE_EFFECTS
 
-	#this is for fixing ballsave.c
-#define MACHINE_DEMOLITION_MAN
-
-
-
-	#these did not work for me
-#define MACHINE_START_GAME_SOUND	MUS_PLUNGER - supposed to be at a new game
-#define MACHINE_MUSIC_PLUNGER		MUS_PLUNGER
-#define MACHINE_MUSIC_GAME			MUS_BG 
+	#see code changes in ballsave.c
+#define CUSTOM_BALL_SAVE_DEFF
+	#see code changes in shootalert.c
+#define CUSTOM_SHOOT_REMINDER_DEFF
 
 #this does not play
 define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
-
-	#not sure about these
-#define MACHINE_SOL_EXTBOARD1
-#define MACHINE_SCORE_DIGITS
-#define MACHINE_REPLAY_CODE_TO_SCORE
-#define MACHINE_DEBUGGER_HOOK
-#define MACHINE_REPLAY_SCORE_CHOICES 10
-#define MACHINE_OUTHOLE_KICK_HOOK
 
 ##########################################################################
 # Lamp Description
@@ -77,8 +55,6 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 # recognized; see tools/genmachine for details.  Lamp location is
 # given in terms of the Lamp-Matrix-Width and Lamp-Matrix-Height.
 ##########################################################################
-
-#TODO colors of lights 
 [lamps]
 11: Ball Save, 						red, 		x(28), 		y(6)
 12: Fortress Multiball, 			white, 		x(33), 		y(9)
@@ -168,10 +144,7 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 #
 ##########################################################################
 [switches]
-
-#must be named this
 11: Launch Button, launch-button, cabinet, novalid
-
 12: Left Handle Button, cabinet, novalid
 13: Start Button, start-button, cabinet, intest, novalid, debounce(TIME_100MS)
 14: Tilt, tilt, ingame, novalid, cabinet, sound(TILT)
@@ -179,17 +152,16 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 16: Left Inlane, ingame
 17: Right Inlane, ingame
 18: Right Outlane, ingame
+
 21: Slam Tilt, slam-tilt, ingame, novalid, cabinet, sound(TILT)
 22: Coin Door Closed, novalid, cabinet
 23: Buyin Button, buyin-button, cabinet, novalid
 24: Always Closed, novalid
 25: Claw Position 1, opto, noscore, novalid
 26: Claw Position 2, opto, noscore, novalid
-
-#must be named this
 27: Shooter, shooter, noscore, novalid, edge
-
 28: Not Used 1, novalid
+
 31: Trough 1, noscore, novalid, opto
 32: Trough 2, noscore, novalid, opto
 33: Trough 3, noscore, novalid, opto
@@ -198,6 +170,7 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 36: Trough Jam, noscore, novalid, opto
 37: Not Used 2, novalid
 38: Standup 5, ingame, standup
+
 41: Left Sling, ingame, c_decl(sw_sling)
 42: Right Sling, ingame, c_decl(sw_sling)
 43: Left Jet, ingame, c_decl(sw_jet)
@@ -206,6 +179,7 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 46: Right Ramp Enter, ingame
 47: Right Ramp Exit, ingame
 48: Right Freeway, ingame
+
 51: Left Ramp Enter, ingame
 52: Left Ramp Exit, ingame
 53: Center Ramp, ingame
@@ -214,14 +188,16 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 56: Standup 2, standup, ingame
 57: Standup 3, standup, ingame
 58: Standup 4, standup, ingame
+
 61: Side Ramp Enter, ingame
 62: Side Ramp Exit, ingame
 63: Left Rollover, ingame
 64: Center Rollover, ingame
 65: Right Rollover, ingame
 66: Eject, ingame
-67: Elevator Index, ingame, novalid, opto
+67: Elevator Index, opto, novalid
 68: Not Used 3, novalid
+
 71: Chase Car 1, opto, ingame
 72: Chase Car  2, opto, ingame
 73: Top Popper, opto, ingame, edge
@@ -230,6 +206,7 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 76: Bottom Popper, opto, ingame, edge, debounce(TIME_200MS)
 77: Eyeball Standup, standup, ingame
 78: Standup 1, standup, ingame
+
 81: Claw Capture Simon, ingame
 82: Claw Super Jets, ingame
 83: Claw Prison Break, ingame
@@ -253,22 +230,17 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 #    nosearch - do not activate this during ball search
 #
 # The following options denote well-known drives:
-#    knocker, ballserve
+#    knocker, ballserve, launch
 #
 ##########################################################################
 # THIS IS LIST IS SHOWN IN THE SAME ORDER AS THE SOLENOID/FLASHER TABLE
 [drives]
 #H = high power J130
-
-#must be named this
 H1: BallServe, ballserve, duty(SOL_DUTY_100), time(TIME_66MS)
 H2: Bottom Popper, time(TIME_200MS)
-
-#must be named this
 H3: Launch, launch, nosearch, duty(SOL_DUTY_100), time(TIME_133MS)
-
 H4: Top Popper, time(TIME_100MS)
-H5: Diverter Power, duty(SOL_DUTY_100)
+H5: Diverter Power, duty(SOL_DUTY_75)
 H6: Not Used 1
 H7: Knocker, knocker, time(TIME_16MS)
 
@@ -279,7 +251,6 @@ L3: Left Jet, duty(SOL_DUTY_100)
 L4: Top Sling, duty(SOL_DUTY_100)
 L5: Right Jet, duty(SOL_DUTY_100)
 
-#this resets the cpu at 50 and no time
 L6: Eject, duty(SOL_DUTY_75), time(TIME_133MS)
 L7: Diverter Hold, nosearch
 L8: : Not Used 2
@@ -321,7 +292,8 @@ X7: Diverter Flasher, flash, nosearch
 X8: Right Ramp Up Flasher, flash, nosearch
 
 
-[templates]
+##########################################################################
+# templates
 # This section contains template definitions for device drivers.
 # For each device requiring a driver, it specifies the file that
 # contains the template code, and any parameters for the specific
@@ -334,60 +306,41 @@ X8: Right Ramp Up Flasher, flash, nosearch
 # look in the drivers directory for details on each driver
 # the templates are autogenrated by ctemp in tools directory
 #
-
-Left Sling: driver(sling), sw=SW_LEFT_SLING, sol=SOL_LEFT_SLING, ontime=3, offtime=16
-Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, offtime=16
-Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
-Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
-Top Sling: driver(jet), sw=SW_TOP_SLING, sol=SOL_TOP_SLING, ontime=3, offtime=16
-
-
-
-# ramp diverter uses a 2 coil arrangement - like flippers
+# some notes on the various kinds of parameters
+#
+# note - spaces between parameters and arguments will cause crashes
+#
+# divhold
 # mode --Set to 1 if the solenoids are fliptronic powered, 0 == normal
-# power_pulse_ms --Durations of the pulse for the full power solenoid (in ms) 
-# 					must be divisible by the value used by the schedule_ms parameter
-# schedule_ms  --try 32 first as highest number, then experiment from there
-#100x16 no 120x4 too strong
-#32, 64, 96, 128
-Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=96, schedule_ms=32, includetest(yes)
-
-
-
-
+# power_pulse_ms --Durations of the pulse for the full power solenoid (in ms) must be divisible by the value used by the schedule_ms parameter
+# schedule_ms  --try 32 first as highest number, then experiment down from there
+#
+# spsol
 # ontime - how long the coil is kept on
-# offtime - how long the coil is kept off after it was fired, before
-# 			polling the switch again.  This prevents constant lock-on.
+# offtime - how long the coil is kept off after it was fired, before polling the switch again.  This prevents constant lock-on.
 # auto 	- if nonzero, then automatically enable during start ball.
-SubwayVUK: driver(spsol), sol=SOL_BOTTOM_POPPER, sw=SW_BOTTOM_POPPER, ontime=8, offtime=15, auto=1
-TopSol: driver(spsol), sol=SOL_TOP_POPPER, sw=SW_TOP_POPPER, ontime=8, offtime=15, auto=1
 
+#
+##########################################################################
+[templates]
+Left Sling: 	driver(sling), 	sw=SW_LEFT_SLING, 	sol=SOL_LEFT_SLING, 	ontime=3, offtime=16
+Right Sling: 	driver(sling), 	sw=SW_RIGHT_SLING, 	sol=SOL_RIGHT_SLING, 	ontime=3, offtime=16
+Left Jet: 		driver(jet), 	sw=SW_LEFT_JET, 	sol=SOL_LEFT_JET, 		ontime=3, offtime=16
+Right Jet: 		driver(jet), 	sw=SW_RIGHT_JET, 	sol=SOL_RIGHT_JET, 		ontime=3, offtime=16
+Top Sling: 		driver(jet), 	sw=SW_TOP_SLING, 	sol=SOL_TOP_SLING, 		ontime=3, offtime=16
+Diverter: 		driver(divhold), power_sol=SOL_DIVERTER_POWER, 	hold_sol=SOL_DIVERTER_HOLD, 	mode=0, 	power_pulse_ms=96, 	schedule_ms=32, 	includetest(yes)
+SubwayVUK: 		driver(spsol), 	sol=SOL_BOTTOM_POPPER, 	sw=SW_BOTTOM_POPPER, 	ontime=8, offtime=15, auto=1
+TopSol: 		driver(spsol), 	sol=SOL_TOP_POPPER, 	sw=SW_TOP_POPPER, 		ontime=8, offtime=15, auto=1
+
+Elevator: driver(motorbank2), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HOLD, down_sw_event=SW_ELEVATOR_INDEX, initial_position=MOTOR_BANK_DOWN, includetest(yes)
 
 #This probably will not work and will have to write a new driver for this motor
 #CryoClawLeft: driver(motorbank), sol=SOL_CLAW_MOTOR_LEFT, up_sw_event=SW_CLAW_POSITION_1, down_sw_event=SW_CLAW_POSITION_2
 #CryoClawRight: driver(motorbank), sol=SOL_CLAW_MOTOR_RIGHT, up_sw_event=SW_CLAW_POSITION_2, down_sw_event=SW_CLAW_POSITION_1
 
-
-# motor bank is really designed for a motor that raises and lowers a bank target
-# like on AFM, but it will work fine here too.  The elevator motor can turn either way 
-# and raises and lowers the elevator as it continually runs.  It is stopped at the top or bottom
-# by limit switches being made up
-#Elevator: driver(motorbank), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HOLD, down_sw_event=SW_ELEVATOR_INDEX
-
-Elevator: driver(motorbank2), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HOLD, down_sw_event=SW_ELEVATOR_INDEX, initial_position=MOTOR_BANK_DOWN
-
-#note - spaces between parameters and arguments will cause crashes
-
-
-# driver designed for TZ mini playfield magnets
-# The parameters are:
-# sw - the switch number that triggers it
-# sol - the solenoid/coil that gets fired automatically
-# ontime - how long the coil is kept on (16ms)
-# offtime - how long the coil is kept off after it was fired, before
-# 			polling the switch again.  This prevents constant lock-on.
-#ClawMagnet: driver(mpfmag),
-#	sol=CLAW_MAGNET
+# sw_on - the switch number or software event that triggers it
+# sw_off - the switch number or software event that triggers it
+#ClawMagnet: driver(magnet), sol=CLAW_MAGNET, sw_on=magnet_on, sw_off=magnet_off, mode=1
 
 ##########################################################################
 # General Illumination
@@ -404,9 +357,9 @@ Elevator: driver(motorbank2), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HO
 # These are additional test items that should appear in the TESTS menu.
 ##########################################################################
 [tests]
-#magnet:
 #claw:
-diverter: #autogenerated-test, see defintion in [templates] section.
+diverter: 	#autogenerated-test, see defintion in [templates] section.
+elevator:	#autogenerated-test, see defintion in [templates] section.
 
 
 ##########################################################################
