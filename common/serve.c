@@ -86,7 +86,7 @@ void serve_ball (void)
 
 /**
  * Activate the autolaunch mechanism.  A ball must already have
- * been served from the trough ; this just fires the launch
+ * been served from the trough; this just fires the launch
  * solenoid.
  */
 static void launch_ball_task (void)
@@ -236,10 +236,11 @@ CALLSET_BOOL_ENTRY (serve, dev_trough_kick_request)
  */
 CALLSET_ENTRY (serve, dev_trough_kick_success)
 {
-#ifdef HAVE_AUTO_SERVE
-	if (valid_playfield)
-		launch_ball ();
-#endif
+	#ifdef HAVE_AUTO_SERVE
+		if (valid_playfield) {
+			launch_ball ();
+		}
+	#endif
 }
 
 
@@ -250,21 +251,20 @@ CALLSET_ENTRY (serve, dev_trough_kick_success)
  */
 CALLSET_ENTRY (serve, sw_shooter)
 {
-	#ifdef MACHINE_SHOOTER_SWITCH
-		if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
-			return;
-	ball_search_timer_reset ();
-	if (valid_playfield
-		&& !tournament_mode_enabled
-		&& !global_flag_test (GLOBAL_FLAG_COIN_DOOR_OPENED))
-		{
-		/* TODO - this might be game specific. For example, Simpsons Pinball
-		Party would give you a manual skill shot here except during
-		multiball. */
-		task_sleep (TIME_200MS);
-		launch_ball ();
-	}
-	#endif
+		#ifdef MACHINE_SHOOTER_SWITCH
+			if (!switch_poll_logical (MACHINE_SHOOTER_SWITCH))
+				return;
+		ball_search_timer_reset ();
+		if (valid_playfield
+			&& !tournament_mode_enabled
+			&& !global_flag_test (GLOBAL_FLAG_COIN_DOOR_OPENED))
+			{
+			/* TODO - this might be game specific. For example, Simpsons Pinball
+			Party would give you a manual skill shot here except during
+			multiball. */
+			launch_ball ();
+		}
+		#endif
 }
 
 
