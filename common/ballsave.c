@@ -94,11 +94,8 @@ bool ballsave_test_active (void)
  */
 static void ballsave_launch (void)
 {
-#ifdef CUSTOM_BALL_SAVE_DEFF
-	callset_invoke (start_custom_ball_save_deff);
-#else
 		deff_start (DEFF_BALL_SAVE);
-#endif
+		ball_just_saved = TRUE;
 		serve_ball_auto ();
 }
 
