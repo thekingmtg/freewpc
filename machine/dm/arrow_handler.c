@@ -84,8 +84,6 @@ CALLSET_ENTRY (arrow_handler, s_ramp_arrow_update) {
 }//end of function
 
 
-
-
 CALLSET_ENTRY (arrow_handler, r_ramp_arrow_update) {
 	if (	!flag_test (FLAG_IS_R_RAMP_ARROW_ACTIVATED)
 	&& ( 	flag_test (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED)
@@ -93,7 +91,7 @@ CALLSET_ENTRY (arrow_handler, r_ramp_arrow_update) {
 		||	flag_test (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED) ) )
 		callset_invoke (rramp_arrow_light_on);
 	else
-		callset_invoke (rramp_arrow_light_on);
+		callset_invoke (rramp_arrow_light_off);
 }//end of function
 
 
