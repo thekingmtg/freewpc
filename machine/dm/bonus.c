@@ -81,7 +81,7 @@ void bonus_deff (void) {
 	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor); /* Start a task to monitor the buttons */
 	/***car crash scoring and display ***/
 	bonus_sched_transition ();
-	if (car_crash_shots_made > 0) {
+//	if (car_crash_shots_made > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -96,7 +96,7 @@ void bonus_deff (void) {
 			dmd_show_low ();
 			sound_send (BONUS_SHORT);
 			bonus_pause ();
-	}/***end of car crash scoring and display ***/
+//	}/***end of car crash scoring and display ***/
 
 
 

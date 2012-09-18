@@ -219,7 +219,7 @@ void jets_completed_effect_deff(void) {
 	dmd_sched_transition (&trans_bitfade_slow);
 	dmd_clean_page_low ();
 	sprintf ("MILLION");
-	font_render_string_center (&font_term10, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();

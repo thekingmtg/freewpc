@@ -353,7 +353,7 @@ void rollovers_effect_deff(void) {
 
 
 void all_rollovers_effect_deff(void) {
-	dmd_alloc_low_clean ();
+	dmd_clean_page_low ();
 	switch (rollover_bonus_multiplier) {
 		case 0:  sprintf ("ERR"); break;
 		case 1:  sprintf ("ERR"); break;
@@ -361,10 +361,13 @@ void all_rollovers_effect_deff(void) {
 		case 3:  sprintf ("3 X"); break;
 		case 4:  sprintf ("4 X"); break;
 		case 5:	 sprintf ("5 X"); break;
+		default: sprintf ("5 X"); break; //this is for development testing
 		}//end of switch
 	font_render_string_center (&font_cu17, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	dmd_show_low ();
 	task_sleep_sec (1);
 	dmd_sched_transition (&trans_sequential_boxfade);
+	dmd_alloc_low_clean ();
 	font_render_string_center (&font_emulogic, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, "BONUS");
 	dmd_show_low ();
 	task_sleep_sec (2);

@@ -23,26 +23,21 @@ Lamp-Matrix-Height: 34
 # Include standard definitions that apply to all WPC games.
 ##########################################################################
 include platform/wpc/wpc-dcs.md
-#nclude platform/wpc/wpc-fliptronic.md
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by
 # some other means.
 ##########################################################################
-	#see code changes in /kernal/flip.c
 define MACHINE_HAS_FLIPPER_GUN_HANDLES
 define MACHINE_HAS_UPPER_LEFT_FLIPPER
 define MACHINE_START_BALL_MUSIC   MUS_PLUNGER
 define MACHINE_BALL_IN_PLAY_MUSIC 	MUS_BG 
 define MACHINE_BALL_SAVE_TIME       4
 define MACHINE_MAX_BALLS            5
-define MACHINE_CUSTOM_AMODE
-define MACHINE_AMODE_EFFECTS
+#define MACHINE_CUSTOM_AMODE
+#define MACHINE_AMODE_EFFECTS
+define AUTOFIRE_DELAY 25
 
-	#see code changes in ballsave.c
-#define CUSTOM_BALL_SAVE_DEFF
-	#see code changes in shootalert.c
-#define CUSTOM_SHOOT_REMINDER_DEFF
 
 #this does not play
 define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
@@ -198,12 +193,12 @@ define MACHINE_END_GAME_MUSIC 		MUS_END_GAME
 67: Elevator Index, opto, novalid
 68: Not Used 3, novalid
 
-71: Chase Car 1, opto, ingame
-72: Chase Car  2, opto, ingame
-73: Top Popper, opto, ingame, edge
+71: Chase Car 1, opto, novalid
+72: Chase Car  2, opto, novalid
+73: Top Popper, opto, edge, novalid, debounce(TIME_200MS)
 74: Elevator Hold, opto, novalid
 75:  Not Used 4, novalid
-76: Bottom Popper, opto, ingame, edge, debounce(TIME_200MS)
+76: Bottom Popper, opto, edge, , novalid, debounce(TIME_200MS)
 77: Eyeball Standup, standup, ingame
 78: Standup 1, standup, ingame
 
@@ -241,8 +236,8 @@ H2: Bottom Popper, time(TIME_200MS)
 H3: Launch, launch, nosearch, duty(SOL_DUTY_100), time(TIME_133MS)
 H4: Top Popper, time(TIME_100MS)
 H5: Diverter Power, duty(SOL_DUTY_75)
-H6: Not Used 1
-H7: Knocker, knocker, time(TIME_16MS)
+H6: Not Used 1, nosearch
+H7: Knocker, knocker, time(TIME_16MS), nosearch
 
 #L = low power J127
 L1: Left Sling, duty(SOL_DUTY_100)
@@ -253,13 +248,13 @@ L5: Right Jet, duty(SOL_DUTY_100)
 
 L6: Eject, duty(SOL_DUTY_75), time(TIME_133MS)
 L7: Diverter Hold, nosearch
-L8: : Not Used 2
+L8: : Not Used 2, nosearch
 
 # G = J126 on Power Driver Board
 G1: Claw Flasher, flash, nosearch
-G2: Elevator Motor, motor
-G3: Claw Motor Left, motor
-G4: Claw motor Right, motor
+G2: Elevator Motor, motor, nosearch
+G3: Claw Left, motor, nosearch
+G4: Claw Right, motor, nosearch
 G5: Jets Flasher, flash, nosearch
 G6: Side Ramp Flasher, flash, nosearch
 G7: Left Ramp Up Flasher, flash, nosearch
@@ -277,7 +272,7 @@ F2: L.R. Flip Hold, time(TIME_100MS)
 F3: L.L. Flip Power, time(TIME_33MS)
 F4: L.L. Flip Hold, time(TIME_100MS)
 F5: Claw Magnet 
-F6: Not Used
+F6: Not Used, nosearch
 F7: U.L. Flip Power, time(TIME_33MS)
 F8: U.L. Flip Hold, time(TIME_100MS)
 
@@ -328,15 +323,15 @@ Right Sling: driver(sling), sw=SW_RIGHT_SLING, sol=SOL_RIGHT_SLING, ontime=3, of
 Left Jet: driver(jet), sw=SW_LEFT_JET, sol=SOL_LEFT_JET, ontime=3, offtime=16
 Right Jet: driver(jet), sw=SW_RIGHT_JET, sol=SOL_RIGHT_JET, ontime=3, offtime=16
 Top Sling: driver(jet), sw=SW_TOP_SLING, sol=SOL_TOP_SLING, ontime=3, offtime=16
-Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=96, schedule_ms=32, includetest(yes)
-SubwayVUK: driver(spsol), sol=SOL_BOTTOM_POPPER, sw=SW_BOTTOM_POPPER, ontime=8, offtime=15, auto=1
+Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_HOLD, mode=0, power_pulse_ms=64, schedule_ms=32, includetest(yes)
+
+###########these work automatically, eventually need to write custom driver###########
+#SubwayVUK: driver(spsol), sol=SOL_BOTTOM_POPPER, sw=SW_BOTTOM_POPPER, ontime=8, offtime=15, auto=1
 TopSol: driver(spsol), sol=SOL_TOP_POPPER, sw=SW_TOP_POPPER, ontime=8, offtime=15, auto=1
 
 Elevator: driver(motorbank2), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HOLD, down_sw_event=SW_ELEVATOR_INDEX, initial_position=MOTOR_BANK_DOWN, includetest(yes)
 
-#This probably will not work and will have to write a new driver for this motor
-#CryoClawLeft: driver(motorbank), sol=SOL_CLAW_MOTOR_LEFT, up_sw_event=SW_CLAW_POSITION_1, down_sw_event=SW_CLAW_POSITION_2
-#CryoClawRight: driver(motorbank), sol=SOL_CLAW_MOTOR_RIGHT, up_sw_event=SW_CLAW_POSITION_2, down_sw_event=SW_CLAW_POSITION_1
+CryoClawDrive: driver(bivar2), forward_sol=SOL_CLAW_LEFT, reverse_sol=SOL_CLAW_RIGHT, forward_sw=SW_CLAW_POSITION_1, reverse_sw=SW_CLAW_POSITION_2
 
 # sw_on - the switch number or software event that triggers it
 # sw_off - the switch number or software event that triggers it
@@ -357,9 +352,9 @@ Elevator: driver(motorbank2), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HO
 # These are additional test items that should appear in the TESTS menu.
 ##########################################################################
 [tests]
-#claw:
 diverter: 	#autogenerated-test, see defintion in [templates] section.
 elevator:	#autogenerated-test, see defintion in [templates] section.
+#claw:
 
 
 ##########################################################################
@@ -380,21 +375,6 @@ elevator:	#autogenerated-test, see defintion in [templates] section.
 # unit of 'allocation' for a lamp effect.
 ##########################################################################
 [lamplists]
-Amode All: Right Ramp Awards, Left Ramp Awards, Right Loop Awards, Left Loop Awards, Freeze, Rollovers , Loops, Multiballs, 
-Claw, Underground Scoop, Standups, Center Ramp, Car Crash
-Amode Rand: Amode All
-Sort1: PF:lamp_sort_bottom_to_top
-Sort2: PF:lamp_sort_top_to_bottom
-Sort3: PF:lamp_sort_left_to_right
-Sort4: PF:lamp_sort_right_to_left
-Circle Out: PF:lamp_sort_circle_out
-Red Lamps: COLOR:red
-White Lamps: COLOR:white
-Orange Lamps: COLOR:orange
-Yellow Lamps: COLOR:yellow
-Green Lamps: COLOR:green
-Blue Lamps: COLOR:blue
-Amber Lamps: COLOR:amber
 Right Ramp Awards: Right Ramp Arrow, Right Ramp Jackpot, Right Ramp Explode, Right Ramp Car Chase, Claw Ready
 Left Ramp Awards: Left Ramp Arrow, Left Ramp Jackpot, Left Ramp Explode, Left Ramp Car Chase, Quick Freeze
 Right Loop Awards: Right Loop Arrow, Right Loop Jackpot, Right Loop Explode
@@ -408,6 +388,24 @@ Underground Scoop: Underground Arrow, Underground Jackpot
 Standups: Standup 1, Standup 2, Standup 3, Standup 4, Standup 5
 Center Ramp: Center Ramp Arrow, Center Ramp Middle, Center Ramp Outer, Center Ramp Inner, Center Ramp Jackpot
 Car Crash: Car Crash Top, Car Crash Center, Car Crash Bottom
+
+Sort1: PF:lamp_sort_bottom_to_top
+Sort2: PF:lamp_sort_top_to_bottom
+Sort3: PF:lamp_sort_left_to_right
+Sort4: PF:lamp_sort_right_to_left
+Circle Out: PF:lamp_sort_circle_out
+
+Amode All: Right Ramp Awards, Left Ramp Awards, Right Loop Awards, Left Loop Awards, Freeze, Rollovers, Loops, Multiballs, 
+Claw, Underground Scoop, Standups, Center Ramp, Car Crash
+Amode Rand: Amode All
+
+#Red Lamps: COLOR:red
+#White Lamps: COLOR:white
+#Yellow Lamps: COLOR:yellow
+#Green Lamps: COLOR:green
+#Blue Lamps: COLOR:blue
+
+
 
 ##########################################################################
 # Containers
@@ -510,19 +508,26 @@ Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Tr
 # Commas _cannot_ be used for this purpose since they separate parameters.
 ##########################################################################
 [highscores]
-GC: DAD, 000.900.000
-1: SAM, 000.800.000
-2: JOE, 000.700.000
-3: ISA, 000.600.000
-4: MOM, 000.500.000
 
 ##########################################################################
 # Per-player bit flags.
+#
+#limit of 64 total
 ##########################################################################
 [flags]
 IS_ACMAG_ACTIVATED:
 IS_CARCHASE_MODE_ACTIVATED:
 IS_EXPLODE_MODE_ACTIVATED:
+IS_COMPUTER_ACTIVATED:
+IS_COMBOS_KILLED:
+
+IS_COMBO_SIDERAMP_ACTIVATED:
+IS_COMBO_LEFTRAMP_ACTIVATED:
+IS_COMBO_RIGHTRAMP_ACTIVATED:
+IS_COMBO_UNDER_ACTIVATED:
+IS_COMBO_CENTERRAMP_ACTIVATED:
+IS_COMBO_LEFTORB_ACTIVATED:
+IS_COMBO_RIGHTORB_ACTIVATED:
 
 IS_CAPSIM_SIDERAMP_ACTIVATED:
 IS_CAPSIM_LEFTRAMP_ACTIVATED:
@@ -562,78 +567,12 @@ IS_R_RAMP_ARROW_ACTIVATED:
 
 ##########################################################################
 # System-wide bit flags.
+#
+#limit of 32 total
 ##########################################################################
 [globalflags]
 
-##########################################################################
-# Display effects
-##########################################################################
-[deffs]
-Acmag Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Acmag Hit Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Acmag Start Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Acmag End Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 
-Capture Simon Start Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Capture Simon Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Capture Simon Hit Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Capture Simon End Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-
-Car Chase Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Car Chase Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Car Chase Start Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Car Chase End Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-
-Carcrash Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-
-Explode Start Effect:			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Explode Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Explode Hit Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Explode End: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-
-fortress jackpot effect:		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-fortress start effect:			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-fortress effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-
-Jets Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Jets Completed Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Superjets Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-Superjets Completed Effect: 	page(MACHINE_PAGE), PRI_GAME_QUICK1, D_RESTARTABLE
-
-
-Prison Break Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Prison Break Hit Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Prison Break Start Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Prison Break End Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-
-
-
-#############custom_deffs.c###############################################################
-Ball Save Effect:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Shoot Reminder Effect:			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Troubleshooting:				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Freeze Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Clw Inlanes Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Qf Inlanes Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Eject Effect: 					page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Underground Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Rollovers Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-All Rollovers Effect: 			page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-#############custom_deffs.c###############################################################
-
-
-standupFrenzy start effect: 	page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Standupfrenzytotalscore Effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Standupfrenzy Mode Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-StandupfrenzyHit Effect: 		page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-Standup Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
-
-
-
-##########################################################################
-# Lamp effects
-##########################################################################
-[leffs]
 
 ##########################################################################
 # Fonts used in this game.
@@ -642,26 +581,28 @@ Standup Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 # font_mono5
 # font_mono9
 # font_num5x7
-# font_lucida9			---good only for very short words
+# font_lucida9		---good only for very short words
 # font_tinynum
 # font_var5			---small text messages
 # font_fixed6 		---standups and standup frenzy
 # font_fixed10 		---fortress MB
-# font_cu17				---good for large single letters only
-# font_term6     	---car crash and car chase and many smaller lines
+# font_cu17			---good for large single letters only
+# font_term6     	---car crash and car chase freeze  and many smaller lines
 # font_times8		---capture simon
 # font_bitmap8
 #
 # The number at the end doesn't correspond to their point size like you would think.
 # The best thing to do is look at the actual font in the development menu
 # Here are others that are available - from the fonts directory
-
-#pcsenior:			---good only for very short words
 #lithograph:	---EXPLODE, amode title, ball save, shoot reminder
-#times10:
+#v5prc:			---prison break
 #steel:			---ACMAG
-#addlg:				---good only for very short words
-#Adore64:		---freeze  ---remember to drop the cap A when using this in your code
+
+#pcsenior:		---good only for very short words
+#addlg:			---good only for very short words
+#Adore64:		---good only for very short words, remember to drop the cap A when using this in your code
+#ffextra:		---these are not letters, but symbols, like wingdings
+#times10:
 #arcadepi:
 #micron55:
 #pixchicago:
@@ -670,11 +611,16 @@ Standup Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 #uni05_54:
 #uni05_63:
 #uni05_64:
-#v5prc:			---prison break
 #xpaiderp:
 #fixed12:
+arial11b:
 
-#these won't compile
+#new fonts to try
+#emulogic
+#hellovetica
+#pixelmix
+
+#these won't compile for me 
 #amiga4ever:
 #arial11:
 #arial11a:
@@ -682,8 +628,6 @@ Standup Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 #miscfixed:
 #luctype:
 
-#these don't look good or don't show up
-#ffextra:		---these are not letters, but symbols, like wingdings
 #utopia:		---looks garbled
 #schu:			---looks garbled
 #joystix:		---don't show
@@ -691,11 +635,98 @@ Standup Effect: 				page(MACHINE_PAGE), PRI_GAME_QUICK1, D_SCORE+D_RESTARTABLE
 #uni05_53:
 #v5prd:
 #v5prf:
-
 ##########################################################################
 #can pick, at most, 4 to 6 extra fonts, depending on file size, outside of the system fonts without
 #receiving compile errors for overflowing the fonts page 
 [fonts]
+v5prc:
 lithograph:
 steel:
-v5prc:
+arial11b:
+emulogic:
+
+
+##########################################################################
+# Display effects
+##########################################################################
+[deffs]
+rollovers effect: page(MACHINE_PAGE), PRI_GAME_QUICK1
+all rollovers effect: page(MACHINE_PAGE), PRI_GAME_QUICK5
+
+######## retina scan effect at eject.c
+eject effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1
+
+underground effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1
+
+clw inlanes effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1
+qf inlanes effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1
+
+carcrash effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1
+
+#car chase start effect: page(MACHINE_PAGE), PRI_GAME_MODE1
+#car chase effect: page(MACHINE_PAGE), PRI_GAME_MODE2, D_QUEUED
+#car chase hit effect: page(MACHINE_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+#car chase end effect: page(MACHINE_PAGE), PRI_GAME_MODE4
+
+#acmag start effect: page(MACHINE_PAGE), PRI_GAME_MODE1
+#acmag effect: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_QUEUED
+#acmag hit effect: page(MACHINE_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+#acmag end effect: page(MACHINE_PAGE), PRI_GAME_MODE4
+
+jets effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_QUEUED+D_RESTARTABLE
+jets completed effect: page(MACHINE_PAGE), PRI_GAME_QUICK2
+
+superjets effect: page(MACHINE_PAGE), PRI_GAME_MODE1, D_QUEUED+D_RESTARTABLE
+superjets completed effect: page(MACHINE_PAGE), PRI_GAME_MODE2
+
+combo effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1, D_QUEUED+D_RESTARTABLE
+computer effect: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
+
+standupfrenzy start effect: page(MACHINE_PAGE), PRI_GAME_MODE1
+standupfrenzy effect: page(MACHINE_PAGE), PRI_GAME_MODE2, D_QUEUED
+standupfrenzy hit effect: page(MACHINE_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+standupfrenzy end effect: page(MACHINE_PAGE), PRI_GAME_MODE4
+
+standup effect: page(MACHINE_PAGE), PRI_GAME_QUICK1
+
+#freeze effect: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_QUEUED
+
+#capture simon start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1
+#capture simon effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+#capture simon hit effect: page(MACHINE2_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+#capture simon end effect: page(MACHINE2_PAGE), PRI_GAME_MODE4
+
+#prison break start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1
+#prison break effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+#prison break hit effect: page(MACHINE2_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+#prison break end effect: page(MACHINE2_PAGE), PRI_GAME_MODE4
+
+explode start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1
+explode effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+explode hit effect: page(MACHINE2_PAGE), PRI_GAME_MODE5, D_RESTARTABLE
+explode end: page(MACHINE2_PAGE), PRI_GAME_MODE7
+
+#fortress start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1, D_QUEUED
+#fortress jackpot effect: page(MACHINE2_PAGE), PRI_GAME_MODE5, D_QUEUED+D_RESTARTABLE
+#fortress effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+
+#############custom_deffs.c 
+#ball save effect: page(MACHINE2_PAGE), PRI_GAME_QUICK7, c_decl(ball_save_deff)
+#plunge ball effect:	page(MACHINE2_PAGE), PRI_GAME_QUICK7, c_decl(plunge_ball_deff)
+#troubleshooting: page(MACHINE2_PAGE), PRI_GAME_QUICK7
+
+Bonus: page(MACHINE3_PAGE), PRI_BONUS, D_QUEUED
+
+
+##########################################################################
+# Lamp effects
+##########################################################################
+[leffs]
+#Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE3_PAGE)
+#Underground Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+
+######inlanes.c#########
+quick freeze: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+cryoclaw: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+
+

@@ -25,8 +25,10 @@ GAME_ROM_PREFIX = fdm
 #
 ROM_PAGE_COUNT = 32
 
-#MACHINE_MAJOR = 0
-#MACHINE_MINOR = 62
+
+# rev number for screen in format X.XX - must be an octal number
+MACHINE_MAJOR = 0
+MACHINE_MINOR = 1
 
 #################################################
 #
@@ -59,23 +61,31 @@ ROM_PAGE_COUNT = 32
 #
 # note: if we put tabs in between the file names you will get a linker error
 # note: continue line with a '\' --make sure to leave off on last line or you will get a linker error
-GAME_TEST_OBJS =
-GAME_INCLUDES =
+#GAME_TEST_OBJS =
+#GAME_INCLUDES =
 
 
-#all files here have NO deffs and may be frequently called
-GAME_OBJS =	simple_switches.o   eyeball.o  \
-eject.o  underground.o  rollovers.o  orbits.o   ramps.o   inlanes.o   arrow_handler.o
-#elevator.o
-
-#all files here have NO deffs and are less frequently called
-GAME2_OBJS = lock_freeze_mbstart.o   sound_handler.o  
-#ball_handling.o   
+#all files here have NO deffs or leffs and may be frequently called
+GAME_OBJS = call_tester.o simple_switches.o  eyeball.o  cryoclaw.o orbits.o   ramps.o   arrow_handler.o 
 
 
 #all files here that have deffs
-GAME_PAGED_OBJS = fortress.o acmag.o  custom_deffs.o   capture_simon.o   car_chase_mode.o   car_crash.o \
-explode.o   jets_superjets.o   prison_break.o   standupfrenzy.o  dm_amode.o   
+#this is about 30% full from the OS
+#also called MACHINE_PAGE - page 59
+GAME_PAGED_OBJS = rollovers.o jets_superjets.o standupfrenzy.o 
+#car_chase_mode.o acmag.o 
+
+
+#all files here that have deffs and are less frequently called
+#also called MACHINE2_PAGE - page 55
+GAME2_OBJS = inlanes.o car_crash.o combos.o eject.o underground.o  explode.o 
+#capture_simon.o prison_break.o fortress.o lock_freeze_mbstart.o   
+#custom_deffs.o \
+
+#all files here that have deffs and are less frequently called
+#also called MACHINE3_PAGE - page 54
+GAME3_OBJS = bonus.o sound_handler.o dm_amode.o     
+
 
 
 #listing of images used

@@ -8,15 +8,15 @@
  */
 #include <freewpc.h>
 
-//#define RAMPS
+#define RAMPS
 //#define CAPTURE
 //#define PRISON
 //#define CMAG		//acmag.c
 //#define LOCK
 //#define CARCHASE
 //#define FORTRESS
-//#define EXPLO		//expolde.c
-//#define JETS		//jets_superjets.c
+#define EXPLO		//expolde.c
+#define JETS		//jets_superjets.c
 
 
 #ifndef JETS
@@ -25,8 +25,8 @@ const U8 jet_shots_made = 0; 	//needed by eyeball.c
 
 
 #ifndef EXPLO
-CALLSET_ENTRY (calltester, explode_made){ } 	//needed by orbits.c/ramps.c
-CALLSET_ENTRY (calltester, start_explode){ } 	//needed by eyeball.c
+ALLSET_ENTRY (calltester, explode_made){ } 	//needed by orbits.c/ramps.c
+ALLSET_ENTRY (calltester, start_explode){ } 	//needed by eyeball.c
 #endif
 
 
@@ -36,15 +36,15 @@ CALLSET_ENTRY (calltester, acmag_made){ } 	//needed by ramps.c
 
 #ifndef RAMPS
 //ramps.c
-CALLSET_ENTRY (calltester, rramp_clawready_on) { } 					//needed by inlanes.c
-CALLSET_ENTRY (calltester, activate_left_ramp_quickfreeze) { } 		//needed by inlanes.c
-CALLSET_ENTRY (calltester, deactivate_left_ramp_quickfreeze) { } 		//needed by inlanes.c
-CALLSET_ENTRY (calltester, extraball_light_on) { }					//needed by rollovers.c
-CALLSET_ENTRY (calltester, access_claw_light_on) { } 				//needed by rollovers.c
-CALLSET_ENTRY (calltester, cramp_jackpot_light_on) { } 				//needed by fortressMB
-CALLSET_ENTRY (calltester, cramp_jackpot_light_off) { } 			//needed by fortressMB
-CALLSET_ENTRY (calltester, activate_explode_inserts) { }
-CALLSET_ENTRY (calltester, deactivate_explode_inserts) { }
+ALLSET_ENTRY (calltester, rramp_clawready_on) { } 					//needed by inlanes.c
+ALLSET_ENTRY (calltester, activate_left_ramp_quickfreeze) { } 		//needed by inlanes.c
+ALLSET_ENTRY (calltester, deactivate_left_ramp_quickfreeze) { } 		//needed by inlanes.c
+ALLSET_ENTRY (calltester, extraball_light_on) { }					//needed by rollovers.c
+ALLSET_ENTRY (calltester, access_claw_light_on) { } 				//needed by rollovers.c
+ALLSET_ENTRY (calltester, cramp_jackpot_light_on) { } 				//needed by fortressMB
+ALLSET_ENTRY (calltester, cramp_jackpot_light_off) { } 			//needed by fortressMB
+ALLSET_ENTRY (calltester, activate_explode_inserts) { }
+ALLSET_ENTRY (calltester, deactivate_explode_inserts) { }
 #endif
 
 #ifndef LOCK
