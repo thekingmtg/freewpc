@@ -663,15 +663,15 @@ qf inlanes effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1
 
 carcrash effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1
 
-#car chase start effect: page(MACHINE_PAGE), PRI_GAME_MODE1
-#car chase effect: page(MACHINE_PAGE), PRI_GAME_MODE2, D_QUEUED
-#car chase hit effect: page(MACHINE_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
-#car chase end effect: page(MACHINE_PAGE), PRI_GAME_MODE4
+car chase start effect: page(MACHINE_PAGE), PRI_GAME_MODE1
+car chase effect: page(MACHINE_PAGE), PRI_GAME_MODE2, D_QUEUED
+car chase hit effect: page(MACHINE_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+car chase end effect: page(MACHINE_PAGE), PRI_GAME_MODE4
 
-#acmag start effect: page(MACHINE_PAGE), PRI_GAME_MODE1
-#acmag effect: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_QUEUED
-#acmag hit effect: page(MACHINE_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
-#acmag end effect: page(MACHINE_PAGE), PRI_GAME_MODE4
+acmag start effect: page(MACHINE_PAGE), PRI_GAME_MODE1
+acmag effect: page(MACHINE_PAGE), PRI_GAME_QUICK2, D_QUEUED
+acmag hit effect: page(MACHINE_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+acmag end effect: page(MACHINE_PAGE), PRI_GAME_MODE4
 
 jets effect: page(MACHINE_PAGE), PRI_GAME_QUICK1, D_QUEUED+D_RESTARTABLE
 jets completed effect: page(MACHINE_PAGE), PRI_GAME_QUICK2
@@ -689,34 +689,34 @@ standupfrenzy end effect: page(MACHINE_PAGE), PRI_GAME_MODE4
 
 standup effect: page(MACHINE_PAGE), PRI_GAME_QUICK1
 
-#freeze effect: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_QUEUED
+freeze effect: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_QUEUED
 
-#capture simon start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1
-#capture simon effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
-#capture simon hit effect: page(MACHINE2_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
-#capture simon end effect: page(MACHINE2_PAGE), PRI_GAME_MODE4
+capture simon start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1
+capture simon effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+capture simon hit effect: page(MACHINE2_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+capture simon end effect: page(MACHINE2_PAGE), PRI_GAME_MODE4
 
-#prison break start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1
-#prison break effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
-#prison break hit effect: page(MACHINE2_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
-#prison break end effect: page(MACHINE2_PAGE), PRI_GAME_MODE4
+prison break start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1
+prison break effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+prison break hit effect: page(MACHINE2_PAGE), PRI_GAME_MODE3, D_RESTARTABLE
+prison break end effect: page(MACHINE2_PAGE), PRI_GAME_MODE4
 
 explode start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1
 explode effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
 explode hit effect: page(MACHINE2_PAGE), PRI_GAME_MODE5, D_RESTARTABLE
 explode end: page(MACHINE2_PAGE), PRI_GAME_MODE7
 
-#fortress start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1, D_QUEUED
-#fortress jackpot effect: page(MACHINE2_PAGE), PRI_GAME_MODE5, D_QUEUED+D_RESTARTABLE
-#fortress effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+fortress start effect: page(MACHINE2_PAGE), PRI_GAME_MODE1, D_QUEUED
+fortress jackpot effect: page(MACHINE2_PAGE), PRI_GAME_MODE5, D_QUEUED+D_RESTARTABLE
+fortress effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+
+Bonus: page(MACHINE3_PAGE), PRI_BONUS, D_QUEUED
+
 
 #############custom_deffs.c 
 #ball save effect: page(MACHINE2_PAGE), PRI_GAME_QUICK7, c_decl(ball_save_deff)
 #plunge ball effect:	page(MACHINE2_PAGE), PRI_GAME_QUICK7, c_decl(plunge_ball_deff)
 #troubleshooting: page(MACHINE2_PAGE), PRI_GAME_QUICK7
-
-Bonus: page(MACHINE3_PAGE), PRI_BONUS, D_QUEUED
-
 
 ##########################################################################
 # Lamp effects

@@ -365,13 +365,13 @@ void standupfrenzy_start_effect_deff (void) {
 			else if (i < 15) {  x = random_scaled (4);  y = random_scaled (5); }
 			else if (i < 20) {  x = random_scaled (8);  y = random_scaled (4); }
 			else 			 {  x = random_scaled (10); y = random_scaled (5); }
-			font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent + x, 22 + DMD_BIG_CY_Cent, "FRENZY");
+			font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent + x, y + DMD_BIG_CY_Cent, "FRENZY");
 			dmd_show_low ();
 			if (i % 10 == 0) sound_send (EXPLOSION1_SHORT);
 			task_sleep (TIME_66MS);
 	} while (i++ < 25);
-	sound_send (EXPLOSION1_LONG);
 	dmd_alloc_low_clean ();
+	sound_send (EXPLOSION1_LONG);
 	font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, "FRENZY");
 	dmd_show_low ();
 	task_sleep_sec (1);
