@@ -16,19 +16,29 @@
 
 //local variables
 U8 eject_killer_counter;
+U8 retina_scan_multiplier;
 
 //prototypes
+void eject_reset (void);
+void player_eject_reset (void);
 void eject_killer_task (void);
 void eyeball_effect_deff(void);
 
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
+void eject_reset (void) {
+	retina_scan_multiplier = 1;
+}//end of function
+
+
 void player_eject_reset (void) {
 	eject_killer_counter = 0;
+	eject_reset ();
 }//end of function
 
 CALLSET_ENTRY (eject, start_player) 	{ player_eject_reset(); }
+CALLSET_ENTRY (eject, start_ball) 		{ eject_reset(); }
 
 
 /****************************************************************************
@@ -44,8 +54,11 @@ void eject_killer_task (void){
 CALLSET_ENTRY (eject, sw_eject) {
 	if (eject_killer_counter++ == 1) {
 		sound_start (ST_SAMPLE, RETINA_SCAN_LONG, SL_4S, PRI_GAME_QUICK1);
-		score (SC_5M);
-		callset_invoke(start_eject_deff);
+		U8 i;
+		for (i = 1; i <= retina_scan_multiplier; i++){
+			score (SC_5M);
+		}//end of loop
+		deff_start (DEFF_EJECT_EFFECT);
 		lamp_tristate_flash(LM_RETINA_SCAN);
 		task_sleep (TIME_500MS);
 		task_sleep (TIME_500MS);
@@ -60,4 +73,26 @@ CALLSET_ENTRY (eject, sw_eject) {
 	}//end of if
 	eject_killer_task();
 }//end of function
+
+
+//called from comp award at underground.c
+CALLSET_ENTRY (eject, comp_award_doub_retina) {
+	retina_scan_multiplier = 2;
+}//end of function
+
+/****************************************************************************
+ *
+ * DISPLAY EFFECTS
+ *
+ ****************************************************************************/
+void eject_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "RETINA");
+	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SCAN");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
+
 

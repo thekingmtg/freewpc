@@ -41,7 +41,8 @@ __boolean 			middle_rollover_activated;
 __boolean 			top_rollover_activated;
 __boolean 			lower_rollover_activated;
 U8 					rollover_bonus_multiplier; // 0 to 5
-U8					rollover_SoundCounter = 0;
+U8					rollover_SoundCounter;
+U8					rollover_MessageCounter;
 
 //external variables
 
@@ -56,19 +57,21 @@ void rollover_sounds_already_lit(void);
  * initialize  and exit
  ***************************************************************************/
 void rollover_reset (void) {
+	rollover_SoundCounter = 0;
+	rollover_MessageCounter = 0;
 	middle_rollover_activated = TRUE;
 	top_rollover_activated = FALSE;
 	lower_rollover_activated = FALSE;
-	rollover_bonus_multiplier = 0;
+	rollover_bonus_multiplier = 1;
 
 	lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 	lamp_tristate_off(LM_TOP_ROLLOVER);
 	lamp_tristate_off(LM_LOWER_ROLLOVER);
 }//end of rollover_reset
 
-void new_player_rollover_reset (void) { }//end of function
+void player_rollover_reset (void) { }//end of function
 
-CALLSET_ENTRY (rollovers, start_player) { new_player_rollover_reset(); }
+CALLSET_ENTRY (rollovers, start_player) { player_rollover_reset(); }
 CALLSET_ENTRY (rollovers, start_ball) { rollover_reset(); }
 
 
@@ -80,6 +83,11 @@ void all_rollover_made (void){
 	lamp_tristate_flash(LM_TOP_ROLLOVER);
 	lamp_tristate_flash(LM_LOWER_ROLLOVER);
 	rollover_sounds_all_rollovers();
+	if (rollover_bonus_multiplier < max_rollover_bonus_multiplier) {
+		++rollover_bonus_multiplier;
+		deff_start (DEFF_ALL_ROLLOVERS_EFFECT);
+	}
+	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(extraball_light_on);
 	task_sleep (TIME_2S);
 	lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 	lamp_tristate_off(LM_TOP_ROLLOVER);
@@ -89,10 +97,6 @@ void all_rollover_made (void){
 	lower_rollover_activated = FALSE;
 	score (SC_500K);
 	//light access claw
-	if (rollover_bonus_multiplier < max_rollover_bonus_multiplier) ++rollover_bonus_multiplier;
-	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(extraball_light_on);
-	//TODO: DISPLAY EFFECTS HERE FOR ADVANCING MULTIPLIER
-	callset_invoke(start_all_rollovers_deff);//at custom_deffs.c
 	callset_invoke(access_claw_light_on);//at inlanes.c
 }//end of function
 
@@ -113,7 +117,7 @@ CALLSET_ENTRY (rollovers, sw_left_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (top_rollover_activated && lower_rollover_activated) all_rollover_made();
-		else callset_invoke(start_rollovers_deff);//at custom_deffs.c
+		else deff_start (DEFF_ROLLOVERS_EFFECT);
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_middle_rollover
 
@@ -134,7 +138,7 @@ CALLSET_ENTRY (rollovers, sw_center_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && lower_rollover_activated)  all_rollover_made();
-		else callset_invoke(start_rollovers_deff);//at custom_deffs.c
+		else deff_start (DEFF_ROLLOVERS_EFFECT);
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_top_rollover
 
@@ -155,7 +159,7 @@ CALLSET_ENTRY (rollovers, sw_right_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && top_rollover_activated)  all_rollover_made();
-		else callset_invoke(start_rollovers_deff);//at custom_deffs.c
+		else deff_start (DEFF_ROLLOVERS_EFFECT);
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_lower_rollover
 
@@ -290,6 +294,8 @@ else if ( rollover_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, MACHINE1_LONG, SL_2S, PRI_GAME_QUICK5);
 }//end of function
 
+
+
 void rollover_sounds_all_rollovers (void) {
 	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
 	if ( rollover_SoundCounter  == 0 )
@@ -300,6 +306,8 @@ else if ( rollover_SoundCounter  == 2 )
 	sound_start (ST_EFFECT, STORM1_LONG, SL_2S, PRI_GAME_QUICK5);
 }//end of function
 
+
+
 void rollover_sounds_already_lit(void) {
 	rollover_SoundCounter = random_scaled(2);//from kernal/random.c
 	if ( rollover_SoundCounter  == 0 )
@@ -307,6 +315,62 @@ void rollover_sounds_already_lit(void) {
 else if ( rollover_SoundCounter  == 1 )
 	sound_start (ST_EFFECT, TOINK2, SL_2S, PRI_GAME_QUICK5);
 }//end of function
+
+
+/****************************************************************************
+ * display effects
+ ****************************************************************************/
+void rollovers_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_cu17, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "M  T  L");
+	dmd_show_low ();
+	task_sleep_sec (1);
+	dmd_sched_transition (&trans_random_boxfade);
+	dmd_clean_page_low ();
+	switch (++rollover_MessageCounter % 3) {
+		case 0:
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "ADVANCE BONUS X");
+			break;
+		case 1:
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT CRYOCLAW");
+			break;
+		case 2:
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_2, DMD_SMALL_CY_2, "5 TIMES");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT EXTRA BALL");
+			break;
+	}//END OF SWITCH
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
+
+
+void all_rollovers_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	switch (rollover_bonus_multiplier) {
+		case 0:  sprintf ("ERR"); break;
+		case 1:  sprintf ("ERR"); break;
+		case 2:  sprintf ("2 X"); break;
+		case 3:  sprintf ("3 X"); break;
+		case 4:  sprintf ("4 X"); break;
+		case 5:	 sprintf ("5 X"); break;
+		}//end of switch
+	font_render_string_center (&font_cu17, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	task_sleep_sec (1);
+	dmd_sched_transition (&trans_sequential_boxfade);
+	font_render_string_center (&font_emulogic, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, "BONUS");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
 
 
 

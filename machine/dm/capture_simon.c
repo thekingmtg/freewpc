@@ -21,21 +21,27 @@
  * estimate of average capture simon mode score: 30 million to 95 million
  *
  */
+
 #include <freewpc.h>
 #include "dm/global_constants.h"
 
 //constants
+const U8 			CAP_SIM_EASY_GOAL 	= 3;
+const U8 			CAP_SIM_MED_GOAL 	= 4;
+const U8 			CAP_SIM_HARD_GOAL 	= 5;
+const U8 			CAP_SIM_GOAL_INCREMENT = 1;
+const U8 			CAP_SIM_GOAL_MAX 	= 10;
 
 //local variables
 U8			capture_simon_SoundCounter;
 U8 			capture_simon_mode_shots_made;
-U8 			capture_simon_modes_achieved;
-U8 			capture_simon_modes_completed;
+__local__ U8 			capture_simon_modes_achieved;
+__local__ U8 			capture_simon_modes_completed;
 U8			capture_simon_mode_timer;
 score_t 	capture_simon_mode_score;
 score_t 	capture_simon_mode_last_score;
 score_t 	capture_simon_mode_next_score;
-score_t 	capture_simon_mode_score_total_score;
+__local__ score_t 	capture_simon_mode_score_total_score;
 
 
 //external variables
@@ -121,9 +127,9 @@ void capture_simon_mode_init (void) {
 	//TODO: randomize which shots are to be made
 	flag_on (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED);
 	flag_on (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED);
-	flag_on (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED);
 	flag_off (FLAG_IS_CAPSIM_UNDER_ACTIVATED);
-	flag_off (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED);
+	flag_on (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED);
 	flag_off (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED);
 	flag_off (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED);
 	callset_invoke(all_arrow_update);
@@ -207,14 +213,15 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
 	score_add (capture_simon_mode_score_total_score, capture_simon_mode_last_score);
 
 	//TODO: complete mode if xx number of shots made?
+	//TODO: not activate capture simon shot on right ramp if diverter is made
 	if (capture_simon_mode_shots_made == 1) {
 		flag_on (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED);
-		flag_on (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED);
+		flag_off (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_UNDER_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED);
 		flag_off (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED);
-		flag_off (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED);
+		flag_on (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED);
 		callset_invoke(all_arrow_update);
 		deff_start (DEFF_CAPTURE_SIMON_HIT_EFFECT);
 	}
@@ -244,8 +251,8 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
  ****************************************************************************/
 void capture_simon_start_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_times8, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE_SIMON");
-	font_render_string_center (&font_times8, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SHOOT ARROWS");
+	font_render_string_center (&font_times8, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE");
+	font_render_string_center (&font_times8, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SIMON");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -255,7 +262,7 @@ void capture_simon_start_effect_deff(void) {
 
 void capture_simon_hit_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_times8, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE_SIMON");
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
 	sprintf_score (capture_simon_mode_last_score);
 	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
@@ -268,7 +275,7 @@ void capture_simon_hit_effect_deff(void) {
 void capture_simon_effect_deff(void) {
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_times8, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE_SIMON");
+		font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
 		sprintf ("%d SEC LEFT,  %d HIT", capture_simon_mode_timer, capture_simon_mode_shots_made);
 		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
 		sprintf_score (capture_simon_mode_next_score);
@@ -284,9 +291,9 @@ void capture_simon_effect_deff(void) {
 
 void capture_simon_end_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_times8, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE_SIMON");
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
 	sprintf("COMPLETED");
-	font_render_string_center (&font_times8, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

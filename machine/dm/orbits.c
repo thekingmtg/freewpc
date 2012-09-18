@@ -46,8 +46,8 @@ U8 		all_loop_counter;
 U8 			right_loop_goal;
 U8 			left_loop_goal;
 U8 			all_loop_goal;
-__boolean 		left_Loop_ExtraBall_activated;
-__boolean 		left_Loop_MultiBall_activated;
+__local__ __boolean 		left_Loop_ExtraBall_activated;
+__local__ __boolean 		left_Loop_MultiBall_activated;
 __boolean 		left_Loop_Explode_activated;
 __boolean 		left_Loop_Jackpot_activated;
 __boolean 			right_Loop_Explode_activated;
@@ -70,8 +70,6 @@ void orbits_reset (void) {
 	right_loop_counter = 0;
 	all_loop_counter = 0;
 
-	left_Loop_ExtraBall_activated = FALSE;
-	left_Loop_MultiBall_activated = FALSE;
 	left_Loop_Explode_activated = FALSE;
 	left_Loop_Jackpot_activated = FALSE;
 
@@ -84,6 +82,8 @@ void player_orbits_reset (void) {
 	right_loop_goal = 0;
 	left_loop_goal=ORBITS_EASY_GOAL;
 	all_loop_goal=(ORBITS_EASY_GOAL * 4);
+	left_Loop_ExtraBall_activated = FALSE;
+	left_Loop_MultiBall_activated = FALSE;
 	orbits_reset();
 }//end of function
 
@@ -250,11 +250,8 @@ CALLSET_ENTRY (orbits, left_orbit_shot_made) {
 	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) callset_invoke(explode_made);
 	if(flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED) )  callset_invoke(capture_simon_made);
 	if(flag_test (FLAG_IS_PBREAK_LEFTORB_ACTIVATED) )  callset_invoke(prison_break_made);
-	if (flag_test (FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) {
-		//TODO: combo shot detection
-	}
-
-
+	if (flag_test(FLAG_IS_COMBOS_KILLED) ) callset_invoke(combo_init);
+	else if ( flag_test(FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) callset_invoke(combo_hit);
 	//TODO: jackpot shot detection
 	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
 }//end of function
@@ -269,13 +266,8 @@ CALLSET_ENTRY (orbits, right_orbit_shot_made) {
 	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) callset_invoke(explode_made);
 	if(flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED) )  callset_invoke(capture_simon_made);
 	if(flag_test (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED) )  callset_invoke(prison_break_made);
-
-
-//	if (flag_test (FLAG_IS_L_LOOP_COMBO_ACTIVATED) ) {
-		//TODO: combo shot detection
-//	}
-
-
+	if (flag_test(FLAG_IS_COMBOS_KILLED) ) callset_invoke(combo_init);
+	else if ( flag_test(FLAG_IS_COMBO_RIGHTORB_ACTIVATED) ) callset_invoke(combo_hit);
 	//TODO: jackpot and combo shot detection
 	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
 }//end of function

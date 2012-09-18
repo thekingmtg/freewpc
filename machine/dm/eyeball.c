@@ -23,19 +23,23 @@
 
 //constants
 const U8 EYE_EASY_GOAL = 3;
-const U8 EYE_PREDEFINED_GOAL_INCREMENT = 1;
+const U8 EYE_MED_GOAL = 4;
+const U8 EYE_HARD_GOAL = 5;
 const U8 EYE_GOAL_STEP = 3;
 const U8 EYE_GOAL_MAX = 50;
+
 const U8 EYE_EB_EASY_GOAL = 5;
-const U8 EYE_EB_GOAL_STEP = 3;
+const U8 EYE_EB_MED_GOAL = 8;
+const U8 EYE_EB_HARD_GOAL = 12;
+const U8 EYE_EB_GOAL_STEP = 5;
 const U8 EYE_EB_GOAL_MAX = 50;
 
 //local variables
 U8 eyeball_shots_made;//for current ball only
 U8 eyeball_eb_shots_made;//for current ball only
-U8 total_eyeball_shots_made;//for entire game
-U8 eyeball_goal;//num of hits to start explode
-U8 eyeball_eb_goal;//num of hits to light extraball
+__local__ U8 total_eyeball_shots_made;//for entire game
+__local__ U8 eyeball_goal;//num of hits to start explode
+__local__ U8 eyeball_eb_goal;//num of hits to light extraball
 score_t temp_score;
 
 //external variables

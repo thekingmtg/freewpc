@@ -19,9 +19,6 @@
  * the left ramp is shot and the ball is frozen
  *
  * access claw can be lit by completing MTL rollovers,
- * TODO: random award from top hole,
- * TODO: random award from computer (subway shot) or
- * TODO: completing certain number of arrow shots
  *
  * Depending on machine settings, One, Two, or Three sets of
  * standup targets must be completed to light Quick Freeze, depending on
@@ -41,6 +38,8 @@ __boolean 	left_inlane_Access_Claw_activated;
 __boolean 	right_inlane_Light_Quick_Freeze_activated;
 
 //external variables
+extern __local__ __boolean 	left_Ramp_QuickFreeze_activated;
+extern __local__ __boolean 		right_Ramp_ClawReady_activated;
 
 //prototypes
 
@@ -70,7 +69,6 @@ CALLSET_ENTRY (inlanes, access_claw_light_on) {
 	lamp_tristate_flash(LM_ACCESS_CLAW);
 	task_sleep (TIME_500MS);
 	lamp_tristate_on (LM_ACCESS_CLAW);
-	callset_invoke(start_clw_inlanes_deff); //call to custom_deffs.c
 }//end of function
 
 
@@ -87,11 +85,13 @@ CALLSET_ENTRY (inlanes, access_claw_light_off) {
 CALLSET_ENTRY (inlanes, sw_left_inlane) {
 	score(SC_5770);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
-	if (left_inlane_Access_Claw_activated)	{
-		callset_invoke(rramp_clawread_on);//at ramps.c - diverter moved there
+	if (!right_Ramp_ClawReady_activated && left_inlane_Access_Claw_activated)	{
+		callset_invoke(rramp_clawready_on);//at ramps.c - diverter moved there
 		callset_invoke(access_claw_light_off);
+	//	leff_start (LEFF_CRYOCLAW);//LIGHTING EFFECTS
 		sound_start (ST_SPEECH, SPCH_CRYOCLAW_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
-	}
+		deff_start (DEFF_CLW_INLANES_EFFECT);
+	}//end of if
 }//end of function
 
 
@@ -108,7 +108,6 @@ CALLSET_ENTRY (inlanes, light_quick_freeze_light_on) {
 	lamp_tristate_flash(LM_LIGHT_QUICK_FREEZE);
 	task_sleep (TIME_500MS);
 	lamp_tristate_on (LM_LIGHT_QUICK_FREEZE);
-	callset_invoke(start_qf_inlanes_deff); //call to custom_deffs.c
 }//end of function
 
 
@@ -125,6 +124,84 @@ CALLSET_ENTRY (inlanes, light_quick_freeze_light_off) {
 CALLSET_ENTRY (inlanes, sw_right_inlane) {
 	score(SC_5770);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
-	if (right_inlane_Light_Quick_Freeze_activated) callset_invoke(activate_left_ramp_quickfreeze);
+	if (!left_Ramp_QuickFreeze_activated && right_inlane_Light_Quick_Freeze_activated) {
+		//leff_start (LEFF_QUICK_FREEZE);//LIGHTING EFFECTS
+		callset_invoke(activate_left_ramp_quickfreeze);//at ramps.c
+		deff_start (DEFF_QF_INLANES_EFFECT);
+	}
 }//end of function
+
+
+
+
+/****************************************************************************
+ * lighting effects
+ ****************************************************************************/
+
+static void quick_freeze_subtask (void) {
+	U8 i;
+	for (i = 0; i < 5; i++) {
+		leff_toggle (LAMPLIST_LEFT_RAMP_AWARDS);
+		task_sleep (TIME_100MS);
+	}//end of loop
+	task_exit ();
+}//end of function
+
+void quick_freeze_leff (void) {
+	gi_leff_enable (PINIO_GI_STRINGS);
+	leff_create_peer (quick_freeze_subtask);
+	task_sleep (TIME_500MS);
+	gi_leff_enable (PINIO_GI_STRINGS);
+	leff_exit ();
+}//end of function
+
+
+static void cryoclaw_subtask (void) {
+	U8 i;
+	for (i = 0; i < 5; i++) {
+		leff_toggle (LAMPLIST_RIGHT_RAMP_AWARDS);
+		task_sleep (TIME_100MS);
+	}//end of loop
+	task_exit ();
+}//end of function
+
+void cryoclaw_leff (void) {
+	gi_leff_enable (PINIO_GI_STRINGS);
+	leff_create_peer (cryoclaw_subtask);
+	task_sleep (TIME_500MS);
+	gi_leff_enable (PINIO_GI_STRINGS);
+	leff_exit ();
+}//end of function
+
+
+
+/****************************************************************************
+ *
+ * display effects
+ *
+ ****************************************************************************/
+void clw_inlanes_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CRYO CLAW");
+	font_render_string_center (&font_term6, 60, 21, "RIGHT RAMP");
+//	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "RIGHT RAMP");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
+
+
+void qf_inlanes_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "QUICK FREEZE");
+	font_render_string_center (&font_term6, 60, 21, "LEFT RAMP");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
+
+
+
 

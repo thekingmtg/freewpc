@@ -6,6 +6,7 @@
  *
  * */
 
+
 #include <freewpc.h>
 #include "dm/global_constants.h"
 
@@ -37,9 +38,7 @@ extern U8 	NumBallsFrozen;
  * BALL_SAVE - see ballsave.c
  *
  ****************************************************************************/
-CALLSET_ENTRY (custom_deffs, start_custom_ball_save_deff) {	deff_start (DEFF_BALL_SAVE_EFFECT);}
-
-//DEFF_BALL_SAVE
+//DEFF_BALL_SAVE - OVERRIDES stock ball save
 void ball_save_effect_deff(void) {
 	U8 ball_save_SoundCounter;
 	ball_save_SoundCounter = random_scaled(ball_save_TotalNumOfSounds);//from kernal/random.c
@@ -60,11 +59,8 @@ void ball_save_effect_deff(void) {
  * shoot reminder - see shootalert.c
  *
  ****************************************************************************/
-CALLSET_ENTRY (custom_deffs, start_custom_shoot_reminder_deff) { deff_start (DEFF_SHOOT_REMINDER_EFFECT);}
-CALLSET_ENTRY (custom_deffs, kill_custom_shoot_reminder_deff) {	deff_stop (DEFF_SHOOT_REMINDER_EFFECT);}
-
-//DEFF_shoot reminder - see shootalert.c
-void shoot_reminder_effect_deff(void) {
+//DEFF_shoot reminder - OVERRIDES stock call
+void plunge_ball_effect_deff(void) {
 	U8 shoot_reminder_SoundCounter;
 	shoot_reminder_SoundCounter = random_scaled(shoot_reminder_TotalNumOfSounds);//from kernal/random.c
 	sound_start (ST_SPEECH, shoot_reminder_SoundsArray[shoot_reminder_SoundCounter], SL_4S, PRI_GAME_QUICK5);
@@ -78,128 +74,6 @@ void shoot_reminder_effect_deff(void) {
 
 
 
-
-/****************************************************************************
- *
- * from inlanes.c
- *
- ****************************************************************************/
-CALLSET_ENTRY (custom_deffs, start_clw_inlanes_deff) {		deff_start (DEFF_CLW_INLANES_EFFECT); }
-
-void clw_inlanes_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CRYO CLAW");
-	font_render_string_center(&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "SHOOT RIGHT RAMP");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-CALLSET_ENTRY (custom_deffs, start_qf_inlanes_deff) {	deff_start (DEFF_QF_INLANES_EFFECT); }
-
-void qf_inlanes_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "QUICK FREEZE");
-	font_render_string_center(&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "SHOOT LEFT RAMP");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-
-
-/****************************************************************************
- *
- * from rollovers.c
- *
- ****************************************************************************/
-CALLSET_ENTRY (custom_deffs, start_rollovers_deff) {	deff_start (DEFF_ROLLOVERS_EFFECT); }
-
-void rollovers_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "LIGHT  M T L  TO");
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "ADVANCE MULTIPLIER");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-CALLSET_ENTRY (custom_deffs, start_all_rollovers_deff) { deff_start (DEFF_ALL_ROLLOVERS_EFFECT); }
-
-void all_rollovers_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	sprintf("BONUS %d", rollover_bonus_multiplier);
-	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "ADVANCED");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-
-/****************************************************************************
- *
- * from underground.c
- *
- ****************************************************************************/
-CALLSET_ENTRY (custom_deffs, start_underground_deff) { deff_start (DEFF_UNDERGROUND_EFFECT); }
-
-void underground_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	sprintf ("SUBWAY");
-	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("%d MADE", underground_shots_made);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-/****************************************************************************
- *
- * from eject.c
- *
- ****************************************************************************/
-CALLSET_ENTRY (custom_deffs, start_eject_deff) { deff_start (DEFF_EJECT_EFFECT);}
-
-void eject_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "RETINA");
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SCAN");
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-/****************************************************************************
- *
- * from lock_freeze_mbstart.c
- *
- ****************************************************************************/
-CALLSET_ENTRY (custom_deffs, start_freeze_deff) { deff_start (DEFF_FREEZE_EFFECT);}
-
-void freeze_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	sprintf ("%d FROZEN", NumBallsFrozen);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("%d MORE FOR MB", NumBallsNeededForNextMB);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
 
 
 

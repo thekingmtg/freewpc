@@ -21,14 +21,21 @@
  * TODO: come up with proper mode
  * TODO: potentially we can make a 2nd and 3rd mode that score differently
  */
+
+
 #include <freewpc.h>
 #include "dm/global_constants.h"
 //constants
+const U8 			PRISON_BREAK_EASY_GOAL 	= 3;
+const U8 			PRISON_BREAK_MED_GOAL 	= 4;
+const U8 			PRISON_BREAK_HARD_GOAL 	= 5;
+const U8 			PRISON_BREAK_GOAL_INCREMENT = 1;
+const U8 			PRISON_BREAK_GOAL_MAX 	= 10;
 
 //local variables
 U8 			prison_break_mode_shots_made; //number of shots made this mode
-U8 			prison_break_modes_achieved;
-U8 			prison_break_modes_completed;
+__local__ U8 			prison_break_modes_achieved;
+__local__ U8 			prison_break_modes_completed;
 U8			prison_break_mode_timer;
 score_t 	prison_break_mode_score; //score for this mode only
 score_t 	prison_break_mode_last_score;
@@ -198,7 +205,7 @@ CALLSET_ENTRY (prison_break, prison_break_made) {
 
 
 /****************************************************************************
- * DMD display and sound effects
+ * DMD display effects
  ****************************************************************************/
 void prison_break_start_effect_deff(void) {
 	dmd_alloc_low_clean ();

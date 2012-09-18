@@ -30,14 +30,14 @@
 //constants
 
 //local variables
-U8 			acmag_mode_shots_made;
-U8 			acmag_modes_achieved;
-U8 			acmag_modes_completed;
+U8 						acmag_mode_shots_made;
+__local__ U8 			acmag_modes_achieved;
+__local__ U8 			acmag_modes_completed;
 U8			acmag_mode_timer;
 score_t 	acmag_mode_score;
 score_t 	acmag_mode_last_score;
 score_t 	acmag_mode_next_score;
-score_t 	acmag_mode_score_total_score;
+__local__ score_t 	acmag_mode_score_total_score;
 
 
 //external variables
@@ -64,10 +64,10 @@ struct timed_mode_ops acmag_mode = {
 	.deff_starting = DEFF_ACMAG_START_EFFECT,
 	.deff_running = DEFF_ACMAG_EFFECT,
 //	.deff_ending = DEFF_ACMAG_END_EFFECT,
-	.prio = PRI_GAME_MODE1,
+	.prio = PRI_GAME_MODE5,
 	.init_timer = 23,
 	.timer = &acmag_mode_timer,
-	.grace_timer = 2,
+	.grace_timer = 2, //default is 2
 //	.pause = system_timer_pause,
 };
 
@@ -224,7 +224,6 @@ void acmag_hit_effect_deff(void) {
 }//end of mode_effect_deff
 
 
-
 void acmag_effect_deff(void) {
 	for (;;) {
 		dmd_alloc_low_clean ();
@@ -239,9 +238,6 @@ void acmag_effect_deff(void) {
 }//end of mode_effect_deff
 
 
-
-
-
 void acmag_end_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "ACMAG");
@@ -251,6 +247,8 @@ void acmag_end_effect_deff(void) {
 	task_sleep_sec (2);
 	deff_exit ();
 	}//end of mode_effect_deff
+
+
 
 /****************************************************************************
  * status display

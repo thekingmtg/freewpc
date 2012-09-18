@@ -10,6 +10,7 @@
  */
 #include <freewpc.h>
 #include "dm/global_constants.h"
+#include "elevator.h"
 
 //local variables
 
@@ -19,7 +20,7 @@
  * initialize  and exit
  ***************************************************************************/
 CALLSET_ENTRY (cryoclaw, start_ball) {
-		elevator_move_down();
+//		elevator_move_down();
 }//end of function
 
 
@@ -42,7 +43,7 @@ CALLSET_ENTRY (cryoclaw, sw_elevator_hold) {
 		task_sleep (TIME_500MS);
 		//turn on magnet
 		//sol_enable
-		sol_request (SOL_CLAW_MAGNET);
+//		sol_request (SOL_CLAW_MAGNET);
 		elevator_move_up();
 
 		elevator_move_down();

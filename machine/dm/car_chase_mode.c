@@ -24,6 +24,9 @@
  * estimate of average carcrash mode score: 45 million to 90 million
  *
  */
+
+/* CALLSET_SECTION (car_chase_mode, __machine2__) */
+
 #include <freewpc.h>
 #include "dm/global_constants.h"
 
@@ -35,12 +38,12 @@ const sound_code_t car_chase_SoundsArray[] = {	SPCH_WHAT_ARE_YOU_DOING, 	SPCH_ST
 
 //local variables
 U8 			car_chase_mode_shots_made;
-U8 			car_chase_modes_achieved;
-U8 			car_chase_modes_completed;
+__local__ U8 			car_chase_modes_achieved;
+__local__ U8 			car_chase_modes_completed;
 U8			car_chase_mode_timer;
 score_t 	car_chase_mode_score;
 score_t 	car_chase_mode_temp_score;
-score_t 	car_chase_mode_score_total_score;
+__local__ score_t 	car_chase_mode_score_total_score;
 
 
 //external variables
@@ -161,18 +164,15 @@ CALLSET_ENTRY (car_chase, car_chase_ramp_made) {
 			score (SC_15M);
 			score_add(car_chase_mode_temp_score, score_table[SC_15M]);
 			break;
-		case 2:
-			//2nd time we are in car_chase - score differently
+		case 2: //2nd time we are in car_chase - score differently
 			score (SC_20M);
 			score_add(car_chase_mode_temp_score, score_table[SC_20M]);
 			break;
-		case 3:
-			//3rd time we are in car_chase - score differently
+		case 3: //3rd time we are in car_chase - score differently
 			score (SC_25M);
 			score_add(car_chase_mode_temp_score, score_table[SC_25M]);
 			break;
-		default:
-			//all cases past 3rd time we are in car_chase
+		default: //all cases past 3rd time we are in car_chase
 			score (SC_25M);
 			score_add(car_chase_mode_temp_score, score_table[SC_25M]);
 			break;
@@ -197,11 +197,15 @@ void car_chase_start_effect_deff(void) {
 
 void car_chase_hit_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAR_CHASE");
-	sprintf ("15,000,000");
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	sprintf ("15");
+	font_render_string_center (&font_cu17, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	task_sleep_sec (1);
+	dmd_sched_transition (&trans_bitfade_slow);
+	dmd_clean_page_low ();
+	sprintf ("MILLION");
+	font_render_string_center (&font_term10, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (1);
 	deff_exit ();
 }//end of mode_effect_deff
 

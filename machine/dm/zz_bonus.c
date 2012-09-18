@@ -128,6 +128,8 @@ static void bonus_sched_transition (void)
 		dmd_sched_transition (&trans_scroll_down);
 }
 
+
+
 /* Function to calculate bonus score */
 static void bonus_add_up_score (U8 award_count, score_id_t award_amount)
 {
@@ -141,6 +143,8 @@ static void bonus_add_up_score (U8 award_count, score_id_t award_amount)
 	score_add (total_bonus, bonus_scored);
 	sprintf_score (bonus_scored);	
 }
+
+
 
 static void bonus_talking_task (void)
 {
@@ -169,6 +173,8 @@ static void bonus_talking_task (void)
 	task_exit ();
 }
 
+
+
 /* Used to announce if the player has played well */
 static bool check_for_big_score (void)
 {
@@ -177,6 +183,8 @@ static bool check_for_big_score (void)
 	else
 		return FALSE;
 }
+
+
 
 static bool check_for_puny_score (void)
 {
@@ -187,6 +195,8 @@ static bool check_for_puny_score (void)
 
 }
 
+
+
 static void points_this_ball_sound_task (void)
 {
 	sound_send (SND_NOT_AN_ORDINARY_GAME);
@@ -195,6 +205,8 @@ static void points_this_ball_sound_task (void)
 	task_sleep_sec (10);
 	task_exit ();
 }
+
+
 
 /* See if it's the players last ball */
 static bool check_if_last_ball_for_multiplayer (void)
@@ -205,6 +217,8 @@ static bool check_if_last_ball_for_multiplayer (void)
 		return FALSE;
 }
 
+
+
 static bool check_if_last_ball_of_multiplayer_game (void)
 {
 	if (ball_up == system_config.balls_per_game && player_up == num_players && 
@@ -213,6 +227,8 @@ static bool check_if_last_ball_of_multiplayer_game (void)
 	else
 		return FALSE;
 }
+
+
 
 void bonus_deff (void)
 {
@@ -849,6 +865,11 @@ void bonus_deff (void)
 	deff_exit ();
 }
 
+
+
+
+
+
 void score_to_beat_deff (void)
 {
 	dmd_alloc_low_clean ();
@@ -884,6 +905,9 @@ void score_to_beat_deff (void)
 	deff_exit ();
 }
 
+
+
+
 CALLSET_ENTRY (bonus, start_game)
 {
 	/* Initiliase hi score storage variables */
@@ -891,6 +915,8 @@ CALLSET_ENTRY (bonus, start_game)
 	current_one_ball_hi_player = 0;
 	current_one_ball_hi_ball_number = 0;
 }
+
+
 
 
 /* Done like this rather than a timer_ as 
@@ -908,6 +934,8 @@ void quickdeath_timer_task (void)
 	task_exit ();
 }
 
+
+
 CALLSET_ENTRY (bonus, valid_playfield)
 {
 	/* Start a timer if this is the first time
@@ -915,6 +943,8 @@ CALLSET_ENTRY (bonus, valid_playfield)
 	if (quickdeath_timer_already_run == FALSE && quickdeath_timer_running == FALSE)
 		task_create_gid (GID_QUICKDEATH, quickdeath_timer_task);
 }
+
+
 
 CALLSET_ENTRY (bonus, start_ball)
 {
@@ -924,6 +954,8 @@ CALLSET_ENTRY (bonus, start_ball)
 	quickdeath_timer_already_run = FALSE;
 	quickdeath_timer_running = FALSE;
 }
+
+
 
 CALLSET_ENTRY (bonus, rank_change)
 {
@@ -946,6 +978,10 @@ CALLSET_ENTRY (bonus, rank_change)
 		deff_start (DEFF_IN_THE_LEAD);
 	}
 }
+
+
+
+
 
 CALLSET_ENTRY (bonus, status_report)
 {
@@ -993,6 +1029,8 @@ CALLSET_ENTRY (bonus, status_report)
 	}
 	status_page_complete ();
 }
+
+
 
 CALLSET_ENTRY (bonus, end_ball)
 {

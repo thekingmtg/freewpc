@@ -31,25 +31,24 @@
  * estimate of average explode mode score: 80 million to 120 million
  * estimate of average eyeball score: 10 million to 20 million
  *
- *
  */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
 
 //constants
-const U8 explode_mode_timer_value = 23;
+const U8 EXPLODE_TIMER_DEFAULT = 23;
 
 //local variables
-U8 explode_temp_counter; //temporary counter
-U8 explode_SoundCounter;
-U8 explode_mode_timer;
-U8 explode_mode_shots_made;//number of times an explode arrow or eyeball is hit
-U8 explode_modes_achieved_counter;//number of times mode achieved
-score_t explode_mode_score;
-score_t explode_mode_last_score;
-score_t explode_mode_temp_score;
-score_t explode_mode_next_score;
+U8 				explode_temp_counter; //temporary counter
+U8 				explode_SoundCounter;
+U8 				explode_mode_timer;
+U8 				explode_mode_shots_made;//number of times an explode is hit
+__local__ U8 	explode_modes_achieved_counter;//number of times mode achieved
+score_t 		explode_mode_score;
+score_t 		explode_mode_last_score;
+score_t 		explode_mode_temp_score;
+score_t 		explode_mode_next_score;
 
 //external variables
 
@@ -76,9 +75,9 @@ struct timed_mode_ops explode_mode = {
 	.deff_running = DEFF_EXPLODE_EFFECT,
 //	.deff_ending = DEFF_EXPLODE_END,
 	.prio = PRI_GAME_MODE5,//shorter the mode time, make priority higher
-	.init_timer = 23, //explode_mode_timer_value should equal this
+	.init_timer = EXPLODE_TIMER_DEFAULT,
 	.timer = &explode_mode_timer,
-	.grace_timer = 2,
+	.grace_timer = 2, //DEFAULT IS 2
 //	.pause = system_timer_pause,
 };
 
@@ -219,7 +218,7 @@ void explode_effect_deff(void) {
 		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
 
 		//DMD size is 128x32
-		for (i = 10; i < (118 - (explode_mode_timer * ( 118/explode_mode_timer_value) ) ); i++) {
+		for (i = 10; i < (118 - (explode_mode_timer * ( 118/EXPLODE_TIMER_DEFAULT) ) ); i++) {
 		sprintf ("I");
 		font_render_string_left (&font_mono5, i, DMD_SMALL_CY_4, sprintf_buffer);
 		}

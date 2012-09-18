@@ -39,6 +39,7 @@
  * estimate of average car score: 9 million to 21 million
  *
  */
+
 #include <freewpc.h>
 #include "dm/global_constants.h"
 
@@ -52,8 +53,9 @@ const U8 	CAR_CRASH_GOAL_MAX = 50;
 U8 			carCrashFirstSwitchDebouncer;
 U8 			carCrashSecondSwitchDebouncer;
 U8			carCrashThirdSwitchDebouncer;
+U8			car_crash_multiplier;
 U8 			car_crash_shots_made;	//non-mode shots made counter
-U8 			car_crash_goal;		//goal to reach mode
+__local__ U8 			car_crash_goal;		//goal to reach mode
 __boolean 	is_car_crash_six_lit; 		//tracks which score to be awarded
 __boolean 	is_car_crash_ten_lit; 		//tracks which score to be awarded
 __boolean 	is_car_crash_three_lit; 		//tracks which score to be awarded
@@ -76,6 +78,7 @@ void car_crash_reset (void) {
 	carCrashFirstSwitchDebouncer = 0;
 	carCrashSecondSwitchDebouncer = 0;
 	carCrashThirdSwitchDebouncer = 0;
+	car_crash_multiplier = 1;
 	car_crash_shots_made = 0;
 	car_crash_goal = CAR_CRASH_EASY_GOAL;
 	is_car_crash_six_lit = FALSE;
@@ -169,10 +172,13 @@ CALLSET_ENTRY (car_crash, sw_chase_car_2) {
 	if (++carCrashSecondSwitchDebouncer == 1) {
 		flasher_pulse (FLASH_CAR_CHASE_CENTER_FLASHER);
 		//TODO: check for tilt here
-		if (is_car_crash_ten_lit)	score (SC_10M);
-		else if (is_car_crash_six_lit)	score (SC_6M);
-		else if (is_car_crash_three_lit) score (SC_3M);
-		else score (SC_1M);
+		U8 i;
+		for (i = 1; i <= car_crash_multiplier; i++){
+			if (is_car_crash_ten_lit)	score (SC_10M);
+			else if (is_car_crash_six_lit)	score (SC_6M);
+			else if (is_car_crash_three_lit) score (SC_3M);
+			else score (SC_1M);
+		}//end of loop
 	}//end of if DEBOUNCER
 	task_create_gid1 (GID_CAR_CRASH_2, car_crash_second_switch_task);
 }//end of function
@@ -219,17 +225,29 @@ CALLSET_ENTRY (car_crash, sw_car_chase_standup) {
 				}
 			}//end of else not >= goal
 			//effectively doubles the score
-			if (is_car_crash_six_lit)	score (SC_6M);
-			else if (is_car_crash_ten_lit)	score (SC_10M);
-			else if (is_car_crash_three_lit) score (SC_3M);
-			else score (SC_1M);
-	}//end of if (++carCrashThirdSwitchDebouncer == 1)
+			U8 i;
+			for (i = 1; i <= car_crash_multiplier; i++){
+				if (is_car_crash_six_lit)	score (SC_6M);
+				else if (is_car_crash_ten_lit)	score (SC_10M);
+				else if (is_car_crash_three_lit) score (SC_3M);
+				else score (SC_1M);
+			}//end of loop
+		}//end of if (++carCrashThirdSwitchDebouncer == 1)
 	task_create_gid1 (GID_CAR_CRASH_3, car_crash_third_switch_task);
 }//end of function
+
+
+//called from comp award at underground.c
+CALLSET_ENTRY (car_crash, comp_award_trip_car_crash) {
+	car_crash_multiplier = 3;
+}//end of function
+
+
 
 /****************************************************************************
  * DMD display and sound effects
  ****************************************************************************/
+
 void carcrash_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	font_render_string_center( &font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CRASH");
@@ -239,3 +257,4 @@ void carcrash_effect_deff(void) {
 	task_sleep_sec (2);
 	deff_exit ();
 }//end of standard_effect_deff
+

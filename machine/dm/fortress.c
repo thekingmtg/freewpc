@@ -1,6 +1,6 @@
 /*
  * demolition man
- * lock_freeze_mbstart.c
+ * fortress.c
  * 
  * written by James Cardona
  *
@@ -8,6 +8,7 @@
  *
  *
  * */
+
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -36,11 +37,11 @@ struct mb_mode_ops fortress_mode = {
 	.music = MUS_MB,
 	.deff_starting = DEFF_FORTRESS_START_EFFECT,
 	.deff_running = DEFF_FORTRESS_EFFECT,
-//	.deff_ending = ,
-//	.update = NULL,
-//	.active_task = mb_mode_active_task,
+//.deff_ending = , 	//	default => .deff_ending = ,
+//.update = , 		//	default => .update = NULL,
+//.active_task = 	//	default => .active_task = mb_mode_active_task,
 	.prio = PRI_MULTIBALL,
-//	.grace_period = 0, //default grace is 500ms
+//.grace_period = 	//default => .grace_period = 500ms
 };
 
 
@@ -153,36 +154,46 @@ void fortress_start_effect_deff(void) {
 
 
 void fortress_jackpot_effect_deff(void) {
+	U8 	jackpot_randomizer;
+	jackpot_randomizer = random_scaled(4);//from kernal/random.c - pick number from 0 to N
 	U8 i;
-	for (i=1; i < 8; i++) {
-		dmd_alloc_low_clean ();
-		sprintf ("JACKPOT");
-		if (i < 7)
-			sprintf_buffer[i] = '\0';
-		font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_300MS);
-	}
-	for (i=0; i < 8; i++) {
-		dmd_sched_transition (&trans_scroll_up);
-		dmd_alloc_low_clean ();
+	if (jackpot_randomizer == 0) {
+		for (i=1; i < 8; i++) {			//slid from side
+			dmd_alloc_low_clean ();
+			sprintf ("JACKPOT");
+			if (i < 7)
+				sprintf_buffer[i] = '\0';
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			dmd_show_low ();
+			task_sleep (TIME_300MS);
+		}
+	} //end of jackpot_randomizer == 0
+	if (jackpot_randomizer == 1) {		//roll up single
+			for (i=0; i < 8; i++) {
+				dmd_sched_transition (&trans_scroll_up);
+				dmd_alloc_low_clean ();
+				font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
+				dmd_show_low ();
+			}
+	} //end of jackpot_randomizer == 1
+	if (jackpot_randomizer == 2) {		//roll up double
+		for (i=0; i < 8; i++) {
+			dmd_sched_transition (&trans_scroll_up);
+			dmd_alloc_low_clean ();
+			font_render_string_center (&font_fixed10, 64, 8, "JACKPOT");
+			font_render_string_center (&font_fixed10, 64, 24, "JACKPOT");
+			dmd_show_low ();
+		}
+	} //end of jackpot_randomizer == 2
+	if (jackpot_randomizer == 3) {		//flash in center
+		dmd_alloc_pair ();
+		dmd_clean_page_low ();
 		font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
+		dmd_copy_low_to_high ();
 		dmd_show_low ();
-	}
-	for (i=0; i < 8; i++) {
-		dmd_sched_transition (&trans_scroll_up);
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, 64, 8, "JACKPOT");
-		font_render_string_center (&font_fixed10, 64, 24, "JACKPOT");
-		dmd_show_low ();
-	}
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed10, 64, 16, "JACKPOT");
-	dmd_copy_low_to_high ();
-	dmd_show_low ();
-	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (25, TIME_100MS);
+		dmd_invert_page (dmd_low_buffer);
+		deff_swap_low_high (25, TIME_100MS);
+	} //end of jackpot_randomizer == 3
 	task_sleep (TIME_500MS);
 	deff_exit ();
 }//end of mode_effect_deff
@@ -193,7 +204,7 @@ void fortress_effect_deff (void) {
 	for (;;) {
 		dmd_alloc_low_clean ();
 		font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "FORTRESS");
-		sprintf ("%d JACKPOT", fortress_jackpot_shots_made);
+		sprintf ("%d JACKPOTS", fortress_jackpot_shots_made);
 		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);

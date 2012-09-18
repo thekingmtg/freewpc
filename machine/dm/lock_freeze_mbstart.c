@@ -14,35 +14,36 @@
 
 
 //local variables
-__boolean 	is_ball_one_frozen;
-__boolean 	is_ball_two_frozen;
-__boolean 	is_ball_three_frozen;
-__boolean 	is_ball_four_frozen;
+__local__ __boolean 	is_ball_one_frozen;
+__local__ __boolean 	is_ball_two_frozen;
+__local__ __boolean 	is_ball_three_frozen;
+__local__ __boolean 	is_ball_four_frozen;
 
-U8			NumBallsFrozen;
-U8			NumMBsDone;
+__local__ U8			NumBallsFrozen;
+__local__ U8			NumMBsDone;
 U8			lock_SoundCounter;
-U8			NumBallsNeededForNextMB;
+__local__ U8			NumBallsNeededForNextMB;
 
 //external variables
 
 //prototypes
 void lock_reset (void);
 void player_reset (void);
+void check_multiball_requirements(void);
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
 void lock_reset (void) {
-	is_ball_one_frozen = FALSE;
-	is_ball_two_frozen = FALSE;
-	is_ball_three_frozen = FALSE;
-	is_ball_four_frozen = FALSE;
-	NumBallsFrozen = 0;
 	callset_invoke (multiball_light_off);//goto orbits.c to turn off light and flag
 }//end of reset
 
 void player_reset (void) {
 	lock_reset();
+	is_ball_one_frozen = FALSE;
+	is_ball_two_frozen = FALSE;
+	is_ball_three_frozen = FALSE;
+	is_ball_four_frozen = FALSE;
+	NumBallsFrozen = 0;
 	lock_SoundCounter = 0;
 	NumMBsDone = 0;
 	NumBallsNeededForNextMB = 1;
@@ -96,16 +97,16 @@ CALLSET_ENTRY (lock_freeze_mbstart, increment_freeze) {
 			lamp_tristate_on (LM_FREEZE_4);
 			break;
 	}//end of switch
-	callset_invoke(start_freeze_deff);
+	deff_start (DEFF_FREEZE_EFFECT);
 	callset_invoke(deactivate_left_ramp_quickfreeze);//goto ramps.c
 	callset_invoke(light_quick_freeze_light_off);//goto inlanes.c
-	callset_invoke(check_multiball_requirements);
+	check_multiball_requirements();
 }//end of function
 
 
 
 
-CALLSET_ENTRY (lock_freeze_mbstart, check_multiball_requirements) {
+void check_multiball_requirements(void) {
 	//if requirements met for next mb - light left loop shot to start mb
 	//Fortress Multiball 	= 1 ball min needs to be frozen
 	//Museum Multiball	 	= 2 ball min needs to be frozen
@@ -116,7 +117,8 @@ CALLSET_ENTRY (lock_freeze_mbstart, check_multiball_requirements) {
 
 
 				//music_disable();
-				music_request (MUS_MB_READY, PRI_GAME_MODE8);//must be higher priority than PRI_SCORES
+				music_request (MUS_MB_READY, PRI_SCORES);//must be higher priority than PRI_SCORES
+//				music_request (MUS_MB_READY, PRI_GAME_MODE8);//must be higher priority than PRI_SCORES
 				//no work - music_set (MUS_MB_READY); //from sound_effect.c
 				//music_enable();
 
@@ -142,6 +144,24 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 	lock_reset();
 }//end of function
 
+
+
+
+/****************************************************************************
+ *
+ * display effects
+ *
+ ****************************************************************************/
+void freeze_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	sprintf ("%d FROZEN", NumBallsFrozen);
+	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	sprintf ("%d MORE FOR MB", NumBallsNeededForNextMB);
+	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
 
 
 

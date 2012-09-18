@@ -8,25 +8,16 @@
  */
 [lamps]
 71: Super Jackpot,yellow, x( 7), y(11)
-72: Computer,yellow, x( 8), y(11)
 73: Demo Time, yellow, x( 9), y(11)
 86: Buy In Button, yellow, buyin, cabinet, x(33), y(18)
 
-[switches]
-75: Elevator Ramp, ingame
 
-
-#H = high power J130
-H1: Ball Release, duty(SOL_DUTY_25), time(TIME_200MS)
-H3: Auto Plunger, nosearch, launch, duty(SOL_DUTY_100), time(TIME_200MS)
 H4: Top Popper, time(TIME_100MS)
 
-# G = J126 on Power Driver Board
 G1: Claw Flasher, flash, nosearch
 
 F5: Claw Magnet 
 
-#X = J4 on 8 driver board
 X5: Elevator 2 Flasher, flash, nosearch
 X6: Elevator 1 Flasher, flash, nosearch
 
@@ -59,12 +50,8 @@ X6: Elevator 1 Flasher, flash, nosearch
 #define TIN_CAN 0xB0
 #define RACE_BY_SHORT 0xB4
 #define RACE_BY_LONG 0xB6
-#define BONUS_SHORT 0xB9
-#define BONUS_LONG 0xBA
 #define MACHINE10 0xBC
-#define EXPLOSION1_SHORT 0xCB
 #define EXPLOSION1_MED 0xCC
-#define EXPLOSION1_LONG 0xCD
 #define MACHINE11 0xD1
 #define TILT 0x01FB
 #define SPARKS 0x01FC
