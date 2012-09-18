@@ -34,9 +34,9 @@ define MACHINE_START_BALL_MUSIC   MUS_PLUNGER
 define MACHINE_BALL_IN_PLAY_MUSIC 	MUS_BG 
 define MACHINE_BALL_SAVE_TIME       4
 define MACHINE_MAX_BALLS            5
-#define MACHINE_CUSTOM_AMODE
-#define MACHINE_AMODE_EFFECTS
-define AUTOFIRE_DELAY 25
+define MACHINE_CUSTOM_AMODE
+define MACHINE_AMODE_EFFECTS
+define AUTOFIRE_DELAY 20
 
 
 #this does not play
@@ -722,7 +722,7 @@ Bonus: page(MACHINE3_PAGE), PRI_BONUS, D_QUEUED
 # Lamp effects
 ##########################################################################
 [leffs]
-#Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE3_PAGE)
+Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE3_PAGE)
 #Underground Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
 
 ######inlanes.c#########
