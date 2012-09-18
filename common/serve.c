@@ -238,6 +238,7 @@ CALLSET_ENTRY (serve, dev_trough_kick_success)
 {
 	#ifdef HAVE_AUTO_SERVE
 		if (valid_playfield) {
+			task_sleep (TIME_200MS);
 			launch_ball ();
 		}
 	#endif
@@ -262,6 +263,7 @@ CALLSET_ENTRY (serve, sw_shooter)
 			/* TODO - this might be game specific. For example, Simpsons Pinball
 			Party would give you a manual skill shot here except during
 			multiball. */
+			task_sleep (TIME_200MS);
 			launch_ball ();
 		}
 		#endif
