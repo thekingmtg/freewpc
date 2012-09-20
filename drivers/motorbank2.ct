@@ -45,10 +45,10 @@
 #include <freewpc.h>
 
 enum @self_state {
-	MOTOR_BANK_INIT,
-	MOTOR_BANK_UP,
-	MOTOR_BANK_DOWN,
-	MOTOR_BANK_OFF,
+	@SELF_INIT,
+	@SELF_UP,
+	@SELF_DOWN,
+	@SELF_OFF,
 };
 
 extern enum @self_state @self_state;
@@ -125,8 +125,8 @@ void @self_move(void) {
 
 
 void @self_move_up (void) {
-	if (@self_state != MOTOR_BANK_UP) {
-		@self_state = MOTOR_BANK_UP;
+	if (@self_state != @SELF_UP) {
+		@self_state = @SELF_UP;
 		task_recreate_gid (GID_@SELF_MONITOR, @self_move_monitor);
 	}
 }
@@ -135,30 +135,30 @@ void @self_move_up (void) {
 
 
 void @self_move_down (void) {
-	if (@self_state != MOTOR_BANK_DOWN) {
-		@self_state = MOTOR_BANK_DOWN;
+	if (@self_state != @SELF_DOWN) {
+		@self_state = @SELF_DOWN;
 		task_recreate_gid (GID_@SELF_MONITOR, @self_move_monitor);
 	}
 }
 
 
 CALLSET_ENTRY (@self, @up_sw_event) {
-	if (@self_state == MOTOR_BANK_UP)
+	if (@self_state == @SELF_UP)
 		@self_stop ();
 }
 
 
 
 CALLSET_ENTRY (@self, @down_sw_event) {
-	if (@self_state == MOTOR_BANK_DOWN)
+	if (@self_state == @SELF_DOWN)
 		@self_stop ();
 }
 
 
-//THIS IS ONLY USED FOR TEST MODE
+
 void @self_move_bump (void) {
 	sol_enable (@sol);
-	task_sleep (TIME_33MS);
+	task_sleep (TIME_16MS);
 	sol_disable (@sol);
 }
 
@@ -171,8 +171,8 @@ CALLSET_ENTRY (@self, tilt, test_start) {
 
 
 CALLSET_ENTRY (@self, amode_start) {
-	@self_state = MOTOR_BANK_INIT;
-	if (@initial_position == MOTOR_BANK_DOWN) 	@self_move_down();
+	@self_state = @SELF_INIT;
+	if (@initial_position == @SELF_DOWN) 	@self_move_down();
 	else 										@self_move_up();
 }
 
@@ -233,12 +233,7 @@ char *@self_test_short_names[] = {
 
 
 
-void @self_test_init (void)
-{
-	@self_test_command = RUN;
-}
-
-
+void @self_test_init (void) { @self_test_command = RUN; }
 
 void @self_draw_test_title(void) {
 	font_render_string_center (&font_mono5, 64, 2, "@SELF TEST");

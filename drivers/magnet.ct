@@ -1,38 +1,7 @@
-/*
- * Copyright 2008-2010 by Brian Dominy <brian@oddchange.com>
- *
- * This file is part of FreeWPC.
- *
- * FreeWPC is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * FreeWPC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with FreeWPC; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-/*
- * Driver for Twilight Zone mini playfield magnets
- *
- * The parameters are:
- * sw - the switch number that triggers it
- * sol - the solenoid/coil that gets fired automatically
- * ontime - how long the coil is kept on (16ms)
- * offtime - how long the coil is kept off after it was fired, before
- * 	polling the switch again.  This prevents constant lock-on.
- */
 
 /* TODO Fix holding down the button */
-@@class mpfmag
+@@class mag
 @@parameter sol
-@@parameter sw_on
-@@parameter sw_off
 @@parameter mode		/* Set to 1 if the solenoids are fliptronic powered */
 
 
@@ -55,11 +24,6 @@ extern __fastram__ U8 @class_enables;
 extern __fastram__ U8 @class_running;
 #endif /* __@class_DRIVER_H */
 
-extern bool mpf_active;
-
-
-
-
 @@
 @@file @self.h
 @@
@@ -73,20 +37,11 @@ extern bool mpf_active;
 	extern U8 fliptronic_powered_coil_outputs;
 #endif
 
+void @self_on (void);
+void @self_off (void);
 
-
-extern inline U8 @self_enabled_p (void) {
-	return @class_enables & INST_MASK;
-}
-
-
-
-extern inline U8 @self_running_p (void) {
-	return @class_running & INST_MASK;
-}
-
-
-
+extern inline U8 @self_enabled_p (void) { return @class_enables & INST_MASK; }
+extern inline U8 @self_running_p (void) { return @class_running & INST_MASK; }
 
 
 
@@ -110,12 +65,12 @@ extern inline U8 @self_running_p (void) {
 
 
 /* Initialize the device */
-CALLSET_ENTRY (@self, init)
-{
+CALLSET_ENTRY (@self, init) {
+	sol_disable (@sol);
 }
 
-\
-CALLSET_ENTRY (@self, sw_on){
+
+void @self_on (void){
 	sol_enable (@sol);
 	@class_running |= INST_MASK;
 }
@@ -123,7 +78,7 @@ CALLSET_ENTRY (@self, sw_on){
 
 
 
-CALLSET_ENTRY (@self, sw_off){
+void @self_off (){
 	sol_disable (@sol);
 	@class_running &= ~INST_MASK;
 }
@@ -135,16 +90,16 @@ CALLSET_ENTRY (@self, sw_off){
 
 
 /* Enable the device at start ball */
-CALLSET_ENTRY (@self, start_ball)
-{
+CALLSET_ENTRY (@self, start_ball) {
+	sol_disable (@sol);
 	@class_enables |= (1 << @instance);
 }
 
 
 
 /* Disable the device at end ball/tilt */
-CALLSET_ENTRY (@self, end_ball, tilt)
-{
+CALLSET_ENTRY (@self, end_ball, tilt) {
+	sol_disable (@sol);
 	@class_enables &= ~(1 << @instance);
 }
 

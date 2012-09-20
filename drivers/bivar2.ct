@@ -50,6 +50,14 @@ typedef enum {
 	@SELF_REVERSE,
 } @self_state_t;
 
+typedef enum {
+	@SELF_UNKNOWN,
+	@SELF_LEFT,
+	@SELF_RIGHT,
+} @self_location_t;
+
+
+//this number is equivalent to off time of duty cycle
 #define @SELF_DUTY_100 0
 #define @SELF_DUTY_50  TIME_16MS
 #define @SELF_DUTY_25  TIME_50MS
@@ -57,13 +65,16 @@ typedef enum {
 
 extern __fastram__ @self_state_t @self_state;
 extern __fastram__ U8 @self_timer;
+extern  @self_location_t @self_location;
 extern U8 @self_speed;
 
 /* User APIs */
-void @self_start_forward (void);
-void @self_start_reverse (void);
+void @self_go_left (void);
+void @self_go_right (void);
 void @self_set_speed (U8 speed);
 void @self_stop (void);
+void @self_bump_left (void);
+void @self_bump_right (void);
 
 extern inline void @self_stop_from_interrupt (void) {
 	@self_state = @SELF_IDLE;
@@ -77,6 +88,8 @@ extern inline void @self_set_speed (U8 speed) { @self_speed = speed; }
 extern inline U8 @self_get_speed (void) { return @self_speed; }
 
 extern inline @self_state_t @self_get_state (void) { return @self_state; }
+
+extern inline @self_location_t @self_get_location (void) { return @self_location; }
 
 /**
  * Realtime update of a duty-cycled device.
@@ -120,47 +133,263 @@ extern inline void @self_service (void) {
 
 __fastram__ @self_state_t @self_state;
 __fastram__ U8 @self_timer;
+@self_location_t @self_location;
 U8 @self_speed;
 
 
-void @self_start_forward (void) {
+void @self_go_left (void) {
 	disable_interrupts ();
 	@self_timer = 1;
 	@self_state = @SELF_FORWARD;
+	@self_location = @SELF_UNKNOWN;
 	sol_disable (@reverse_sol);
 	enable_interrupts ();
 }
 
 
 
-void @self_start_reverse (void) {
+void @self_go_right (void) {
 	disable_interrupts ();
 	@self_timer = 1;
 	@self_state = @SELF_REVERSE;
+	@self_location = @SELF_UNKNOWN;
 	sol_disable (@forward_sol);
 	enable_interrupts ();
 }
-
 
 
 void @self_stop (void) {
 	disable_interrupts ();
 	@self_stop_from_interrupt ();
 	enable_interrupts ();
+	@self_state = @SELF_IDLE;
+	sol_disable (@forward_sol);
+	sol_disable (@reverse_sol);
+
+}
+
+CALLSET_ENTRY (@self, @forward_sw) {
+	sol_disable (@forward_sol);
+	sol_disable (@reverse_sol);
+	@self_state = @SELF_IDLE;
+	@self_location = @SELF_LEFT;
+	@self_stop ();
+}
+
+CALLSET_ENTRY (@self, @reverse_sw) {
+	sol_disable (@forward_sol);
+	sol_disable (@reverse_sol);
+	@self_state = @SELF_IDLE;
+	@self_location = @SELF_RIGHT;
+	@self_stop ();
+}
+
+
+void @self_bump_left (void) {
+if (	!switch_poll_logical (@forward_sw)
+	&&  !@self_location == @SELF_LEFT ) {
+			sol_disable (@reverse_sol);
+			sol_enable (@forward_sol);
+			task_sleep (TIME_16MS);
+			sol_disable (@forward_sol);
+			@self_state = @SELF_IDLE;
+	}
 }
 
 
 
+void @self_bump_right (void) {
+if (	!switch_poll_logical (@reverse_sw)
+	&&  !@self_location == @SELF_RIGHT ) {
+			sol_disable (@forward_sol);
+			sol_enable (@reverse_sol);
+			task_sleep (TIME_16MS);
+			sol_disable (@reverse_sol);
+			@self_state = @SELF_IDLE;
+	}
+}
+
+
 CALLSET_ENTRY (@self, init) {
 	@self_state = @SELF_IDLE;
-	@self_set_speed (@SELF_DUTY_100);
+	@self_location = @SELF_UNKNOWN;
+	@self_set_speed (@SELF_DUTY_50);
 }
 
 
 
 
 CALLSET_ENTRY (@self, tilt, stop_game, test_start) {
+	@self_state = @SELF_IDLE;
+	@self_location = @SELF_UNKNOWN;
 	@self_stop ();
 }
 
+
+
 /* vim: set filetype=c: */
+
+
+
+@@
+@@file @self_test.c
+@@
+
+ 
+/***********************************************************************
+ * @self test:
+ ***********************************************************************/
+ 
+
+#include <freewpc.h>
+#include <window.h>
+#include <test.h>
+#include "@self.h"
+
+// FIXME - font_render_string_right vertically offsets the text by 1 pixel (downwards)
+// When this is removed removed all references to FR_WORKAROUND
+#define FRSR_WORKAROUND 1
+
+enum {
+	FIRST_TEST = 0,
+	BUMPLEFT = FIRST_TEST,
+	BUMPRIGHT,
+	LEFT,
+	RIGHT,
+	STOP,
+	LAST_TEST = STOP
+} @self_test_command;
+
+
+
+char *@self_test_short_names[] = {
+	"BUMP LEFT",
+	"BUMP RIGHT",
+	"LEFT",
+	"STOP",
+	"RIGHT",
+	"STOP"
+};
+
+
+
+void @self_test_init (void) { @self_test_command = BUMPLEFT; }
+
+void @self_draw_test_title(void) {
+	font_render_string_center (&font_mono5, 64, 2, "@SELF TEST");
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
+}
+
+
+
+void @self_test_draw (void) {
+	dmd_alloc_low_clean ();
+	@self_draw_test_title();
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
+
+	//display status of left limit switch
+	sprintf ("@forward_sw");
+	font_render_string_center (&font_var5, 64, 13, sprintf_buffer);
+	if (switch_poll_logical (@forward_sw) ) sprintf ("X");
+	 else sprintf ("O"); 
+	font_render_string_center (&font_var5, 20, 13, sprintf_buffer);
+
+	//display status of right limit switch
+	sprintf ("@reverse_sw");
+	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
+	if (switch_poll_logical (@reverse_sw) ) sprintf ("X");
+	 else sprintf ("O"); 
+	font_render_string_center (&font_var5, 20, 20, sprintf_buffer);
+
+	//name of currently running test
+	sprintf(@self_test_short_names[@self_test_command]);
+	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
+
+	dmd_show_low ();
+}
+
+
+
+
+void @self_test_thread (void) {
+	for (;;) {
+		task_sleep (TIME_33MS);
+		@self_test_draw ();
+	}
+}
+
+
+//up test button pressed
+void @self_test_up (void) {
+	if (@self_test_command < LAST_TEST)
+		@self_test_command++;
+}
+
+
+
+//down test button pressed
+void @self_test_down (void) {
+	if (@self_test_command > FIRST_TEST)
+		@self_test_command--;
+}
+
+
+//escape test button pressed
+void @self_test_escape (void) {
+	// stop everything
+	@self_stop();
+	window_pop();
+}
+
+
+//enter test button pressed
+void @self_test_enter (void) {
+	sound_send (SND_TEST_ENTER);
+  	switch (@self_test_command) {
+  		case BUMPLEFT:
+			@self_bump_left();
+			@self_test_command = BUMPLEFT;
+  		break;
+  		case BUMPRIGHT:
+			@self_bump_right();
+			@self_test_command = BUMPRIGHT;
+  		break;
+  		case LEFT:
+			@self_go_left();
+			@self_test_command = STOP;
+  		break;
+  		case RIGHT:
+			@self_go_right();
+			@self_test_command = STOP;
+  		break;
+  		case STOP:
+			@self_stop();
+			@self_test_command = BUMPL;
+  		break;
+  	}
+}
+
+
+
+struct window_ops @self_test_window = {
+	DEFAULT_WINDOW,
+	.init = @self_test_init,
+	.draw = @self_test_draw,
+	.up = @self_test_up,
+	.down = @self_test_down,
+	.enter = @self_test_enter,
+	.escape = @self_test_escape,
+	.thread = @self_test_thread,
+};
+
+
+
+struct menu @self_test_item = {
+	.name = "@SELF TEST", // needs @SELF for uppercase version of 'self' as test menu font doesn't have lower-case letters.
+	.flags = M_ITEM,
+	.var = { .subwindow = { &@self_test_window, NULL } },
+};
+
+
+
+
