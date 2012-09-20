@@ -251,8 +251,8 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
  ****************************************************************************/
 void capture_simon_start_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_times8, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE");
-	font_render_string_center (&font_times8, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SIMON");
+	font_render_string_center (&font_times8, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE");
+	font_render_string_center (&font_times8, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "SIMON");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -262,9 +262,9 @@ void capture_simon_start_effect_deff(void) {
 
 void capture_simon_hit_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE SIMON");
 	sprintf_score (capture_simon_mode_last_score);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -275,11 +275,11 @@ void capture_simon_hit_effect_deff(void) {
 void capture_simon_effect_deff(void) {
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
+		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE SIMON");
 		sprintf ("%d SEC LEFT,  %d HIT", capture_simon_mode_timer, capture_simon_mode_shots_made);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
+		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
 		sprintf_score (capture_simon_mode_next_score);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
+		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
 	}//END OF ENDLESS LOOP
@@ -291,9 +291,9 @@ void capture_simon_effect_deff(void) {
 
 void capture_simon_end_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAPTURE SIMON");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE SIMON");
 	sprintf("COMPLETED");
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

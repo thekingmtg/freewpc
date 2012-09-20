@@ -187,23 +187,39 @@ CALLSET_ENTRY (car_chase, car_chase_ramp_made) {
  ****************************************************************************/
 void car_chase_start_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAR_CHASE");
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "SHOOT RAMPS");
+	sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
+	dmd_sched_transition (&trans_scroll_left_fast);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAR_CHASE");
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (1);
+	dmd_sched_transition (&trans_scroll_left_fast);
+	dmd_alloc_low_clean ();
+	sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "SHOOT RAMPS");
+	dmd_show_low ();
+	task_sleep_sec (1);
 	deff_exit ();
 }//end of mode_effect_deff
 
 
 void car_chase_hit_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	sprintf ("15");
-	font_render_string_center (&font_cu17, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
+	dmd_sched_transition (&trans_scroll_left_fast);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAR_CHASE");
+	dmd_show_low ();
 	task_sleep_sec (1);
-	dmd_sched_transition (&trans_bitfade_slow);
+	dmd_sched_transition (&trans_scroll_left_fast);
+	dmd_alloc_low_clean ();
+	sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
+	sprintf ("15");
+	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (1);
+	dmd_sched_transition (&trans_bitfade_fast);
 	dmd_clean_page_low ();
 	sprintf ("MILLION");
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
@@ -214,13 +230,13 @@ void car_chase_hit_effect_deff(void) {
 void car_chase_effect_deff(void) {
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAR_CHASE");
+		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAR_CHASE");
 		sprintf ("%d SEC LEFT,  %d HIT", car_chase_mode_timer, car_chase_mode_shots_made);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
+		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
 		sprintf_score (car_chase_mode_score);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
+		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
 		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_500MS);
 	}//END OF ENDLESS LOOP
 }//end of mode_effect_deff
 
@@ -230,9 +246,9 @@ void car_chase_effect_deff(void) {
 
 void car_chase_end_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CAR_CHASE");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAR_CHASE");
 	sprintf("COMPLETED");
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

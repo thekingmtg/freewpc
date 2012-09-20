@@ -155,9 +155,9 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
 void freeze_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	sprintf ("%d FROZEN", NumBallsFrozen);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 	sprintf ("%d MORE FOR MB", NumBallsNeededForNextMB);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

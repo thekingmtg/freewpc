@@ -182,9 +182,9 @@ void cryoclaw_leff (void) {
  ****************************************************************************/
 void clw_inlanes_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CRYO CLAW");
-	font_render_string_center (&font_term6, 60, 21, "RIGHT RAMP");
-//	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CX_Bot, "RIGHT RAMP");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CRYO CLAW");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, 21, "RIGHT RAMP");
+//	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CX_Bot, "RIGHT RAMP");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -194,8 +194,8 @@ void clw_inlanes_effect_deff(void) {
 
 void qf_inlanes_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "QUICK FREEZE");
-	font_render_string_center (&font_term6, 60, 21, "LEFT RAMP");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "QUICK FREEZE");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, 21, "LEFT RAMP");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

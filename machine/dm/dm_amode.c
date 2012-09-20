@@ -19,7 +19,9 @@
  *  trans_scroll_down_slow
  *
  *  trans_scroll_left
+ *  trans_scroll_left_fast
  *  trans_scroll_right
+ *  trans_scroll_right_fast
  *
  *  trans_sequential_boxfade
  *  trans_random_boxfade
@@ -29,6 +31,7 @@
  *
  *  trans_bitfade_slow
  *  trans_bitfade_fast
+ *  trans_bitfade_fastest
  *
  *  trans_unroll_vertical
  *

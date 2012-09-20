@@ -185,20 +185,19 @@ void jets_effect_deff(void) {
 		U8 y = random_scaled (4);
 		dmd_alloc_low_clean ();
 		psprintf ("1 JET", "%d JETS", jet_shots_made);
-		font_render_string_center (&font_fixed6, DMD_BIG_CX_Top + x, DMD_BIG_CY_Top + y, sprintf_buffer);
-		sprintf ("%d FOR BONUS", jet_goal);
-		font_render_string_center (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+		font_render_string_center (&font_fixed6, DMD_MIDDLE_X + x, DMD_BIG_CY_Top + y, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_66MS);
-	} while (i++ < 12);//about .75sec
+	} while (i++ < 8);//about .75sec
 	/* Redraw it so text is centered */
+	dmd_sched_transition (&trans_bitfade_fastest);
 	dmd_alloc_low_clean ();
 	psprintf ("1 JET", "%d JETS", jet_shots_made);
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 	sprintf ("%d FOR BONUS", jet_goal);
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep (TIME_200MS);
+	task_sleep (TIME_1S);
 	deff_exit ();
 }//end of jets_effect_deff
 
@@ -207,19 +206,19 @@ void jets_effect_deff(void) {
 void jets_completed_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	switch (jets_modes_achieved) {
-		case 0:  sprintf ("ERR"); break; //never entered mode
 		case 1:  sprintf ("1"); break;
 		case 2:  sprintf ("2"); break;
 		case 3:  sprintf ("3"); break;
 		case 4:	 sprintf ("4"); break;
-		default: sprintf ("5"); break;
+		default: sprintf ("ERR"); break;
 		}//end of switch
-	font_render_string_center (&font_cu17, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
+	dmd_show_low ();
 	task_sleep_sec (1);
 	dmd_sched_transition (&trans_bitfade_slow);
 	dmd_clean_page_low ();
 	sprintf ("MILLION");
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
@@ -235,10 +234,10 @@ void jets_completed_effect_deff(void) {
 void superjets_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	sprintf ("%d SUPERJETS", super_jet_shots_made);
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 
 	sprintf ("%d FOR BONUS", super_jet_goal);
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
@@ -247,13 +246,13 @@ void superjets_effect_deff(void) {
 
 void superjets_completed_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "SUPERJETS");
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "COMPLETED");
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Top, "SUPERJETS");
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "COMPLETED");
 	dmd_show_low ();
 	task_sleep_sec (3);
 	dmd_alloc_low_clean ();
 	sprintf_score (superjets_mode_score);
-	font_render_string_center (&font_fixed6, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

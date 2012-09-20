@@ -39,7 +39,6 @@ __boolean 		computer_award_activated;
 //prototypes
 void combo_reset (void);
 void player_combo_reset (void);
-void combo_kill (void);
 void flash_combos(void);
 void choose_random_flag_set(void);
 
@@ -97,7 +96,15 @@ void combo_task (void) {
 	flash_combos();
 	task_sleep_sec(COMBO_HURRY_TIME);
 	//still no hits so turn off flags and lamps until something is hit
-	combo_kill();
+	flag_off (FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
+	flag_off (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
+	flag_off (FLAG_IS_COMBO_UNDER_ACTIVATED);
+	flag_off (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
+	flag_off (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
+	flag_off (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
+	flag_on (FLAG_IS_COMBOS_KILLED);
+	callset_invoke (all_arrow_update);
 	task_exit();
 }//end of function
 
@@ -126,20 +133,6 @@ void flash_combos(void){
 
 
 
-void combo_kill (void) {
-	flag_off (FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
-	flag_off (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
-	flag_off (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
-	flag_off (FLAG_IS_COMBO_UNDER_ACTIVATED);
-	flag_off (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
-	flag_off (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
-	flag_off (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
-	flag_on (FLAG_IS_COMBOS_KILLED);
-	callset_invoke (all_arrow_update);
-}//end of function
-
-
-
 CALLSET_ENTRY (combo, combo_hit) {
 	if (++combo_counter >= combo_goal  && !computer_award_activated) {
 		combo_goal += COMBO_EASY_GOAL_STEP;
@@ -147,9 +140,9 @@ CALLSET_ENTRY (combo, combo_hit) {
 		deff_start (DEFF_COMPUTER_EFFECT);
 	} else 	if (combo_counter < combo_goal) deff_start (DEFF_COMBO_EFFECT);
 	// reset the task timer
+	task_recreate_gid (GID_COMBO, combo_task);
 	choose_random_flag_set();
 	callset_invoke (all_arrow_update);
-	task_recreate_gid (GID_COMBO, combo_task);
 }//end of function
 
 
@@ -235,9 +228,9 @@ void choose_random_flag_set(void) {
 void combo_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	sprintf ("%d COMBOS", combo_counter);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 	sprintf ("%d TO COMPUTER", combo_goal - combo_counter);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();
@@ -248,9 +241,9 @@ void combo_effect_deff(void) {
 void computer_effect_deff(void) {
 	dmd_alloc_low_clean ();
 	sprintf ("COMPUTER LIT");
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 	sprintf ("SHOOT SUBWAY", combo_goal - combo_counter);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (3);
 	deff_exit ();

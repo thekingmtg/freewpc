@@ -133,8 +133,8 @@ CALLSET_ENTRY (fortress, fortress_jackpot_made) {
 void fortress_start_effect_deff(void) {
 		U8 count = 8;
 		dmd_alloc_pair_clean ();
-		font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "FORTRESS");
-		font_render_string_center (&font_fixed10, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "MULTIBALL");
+		font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Top, "FORTRESS");
+		font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "MULTIBALL");
 		/* low = text, high = blank */
 		while (--count > 0) {
 			dmd_show2 ();
@@ -203,9 +203,9 @@ void fortress_jackpot_effect_deff(void) {
 void fortress_effect_deff (void) {
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "FORTRESS");
+		font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Top, "FORTRESS");
 		sprintf ("%d JACKPOTS", fortress_jackpot_shots_made);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
+		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
 	}//END OF ENDLESS LOOP

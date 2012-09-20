@@ -37,7 +37,7 @@
 #include "dm/global_constants.h"
 
 //constants
-const U8 EXPLODE_TIMER_DEFAULT = 23;
+const U8 EXPLODE_TIMER_DEFAULT = 33;
 
 //local variables
 U8 				explode_temp_counter; //temporary counter
@@ -49,7 +49,7 @@ score_t 		explode_mode_score;
 score_t 		explode_mode_last_score;
 score_t 		explode_mode_temp_score;
 score_t 		explode_mode_next_score;
-
+score_t 		explode_mode_display_score;
 //external variables
 
 //prototypes
@@ -75,7 +75,7 @@ struct timed_mode_ops explode_mode = {
 	.deff_running = DEFF_EXPLODE_EFFECT,
 //	.deff_ending = DEFF_EXPLODE_END,
 	.prio = PRI_GAME_MODE5,//shorter the mode time, make priority higher
-	.init_timer = 23, //make sure to set EXPLODE_TIMER_DEFAULT to the same value
+	.init_timer = 33, //make sure to set EXPLODE_TIMER_DEFAULT to the same value
 	.timer = &explode_mode_timer,
 	.grace_timer = 2, //DEFAULT IS 2
 //	.pause = system_timer_pause,
@@ -110,6 +110,7 @@ void explode_mode_init (void) {
 	score_add (explode_mode_next_score, score_table[SC_15M]);
 	callset_invoke(activate_explode_inserts);
 	++explode_modes_achieved_counter;
+	serve_ball_auto(); //add one ball to the playfield
 }//end of function
 
 
@@ -199,9 +200,9 @@ void explode_start_effect_deff(void) {
 
 void explode_hit_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_lithograph, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "BOOM BABY");
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BABY");
 	sprintf_score (explode_mode_last_score);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -213,22 +214,20 @@ void explode_effect_deff(void) {
 	U8 i;
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_lithograph, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "EXPLODE");
-		sprintf ("%d SEC LEFT,  %d HIT", explode_mode_timer, explode_mode_shots_made);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
+		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "EXPLODE");
+		score_zero(explode_mode_display_score);
+		score_add (explode_mode_display_score, score_table[SC_1M]);
+		score_mul (explode_mode_display_score, explode_mode_timer);
+		sprintf_score (explode_mode_display_score);
+		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
 
 		//DMD size is 128x32
-		for (i = 10; i < (118 - (explode_mode_timer * ( 118/EXPLODE_TIMER_DEFAULT) ) ); i++) {
-		sprintf ("I");
-		font_render_string_left (&font_mono5, i, DMD_SMALL_CY_4, sprintf_buffer);
+		for (i = 5; i < (118 - (explode_mode_timer * ( 118/EXPLODE_TIMER_DEFAULT) ) ); i++) {
+			sprintf ("I");
+			font_render_string_left (&font_mono5, i, DMD_SMALL_CY_4, sprintf_buffer);
 		}
-/*score count down
-		score_zero(explode_mode_temp_score);
-		score_add (explode_mode_temp_score, score_table[SC_1M]);
-		score_mul (explode_mode_temp_score, explode_mode_timer);
-*/
 		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_500MS);//score goes down by second so update every 500ms is plenty soon enough
 	}//END OF ENDLESS LOOP
 }//end of mode_effect_deff
 
@@ -237,8 +236,8 @@ void explode_effect_deff(void) {
 
 void explode_end_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_lithograph, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "EXPLODE");
-	font_render_string_center (&font_lithograph, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "COMPLETED");
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "EXPLODE");
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "COMPLETED");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

@@ -13,47 +13,39 @@ score_t bonus_scored;	/* Temp variable used to calculate bonus per item etc */
 bool buttons_held;
 
 //external variables
-/*
+
+extern U8 		car_crash_shots_made; 				//from car_crash.c
+
 extern U8 		car_chase_mode_shots_made;			//from car_chase.c
 extern U8 		car_chase_modes_achieved;
 extern U8 		car_chase_modes_completed;
-extern score_t 	car_chase_mode_score_total_score;
 
 extern U8 		capture_simon_mode_shots_made;		//from capture_simon.c
 extern U8 		capture_simon_modes_achieved;
 extern U8 		capture_simon_modes_completed;
-extern score_t 	capture_simon_mode_score_total_score;
 
 extern U8 		prison_break_mode_shots_made;		//from prison_break.c
 extern U8 		prison_break_modes_achieved;
 extern U8 		prison_break_modes_completed;
-extern score_t 	prison_break_mode_score_total_score;
 
 extern U8 		acmag_mode_shots_made;				//from acmag.c
 extern U8 		acmag_modes_achieved;
 extern U8 		acmag_modes_completed;
-extern score_t 	acmag_mode_score_total_score;
 
-extern U8 		explode_mode_shots_made;				//from acmag.c
+extern U8 		explode_mode_shots_made;				//from EXPLODE.c
 extern score_t 	explode_mode_score;
 
-extern U8 		jet_shots_made;
 extern U8 		superjets_modes_achieved;
 extern U8 		super_jet_shots_made;
 
 extern U8		standupFrenzy_modes_achieved;
 extern U8 		standupFrenzyNumHits;
-extern score_t 	standupFrenzyTotalScore;
-extern U8 		standup_num_of_hits;
+//
 
-extern U8 		rollover_bonus_multiplier; 			//from rollovers.c
-extern U8 		total_eyeball_shots_made; 			//from eyeball.c
-extern U8		computerAwards;						//from underground.c
 extern U8 		combo_counter;
 extern U8		fortress_jackpot_shots_made;
-*/
 
-extern U8 		car_crash_shots_made; 				//from car_crash.c
+extern U8 		rollover_bonus_multiplier; 			//from rollovers.c
 
 //prototypes
 static void bonus_button_monitor (void);
@@ -79,9 +71,13 @@ void bonus_deff (void) {
 	task_sleep_sec (1);
 
 	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor); /* Start a task to monitor the buttons */
-	/***car crash scoring and display ***/
+
+
+	/**
+	 * *car crash scoring and display *
+	 * **/
 	bonus_sched_transition ();
-//	if (car_crash_shots_made > 0) {
+	if (car_crash_shots_made > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -96,12 +92,12 @@ void bonus_deff (void) {
 			dmd_show_low ();
 			sound_send (BONUS_SHORT);
 			bonus_pause ();
-//	}/***end of car crash scoring and display ***/
+	}/***end of car crash scoring and display ***/
 
-
-
-	/***car chase scoring and display ***/
-/*	bonus_sched_transition ();
+	/**
+	 * *car chase scoring and display *
+	 * **/
+	bonus_sched_transition ();
 	if (car_chase_modes_achieved > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
@@ -122,12 +118,200 @@ void bonus_deff (void) {
 			dmd_show_low ();
 			sound_send (BONUS_SHORT);
 			bonus_pause ();
-	}//end of car chase scoring and display
-*/
+	}/***end of car chase scoring and display ***/
+
+	/**
+	 * *capture_simon scoring and display *
+	 * **/
+	bonus_sched_transition ();
+	if (capture_simon_modes_achieved > 0) {
+			dmd_alloc_low_clean ();
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_100K]);
+			score_mul (bonus_scored, capture_simon_mode_shots_made);
+			score_add (total_bonus, bonus_scored);
+
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_1M]);
+			score_mul (bonus_scored, capture_simon_modes_achieved);
+			score_add (total_bonus, bonus_scored);
+
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_5M]);
+			score_mul (bonus_scored, capture_simon_modes_completed);
+			score_add (total_bonus, bonus_scored);
+
+			sprintf_score (bonus_scored);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			sprintf ("CAPTURE SIMON");
+			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			bonus_sched_transition ();
+			dmd_show_low ();
+			sound_send (BONUS_SHORT);
+			bonus_pause ();
+	}/***end of capture_simon scoring and display ***/
+
+	/**
+	 * *prison_break scoring and display *
+	 * **/
+	bonus_sched_transition ();
+	if (prison_break_modes_achieved > 0) {
+			dmd_alloc_low_clean ();
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_100K]);
+			score_mul (bonus_scored, prison_break_mode_shots_made);
+			score_add (total_bonus, bonus_scored);
+
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_1M]);
+			score_mul (bonus_scored, prison_break_modes_achieved);
+			score_add (total_bonus, bonus_scored);
+
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_5M]);
+			score_mul (bonus_scored, prison_break_modes_completed);
+			score_add (total_bonus, bonus_scored);
+
+			sprintf_score (bonus_scored);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			sprintf ("BREAKOUT");
+			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			bonus_sched_transition ();
+			dmd_show_low ();
+			sound_send (BONUS_SHORT);
+			bonus_pause ();
+	}/***end of prison_break scoring and display ***/
+
+	/**
+	 * *acmag scoring and display *
+	 * **/
+	bonus_sched_transition ();
+	if (acmag_modes_achieved > 0) {
+			dmd_alloc_low_clean ();
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_100K]);
+			score_mul (bonus_scored, acmag_mode_shots_made);
+			score_add (total_bonus, bonus_scored);
+
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_1M]);
+			score_mul (bonus_scored, acmag_modes_achieved);
+			score_add (total_bonus, bonus_scored);
+
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_5M]);
+			score_mul (bonus_scored, acmag_modes_completed);
+			score_add (total_bonus, bonus_scored);
+
+			sprintf_score (bonus_scored);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			sprintf ("ACMAG");
+			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			bonus_sched_transition ();
+			dmd_show_low ();
+			sound_send (BONUS_SHORT);
+			bonus_pause ();
+	}/***end of acmag scoring and display ***/
+
+	/**
+	 * *explode scoring and display *
+	 * **/
+	bonus_sched_transition ();
+	if (explode_mode_shots_made > 0) {
+			dmd_alloc_low_clean ();
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_100K]);
+			score_mul (bonus_scored, explode_mode_shots_made);
+			score_add (bonus_scored, score_table[SC_1M]);
+			score_add (total_bonus, bonus_scored);
+
+			sprintf_score (bonus_scored);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			sprintf ("EXPLODE");
+			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			bonus_sched_transition ();
+			dmd_show_low ();
+			sound_send (BONUS_SHORT);
+			bonus_pause ();
+	}/***end of explode scoring and display ***/
+
+	/**
+	 * *superjets scoring and display *
+	 * **/
+	bonus_sched_transition ();
+	if (superjets_modes_achieved > 0) {
+			dmd_alloc_low_clean ();
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_100K]);
+			score_mul (bonus_scored, super_jet_shots_made);
+			score_add (total_bonus, bonus_scored);
+
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_1M]);
+			score_mul (bonus_scored, superjets_modes_achieved);
+			score_add (total_bonus, bonus_scored);
+
+			sprintf_score (bonus_scored);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			sprintf ("SUPERJETS");
+			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			bonus_sched_transition ();
+			dmd_show_low ();
+			sound_send (BONUS_SHORT);
+			bonus_pause ();
+	}/***end of superjets scoring and display ***/
+
+	/**
+	 * *standupFrenzy scoring and display *
+	 * **/
+	bonus_sched_transition ();
+	if (standupFrenzy_modes_achieved> 0) {
+			dmd_alloc_low_clean ();
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_100K]);
+			score_mul (bonus_scored, standupFrenzyNumHits);
+			score_add (total_bonus, bonus_scored);
+
+			score_zero (bonus_scored);
+			score_add (bonus_scored, score_table[SC_1M]);
+			score_mul (bonus_scored, standupFrenzy_modes_achieved);
+			score_add (total_bonus, bonus_scored);
+
+			sprintf_score (bonus_scored);
+			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			sprintf ("FRENZY");
+			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			bonus_sched_transition ();
+			dmd_show_low ();
+			sound_send (BONUS_SHORT);
+			bonus_pause ();
+	}/***end of standupFrenzy scoring and display ***/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 		
 	
-	score_long (total_bonus); // Add to total bonus to player score
 
 /*
 	if (check_for_puny_score ())
@@ -141,6 +325,7 @@ void bonus_deff (void) {
 	}
 */
 		
+	score_long (total_bonus); // Add to total bonus to player score
 	/* Show final score */
 	dmd_alloc_low_clean ();
 	sound_send (BONUS_LONG);
@@ -181,6 +366,8 @@ static void bonus_sched_transition (void) {
 	else
 		dmd_sched_transition (&trans_scroll_down);
 }//end of function
+
+
 
 static void bonus_pause (void) {
 	if (buttons_held) 	task_sleep (TIME_100MS);

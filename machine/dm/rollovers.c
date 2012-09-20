@@ -52,6 +52,7 @@ void all_rollover_made (void);
 void rollover_sounds (void);
 void rollover_sounds_all_rollovers (void);
 void rollover_sounds_already_lit(void);
+void rollovers_effect(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -117,7 +118,7 @@ CALLSET_ENTRY (rollovers, sw_left_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (top_rollover_activated && lower_rollover_activated) all_rollover_made();
-		else deff_start (DEFF_ROLLOVERS_EFFECT);
+		else rollovers_effect();
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_middle_rollover
 
@@ -138,7 +139,7 @@ CALLSET_ENTRY (rollovers, sw_center_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && lower_rollover_activated)  all_rollover_made();
-		else deff_start (DEFF_ROLLOVERS_EFFECT);
+		else rollovers_effect();
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_top_rollover
 
@@ -159,7 +160,7 @@ CALLSET_ENTRY (rollovers, sw_right_rollover) {
 		score (SC_250K);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && top_rollover_activated)  all_rollover_made();
-		else deff_start (DEFF_ROLLOVERS_EFFECT);
+		else rollovers_effect();
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_lower_rollover
 
@@ -320,60 +321,89 @@ else if ( rollover_SoundCounter  == 1 )
 /****************************************************************************
  * display effects
  ****************************************************************************/
-void rollovers_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_cu17, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "M  T  L");
-	dmd_show_low ();
-	task_sleep_sec (1);
-	dmd_sched_transition (&trans_random_boxfade);
-	dmd_clean_page_low ();
-	switch (++rollover_MessageCounter % 3) {
-		case 0:
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "ADVANCE BONUS X");
-			break;
-		case 1:
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT CRYOCLAW");
-			break;
-		case 2:
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_2, DMD_SMALL_CY_2, "5 TIMES");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT EXTRA BALL");
-			break;
-	}//END OF SWITCH
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
 void all_rollovers_effect_deff(void) {
 	dmd_clean_page_low ();
 	switch (rollover_bonus_multiplier) {
-		case 0:  sprintf ("ERR"); break;
-		case 1:  sprintf ("ERR"); break;
 		case 2:  sprintf ("2 X"); break;
 		case 3:  sprintf ("3 X"); break;
 		case 4:  sprintf ("4 X"); break;
 		case 5:	 sprintf ("5 X"); break;
-		default: sprintf ("5 X"); break; //this is for development testing
+		default: sprintf ("ERR"); break; //this is for development testing
 		}//end of switch
-	font_render_string_center (&font_cu17, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	dmd_sched_transition (&trans_sequential_boxfade);
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_emulogic, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, "BONUS");
+	font_render_string_center (&font_emulogic, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "BONUS");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 }//end of mode_effect_deff
 
+
+
+
+
+void rollovers_effect(void) {
+	switch (++rollover_MessageCounter % 3) {
+		case 0:  deff_start (DEFF_ROLLOVERS1_EFFECT); break;
+		case 1:  deff_start (DEFF_ROLLOVERS2_EFFECT); break;
+		case 2:  deff_start (DEFF_ROLLOVERS3_EFFECT); break;
+		default: deff_start (DEFF_ROLLOVERS1_EFFECT); break;
+		}//end of switch
+}//end of FUNCTION
+
+
+void rollovers1_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Top, "M  T  L");
+	dmd_show_low ();
+	task_sleep_sec (1);
+	dmd_sched_transition (&trans_random_boxfade);
+	dmd_clean_page_low ();
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "ADVANCE BONUS X");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
+
+
+void rollovers2_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Top, "M  T  L");
+	dmd_show_low ();
+	task_sleep_sec (1);
+	dmd_sched_transition (&trans_random_boxfade);
+	dmd_clean_page_low ();
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT CRYOCLAW");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
+
+
+void rollovers3_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Top, "M  T  L");
+	dmd_show_low ();
+	task_sleep_sec (1);
+	dmd_sched_transition (&trans_random_boxfade);
+	dmd_clean_page_low ();
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_2, DMD_SMALL_CY_2, "5 TIMES");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT EXTRA BALL");
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
 
 
 

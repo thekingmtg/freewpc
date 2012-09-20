@@ -250,9 +250,9 @@ CALLSET_ENTRY (car_crash, comp_award_trip_car_crash) {
 
 void carcrash_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center( &font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "CRASH");
-	sprintf ("%d FOR CHASE", (car_crash_goal - car_crash_shots_made) );
-	font_render_string_center( &font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center( &font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CRASH");
+	sprintf ("%d FOR CHASE", car_crash_goal - car_crash_shots_made );
+	font_render_string_center( &font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

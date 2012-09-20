@@ -45,7 +45,7 @@ void ball_save_effect_deff(void) {
 	sound_start (ST_SPEECH, ball_save_SoundsArray[ball_save_SoundCounter], SL_4S, PRI_GAME_QUICK5);
 	dmd_alloc_low_clean ();
 	sprintf ("BALL SAVE");
-	font_render_string_center (&font_lithograph, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -66,7 +66,7 @@ void plunge_ball_effect_deff(void) {
 	sound_start (ST_SPEECH, shoot_reminder_SoundsArray[shoot_reminder_SoundCounter], SL_4S, PRI_GAME_QUICK5);
 	dmd_alloc_low_clean ();
 	sprintf ("PLUNGE BALL");
-	font_render_string_center (&font_lithograph, DMD_BIG_CX_Top, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

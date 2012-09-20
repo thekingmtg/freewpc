@@ -51,7 +51,6 @@ X6: Elevator 1 Flasher, flash, nosearch
 #define RACE_BY_SHORT 0xB4
 #define RACE_BY_LONG 0xB6
 #define MACHINE10 0xBC
-#define EXPLOSION1_MED 0xCC
 #define MACHINE11 0xD1
 #define TILT 0x01FB
 #define SPARKS 0x01FC

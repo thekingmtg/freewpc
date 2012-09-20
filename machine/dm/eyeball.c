@@ -35,6 +35,7 @@ const U8 EYE_EB_GOAL_STEP = 5;
 const U8 EYE_EB_GOAL_MAX = 50;
 
 //local variables
+U8	eyeball_MessageCounter;
 U8 eyeball_shots_made;//for current ball only
 U8 eyeball_eb_shots_made;//for current ball only
 __local__ U8 total_eyeball_shots_made;//for entire game
@@ -50,6 +51,7 @@ void eyeball_reset (void);
 void player_eyeball_reset (void);
 void eyeball_goal_award (void);
 void eyeball_eb_award (void);
+void eyeball_effect_chooser(void);
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
@@ -94,8 +96,11 @@ CALLSET_ENTRY (eyeball, sw_eyeball_standup) {
 	++eyeball_shots_made;
 	sound_start (ST_SAMPLE, EXPLOSION1_MED, SL_2S, PRI_GAME_QUICK1);
 	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
-	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
-	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
+	if (eyeball_eb_shots_made == eyeball_eb_goal)  eyeball_eb_award();
+	if (eyeball_shots_made == eyeball_goal)  eyeball_goal_award();//start explode
+	if ( 	(!eyeball_eb_shots_made == eyeball_eb_goal)
+		&& 	(!eyeball_shots_made == eyeball_goal)  )
+				eyeball_effect_chooser();
 	score (SC_5M);
 	//100k per jet hit here
 	if (jet_shots_made > 0) {
@@ -105,9 +110,70 @@ CALLSET_ENTRY (eyeball, sw_eyeball_standup) {
 		score_long (temp_score); //add temp score to player's score
 	}//end of if
 	//light extra ball
-	if (eyeball_eb_shots_made == eyeball_eb_goal)  eyeball_eb_award();
-	if (eyeball_shots_made == eyeball_goal)  eyeball_goal_award();//start explode
 }//end of function
+
+
+
+
+/****************************************************************************
+ * display effects
+ ****************************************************************************/
+void eyeball_effect_chooser(void) {
+	switch (++eyeball_MessageCounter % 4) {
+		case 0: deff_start (DEFF_EYEBALL1_EFFECT); break;
+		case 1: deff_start (DEFF_EYEBALL2_EFFECT); break;
+		case 2: deff_start (DEFF_EYEBALL3_EFFECT); break;
+		case 3: deff_start (DEFF_EYEBALL4_EFFECT); break;
+	}//END OF SWITCH
+}//end of mode_effect_deff
+
+void eyeball1_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	sprintf ("OOOHHHH");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+	sprintf ("MY EYE");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
+	deff_exit ();
+}//end of mode_effect_deff
+
+void eyeball2_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "JETS");
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "INCREASE");
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "RETINA SCAN");
+	dmd_show_low ();
+	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
+	deff_exit ();
+}//end of mode_effect_deff
+
+void eyeball3_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "EXTRA BALL");
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "AT");
+	sprintf ("%d HITS", eyeball_eb_goal);
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
+	deff_exit ();
+}//end of mode_effect_deff
+
+void eyeball4_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "EXPLODE");
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "AT");
+	sprintf ("%d HITS", eyeball_goal );
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
+	deff_exit ();
+}//end of mode_effect_deff
+
 
 
 

@@ -11,24 +11,21 @@
 #include <freewpc.h>
 #include "dm/global_constants.h"
 #include "elevator.h"
+#include "cryoclawdrive.h"
+#include "clawmagnet.h"
 
 //local variables
+__boolean	ballOnClaw;
 
 //prototypes
+void magnet_task (void);
 
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
 CALLSET_ENTRY (cryoclaw, start_ball) {
-//		elevator_move_down();
+	ballOnClaw = FALSE;
 }//end of function
-
-
-//void player_cryoclaw_reset (void) {
-//}//end of function
-
-//ALLSET_ENTRY (cryoclaw, start_player) 	{ player_cryoclaw_reset(); }
-
 
 /****************************************************************************
  * elevator
@@ -38,17 +35,76 @@ CALLSET_ENTRY (cryoclaw, start_ball) {
  ****************************************************************************/
 CALLSET_ENTRY (cryoclaw, sw_elevator_hold) {
 	if (valid_playfield) {
-
-	//sound_start (ST_SAMPLE, RETINA_SCAN_LONG, SL_4S, PRI_GAME_QUICK1);
-		task_sleep (TIME_500MS);
-		//turn on magnet
-		//sol_enable
-//		sol_request (SOL_CLAW_MAGNET);
-		elevator_move_up();
-
-		elevator_move_down();
+		flipper_disable ();
+		task_sleep(TIME_2S);
+		clawmagnet_on ();							//turn on magnet
+		task_create_gid1 (GID_MAGNET, magnet_task); //start 10 second timer
+		elevator_move_bump();						//move elevator up off bottom limit switch
+		elevator_move_bump();
+		elevator_move();							//then up and back down back to home
+		ballOnClaw = TRUE;							//ball "should" be on magnet
+		task_sleep(TIME_2S);
+		cryoclawdrive_start_forward ();  			//move claw to other side
+		callset_invoke(rramp_clawready_off);		//turn off diverter
 	}//end of if valid playfield
 }//end of function
 
+//turn off magnet if not used in XX secs
+void magnet_task (void) {
+	task_sleep_sec(14);
+	clawmagnet_off ();
+	flipper_enable ();
+	task_exit();
+}//end of function
+
+
+
+//release ball
+CALLSET_ENTRY (cryoclaw, sw_left_handle_button, sw_launch_button) {
+	if (ballOnClaw) {
+		clawmagnet_off ();					//turn off magnet
+		ballOnClaw = FALSE;
+		flipper_enable ();
+		task_sleep(TIME_2S);
+		cryoclawdrive_start_reverse ();		//move claw back to home position
+	}//end of if
+}//end of function
+
+
+
+
+
+
+//move claw left
+CALLSET_ENTRY (cryoclaw, sw_left_button, sw_upper_left_button) {
+	if (	ballOnClaw
+		 &&	!switch_poll_logical (SW_CLAW_POSITION_1)
+		 &&	!cryoclawdrive_get_location() == CRYOCLAWDRIVE_LEFT) {
+		cryoclawdrive_bump_l ();
+	}//end of if
+}//end of function
+
+
+
+//move claw right
+CALLSET_ENTRY (cryoclaw, sw_right_button, sw_upper_right_button) {
+	if (	ballOnClaw
+		&& 	!switch_poll_logical (SW_CLAW_POSITION_2)
+		&&	!cryoclawdrive_get_location() == CRYOCLAWDRIVE_RIGHT) {
+		cryoclawdrive_bump_r ();
+	}//end of if
+}//end of function
+
+
+
+//ensure claw is all the way to the right
+CALLSET_ENTRY (cryoclaw, amode_start, player_start) {
+	clawmagnet_off ();					//turn off magnet
+	flipper_enable ();
+	task_sleep(TIME_2S);
+	cryoclawdrive_start_forward ();
+	task_sleep(TIME_2S);
+	cryoclawdrive_start_reverse ();
+}//end of function
 
 

@@ -63,7 +63,7 @@ struct timed_mode_ops acmag_mode = {
 	.music = MUS_ACMAG,
 	.deff_starting = DEFF_ACMAG_START_EFFECT,
 	.deff_running = DEFF_ACMAG_EFFECT,
-//	.deff_ending = DEFF_ACMAG_END_EFFECT,
+	.deff_ending = DEFF_ACMAG_END_EFFECT,
 	.prio = PRI_GAME_MODE5,
 	.init_timer = 23,
 	.timer = &acmag_mode_timer,
@@ -204,8 +204,8 @@ CALLSET_ENTRY (acmag, acmag_made) {
  ****************************************************************************/
 void acmag_start_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "ACMAG");
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, "CENTER RAMP");
+	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "CENTER RAMP");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -215,9 +215,9 @@ void acmag_start_effect_deff(void) {
 
 void acmag_hit_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "ACMAG");
+	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
 	sprintf_score (acmag_mode_last_score);
-	font_render_string_center (&font_term6, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -227,11 +227,11 @@ void acmag_hit_effect_deff(void) {
 void acmag_effect_deff(void) {
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "ACMAG");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
 		sprintf ("%d SEC LEFT,  %d HIT", acmag_mode_timer, acmag_mode_shots_made);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
+		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
 		sprintf_score (acmag_mode_next_score);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
+		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
 	}//END OF ENDLESS LOOP
@@ -240,9 +240,9 @@ void acmag_effect_deff(void) {
 
 void acmag_end_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_steel, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "ACMAG");
+	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
 	sprintf("COMPLETED");
-	font_render_string_center (&font_steel, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

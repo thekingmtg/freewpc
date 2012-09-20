@@ -308,7 +308,7 @@ void standupFrenzy_sounds (void) {
  ****************************************************************************/
 void standup_effect_deff (void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "STAND UP");
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND UP");
 	dmd_show_low ();
 	task_sleep_sec (1);
 	dmd_sched_transition (&trans_vstripe_left2right);
@@ -316,7 +316,7 @@ void standup_effect_deff (void) {
 	switch (++standup_MessageCounter % 3) {
 		case 0:
 			sprintf ("%d STANDUPS HIT", standup_num_of_hits);
-			font_render_string_center(&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+			font_render_string_center(&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 			break;
 		case 1:
 			if (!left_Ramp_QuickFreeze_activated) {
@@ -354,7 +354,7 @@ void standupfrenzy_start_effect_deff (void) {
 	U8 y;
 	U8 i = 0;
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "STANDUP");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STANDUP");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	sound_send (EXPLOSION1_SHORT);
@@ -363,18 +363,39 @@ void standupfrenzy_start_effect_deff (void) {
 			if 		(i < 5) { 	x = random_scaled (1);	y = random_scaled (2); }
 			else if (i < 10) {  x = random_scaled (2);  y = random_scaled (3); }
 			else if (i < 15) {  x = random_scaled (4);  y = random_scaled (5); }
-			else if (i < 20) {  x = random_scaled (8);  y = random_scaled (4); }
+			else if (i < 22) {  x = random_scaled (8);  y = random_scaled (4); }
 			else 			 {  x = random_scaled (10); y = random_scaled (5); }
-			font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent + x, y + DMD_BIG_CY_Cent, "FRENZY");
+			if (i % 2 == 0)  font_render_string_center (&font_fixed10, DMD_MIDDLE_X + x, y + DMD_BIG_CY_Cent, "FRENZY");
+			else 			font_render_string_center (&font_fixed10, DMD_MIDDLE_X - x, DMD_BIG_CY_Cent - y, "FRENZY");
 			dmd_show_low ();
-			if (i % 10 == 0) sound_send (EXPLOSION1_SHORT);
+			if (i == 0) sound_send (EXPLOSION1_SHORT);
+			if (i == 10) sound_send (EXPLOSION1_SHORT);
+			if (i == 18) sound_send (EXPLOSION1_SHORT);
+			if (i == 24) sound_send (EXPLOSION1_SHORT);
+			if (i == 28) sound_send (EXPLOSION1_MED);
 			task_sleep (TIME_66MS);
-	} while (i++ < 25);
-	dmd_alloc_low_clean ();
+	} while (i++ < 30);
+	//pulsate words in middle
 	sound_send (EXPLOSION1_LONG);
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, "FRENZY");
-	dmd_show_low ();
-	task_sleep_sec (1);
+	i = 8;
+	dmd_alloc_pair_clean ();
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "FRENZY");
+	/* low = text, high = blank */
+	while (--i > 0){
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+
+		dmd_flip_low_high ();
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+
+		dmd_show_high ();
+		task_sleep (TIME_66MS);
+
+		dmd_show2 ();
+		task_sleep (TIME_66MS);
+		dmd_flip_low_high ();
+	}//end of loop
 	deff_exit ();
 } // standupFrenzyTotalScore_deff
 
@@ -384,7 +405,7 @@ void standupfrenzy_start_effect_deff (void) {
 void standupfrenzy_hit_effect_deff (void) {
 	dmd_alloc_low_clean ();
 	sprintf_score (standupFrenzyLastScore);
-	font_render_string_center (&font_fixed10, DMD_BIG_CX_Cent, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
@@ -411,9 +432,9 @@ void standupfrenzy_effect_deff (void) {
 /*mode is over*/
 void standupfrenzy_end_effect_deff (void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Top, DMD_BIG_CY_Top, "STANDUP FRENZY");
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STANDUP FRENZY");
 	sprintf_score (standupFrenzyTotalScore);
-	font_render_string_center (&font_mono5, DMD_BIG_CX_Bot, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
