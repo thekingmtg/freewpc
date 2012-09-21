@@ -364,7 +364,7 @@ void @self_test_enter (void) {
   		break;
   		case STOP:
 			@self_stop();
-			@self_test_command = BUMPL;
+			@self_test_command = BUMPLEFT;
   		break;
   	}
 }
