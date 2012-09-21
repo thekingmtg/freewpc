@@ -223,6 +223,15 @@ dmd_transition_t trans_scroll_left = {
 };
 
 
+dmd_transition_t trans_scroll_left_fast = {
+	.composite_init = trans_scroll_left_init,
+	.composite_old = trans_scroll_left_old,
+	.composite_new = trans_scroll_left_new,
+	.delay = 0,
+	.arg = { .u16 = 0 },
+	.count = 16,
+};
+
 /*********************************************************************/
 
 void trans_scroll_right_init (void)
@@ -261,6 +270,16 @@ dmd_transition_t trans_scroll_right = {
 	.composite_old = trans_scroll_right_old,
 	.composite_new = trans_scroll_right_new,
 	.delay = TIME_33MS,
+	.arg = { .u16 = 0 },
+	.count = 16,
+};
+
+
+dmd_transition_t trans_scroll_right_fast = {
+	.composite_init = trans_scroll_right_init,
+	.composite_old = trans_scroll_right_old,
+	.composite_new = trans_scroll_right_new,
+	.delay = 0,
 	.arg = { .u16 = 0 },
 	.count = 16,
 };
@@ -504,6 +523,16 @@ dmd_transition_t trans_bitfade_fast = {
 	.composite_old = trans_bitfade_old,
 	.composite_new = trans_bitfade_new,
 	.delay = TIME_33MS,
+	.arg = { .u16 = 0 },
+	.count = 8,
+};
+
+
+dmd_transition_t trans_bitfade_fastest = {
+	.composite_init = trans_bitfade_init,
+	.composite_old = trans_bitfade_old,
+	.composite_new = trans_bitfade_new,
+	.delay = 0,
 	.arg = { .u16 = 0 },
 	.count = 8,
 };
