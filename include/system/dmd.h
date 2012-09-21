@@ -148,13 +148,16 @@ extern dmd_transition_t
 	trans_scroll_down,
 	trans_scroll_down_fast,
 	trans_scroll_left,
+	trans_scroll_left_fast,
 	trans_scroll_right,
+	trans_scroll_right_fast,
 	trans_sequential_boxfade,
 	trans_random_boxfade,
 	trans_vstripe_left2right,
 	trans_vstripe_right2left,
 	trans_bitfade_slow,
 	trans_bitfade_fast,
+	trans_bitfade_fastest,
 	trans_unroll_vertical
 	;
 
