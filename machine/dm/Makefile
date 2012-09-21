@@ -66,13 +66,13 @@ MACHINE_MINOR = 1
 
 
 #all files here have NO deffs or leffs and may be frequently called
-GAME_OBJS = simple_switches.o  eyeball.o  cryoclaw.o orbits.o   ramps.o   arrow_handler.o 
+GAME_OBJS = simple_switches.o  cryoclaw.o orbits.o   ramps.o   arrow_handler.o 
 #call_tester.o 
 
 #all files here that have deffs
 #this is about 30% full from the OS
 #also called MACHINE_PAGE - page 59
-GAME_PAGED_OBJS = rollovers.o jets_superjets.o standupfrenzy.o car_chase_mode.o acmag.o 
+GAME_PAGED_OBJS = rollovers.o jets_superjets.o standupfrenzy.o car_chase_mode.o acmag.o eyeball.o  
 
 
 #all files here that have deffs and are less frequently called

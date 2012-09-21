@@ -97,6 +97,18 @@ CALLSET_ENTRY (underground, underground_arrow_light_off) {
 	lamp_tristate_off (LM_UNDERGROUND_ARROW);
 }//end of function
 
+CALLSET_ENTRY (underground, computer_light_on) {
+	flag_on (FLAG_IS_COMPUTER_ACTIVATED);
+	lamp_tristate_flash (LM_COMPUTER);
+}//end of function
+
+CALLSET_ENTRY (underground, computer_light_off) {
+	flag_off (FLAG_IS_COMPUTER_ACTIVATED);
+	lamp_tristate_off (LM_COMPUTER);
+}//end of function
+
+
+
 /****************************************************************************
  * body
  *
@@ -145,10 +157,12 @@ CALLSET_ENTRY (underground, sw_bottom_popper) {
 
 //called after minimum of every N combos and underground shot made
 CALLSET_ENTRY (underground, computer_award) {
+	music_timed_disable(TIME_5S);
+	//music_disable();
 	deff_start (DEFF_COMPUTER_AWARD_EFFECT);
 	computerAwards = random_scaled(computerAwardsNumOfSounds);//from kernal/random.c
 	sound_start (ST_SPEECH, computerAwardsSoundsArray[computerAwards], SL_2S, PRI_GAME_QUICK5);
-	task_sleep(TIME_2S);
+	task_sleep(TIME_3S);
 	switch (computerAwards) {
 	case 0 :
 			sound_start(ST_SPEECH, SPCH_COLLECT_BONUS, SL_4S, PRI_GAME_QUICK5);
@@ -180,8 +194,11 @@ CALLSET_ENTRY (underground, computer_award) {
 			callset_invoke (comp_award_doub_retina);
 			break;
 	}//end of switch
-	task_sleep(TIME_3S);
-	sol_request_async(SOL_BOTTOM_POPPER);
+	task_sleep(TIME_4S);
+	if (++undergroundSwitchDebouncer == 1)  sol_request_async(SOL_BOTTOM_POPPER);
+	task_create_gid1 (GID_UG_DEBOUNCE, underground_task);
+	callset_invoke(computer_light_off);
+	//music_enable();
 }//end of function
 
 

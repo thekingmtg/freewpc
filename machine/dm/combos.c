@@ -74,17 +74,7 @@ CALLSET_ENTRY (combo, valid_playfield) { callset_invoke(combo_init); }
 /****************************************************************************
  * playfield lights and flags
  ***************************************************************************/
-CALLSET_ENTRY (combo, computer_light_on) {
-	flag_on (FLAG_IS_COMPUTER_ACTIVATED);
-	lamp_tristate_flash (LM_COMPUTER);
-}//end of function
 
-
-
-CALLSET_ENTRY (combo, computer_light_off) {
-	flag_off (FLAG_IS_COMPUTER_ACTIVATED);
-	lamp_tristate_off (LM_COMPUTER);
-}//end of function
 
 /****************************************************************************
  * body
@@ -136,7 +126,7 @@ void flash_combos(void){
 CALLSET_ENTRY (combo, combo_hit) {
 	if (++combo_counter >= combo_goal  && !computer_award_activated) {
 		combo_goal += COMBO_EASY_GOAL_STEP;
-		callset_invoke(computer_light_on);
+		callset_invoke(computer_light_on); 	//at underground.c
 		deff_start (DEFF_COMPUTER_EFFECT);
 	} else 	if (combo_counter < combo_goal) deff_start (DEFF_COMBO_EFFECT);
 	// reset the task timer
