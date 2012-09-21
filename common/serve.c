@@ -236,12 +236,14 @@ CALLSET_BOOL_ENTRY (serve, dev_trough_kick_request)
  */
 CALLSET_ENTRY (serve, dev_trough_kick_success)
 {
+#ifndef MACHINE_DEMO_MAN
 	#ifdef HAVE_AUTO_SERVE
 		if (valid_playfield) {
 			task_sleep (TIME_200MS);
 			launch_ball ();
 		}
 	#endif
+#endif
 }
 
 
