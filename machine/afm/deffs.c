@@ -106,7 +106,7 @@ void martian_spell (bool on)
 		{
 			c[0] = *s;
 			c[1] = '\0';
-			font_render_string_center (&font_times8, x, 11, c);
+			font_render_string_center (&font_fixed10, x, 11, c);
 		}
 		x += 16;
 		s++;
@@ -157,7 +157,7 @@ void mb_running_deff (void)
 target_change:
 	dmd_map_overlay ();
 	frame_draw (IMG_UFO);
-	font_render_string_center (&font_mono5, 92, 5, "MULTIBALL");
+	font_render_string_center (&font_var5, 92, 5, "MULTIBALL");
 	dmd_rough_copy (64, 2, 64, 6);
 	if (mb_targets_left == 0)
 		sprintf ("SUPER JACKPOT LIT");
@@ -216,7 +216,7 @@ void mb_increase_jackpot_deff (void)
 {
 	extern score_t mb_super_value;
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 7, "SUPER JACKPOT AT");
+	font_render_string_center (&font_var5, 64, 7, "SUPER JACKPOT AT");
 	sprintf_score (mb_super_value);
 	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();
@@ -234,7 +234,7 @@ void attack_running_deff (void)
 	for (;;)
 	{
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_mono5, 64, 5, "MARTIAN ATTACK");
+		font_render_string_center (&font_var5, 64, 5, "MARTIAN ATTACK");
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		dmd_show_low ();

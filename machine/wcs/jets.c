@@ -11,7 +11,7 @@ __local__ U8 ultra_jet_count;
 void jet_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 96, 5, "JET BUMPER");
+	font_render_string_center (&font_var5, 96, 5, "JET BUMPER");
 	sprintf ("%d", jet_count);
 	font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
 

@@ -39,6 +39,7 @@
  * estimate of average car score: 9 million to 21 million
  *
  */
+/* CALLSET_SECTION (car_crash, __machine2__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -61,15 +62,6 @@ __boolean 	is_car_crash_ten_lit; 		//tracks which score to be awarded
 __boolean 	is_car_crash_three_lit; 		//tracks which score to be awarded
 
 //external variables
-
-//prototypes
-void car_crash_reset (void);
-void player_car_crash_reset (void);
-void car_crash_first_switch_task (void);
-void car_crash_second_switch_task (void);
-void car_crash_third_switch_task (void);
-void carcrash_mode_effect_deff(void);
-void carcrash_effect_deff(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -249,10 +241,25 @@ CALLSET_ENTRY (car_crash, comp_award_trip_car_crash) {
  ****************************************************************************/
 
 void carcrash_effect_deff(void) {
+	U8 i = 1;
+	do {
+		dmd_alloc_low_clean ();
+		font_render_string_center( &font_fipps, DMD_MIDDLE_X - (i*8), 	DMD_BIG_CY_Cent, "C");
+		font_render_string_center( &font_fipps, DMD_MIDDLE_X - (i*4), 	DMD_BIG_CY_Cent, "R");
+		font_render_string_center( &font_fipps, DMD_MIDDLE_X, 			DMD_BIG_CY_Cent, "A"); //right in middle
+		font_render_string_center( &font_fipps, DMD_MIDDLE_X + (i*4), 	DMD_BIG_CY_Cent, "S");
+		font_render_string_center( &font_fipps, DMD_MIDDLE_X + (i*8), 	DMD_BIG_CY_Cent, "H");
+		dmd_show_low ();
+		if (i < 3) 		task_sleep (TIME_100MS);
+		else if (i < 6) task_sleep (TIME_200MS);
+		else if (i < 9) task_sleep (TIME_500MS);
+	} while (i++ < 7);
+
 	dmd_alloc_low_clean ();
-	font_render_string_center( &font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CRASH");
-	sprintf ("%d FOR CHASE", car_crash_goal - car_crash_shots_made );
-	font_render_string_center( &font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	sprintf ("CRASH %d MORE", car_crash_goal - car_crash_shots_made );
+	font_render_string_center( &font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+	sprintf ("FOR CHASE");
+	font_render_string_center( &font_fipps, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

@@ -80,7 +80,7 @@ void zr1_test_init (void)
 }
 
 void zr1_draw_test_title(void) {
-	font_render_string_center (&font_mono5, 64, 2, "ZR1 ENGINE TEST");
+	font_render_string_center (&font_var5, 64, 2, "ZR1 ENGINE TEST");
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 }
 
@@ -167,7 +167,7 @@ void zr1_test_draw (void)
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
 
 	sprintf(zr1_test_short_names[zr1_test_command]);
-	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
+	font_render_string_left (&font_var5, 0, 27, sprintf_buffer);
 
 
 

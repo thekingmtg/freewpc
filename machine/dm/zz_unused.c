@@ -22,16 +22,8 @@ X5: Elevator 2 Flasher, flash, nosearch
 X6: Elevator 1 Flasher, flash, nosearch
 
 
-
-
-
-
-
-
-
 #define MUS_BG_A 0x3
 #define MUS_BG_B 0x4
-#define MUS_CLAW 0xE
 #define MUS_HIGH_SCORE 0x1F
 
 #define SPECIAL 0x21
@@ -43,7 +35,6 @@ X6: Elevator 1 Flasher, flash, nosearch
 #define SPRAY_CAN 0x81
 #define STEAM 0x8B
 #define SPECIAL_EFFECT 0x8C
-#define TRAIN_PULL_IN 0x8D
 #define GUNSHOT_MUFFLED 0x98
 #define GUNSHOT 0x99
 #define LOW_HORN 0xAA
@@ -61,22 +52,16 @@ X6: Elevator 1 Flasher, flash, nosearch
 #define ORCHESTRA 0x0210
 #define MACHINE14_SHORT 0x0212
 #define MACHINE14_LONG 0x0216
-#define COMPUTER3 0x0218
 #define GROUND_HUMM 0x0219
 
 
 #define SPCH_SOME_ACTION 0x0143
 #define SPCH_CLOSE_ENOUGH 0x014A
 #define SPCH_SIMON_SAYS_SLY 0x0154
-#define SPCH_BACK_IN_FRIDGE 0x0155
-#define SPCH_SIMON_LAUGH_LONG 0x0165
 #define SPCH_JOHN_SCREAM 0x0166
 #define SPCH_FEEL_GOOD_TOO 0x0182
 #define SPCH_COWS 0x025A
 #define SPCH_I_GOT_IT 0x0263
-#define SPCH_COMPETITION 0x0264
-#define SPCH_HOW_NICE 0x0289
-#define SPCH_LOVE_THIS_GUY 0x028A
 #define SPCH_UHHN 0x0292
 #define SPCH_WHAT_YOU_DOING_HERE 0x02AC
 #define SPCH_GET_THIS_PARTNER 0x02AE
@@ -92,8 +77,7 @@ X6: Elevator 1 Flasher, flash, nosearch
 #define SPCH_TRIPLE 0x0376
 #define SPCH_YOU_AND_ME 0x0385
 #define SPCH_CAR_CRASH_TRIPLED 0x03EE
-#define SPCH_USE_BUTTONS_TO_RELEASE_BALL 0x0417
-#define SPCH_USE_TRIGGERS_TO_MOVE_CRYOCLAW 0x0418
+
 #define SPCH_IN_THIS_CENTURY 0x041B
 #define SPCH_STAYED_THERE 0x041E
 #define SPCH_DONT_WORRY 0x0420
@@ -109,14 +93,6 @@ X6: Elevator 1 Flasher, flash, nosearch
 multiball sayings
 #define SPCH_SUPER_JACKPOT 0x0378
 #define SPCH_GET_SUPER_JACKPOT 0x02D6
-
-top popper award sayings
-#define SPCH_YOU_LOOK_GREAT_TODAY 0x0416
-#define SPCH_ILUMINATE 0x018A
-#define SPCH_AMAZING_WES 0x030D
-#define SPCH_AMAZING_SLY 0x0320
-#define SPCH_GLORIOUS 0x0140
-#define SPCH_OUTSTANDING 0x02F6
 
 end ball and match feature
 #define SPCH_TWO_PRICE_ONE 0x02A9

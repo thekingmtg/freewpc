@@ -333,16 +333,16 @@ void rtc_render (struct date *d)
 #if (MACHINE_DMD == 1)
 	enum day_of_week day = rtc_calc_day_of_week (d);
 	sprintf ("%s", day_names[day]);
-	font_render_string_center (&font_mono5, 64, 7, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 7, sprintf_buffer);
 	rtc_render_date (d);
-	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
 	rtc_render_time (d);
-	font_render_string_center (&font_mono5, 64, 25, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 25, sprintf_buffer);
 #else
 	rtc_render_date (d);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
 	rtc_render_time (d);
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
 #endif
 	if (rtc_edit_field != RTC_FIELD_INVALID)
 	{

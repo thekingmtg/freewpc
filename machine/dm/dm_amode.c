@@ -18,7 +18,7 @@
  *  trans_scroll_down_avg
  *  trans_scroll_down_slow
  *
- *  trans_scroll_left
+ *  trans_scroll_left  --slowest
  *  trans_scroll_left_fast
  *  trans_scroll_right
  *  trans_scroll_right_fast
@@ -72,11 +72,15 @@ void amode_leff (void) {
 void show_driver_animation (void) {
 	U16 fno;
 	U8 i;
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
 	for (i = 0; i < 5; i++) {
 		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2) {
-			/* We are drawing a full frame, so a clean isn't needed */
 			dmd_alloc_pair ();
-			frame_draw (fno);
+			frame_draw_plane (fno++);
+			dmd_flip_low_high ();
+			frame_draw_plane (fno);
+			dmd_flip_low_high ();
 			dmd_show2 ();
 			task_sleep (TIME_66MS);
 		}//end of inner loop
@@ -121,10 +125,10 @@ CALLSET_ENTRY (dm_amode, amode_page) {
 
 	if (alternator % 2 == 0) {
 		dmd_sched_transition (&trans_scroll_right);
-		show_driver_animation ();
+		show_rocket_animation ();
 	} else {
 		dmd_sched_transition (&trans_scroll_left);
-		show_rocket_animation ();
+		show_driver_animation ();
 		}
 
 	dmd_sched_transition (&trans_bitfade_slow);

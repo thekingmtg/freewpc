@@ -24,8 +24,10 @@
  *
  *
  */
+/* CALLSET_SECTION (acmag, __machine__) */
 #include <freewpc.h>
 #include "dm/global_constants.h"
+#include "clawmagnet.h"
 
 //constants
 
@@ -39,18 +41,7 @@ score_t 	acmag_mode_last_score;
 score_t 	acmag_mode_next_score;
 __local__ score_t 	acmag_mode_score_total_score;
 
-
 //external variables
-
-//prototypes
-void acmag_reset (void);
-void acmag_player_reset (void);
-void acmag_effect_deff(void);
-void acmag_mode_init (void);
-void acmag_mode_expire (void);
-void acmag_mode_exit (void);
-
-
 
 /****************************************************************************
  * mode definition structure
@@ -64,7 +55,7 @@ struct timed_mode_ops acmag_mode = {
 	.deff_starting = DEFF_ACMAG_START_EFFECT,
 	.deff_running = DEFF_ACMAG_EFFECT,
 	.deff_ending = DEFF_ACMAG_END_EFFECT,
-	.prio = PRI_GAME_MODE5,
+	.prio = PRI_GAME_MODE2,
 	.init_timer = 23,
 	.timer = &acmag_mode_timer,
 	.grace_timer = 2, //default is 2
@@ -92,6 +83,11 @@ void acmag_player_reset (void) {
 
 
 void acmag_mode_init (void) {
+			//the claw mode can expire on its own and since it is a lower priority it will not display
+			//callset_invoke (end_claw_mode); // this seemed to cause occasional crashes
+			clawmagnet_off ();
+			flag_off(FLAG_IS_BALL_ON_CLAW);
+			flipper_enable ();
 	score (SC_250K);
 	acmag_mode_shots_made = 0;
 	flag_on (FLAG_IS_ACMAG_ACTIVATED);
@@ -203,37 +199,41 @@ CALLSET_ENTRY (acmag, acmag_made) {
  * DMD display and sound effects
  ****************************************************************************/
 void acmag_start_effect_deff(void) {
-	dmd_alloc_low_clean ();
+	dmd_map_overlay ();
+	dmd_clean_page_high ();
+	dmd_clean_page_low ();
 	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "CENTER RAMP");
-	dmd_show_low ();
-	task_sleep_sec (2);
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "CENTER RAMP");
+	show_text_on_stars (40); //about 4 seconds
 	deff_exit ();
 }//end of mode_effect_deff
 
 
 
 void acmag_hit_effect_deff(void) {
-	dmd_alloc_low_clean ();
+	dmd_map_overlay ();
+	dmd_clean_page_high ();
+	dmd_clean_page_low ();
+	dmd_sched_transition (&trans_bitfade_fast);
 	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
 	sprintf_score (acmag_mode_last_score);
 	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
+	show_text_on_stars (20);
 	deff_exit ();
 }//end of mode_effect_deff
 
 
 void acmag_effect_deff(void) {
 	for (;;) {
-		dmd_alloc_low_clean ();
+		dmd_map_overlay ();
+		dmd_clean_page_high ();
+		dmd_clean_page_low ();
 		font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
 		sprintf ("%d SEC LEFT,  %d HIT", acmag_mode_timer, acmag_mode_shots_made);
-		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
 		sprintf_score (acmag_mode_next_score);
-		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+		show_text_on_stars (8); //about 800 ms
 	}//END OF ENDLESS LOOP
 }//end of mode_effect_deff
 
@@ -243,11 +243,72 @@ void acmag_end_effect_deff(void) {
 	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
 	sprintf("COMPLETED");
 	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
+	dmd_show_low (); //shows a mono image
 	task_sleep_sec (2);
 	deff_exit ();
 	}//end of mode_effect_deff
 
+
+#define MAX_STARS 12
+#define MAX_STATE 4
+struct star_state {
+	U8 time;
+	U8 state;
+	U8 x;
+	U8 y;
+} star_states[MAX_STARS];
+
+static const U8 star_bitmaps[] = {
+	3, 3, 0, 0, 0,
+	3, 3, 0, 2, 0,
+	3, 3, 0, 2, 0,
+	3, 3, 2, 5, 2,
+	3, 3, 2, 7, 2,
+	3, 3, 2, 7, 2,
+};
+
+void star_draw (void) {
+	U8 n;
+	for (n = 0; n < MAX_STARS; n++) {
+		struct star_state *s = &star_states[n];
+		if (s->time) {
+			//bitmap_erase_asm (...);
+			bitmap_blit2 (star_bitmaps + s->state * 5, s->x, s->y);
+
+			s->time--;
+
+			if (random () < 128)
+				;
+			if (s->state == MAX_STATE)  s->state--;
+			else if (s->state == 0)		s->state++;
+			else if (random () < 192)	s->state++;
+			else						s->state--;
+		}//end of if s->time
+		else {
+			if (random () < 64) {
+				s->time = 4 + random_scaled (8);
+				s->x = 4 + random_scaled (120);
+				s->y = 2 + random_scaled (24);
+				s->state = 0;
+			}//end of if (random () < 64
+		}//end of else
+	}//end of for loop
+}//end of function
+
+
+
+void show_text_on_stars (U8 times) {
+	U8 n;
+	for (n = 0; n < times; n++) {
+		dmd_dup_mapped ();//allocate new space but make it a copy of what is on DMD now
+		dmd_overlay_onto_color ();//mono overlay onto current color page
+		star_draw ();
+		dmd_show2 ();//shows a 4 color image
+		task_sleep (TIME_100MS);
+		dmd_map_overlay ();/** Map a consecutive display page pair into windows 0 & 1 */
+	}
+	dmd_alloc_pair_clean ();
+}
 
 
 /****************************************************************************

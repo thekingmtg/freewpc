@@ -1,3 +1,36 @@
+SDSS - Kill ballsaver when activated.
+SSSMB - Miss jackpot bug
+
+Tennis style scoring, player must be a certain amounts of points in front to
+win, or 2 balls past and the other play fails to retake the lead.
+
+show ZZzz's on skill shot if no one is playing
+
+put dmd_text_outline into score_deff.c
+
+Extra ball outlane - Lit from door panel
+
+Make anticradle check shooter lane
+debug anticradle and pb in lock
+
+Count balls going into slot tunnel for more accurate pb detection during
+multiball
+Wavy demo style text
+
+lamp_tristate_flash speeds
+
+BUGS
+Autofire ballsave multiball drain bug
+sssmb, make 'easy' jackpot and fix existing code
+Door handle lit crash!  Gaah!
+
+
+Make TZ challenge
+Grand champion gets to enter a PIN which is stored in the machine.  This means
+they can enter in their GC flipcode
+
+Jackpot Leff
+
 Use system time for some features
 	eg: 1200 midnight multiball
 Store a mode for use later (when Buyin is pressed)
@@ -23,10 +56,11 @@ what we do is:
 
 Show fuse list in test
 
-Alarm clock:
-
-Allow the player to set a time for the alarm to go off,
-either a specific time, or 10, 20 minutes etc.
+Magnet multiball:
+=================
+Grab a ball on the magnet, but hold it v. weakly.  Enough to hold it but not
+enough to stop another ball getting grabbed.  Then just wait for the opto to
+change when the ball hits it.
 
 Sharpe Shooter Mode:
 Alternative to BTTZ, Shooter pot starts with 50M, player must hit 2 lit shots,

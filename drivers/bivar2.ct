@@ -1,24 +1,6 @@
 /*
- * Copyright 2009-2010 by Brian Dominy <brian@oddchange.com>
+ * written by James Cardona and based on previous work in bivar.ct 
  *
- * This file is part of FreeWPC.
- *
- * FreeWPC is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * FreeWPC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with FreeWPC; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- */
-
-/*
  * Driver for a bidirectional, variable-speed motor with two stop-limit switches
  *
  * This driver is based on the simpler 'duty' driver, but it
@@ -27,15 +9,18 @@
  */
 
 @@class duty
-@@parameter forward_sol
-@@parameter reverse_sol
-@@parameter forward_sw
-@@parameter reverse_sw
+@@parameter left_sol
+@@parameter right_sol
+@@parameter left_sw
+@@parameter right_sw
+
+
 
 @@
 @@file @self.sched
 @@
 !@self_service		16		80c
+
 
 
 @@
@@ -57,7 +42,7 @@ typedef enum {
 } @self_location_t;
 
 
-//this number is equivalent to off time of duty cycle
+//this number is equivalent to off time of duty cycle, on time is always 16ms
 #define @SELF_DUTY_100 0
 #define @SELF_DUTY_50  TIME_16MS
 #define @SELF_DUTY_25  TIME_50MS
@@ -75,11 +60,15 @@ void @self_set_speed (U8 speed);
 void @self_stop (void);
 void @self_bump_left (void);
 void @self_bump_right (void);
+void @self_go_to_center_monitor (void);
+void @self_go_left_to_center (void);
+void @self_go_right_to_center (void);
 
+ 
 extern inline void @self_stop_from_interrupt (void) {
 	@self_state = @SELF_IDLE;
-	sol_disable (@forward_sol);
-	sol_disable (@reverse_sol);
+	sol_disable(@left_sol);
+	sol_disable(@right_sol);
 }
 
 
@@ -104,18 +93,18 @@ extern inline void @self_service (void) {
 			if (@self_speed == 0)
 				;
 			else if (@self_state == @SELF_FORWARD)
-				sol_disable (@forward_sol);
+				sol_disable (@left_sol);
 			else
-				sol_disable (@reverse_sol);
+				sol_disable (@right_sol);
 			@self_timer = @self_speed;
 		}
 		else if (--@self_timer == 0) {
 			/* We are in off delay, if timer reaches zero,
 			then turn it back on. */
 			if (@self_state == @SELF_FORWARD)
-				sol_enable (@forward_sol);
+				sol_enable (@left_sol);
 			else
-				sol_enable (@reverse_sol);
+				sol_enable (@right_sol);
 		}
 	}
 }
@@ -142,7 +131,7 @@ void @self_go_left (void) {
 	@self_timer = 1;
 	@self_state = @SELF_FORWARD;
 	@self_location = @SELF_UNKNOWN;
-	sol_disable (@reverse_sol);
+	sol_disable (@right_sol);
 	enable_interrupts ();
 }
 
@@ -153,7 +142,37 @@ void @self_go_right (void) {
 	@self_timer = 1;
 	@self_state = @SELF_REVERSE;
 	@self_location = @SELF_UNKNOWN;
-	sol_disable (@forward_sol);
+	sol_disable (@left_sol);
+	enable_interrupts ();
+}
+
+
+void @self_go_to_center_monitor (void) {
+	task_sleep(TIME_500MS);
+	disable_interrupts ();
+	@self_state = @SELF_IDLE;
+	sol_disable (@right_sol);
+	sol_disable (@left_sol);
+	enable_interrupts ();
+	task_exit ();
+}
+
+void @self_go_left_to_center (void) {
+	disable_interrupts ();
+	@self_timer = 1;
+	@self_state = @SELF_FORWARD;
+	@self_location = @SELF_UNKNOWN;
+	task_create_gid1 (GID_@SELF_GRTC_MONITOR, @self_go_to_center_monitor);
+	enable_interrupts ();
+}
+
+
+void @self_go_right_to_center (void) {
+	disable_interrupts ();
+	@self_timer = 1;
+	@self_state = @SELF_REVERSE;
+	@self_location = @SELF_UNKNOWN;
+	task_create_gid1 (GID_@SELF_GRTC_MONITOR, @self_go_to_center_monitor);
 	enable_interrupts ();
 }
 
@@ -163,49 +182,60 @@ void @self_stop (void) {
 	@self_stop_from_interrupt ();
 	enable_interrupts ();
 	@self_state = @SELF_IDLE;
-	sol_disable (@forward_sol);
-	sol_disable (@reverse_sol);
-
+	sol_disable (@right_sol);
+	sol_disable (@left_sol);
 }
 
-CALLSET_ENTRY (@self, @forward_sw) {
-	sol_disable (@forward_sol);
-	sol_disable (@reverse_sol);
-	@self_state = @SELF_IDLE;
-	@self_location = @SELF_LEFT;
-	@self_stop ();
+
+
+CALLSET_ENTRY (@self, @left_sw) {
+	if (!(@self_location == @SELF_LEFT) ) {
+			@self_stop (); 
+			@self_location = @SELF_LEFT;
+	}
 }
 
-CALLSET_ENTRY (@self, @reverse_sw) {
-	sol_disable (@forward_sol);
-	sol_disable (@reverse_sol);
-	@self_state = @SELF_IDLE;
+
+
+CALLSET_ENTRY (@self, @right_sw) {
+	@self_stop (); 
 	@self_location = @SELF_RIGHT;
-	@self_stop ();
+}
+
+void @self_bump_monitor (void) {
+	task_sleep(TIME_100MS);
+	@self_stop (); 
+	task_exit ();
 }
 
 
 void @self_bump_left (void) {
-if (	!switch_poll_logical (@forward_sw)
-	&&  !@self_location == @SELF_LEFT ) {
-			sol_disable (@reverse_sol);
-			sol_enable (@forward_sol);
-			task_sleep (TIME_16MS);
-			sol_disable (@forward_sol);
-			@self_state = @SELF_IDLE;
+	if ( 	(@self_location == @SELF_UNKNOWN)
+		|| 	(@self_location == @SELF_RIGHT) ){ 
+				disable_interrupts ();
+				@self_timer = 1;
+				@self_state = @SELF_FORWARD;
+				@self_location = @SELF_UNKNOWN;
+				sol_disable (@right_sol);
+				sol_enable (@left_sol);
+				task_recreate_gid (GID_@SELF_B_MONITOR, @self_bump_monitor);
+				enable_interrupts ();
 	}
 }
 
 
 
 void @self_bump_right (void) {
-if (	!switch_poll_logical (@reverse_sw)
-	&&  !@self_location == @SELF_RIGHT ) {
-			sol_disable (@forward_sol);
-			sol_enable (@reverse_sol);
-			task_sleep (TIME_16MS);
-			sol_disable (@reverse_sol);
-			@self_state = @SELF_IDLE;
+	if ( 	(@self_location == @SELF_UNKNOWN)
+		|| 	(@self_location == @SELF_LEFT) ){ 
+				disable_interrupts ();
+				@self_timer = 1;
+				@self_state = @SELF_REVERSE;
+				@self_location = @SELF_UNKNOWN;
+				sol_disable (@left_sol);
+				sol_enable (@right_sol);
+				task_recreate_gid (GID_@SELF_B_MONITOR, @self_bump_monitor);
+				enable_interrupts ();
 	}
 }
 
@@ -213,7 +243,7 @@ if (	!switch_poll_logical (@reverse_sw)
 CALLSET_ENTRY (@self, init) {
 	@self_state = @SELF_IDLE;
 	@self_location = @SELF_UNKNOWN;
-	@self_set_speed (@SELF_DUTY_50);
+	@self_set_speed (@SELF_DUTY_100);
 }
 
 
@@ -266,44 +296,32 @@ char *@self_test_short_names[] = {
 	"BUMP LEFT",
 	"BUMP RIGHT",
 	"LEFT",
-	"STOP",
 	"RIGHT",
 	"STOP"
 };
+
+extern  @self_location_t @self_location;
 
 
 
 void @self_test_init (void) { @self_test_command = BUMPLEFT; }
 
-void @self_draw_test_title(void) {
-	font_render_string_center (&font_mono5, 64, 2, "@SELF TEST");
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
-}
-
-
 
 void @self_test_draw (void) {
 	dmd_alloc_low_clean ();
-	@self_draw_test_title();
+	//draw title
+	font_render_string_center (&font_var5, 64, 2, "@SELF TEST");
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
 
-	//display status of left limit switch
-	sprintf ("@forward_sw");
-	font_render_string_center (&font_var5, 64, 13, sprintf_buffer);
-	if (switch_poll_logical (@forward_sw) ) sprintf ("X");
-	 else sprintf ("O"); 
-	font_render_string_center (&font_var5, 20, 13, sprintf_buffer);
 
-	//display status of right limit switch
-	sprintf ("@reverse_sw");
-	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
-	if (switch_poll_logical (@reverse_sw) ) sprintf ("X");
-	 else sprintf ("O"); 
-	font_render_string_center (&font_var5, 20, 20, sprintf_buffer);
+	//display status of limit switches
+	sprintf ("@self_location");
+	font_render_string_center (&font_var5, 64, 13, sprintf_buffer);
 
 	//name of currently running test
 	sprintf(@self_test_short_names[@self_test_command]);
-	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
+	font_render_string_left (&font_var5, 0, 27, sprintf_buffer);
 
 	dmd_show_low ();
 }
@@ -313,10 +331,11 @@ void @self_test_draw (void) {
 
 void @self_test_thread (void) {
 	for (;;) {
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_200MS);//this was set to run faster but seemed to cause problems
 		@self_test_draw ();
 	}
 }
+
 
 
 //up test button pressed
@@ -334,12 +353,14 @@ void @self_test_down (void) {
 }
 
 
+
 //escape test button pressed
 void @self_test_escape (void) {
 	// stop everything
 	@self_stop();
 	window_pop();
 }
+
 
 
 //enter test button pressed

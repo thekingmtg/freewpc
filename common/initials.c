@@ -68,7 +68,7 @@ char initials_data[NUM_INITIALS_ALLOWED+1];
  * It continuously redraws itself whenever the timer, the selected
  * character, or the entered characters change.
  */
-void enter_initials_deff (void)
+/*void enter_initials_deff (void)
 {
 	while (in_test || task_find_gid (GID_ENTER_INITIALS))
 	{
@@ -80,14 +80,14 @@ void enter_initials_deff (void)
 			font_render_string_left (&font_var5, 0, 1, "ENTER INITIALS");
 			for (n=0; n < 3; n++)
 			{
-				font_render_glyph (&font_bitmap8, n * 8, 9,
+				font_render_glyph (&font_term6, n * 8, 9,
 					initials_data[n] ? initials_data[n] : '_');
 			}
 
 			if (initials_selection < MAX_INITIAL_INITIAL+1)
 			{
 				sprintf ("%12s", initial_chars + initials_selection);
-				font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
+				font_render_string_left (&font_term6, 0, 23, sprintf_buffer);
 			}
 			else
 			{
@@ -95,12 +95,12 @@ void enter_initials_deff (void)
 
 				x = ALPHABET_LEN - initials_selection;
 				sprintf ("%*s", x, initial_chars + initials_selection);
-				font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
+				font_render_string_left (&font_term6, 0, 23, sprintf_buffer);
 
 				x = MAX_LETTERS_SHOWN - x;
 				sprintf ("%*s", x, initial_chars);
 				x = MAX_LETTERS_SHOWN - x;
-				font_render_string_left (&font_bitmap8, x * FONT_WIDTH, 23, sprintf_buffer);
+				font_render_string_left (&font_term6, x * FONT_WIDTH, 23, sprintf_buffer);
 			}
 
 			for (n = 22; n <= 30; n++)
@@ -124,6 +124,68 @@ void enter_initials_deff (void)
 	task_sleep (TIME_500MS);
 	deff_exit ();
 }
+*/
+
+
+void enter_initials_deff (void)
+{
+	while (in_test || task_find_gid (GID_ENTER_INITIALS))
+	{
+		if (score_update_required ())
+		{
+#if (MACHINE_DMD == 1)
+			U8 n;
+			dmd_alloc_low_clean ();
+			font_render_string_left (&font_var5, 0, 1, "ENTER INITIALS");
+			font_render_string_left (&font_fixed10, 0, 9, initials_data);
+
+			if (initials_selection < MAX_INITIAL_INITIAL+1)
+			{
+				sprintf ("%12s", initial_chars + initials_selection);
+				font_render_string_left (&font_term6, 0, 23, sprintf_buffer);
+			}
+			else
+			{
+				U8 x;
+
+				x = ALPHABET_LEN - initials_selection;
+				sprintf ("%*s", x, initial_chars + initials_selection);
+				font_render_string_left (&font_term6, 0, 23, sprintf_buffer);
+
+				x = MAX_LETTERS_SHOWN - x;
+				sprintf ("%*s", x, initial_chars);
+				x = MAX_LETTERS_SHOWN - x;
+				font_render_string_left (&font_term6, x * FONT_WIDTH, 23, sprintf_buffer);
+			}
+
+			for (n = 22; n <= 30; n++)
+			{
+				dmd_low_buffer[16UL * n + SELECT_OFFSET - 1] ^= 0x80;
+				dmd_low_buffer[16UL * n + SELECT_OFFSET] ^= 0x7F;
+			}
+
+			sprintf ("%d", initials_enter_timer);
+			font_render_string_right (&font_fixed6, 126, 3, sprintf_buffer);
+			dmd_show_low ();
+#else
+			seg_alloc_clean ();
+			seg_write_string (0, 0, "ENTER INITIALS");
+			sprintf ("%c", initial_chars[initials_selection]);
+			seg_write_string (0, 15, sprintf_buffer);
+			seg_write_string (1, 0, initials_data);
+			sprintf ("%d", initials_enter_timer);
+			seg_write_string (1, 14, sprintf_buffer);
+			seg_show ();
+#endif
+		}
+		task_sleep (TIME_66MS);
+	}
+	task_sleep (TIME_500MS);
+	deff_exit ();
+}
+
+
+
 
 void initials_stop (void)
 {

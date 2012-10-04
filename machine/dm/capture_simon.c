@@ -21,9 +21,11 @@
  * estimate of average capture simon mode score: 30 million to 95 million
  *
  */
+/* CALLSET_SECTION (capture_simon, __machine2__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
+#include "clawmagnet.h"
 
 //constants
 const U8 			CAP_SIM_EASY_GOAL 	= 3;
@@ -46,16 +48,6 @@ __local__ score_t 	capture_simon_mode_score_total_score;
 
 //external variables
 
-//prototypes
-void capture_simon_reset (void);
-void capture_simon_player_reset (void);
-void capture_simon_effect_deff(void);
-void capture_simon_mode_init (void);
-void capture_simon_mode_expire (void);
-void capture_simon_mode_exit (void);
-
-
-
 /****************************************************************************
  * mode definition structure
  ***************************************************************************/
@@ -68,7 +60,7 @@ struct timed_mode_ops capture_simon_mode = {
 	.deff_starting = DEFF_CAPTURE_SIMON_START_EFFECT,
 	.deff_running = DEFF_CAPTURE_SIMON_EFFECT,
 //	.deff_ending = DEFF_CAPTURE_SIMON_END_EFFECT,
-	.prio = PRI_GAME_MODE1,
+	.prio = PRI_GAME_MODE4,
 	.init_timer = 23,
 	.timer = &capture_simon_mode_timer,
 	.grace_timer = 2,
@@ -102,6 +94,11 @@ void capture_simon_player_reset (void) {
 
 
 void capture_simon_mode_init (void) {
+			//the claw mode can expire on its own and since it is a lower priority it will not display
+			//callset_invoke (end_claw_mode); // this seemed to cause occasional crashes
+			clawmagnet_off ();
+			flag_off(FLAG_IS_BALL_ON_CLAW);
+			flipper_enable ();
 	sound_start (ST_SPEECH, SPCH_UNDER_ARREST, SL_3S, PRI_GAME_QUICK1);
 	score (SC_250K);
 	capture_simon_mode_shots_made = 0;
@@ -251,8 +248,8 @@ CALLSET_ENTRY (capture_simon, capture_simon_made) {
  ****************************************************************************/
 void capture_simon_start_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_times8, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE");
-	font_render_string_center (&font_times8, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "SIMON");
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE");
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "SIMON");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -262,9 +259,9 @@ void capture_simon_start_effect_deff(void) {
 
 void capture_simon_hit_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE SIMON");
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAUGHT");
 	sprintf_score (capture_simon_mode_last_score);
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -273,13 +270,25 @@ void capture_simon_hit_effect_deff(void) {
 
 
 void capture_simon_effect_deff(void) {
+	U8 i = 0;
+	__boolean TOGGLE = FALSE;
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE SIMON");
+//		dmd_sched_transition (&trans_scroll_right);
+		if (++i % 5 == 0) {//change TOGGLE once per second
+				if (TOGGLE) {
+					TOGGLE = FALSE;
+					font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Top, "SIMON");
+				}//end of inner if
+				else {
+					TOGGLE = TRUE;
+					font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE");
+				}//end of else
+		}//end of if (++i % 5 == 0)
 		sprintf ("%d SEC LEFT,  %d HIT", capture_simon_mode_timer, capture_simon_mode_shots_made);
-		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
 		sprintf_score (capture_simon_mode_next_score);
-		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_200MS);
 	}//END OF ENDLESS LOOP
@@ -291,9 +300,9 @@ void capture_simon_effect_deff(void) {
 
 void capture_simon_end_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CAPTURE SIMON");
-	sprintf("COMPLETED");
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Top, "SIMON");
+	sprintf("CAUGHT");
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

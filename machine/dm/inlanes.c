@@ -29,6 +29,7 @@
  *
  *
  * */
+/* CALLSET_SECTION (inlanes, __machine2__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -40,8 +41,6 @@ __boolean 	right_inlane_Light_Quick_Freeze_activated;
 //external variables
 extern __local__ __boolean 	left_Ramp_QuickFreeze_activated;
 extern __local__ __boolean 		right_Ramp_ClawReady_activated;
-
-//prototypes
 
 
 /****************************************************************************
@@ -182,9 +181,9 @@ void cryoclaw_leff (void) {
  ****************************************************************************/
 void clw_inlanes_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CRYO CLAW");
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, 21, "RIGHT RAMP");
-//	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CX_Bot, "RIGHT RAMP");
+	dmd_sched_transition (&trans_scroll_down);
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "CRYO CLAW");
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "RIGHT RAMP");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -194,8 +193,9 @@ void clw_inlanes_effect_deff(void) {
 
 void qf_inlanes_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "QUICK FREEZE");
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, 21, "LEFT RAMP");
+	dmd_sched_transition (&trans_scroll_down);
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "QUICK FREEZE");
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "LEFT RAMP");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

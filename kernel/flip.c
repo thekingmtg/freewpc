@@ -194,9 +194,9 @@ void fliptronic_rtt (void)
 #ifdef MACHINE_HAS_UPPER_LEFT_FLIPPER
 			flipper_service (WPC_UL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
 			//like on demolition man
-	#ifdef MACHINE_HAS_FLIPPER_GUN_HANDLES
-			flipper_service (WPC_LL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
-	#endif
+	//ifdef MACHINE_HAS_FLIPPER_GUN_HANDLES
+	//		flipper_service (WPC_LL_FLIP_SW, WPC_UL_FLIP_EOS, WPC_UL_FLIP_POWER, WPC_UL_FLIP_HOLD);
+	//endif
 #endif
 
 #ifdef MACHINE_HAS_UPPER_RIGHT_FLIPPER

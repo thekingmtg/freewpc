@@ -53,14 +53,26 @@ CALLSET_ENTRY (simple_switches, sw_right_outlane, sw_left_outlane) {
 }//end of function
 
 
-CALLSET_ENTRY (simple_switches, sw_upper_left_flipper_gate) { score(SC_1010); }
+CALLSET_ENTRY (simple_switches, sw_upper_left_flipper_gate) {
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+	else score(SC_1010);
+}
 
-CALLSET_ENTRY (simple_switches, sw_upper_rebound) {score(SC_1010); simple_sounds(); }
+CALLSET_ENTRY (simple_switches, sw_upper_rebound) {
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+	else {
+		score(SC_1010);
+		simple_sounds();
+	}
+}
 
 CALLSET_ENTRY (simple_switches, sw_lower_rebound) {
-	simple_sounds();
-	score(SC_1010);
-	flasher_pulse (FLASH_LOWER_REBOUND_FLASHER); //FLASH followed by name of flasher in caps
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+	else {
+		simple_sounds();
+		score(SC_1010);
+		flasher_pulse (FLASH_LOWER_REBOUND_FLASHER); //FLASH followed by name of flasher in caps
+	}
 }//end of function
 
 

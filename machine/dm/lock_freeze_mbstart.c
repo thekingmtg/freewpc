@@ -8,6 +8,7 @@
  *
  *
  * */
+/* CALLSET_SECTION (lock_freeze_mbstart, __machine2__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -26,16 +27,14 @@ __local__ U8			NumBallsNeededForNextMB;
 
 //external variables
 
-//prototypes
-void lock_reset (void);
-void player_reset (void);
-void check_multiball_requirements(void);
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
 void lock_reset (void) {
 	callset_invoke (multiball_light_off);//goto orbits.c to turn off light and flag
 }//end of reset
+
+
 
 void player_reset (void) {
 	lock_reset();
@@ -50,8 +49,8 @@ void player_reset (void) {
 }//end of function
 
 
-CALLSET_ENTRY (lock_freeze_mbstart, start_player) { player_reset(); }
 
+CALLSET_ENTRY (lock_freeze_mbstart, start_player) { player_reset(); }
 
 /****************************************************************************
  * body
@@ -115,13 +114,11 @@ void check_multiball_requirements(void) {
 	if (NumBallsFrozen > (NumMBsDone % 4) ) { // % is modulus
 				callset_invoke (multiball_light_on);//goto orbits.c
 
-
 				//music_disable();
 				music_request (MUS_MB_READY, PRI_SCORES);//must be higher priority than PRI_SCORES
 //				music_request (MUS_MB_READY, PRI_GAME_MODE8);//must be higher priority than PRI_SCORES
 				//no work - music_set (MUS_MB_READY); //from sound_effect.c
 				//music_enable();
-
 
 				if ( (lock_SoundCounter++ % 2) == 0 )//check if even
 					sound_start (ST_SPEECH, SPCH_MULTIBALL_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
@@ -134,17 +131,20 @@ void check_multiball_requirements(void) {
 
 //this is called from left loop shot at orbits.c
 CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
-	if 		( (NumMBsDone % 4) == 1) 	callset_invoke (fortress_start);//goto fortressMB.c
-	else if ( (NumMBsDone % 4) == 2) 	callset_invoke (museum_start);//goto museumMB.c
-	else if ( (NumMBsDone % 4) == 3) 	callset_invoke (cryoprison_start);//goto cryoprisonMB.c
-	else 								callset_invoke (wasteland_start);//goto wastelandMB.c
+	if 		( (NumMBsDone % 4) == 0) 	callset_invoke (fortress_start);//goto fortressMB.c
+//	else if ( (NumMBsDone % 4) == 1) 	callset_invoke (museum_start);//goto museumMB.c
+//	else if ( (NumMBsDone % 4) == 2) 	callset_invoke (cryoprison_start);//goto cryoprisonMB.c
+//	else if ( (NumMBsDone % 4) == 3) 	callset_invoke (wasteland_start);//goto wastelandMB.c
 	//turn off freeze light and reset counter for next MB
-	NumMBsDone++;
-	++NumBallsNeededForNextMB;
-	lock_reset();
 }//end of function
 
 
+//after we are sure we have a valid MB start, we reset everything for next time
+CALLSET_ENTRY (lock_freeze_mbstart, multiball_started) {
+NumMBsDone++;
+++NumBallsNeededForNextMB;
+lock_reset();
+}//end of function
 
 
 /****************************************************************************
@@ -153,15 +153,29 @@ CALLSET_ENTRY (lock_freeze_mbstart, multiball_start) {
  *
  ****************************************************************************/
 void freeze_effect_deff(void) {
-	dmd_alloc_low_clean ();
+	U8 i = 12;
+	do {
+		dmd_alloc_pair_clean();
+		font_render_string_center( &font_fixed10, DMD_MIDDLE_X - (i*10), 	DMD_BIG_CY_Top, "F");
+		font_render_string_center( &font_fixed10, DMD_MIDDLE_X - (i*5), 	DMD_BIG_CY_Top, "R");
+		font_render_string_center( &font_fixed10, DMD_MIDDLE_X, 			DMD_BIG_CY_Top, "EE"); //right in middle
+		font_render_string_center( &font_fixed10, DMD_MIDDLE_X + (i*5), 	DMD_BIG_CY_Top, "Z");
+		font_render_string_center( &font_fixed10, DMD_MIDDLE_X + (i*10), 	DMD_BIG_CY_Top, "E");
+		dmd_show_low ();
+		task_sleep (TIME_100MS);
+	} while (i-- > 4);//about XXsec
+	task_sleep (TIME_500MS);
+
+
+	dmd_alloc_pair_clean();
+	dmd_sched_transition (&trans_bitfade_fast);
 	sprintf ("%d FROZEN", NumBallsFrozen);
 	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("%d MORE FOR MB", NumBallsNeededForNextMB);
+	if (NumBallsFrozen >= NumBallsNeededForNextMB)
+				sprintf ("MULTIBALL READY");
+	else		sprintf ("%d MORE FOR MB", NumBallsNeededForNextMB - NumBallsFrozen);
 	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
 }//end of mode_effect_deff
-
-
-

@@ -117,33 +117,33 @@ void bpt_display (void)
 	dmd_alloc_low_clean ();
 
 	sprintf ("%p", bpt_mem_addr);
-	font_render_string_left (&font_bitmap8, 0, 0, sprintf_buffer);
+	font_render_string_left (&font_term6, 0, 0, sprintf_buffer);
 
 	sprintf ("%02X %02X %02X %02X",
 		bpt_mem_addr[0], bpt_mem_addr[1], bpt_mem_addr[2], bpt_mem_addr[3]);
-	font_render_string_left (&font_bitmap8, 40, 0, sprintf_buffer);
+	font_render_string_left (&font_term6, 40, 0, sprintf_buffer);
 
 	if (new_fatal_error)
 	{
 		sprintf ("ERR %d GID %d",
 			(U8)system_audits.lockup1_addr, (U8)system_audits.lockup1_pid_lef);
-		font_render_string_left (&font_bitmap8, 0, 8, sprintf_buffer);
+		font_render_string_left (&font_term6, 0, 8, sprintf_buffer);
 	}
 	else if (task_getpid ())
 	{
 
 		sprintf ("PID %p GID %d", task_getpid (), task_getgid ());
-		font_render_string_left (&font_bitmap8, 0, 8, sprintf_buffer);
+		font_render_string_left (&font_term6, 0, 8, sprintf_buffer);
 		sprintf ("%02X%02X %02X", bpt_addr[0], bpt_addr[1]-2, bpt_addr[2]);
-		font_render_string_left (&font_bitmap8, 0, 16, sprintf_buffer);
+		font_render_string_left (&font_term6, 0, 16, sprintf_buffer);
 	}
 	else
 	{
-		font_render_string_left (&font_bitmap8, 0, 8, "BREAK");
+		font_render_string_left (&font_term6, 0, 8, "BREAK");
 	}
 
 	sprintf ("C%04lX", prev_log_callset);
-	font_render_string_left (&font_bitmap8, 0, 24, sprintf_buffer);
+	font_render_string_left (&font_term6, 0, 24, sprintf_buffer);
 	dmd_show_low ();
 #endif
 }

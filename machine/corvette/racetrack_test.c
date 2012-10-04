@@ -107,11 +107,11 @@ void racetrack_test_init (void)
 }
 
 void racetrack_draw_test_title(void) {
-	font_render_string_center (&font_mono5, 64, 2, "RACETRACK TEST");
+	font_render_string_center (&font_var5, 64, 2, "RACETRACK TEST");
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 }
 
-// 21 characters wide max when using font_mono5
+// 21 characters wide max when using font_var5
 // ~30 characters when using font_var5
 
 #define LINE_1_Y 7
@@ -190,7 +190,7 @@ void racetrack_test_draw (void)
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
 
 	sprintf(racetrack_test_short_names[racetrack_test_command]);
-	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
+	font_render_string_left (&font_var5, 0, 27, sprintf_buffer);
 
 	dmd_show_low ();
 }

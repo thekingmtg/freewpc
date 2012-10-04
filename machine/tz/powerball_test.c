@@ -41,7 +41,7 @@ void pb_test_init (void)
 void pb_test_draw (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 3, "POWERBALL TEST");
+	font_render_string_center (&font_var5, 64, 0, "POWERBALL TEST");
 
 	if (pb_location == PB_MISSING)
 		sprintf ("LOST");
@@ -57,21 +57,21 @@ void pb_test_draw (void)
 		sprintf ("NOT SURE");
 	else
 		sprintf ("ERROR");
-	font_render_string_left (&font_mono5, 0, 6, sprintf_buffer);
+	font_render_string_left (&font_var5, 0, 6, sprintf_buffer);
 
 	if (pb_location & (PB_IN_LOCK | PB_IN_TROUGH))
 	{
 		sprintf ("POS. %d", pb_depth);
-		font_render_string_right (&font_mono5, 127, 6, sprintf_buffer);
+		font_render_string_right (&font_var5, 127, 6, sprintf_buffer);
 	}
 
 	sprintf ("TROUGH SW. %s",
 		switch_poll_logical (SW_TROUGH_PROXIMITY) ? "CLOSED" : "OPEN");
-	font_render_string_left (&font_mono5, 0, 12, sprintf_buffer);
+	font_render_string_left (&font_var5, 0, 12, sprintf_buffer);
 
 	sprintf ("SLOT SW. %s",
 		switch_poll_logical (SW_SLOT_PROXIMITY) ? "CLOSED" : "OPEN");
-	font_render_string_left (&font_mono5, 0, 18, sprintf_buffer);
+	font_render_string_left (&font_var5, 0, 18, sprintf_buffer);
 
 	switch (pb_test_command)
 	{
@@ -80,7 +80,7 @@ void pb_test_draw (void)
 		case RELEASE_GUMBALL: sprintf ("REL. GUMBALL"); break;
 		case LOAD_GUMBALL: sprintf ("LOAD GUMBALL"); break;
 	}
-	font_render_string_left (&font_mono5, 0, 24, sprintf_buffer);
+	font_render_string_left (&font_var5, 0, 24, sprintf_buffer);
 
 	dmd_show_low ();
 }
@@ -116,7 +116,7 @@ void pb_test_enter (void)
 	switch (pb_test_command)
 	{
 		case KICK_TROUGH:
-			serve_ball ();
+			device_request_kick (device_entry (DEVNO_TROUGH));
 			break;
 		case KICK_LOCK:
 			device_request_kick (device_entry (DEVNO_LOCK));

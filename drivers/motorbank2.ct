@@ -1,36 +1,26 @@
 /***********************************************************************
- * Copyright 2011 by Brian Dominy <brian@oddchange.com>
  *
- * This file is part of FreeWPC.
+ *  written by James Cardona and based on previous work in motorbank.ct and bivar.ct 
  *
- * FreeWPC is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
- *
- * FreeWPC is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with FreeWPC; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
- *
- *
- *
- * Similar to motorbank, but adds testing and more specifaclly designed 
- * for a device that would stay down most of the time and only raise
- * to lift a ball - like the elevator on demolition man
- *
+ * handles a duty-cycled, single direction motor which has 2 limit switches, either
+ * upper and lower or left and right to turn off the motor.  The motor, if run
+ * continuously will go up and down due to cam mechanism.  This driver has support
+ * for task based shutdown of motor if limit switches are broken and a testing 
+ * algorithm. 
  */
 
 @@class duty
-
 @@parameter sol
 @@parameter up_sw_event
 @@parameter down_sw_event
 @@parameter initial_position
+
+
+
+@@
+@@file @self.sched
+@@
+!@self_service		16		80c
 
 
 
@@ -44,21 +34,72 @@
 
 #include <freewpc.h>
 
-enum @self_state {
+typedef enum {
 	@SELF_INIT,
 	@SELF_UP,
 	@SELF_DOWN,
 	@SELF_OFF,
-};
+}@self_state_t;
 
-extern enum @self_state @self_state;
+//this number is equivalent to off time of duty cycle
+#define @SELF_DUTY_100 0
+#define @SELF_DUTY_50  TIME_16MS
+#define @SELF_DUTY_25  TIME_50MS
+#define @SELF_DUTY_10  TIME_166MS
 
+extern __fastram__ @self_state_t @self_state;
+extern __fastram__ U8 @self_timer;
+extern U8 @self_speed;
+
+
+/* User APIs */
 void @self_stop (void);
 void @self_move_up (void);
 void @self_move_down (void);
-void @self_move_bump (void);
-void @self_move (void);
-void @self_move_task_timer (void);
+void @self_bump_up (void);
+void @self_bump_down (void);
+
+
+extern inline void @self_stop_from_interrupt (void) {
+	@self_state = @SELF_OFF;
+	sol_disable (@sol);
+}
+
+
+extern inline void @self_set_speed (U8 speed) { @self_speed = speed; }
+
+extern inline U8 @self_get_speed (void) { return @self_speed; }
+
+extern inline @self_state_t @self_get_state (void) { return @self_state; }
+
+
+/**
+ * Realtime update of a duty-cycled device.
+ */
+/* RTT(name=@self_service freq=16) */
+extern inline void @self_service (void) {
+	/* Only act if device is enabled */
+	if (@self_state != @SELF_OFF) {
+		if (@self_timer == 0) {
+			/* enabled for 1 tick.  We need to
+			turn it off, and restart the off delay. */
+			if (@self_speed == 0)
+				;
+			else if (@self_state == @SELF_UP
+					|| @self_state == @SELF_DOWN)
+						sol_disable (@sol);
+			@self_timer = @self_speed;
+		}
+		else if (--@self_timer == 0) {
+			/* We are in off delay, if timer reaches zero,
+			then turn it back on. */
+			if (@self_state == @SELF_UP
+					|| @self_state == @SELF_DOWN)
+						sol_enable (@sol);
+		}
+	}
+}
+
 
 
 
@@ -75,7 +116,9 @@ void @self_move_task_timer (void);
 #include <freewpc.h>
 #include "@self.h"
 
-enum @self_state @self_state;
+__fastram__ @self_state_t @self_state;
+__fastram__ U8 @self_timer;
+U8 @self_speed;
 
 __boolean @self_timer;
 
@@ -84,62 +127,42 @@ void @self_move_monitor (void) {
 	sol_enable (@sol);
 	task_sleep_sec (4);
 	sol_disable (@sol);
+	@self_state = @SELF_OFF;
 	task_exit ();
 }
-
 
 
 void @self_stop (void) {
 	dbprintf ("Stopping\n");
 	task_kill_gid (GID_@SELF_MONITOR);
-	task_kill_gid (GID_@SELF_MOVE);
+	@self_state = @SELF_OFF;
 	sol_disable (@sol);
 }
-
-
-static void @self_move_task (void) {
-	//start timer
-	@self_move_task_timer();
-	do {
-		sol_enable (@sol);
-	} while (	!switch_poll_logical (@down_sw_event)  
-	         && !@self_timer);//or time = 4 sec
-	sol_disable (@sol);
-	task_exit ();
-}
-
-void @self_move_task_timer (void) {
-	task_sleep_sec (4);
-	@self_timer = TRUE;
-}
-
-
-void @self_move(void) {
-	@self_timer = FALSE;
-	task_create_gid1 (GID_@SELF_MOVE, @self_move_task);
-}
-
-
-
 
 
 
 void @self_move_up (void) {
-	if (@self_state != @SELF_UP) {
+	disable_interrupts ();
+	task_create_gid1 (GID_@SELF_MONITOR, @self_move_monitor);
+	@self_timer = 1;
+	sol_enable (@sol);
+	if (@self_state != @SELF_UP)
 		@self_state = @SELF_UP;
-		task_recreate_gid (GID_@SELF_MONITOR, @self_move_monitor);
-	}
+	enable_interrupts ();
 }
-
 
 
 
 void @self_move_down (void) {
-	if (@self_state != @SELF_DOWN) {
+	disable_interrupts ();
+	task_create_gid1 (GID_@SELF_MONITOR, @self_move_monitor);
+	@self_timer = 1;
+	sol_enable (@sol);
+	if (@self_state != @SELF_DOWN) 
 		@self_state = @SELF_DOWN;
-		task_recreate_gid (GID_@SELF_MONITOR, @self_move_monitor);
-	}
+	enable_interrupts ();
 }
+
 
 
 CALLSET_ENTRY (@self, @up_sw_event) {
@@ -156,15 +179,42 @@ CALLSET_ENTRY (@self, @down_sw_event) {
 
 
 
-void @self_move_bump (void) {
+void @self_bump_monitor (void) {
 	sol_enable (@sol);
-	task_sleep (TIME_16MS);
+	task_sleep(TIME_66MS);
 	sol_disable (@sol);
+	@self_state = @SELF_OFF;
+	task_exit ();
+}
+
+
+
+void @self_bump_up (void) {
+	disable_interrupts ();
+	task_create_gid1 (GID_@SELF_B_MONITOR, @self_bump_monitor);
+	@self_timer = 1;
+	sol_enable (@sol);
+	if (@self_state != @SELF_UP)
+		@self_state = @SELF_UP;
+	enable_interrupts ();
+}
+
+
+
+void @self_bump_down (void) {
+	disable_interrupts ();
+	task_create_gid1 (GID_@SELF_B_MONITOR, @self_bump_monitor);
+	@self_timer = 1;
+	sol_enable (@sol);
+	if (@self_state != @SELF_DOWN) 
+		@self_state = @SELF_DOWN;
+	enable_interrupts ();
 }
 
 
 
 CALLSET_ENTRY (@self, tilt, test_start) {
+	@self_state = @SELF_OFF;
 	@self_stop ();
 }
 
@@ -173,12 +223,16 @@ CALLSET_ENTRY (@self, tilt, test_start) {
 CALLSET_ENTRY (@self, amode_start) {
 	@self_state = @SELF_INIT;
 	if (@initial_position == @SELF_DOWN) 	@self_move_down();
-	else 										@self_move_up();
+	else 									@self_move_up();
 }
 
 
 
 
+CALLSET_ENTRY (@self, init) {
+	@self_state = @SELF_OFF;
+	@self_set_speed (@SELF_DUTY_25);
+}
 
 
 
@@ -215,7 +269,8 @@ CALLSET_ENTRY (@self, amode_start) {
 
 enum {
 	FIRST_TEST = 0,
-	RUN = FIRST_TEST,
+	BUMP_UP = FIRST_TEST,
+	BUMP_DOWN, 
 	UP,
 	DOWN,
 	STOP,
@@ -225,7 +280,8 @@ enum {
 
 
 char *@self_test_short_names[] = {
-	"RUN",
+	"BUMP UP",
+	"BUMP DOWN",
 	"UP",
 	"DOWN",
 	"STOP"
@@ -233,38 +289,32 @@ char *@self_test_short_names[] = {
 
 
 
-void @self_test_init (void) { @self_test_command = RUN; }
-
-void @self_draw_test_title(void) {
-	font_render_string_center (&font_mono5, 64, 2, "@SELF TEST");
-	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
-}
-
+void @self_test_init (void) { @self_test_command = BUMP_UP; }
 
 
 void @self_test_draw (void) {
 	dmd_alloc_low_clean ();
-	@self_draw_test_title();
+	font_render_string_center (&font_var5, 64, 2, "@SELF TEST");
+	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 5);
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 25);
 
 	//display status of upper limit switch
-	sprintf ("@up_sw_event");
-	font_render_string_center (&font_var5, 64, 13, sprintf_buffer);
-	if (switch_poll_logical (@up_sw_event) ) sprintf ("X");
-	 else sprintf ("O"); 
-	font_render_string_center (&font_var5, 20, 13, sprintf_buffer);
+			sprintf ("@up_sw_event");
+			font_render_string_center (&font_var5, 64, 13, sprintf_buffer);
+//			if (switch_poll_logical (@up_sw_event) ) 	sprintf ("X");
+//			 else 										sprintf ("O"); 
+//			font_render_string_center (&font_var5, 20, 13, sprintf_buffer);
 
 	//display status of lower limit switch
-	sprintf ("@down_sw_event");
-	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
-	if (switch_poll_logical (@down_sw_event) ) sprintf ("X");
-	 else sprintf ("O"); 
-	font_render_string_center (&font_var5, 20, 20, sprintf_buffer);
+			sprintf ("@down_sw_event");
+			font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
+//			if (switch_poll_logical (@down_sw_event) ) 	sprintf ("X");
+//			 else 										sprintf ("O"); 
+//			font_render_string_center (&font_var5, 20, 20, sprintf_buffer);
 
 	//name of currently running test
-	sprintf(@self_test_short_names[@self_test_command]);
-	font_render_string_left (&font_mono5, 0, 27, sprintf_buffer);
-
+			sprintf(@self_test_short_names[@self_test_command]);
+			font_render_string_left (&font_var5, 0, 27, sprintf_buffer);
 	dmd_show_low ();
 }
 
@@ -273,7 +323,7 @@ void @self_test_draw (void) {
 
 void @self_test_thread (void) {
 	for (;;) {
-		task_sleep (TIME_33MS);
+		task_sleep (TIME_200MS);//this was set to run faster but seemed to cause problems
 		@self_test_draw ();
 	}
 }
@@ -306,26 +356,25 @@ void @self_test_escape (void) {
 void @self_test_enter (void) {
 	sound_send (SND_TEST_ENTER);
   	switch (@self_test_command) {
-  		case RUN:
-			dbprintf ("@self_test_enter: starting 'open'\n");
-			@self_move_bump();
-			@self_test_command = RUN;
+  		case BUMP_UP:
+			@self_bump_up();
+			@self_test_command = BUMP_UP;
+  		break;
+  		case BUMP_DOWN:
+			@self_bump_down();
+			@self_test_command = BUMP_DOWN;
   		break;
   		case UP:
-			dbprintf ("@self_test_enter: starting 'open'\n");
 			@self_move_up();
 			@self_test_command = DOWN;
   		break;
   		case DOWN:
-			dbprintf ("@self_test_enter: starting 'open'\n");
 			@self_move_down();
 			@self_test_command = STOP;
   		break;
-  	
   		case STOP:
-			dbprintf ("@self_test_enter: starting 'close'\n");
 			@self_stop();
-			@self_test_command = RUN;
+			@self_test_command = BUMP_UP;
   		break;
   	}
 }

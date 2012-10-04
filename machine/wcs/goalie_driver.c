@@ -192,7 +192,7 @@ void goalie_status_display (void)
 {
 	const char *s;
 
-	font_render_string_center (&font_mono5, 64, 2, "GOALIE TEST");
+	font_render_string_center (&font_var5, 64, 2, "GOALIE TEST");
 
 	if (goalie_status & GOALIE_CALIBRATING)
 		s = "CALIBRATING";
@@ -219,7 +219,7 @@ void goalie_status_display (void)
 	font_render_string_center (&font_var5, 64, 16, s);
 
 	sprintf ("POS %d/%d", goalie_distance, goal_width);
-	font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
 
 	dmd_show_low ();
 }

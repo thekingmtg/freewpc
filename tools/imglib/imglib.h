@@ -150,7 +150,7 @@ void bitmap_zoom_out(struct buffer *buf);
 
 #define buffer_invert(buf) buffer_unop(buf, com_operator)
 
-extern const font_t mono5;
+extern const font_t var5;
 extern const font_t mono9;
 extern const font_t fixed10;
 

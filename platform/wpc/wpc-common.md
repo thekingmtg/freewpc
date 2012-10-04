@@ -77,18 +77,19 @@ ALL: 11..88
 Ball Save: %ball-save
 
 [fonts]
-mono5:
 mono9:
 num5x7:
-lucida9:
 tinynum:
 var5:
 fixed6:
-cu17:
 fixed10:
 term6:
-times8:
-bitmap8:
 symbol:
+
+#cu17: 		#replaced with fixed10
+#times8:	#replaced with term6
+#bitmap8:	#replaced with term6
+#mono5:		#replaced with var5
+#lucida9:	#replaced with fixed10
 
 

@@ -3,7 +3,7 @@
  */
 /* CALLSET_SECTION (bonus, __machine3__) */
 #include <freewpc.h>
-
+#include "dm/global_constants.h"
 
 //constants
 
@@ -13,7 +13,6 @@ score_t bonus_scored;	/* Temp variable used to calculate bonus per item etc */
 bool buttons_held;
 
 //external variables
-
 extern U8 		car_crash_shots_made; 				//from car_crash.c
 
 extern U8 		car_chase_mode_shots_made;			//from car_chase.c
@@ -32,52 +31,54 @@ extern U8 		acmag_mode_shots_made;				//from acmag.c
 extern U8 		acmag_modes_achieved;
 extern U8 		acmag_modes_completed;
 
-extern U8 		explode_mode_shots_made;				//from EXPLODE.c
+extern U8 		explode_mode_shots_made;			//from EXPLODE.c
 extern score_t 	explode_mode_score;
 
-extern U8 		superjets_modes_achieved;
-extern U8 		super_jet_shots_made;
+extern U8 		superjets_modes_achieved;			//from superjets.c
+extern U8 		superjets_mode_shots_made;
 
-extern U8		standupFrenzy_modes_achieved;
+extern U8		standupFrenzy_modes_achieved;		//from standupfrenzy.c
 extern U8 		standupFrenzyNumHits;
 //
 
-extern U8 		combo_counter;
+extern U8 		combo_counter;						//from combos.c
 extern U8		fortress_jackpot_shots_made;
 
 extern U8 		rollover_bonus_multiplier; 			//from rollovers.c
 
-//prototypes
-static void bonus_button_monitor (void);
-static void bonus_sched_transition (void);
-static void bonus_pause (void);
 
+/****************************************************************************
+ * body
+ ****************************************************************************/
+CALLSET_ENTRY (bonus, bonus){
+	deff_start (DEFF_BONUS);
+//	leff_start (LEFF_BONUS);
+	task_sleep_sec (1);
+	while (deff_get_active() == DEFF_BONUS)
+		task_sleep (TIME_66MS);
+//	leff_stop (LEFF_BONUS);
+}//end of function
 
 
 void bonus_deff (void) {
-	/* 
-	 * Taunts.....
-	 * */
-
-	task_sleep (TIME_100MS);	/* Wait a bit so the previous music_stop doesn't kill the taunt sounds */
+	task_sleep (TIME_100MS);	/* Wait a bit so the previous music_stop doesn't kill the sounds */
 	score_zero (total_bonus);	/* Clear the bonus score */
-	//	sample_start (MUS_FADE_BONUS, SL_500MS);
-	sound_send (BONUS_SHORT);
+	sound_start (ST_EFFECT, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
+
 	/* Show Initial bonus screen */
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_times8, 64, 16, "BONUS");
-	dmd_sched_transition (&trans_bitfade_fast);
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "BONUS");
+	dmd_sched_transition (&trans_scroll_down);
 	dmd_show_low ();
 	task_sleep_sec (1);
 
 	task_recreate_gid (GID_BONUS_BUTTON_MONITOR, bonus_button_monitor); /* Start a task to monitor the buttons */
 
-
 	/**
 	 * *car crash scoring and display *
 	 * **/
-	bonus_sched_transition ();
 	if (car_crash_shots_made > 0) {
+		sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -85,19 +86,17 @@ void bonus_deff (void) {
 			score_add (total_bonus, bonus_scored);
 
 			sprintf_score (bonus_scored);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("CAR CRASH");
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_send (BONUS_SHORT);
 			bonus_pause ();
 	}/***end of car crash scoring and display ***/
 
 	/**
 	 * *car chase scoring and display *
 	 * **/
-	bonus_sched_transition ();
 	if (car_chase_modes_achieved > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
@@ -111,19 +110,18 @@ void bonus_deff (void) {
 			score_add (total_bonus, bonus_scored);
 
 			sprintf_score (bonus_scored);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("CAR CHASE");
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_send (BONUS_SHORT);
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of car chase scoring and display ***/
 
 	/**
 	 * *capture_simon scoring and display *
 	 * **/
-	bonus_sched_transition ();
 	if (capture_simon_modes_achieved > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
@@ -142,19 +140,18 @@ void bonus_deff (void) {
 			score_add (total_bonus, bonus_scored);
 
 			sprintf_score (bonus_scored);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("CAPTURE SIMON");
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_send (BONUS_SHORT);
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of capture_simon scoring and display ***/
 
 	/**
 	 * *prison_break scoring and display *
 	 * **/
-	bonus_sched_transition ();
 	if (prison_break_modes_achieved > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
@@ -173,19 +170,18 @@ void bonus_deff (void) {
 			score_add (total_bonus, bonus_scored);
 
 			sprintf_score (bonus_scored);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("BREAKOUT");
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_send (BONUS_SHORT);
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of prison_break scoring and display ***/
 
 	/**
 	 * *acmag scoring and display *
 	 * **/
-	bonus_sched_transition ();
 	if (acmag_modes_achieved > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
@@ -204,19 +200,18 @@ void bonus_deff (void) {
 			score_add (total_bonus, bonus_scored);
 
 			sprintf_score (bonus_scored);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("ACMAG");
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_send (BONUS_SHORT);
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of acmag scoring and display ***/
 
 	/**
 	 * *explode scoring and display *
 	 * **/
-	bonus_sched_transition ();
 	if (explode_mode_shots_made > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
@@ -226,24 +221,23 @@ void bonus_deff (void) {
 			score_add (total_bonus, bonus_scored);
 
 			sprintf_score (bonus_scored);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("EXPLODE");
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_send (BONUS_SHORT);
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of explode scoring and display ***/
 
 	/**
 	 * *superjets scoring and display *
 	 * **/
-	bonus_sched_transition ();
 	if (superjets_modes_achieved > 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
-			score_mul (bonus_scored, super_jet_shots_made);
+			score_mul (bonus_scored, superjets_mode_shots_made);
 			score_add (total_bonus, bonus_scored);
 
 			score_zero (bonus_scored);
@@ -252,19 +246,18 @@ void bonus_deff (void) {
 			score_add (total_bonus, bonus_scored);
 
 			sprintf_score (bonus_scored);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("SUPERJETS");
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_send (BONUS_SHORT);
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of superjets scoring and display ***/
 
 	/**
 	 * *standupFrenzy scoring and display *
 	 * **/
-	bonus_sched_transition ();
 	if (standupFrenzy_modes_achieved> 0) {
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
@@ -278,89 +271,65 @@ void bonus_deff (void) {
 			score_add (total_bonus, bonus_scored);
 
 			sprintf_score (bonus_scored);
-			font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
+			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("FRENZY");
-			font_render_string_center (&font_mono5, 64, 4, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_send (BONUS_SHORT);
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of standupFrenzy scoring and display ***/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-		
-	
-
-/*
-	if (check_for_puny_score ())
-			sound_send (SND_BUYIN_CANCELLED);
-		else if (check_for_big_score ())
-			task_sleep_sec (2);
-		else
-			sound_send (SND_GREED_MODE_BOOM);
-		
-		task_sleep_sec (2);
-	}
-*/
-		
-	score_long (total_bonus); // Add to total bonus to player score
 	/* Show final score */
+	score_long (total_bonus); // Add to total bonus to player score
 	dmd_alloc_low_clean ();
-	sound_send (BONUS_LONG);
+	sound_start (ST_SAMPLE, BONUS_LONG, SL_4S, PRI_GAME_QUICK6);
 	scores_draw ();
 	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
-	task_sleep_sec (2);
 	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
 //	task_kill_gid (GID_BONUS_TALKING);
+
+	/*make verbal comments on final score*/
+	U8 BSoundCounter;
+	if (check_for_puny_score () ) {
+			BSoundCounter = random_scaled(3);
+			if (BSoundCounter == 0)	sound_start (ST_SAMPLE, SPCH_COMPETITION, SL_2S, PRI_GAME_QUICK6);
+			if (BSoundCounter == 1)	sound_start (ST_SAMPLE, SPCH_HOW_NICE, SL_2S, PRI_GAME_QUICK6);
+			if (BSoundCounter == 2)	sound_start (ST_SAMPLE, SPCH_LOVE_THIS_GUY, SL_2S, PRI_GAME_QUICK6);
+	}
+	else if (check_for_big_score () ) {
+			BSoundCounter = random_scaled(2);
+			if (BSoundCounter == 0)	sound_start (ST_SAMPLE, SPCH_BACK_IN_FRIDGE, SL_2S, PRI_GAME_QUICK6);
+			if (BSoundCounter == 1)	sound_start (ST_SAMPLE, SPCH_SIMON_LAUGH_LONG, SL_2S, PRI_GAME_QUICK6);
+	}
+	task_sleep_sec (2);
 	deff_exit ();
 }//END OF FUNCTION
 
 
 
-
+/****************************************************************************
+ *
+ * bonus helper functions
+ *
+ ****************************************************************************/
 /* Speed up the bonus if both flipper buttons are pressed */
-static void bonus_button_monitor (void) {
+void bonus_button_monitor (void) {
 	buttons_held = FALSE;
 	for (;;) {
 		if ((switch_poll_logical (SW_LEFT_BUTTON)
 			&& switch_poll_logical (SW_RIGHT_BUTTON))
-			&& buttons_held == FALSE) {
-			buttons_held = TRUE;
-			//sound_send (SND_FIST_BOOM1);
-		}
+			&& buttons_held == FALSE)
+					buttons_held = TRUE;
 		task_sleep (TIME_100MS);
-	}
+	}//end of for loop
 }//end of function
-
-
 
 
 /* Function so we can call two different transistions
  * depending on whether the buttons were pressed */
-static void bonus_sched_transition (void) {
+void bonus_sched_transition (void) {
 	if (buttons_held == TRUE)
 		dmd_sched_transition (&trans_scroll_down_fast);
 	else
@@ -368,16 +337,30 @@ static void bonus_sched_transition (void) {
 }//end of function
 
 
-
-static void bonus_pause (void) {
+void bonus_pause (void) {
 	if (buttons_held) 	task_sleep (TIME_100MS);
 	else 				task_sleep_sec (1);
 }//end of function
 
 
+/* Used to announce if the player has played well */
+bool check_for_big_score (void) {
+	if (score_compare (total_bonus, score_table[SC_100M]) == 1) 	return TRUE;
+			else 													return FALSE;
+}
+//returns 1 if s1 > s2
+bool check_for_puny_score (void) {
+	if (score_compare (score_table[SC_100M], total_bonus) == 1)  	return TRUE;
+			else													return FALSE;
+}
+
+
+
+
+
 
 /*
-static void bonus_talking_task (void) {
+void bonus_talking_task (void) {
 	sound_send (SND_NOT_AN_ORDINARY_GAME);
 	task_sleep_sec (2);
 	sound_send (SND_OR_AN_ORDINARY_PLAYER);
@@ -406,36 +389,9 @@ static void bonus_talking_task (void) {
 */
 
 
-
-/* Used to announce if the player has played well */
-/*
-static bool check_for_big_score (void)
-{
-	if (score_compare (points_this_ball, score_table[SC_100M]) == 1)
-		return TRUE;
-	else
-		return FALSE;
-}
-*/
-
-/*
-static bool check_for_puny_score (void)
-{
-	if (score_compare (score_table[SC_10M], points_this_ball) == 1)
-		return TRUE;
-	else
-		return FALSE;
-
-}
-*/
-
-
-
-
-
 /* See if it's the players last ball */
 /*
-static bool check_if_last_ball_for_multiplayer (void)
+bool check_if_last_ball_for_multiplayer (void)
 {
 	if (ball_up == system_config.balls_per_game && num_players > 1 && extra_balls == 0)
 		return TRUE;
@@ -445,7 +401,7 @@ static bool check_if_last_ball_for_multiplayer (void)
 */
 
 /*
-static bool check_if_last_ball_of_multiplayer_game (void)
+bool check_if_last_ball_of_multiplayer_game (void)
 {
 	if (ball_up == system_config.balls_per_game && player_up == num_players &&
 		num_players > 1 && extra_balls == 0)
@@ -458,7 +414,7 @@ static bool check_if_last_ball_of_multiplayer_game (void)
 
 /* Function to calculate bonus score */
 /*
-static void bonus_add_up_score (U8 award_count, score_id_t award_amount) {
+void bonus_add_up_score (U8 award_count, score_id_t award_amount) {
 	score_zero (bonus_scored);// Zero the temporary score
 	score_add (bonus_scored, score_table[award_amount]);	// Add the award amount to the temp score
 	score_mul (bonus_scored, award_count);					// Multiply it by award_count

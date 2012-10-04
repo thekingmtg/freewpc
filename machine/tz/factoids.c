@@ -21,7 +21,9 @@
 /* CALLSET_SECTION (factoids, __machine3__) */
 
 #include <freewpc.h>
-#define NUM_FACTOIDS 20
+#include <amode.h>
+
+#define NUM_FACTOIDS 22
 
 const struct {
 	const char *line1;
@@ -36,7 +38,7 @@ const struct {
 	{ "THE SLOT MACHINE", "ON THE PLAYFIELD", "IS FROM THE EPISODE", "THE FEVER" },
 	{ "THE PLAYER PIANO", "ON THE PLAYFIELD", "IS FROM THE EPISODE", "A PIANO IN THE HOUSE" },
 	{ "THE CAMERA", "ON THE PLAYFIELD", "IS FROM THE EPISODE", "A MOST UNUSUAL CAMERA" },
-	{ "WILLIAMS MANUFACTURED", "15,235 UNITS OF TWILIGHT ZONE", "COMPARED TO 20,270 UNITS", "FOR THE ADDAMS FAMILY" },
+	{ "WILLIAMS MANUFACTURED", "15,235 UNITS OF TWILIGHT ZONE", "COMPARED TO 20,270 UNITS", "OF THE ADDAMS FAMILY" },
 	{ "FREEWPC DEVELOPMENT", "STARTED IN 2005 AND THE", "FIRST HARDWARE TEST", "WAS IN OCTOBER 2008" },
 	{ "FREEWPC WAS ORIGINALLY", "100% ASSEMBLY LANGUAGE", "IT IS NOW 90% C", "6% PERL AND 4% ASM"},
 	{ "GOTTLIEB'S HUMPTY DUMPTY", "MANUFACTURED IN 1947 WAS", "THE FIRST TABLE TO HAVE", "ELECTRIC FLIPPERS" },
@@ -49,7 +51,9 @@ const struct {
 	{ "DOLPHINS SLEEP", "WITH ONE EYE OPEN", "", "" },
 	{ "TWELVE OR MORE COWS", "ARE KNOWN AS", "A FLINK" },
 	{ "THE MAN FEATURED BY", "THE UPPER RIGHT FLIPPER", "IS BURGESS MEREDITH FROM", "THE ROCKY FILMS" },
-};
+	{ "FRANK MILLER STARTED", "HIS CAREER WORKING ON", "THE TWILIGHT ZONE", "COMIC BOOKS" },
+	{ "GBVQV", "AN FV", "XHEGFRG", "" },
+	};
 
 static void factoid_msg (U8 factoid)
 {
@@ -64,11 +68,28 @@ void show_random_factoid (void)
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
-	font_render_string_center (&font_fixed6, 64, 10, "RANDOM FACTOID");
+	font_render_string_center (&font_bitoutline, 64, 8, "RANDOM");
+	font_render_string_center (&font_bitoutline, 64, 20, "FACTOID");
 	show_text_on_stars ();
 	
-	dmd_alloc_pair_clean ();
+	dmd_alloc_low_clean ();
 	factoid_msg(random_scaled(NUM_FACTOIDS));
-	dmd_show2 ();
-	task_sleep_sec (6);
+	dmd_show_low ();
+	amode_sleep_sec (6);
 }
+
+void random_factoid_deff (void)
+{
+	U8 i;
+	for (i = 0; i < NUM_FACTOIDS; i++)
+	{
+		dmd_alloc_pair_clean ();
+		factoid_msg(i);
+		dmd_copy_low_to_high ();
+		dmd_show2 ();
+		task_sleep_sec (6);
+		dmd_sched_transition (&trans_scroll_up_slower);
+	}
+	deff_exit ();
+}
+

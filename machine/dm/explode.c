@@ -32,6 +32,8 @@
  * estimate of average eyeball score: 10 million to 20 million
  *
  */
+/* CALLSET_SECTION (explode, __machine2__) */
+
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -40,6 +42,7 @@
 const U8 EXPLODE_TIMER_DEFAULT = 33;
 
 //local variables
+U8				explode_MessageCounter;
 U8 				explode_temp_counter; //temporary counter
 U8 				explode_SoundCounter;
 U8 				explode_mode_timer;
@@ -51,16 +54,6 @@ score_t 		explode_mode_temp_score;
 score_t 		explode_mode_next_score;
 score_t 		explode_mode_display_score;
 //external variables
-
-//prototypes
-void explode_mode_init (void);
-void explode_mode_expire (void);
-void explode_mode_exit (void);
-void explode_reset (void);
-void player_explode_reset (void);
-void explode_effect_deff(void);
-
-
 
 /****************************************************************************
  * mode definition structure
@@ -166,7 +159,7 @@ CALLSET_ENTRY (explode, explode_made) {
 	}//end of switch
 	score_add (explode_mode_score, explode_mode_last_score);
 */
-	deff_start (DEFF_EXPLODE_HIT_EFFECT);
+	explode_effect();
 }//end of function
 
 
@@ -177,7 +170,7 @@ CALLSET_ENTRY (explode, explode_made) {
 void explode_start_effect_deff(void) {
 	U8 count = 8;
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_lithograph, 64, 9, "EXPLODE");
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "EXPLODE");
 	/* low = text, high = blank */
 	while (--count > 0){
 		dmd_show2 ();
@@ -198,8 +191,20 @@ void explode_start_effect_deff(void) {
 }//end of mode_effect_deff
 
 
-void explode_hit_effect_deff(void) {
-	dmd_alloc_low_clean ();
+
+void explode_effect(void) {
+	switch (++explode_MessageCounter % 4) {
+		case 0:  deff_start (DEFF_EXPLODE_HIT1_EFFECT); break;
+		case 1:  deff_start (DEFF_EXPLODE_HIT2_EFFECT); break;
+		case 2:  deff_start (DEFF_EXPLODE_HIT3_EFFECT); break;
+		default: deff_start (DEFF_EXPLODE_HIT4_EFFECT); break;
+		}//end of switch
+}//end of FUNCTION
+
+
+
+void explode_hit1_effect_deff(void) {
+	dmd_alloc_pair_clean ();
 	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BABY");
 	sprintf_score (explode_mode_last_score);
 	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
@@ -210,24 +215,60 @@ void explode_hit_effect_deff(void) {
 
 
 
-void explode_effect_deff(void) {
-	U8 i;
-	for (;;) {
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "EXPLODE");
-		score_zero(explode_mode_display_score);
-		score_add (explode_mode_display_score, score_table[SC_1M]);
-		score_mul (explode_mode_display_score, explode_mode_timer);
-		sprintf_score (explode_mode_display_score);
-		font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+void explode_hit2_effect_deff(void) {
+	dmd_alloc_pair_clean ();
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOOOOYAH");
+	sprintf_score (explode_mode_last_score);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
 
-		//DMD size is 128x32
-		for (i = 5; i < (118 - (explode_mode_timer * ( 118/EXPLODE_TIMER_DEFAULT) ) ); i++) {
-			sprintf ("I");
-			font_render_string_left (&font_mono5, i, DMD_SMALL_CY_4, sprintf_buffer);
-		}
-		dmd_show_low ();
-		task_sleep (TIME_500MS);//score goes down by second so update every 500ms is plenty soon enough
+
+
+void explode_hit3_effect_deff(void) {
+	dmd_alloc_pair_clean ();
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BOOM");
+	sprintf_score (explode_mode_last_score);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
+
+
+void explode_hit4_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "POW");
+	sprintf_score (explode_mode_last_score);
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_show_low ();
+	task_sleep_sec (2);
+	deff_exit ();
+}//end of mode_effect_deff
+
+
+
+void explode_effect_deff(void) {
+	U8 i = 0;
+	for (;;) {
+			dmd_alloc_low_clean ();
+			font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "EXPLODE");
+			score_zero(explode_mode_display_score);
+			score_add (explode_mode_display_score, score_table[SC_1M]);
+			score_mul (explode_mode_display_score, explode_mode_timer);
+			sprintf_score (explode_mode_display_score);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+
+			//DMD size is 128x32
+			for (i = 5; i < (118 - (explode_mode_timer * ( 118/EXPLODE_TIMER_DEFAULT) ) ); i++) {
+				sprintf ("I");
+				font_render_string_left (&font_var5, i, DMD_SMALL_CY_4, sprintf_buffer);
+			}//end of for loop
+			dmd_show_low ();
+			task_sleep (TIME_500MS);//score goes down by second so update every 500ms is plenty soon enough
 	}//END OF ENDLESS LOOP
 }//end of mode_effect_deff
 

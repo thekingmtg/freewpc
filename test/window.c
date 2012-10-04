@@ -239,7 +239,7 @@ void window_init (void)
 void window_title (const char *title)
 {
 #if (MACHINE_DMD == 1)
-	font_render_string_center (&font_mono5, 64, 2, title);
+	font_render_string_center (&font_var5, 64, 2, title);
 #endif
 }
 
@@ -302,7 +302,7 @@ void browser_draw (void)
 	if (browser_item_number)
 	{
 		(*browser_item_number) (menu_selection);
-		font_render_string_left (&font_mono5, 4, 20, sprintf_buffer);
+		font_render_string_left (&font_var5, 4, 20, sprintf_buffer);
 	}
 
 	dmd_show_low ();
@@ -327,7 +327,7 @@ void browser_down (void)
 
 void browser_print_operation (const char *s)
 {
-	font_render_string_right (&font_mono5, 127, 20, s);
+	font_render_string_right (&font_var5, 127, 20, s);
 }
 
 /**********************************************************/
@@ -347,11 +347,11 @@ void adj_browser_draw (void)
 	window_stop_thread ();
 
 	adj_render_current_name (menu_selection+1);
-	print_row_center (&font_mono5, 10);
+	print_row_center (&font_var5, 10);
 
 	if (ad->nvram == NULL)
 	{
-		font_render_string_center (&font_mono5, 32, 21, "N/A");
+		font_render_string_center (&font_var5, 32, 21, "N/A");
 		dmd_copy_low_to_high ();
 	}
 	else
@@ -376,7 +376,7 @@ void adj_browser_draw (void)
 		if (ad->nvram)
 			adj_render_current_value (adj_edit_value);
 
-		font_render_string_center (&font_mono5, 32, 21, sprintf_buffer);
+		font_render_string_center (&font_var5, 32, 21, sprintf_buffer);
 	}
 	window_start_thread ();
 }
@@ -624,7 +624,7 @@ void audit_browser_draw (void)
 	struct audit *aud = browser_audits + menu_selection;
 
 	sprintf ("%d. %s", menu_selection+1, aud->name);
-	print_row_center (&font_mono5, 10);
+	print_row_center (&font_var5, 10);
 
 	if (aud->nvram)
 	{
@@ -640,7 +640,7 @@ void audit_browser_draw (void)
 			render_audit ((U16)aud->nvram, aud->format);
 		else
 			render_audit (*(aud->nvram), aud->format);
-		font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 21, sprintf_buffer);
 	}
 
 	dmd_show_low ();
@@ -699,8 +699,8 @@ void confirm_draw (void)
 	m = m->var.submenus[sel];
 
 	sprintf ("%d", confirm_timer);
-	font_render_string_left (&font_mono5, 1, 1, sprintf_buffer);
-	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
+	font_render_string_left (&font_var5, 1, 1, sprintf_buffer);
+	font_render_string_right (&font_var5, 127, 1, sprintf_buffer);
 
 	window_title (m->name);
 	font_render_string_center (&font_var5, 64, 18, "PRESS START TO CONFIRM");
@@ -713,8 +713,8 @@ void confirm_start (void)
 {
 	window_stop_thread ();
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 10, "SAVING NEW");
-	font_render_string_center (&font_mono5, 64, 20, "ADJUSTMENT VALUE");
+	font_render_string_center (&font_var5, 64, 10, "SAVING NEW");
+	font_render_string_center (&font_var5, 64, 20, "ADJUSTMENT VALUE");
 	dmd_show_low ();
 	sound_send (SND_TEST_CONFIRM);
 	task_sleep_sec (2);
@@ -725,8 +725,8 @@ void confirm_escape (void)
 {
 	window_stop_thread ();
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 10, "ESCAPE PRESSED");
-	font_render_string_center (&font_mono5, 64, 20, "CHANGE IGNORED");
+	font_render_string_center (&font_var5, 64, 10, "ESCAPE PRESSED");
+	font_render_string_center (&font_var5, 64, 20, "CHANGE IGNORED");
 	dmd_show_low ();
 	sound_send (SND_TEST_ABORT);
 	task_sleep_sec (2);
@@ -768,11 +768,11 @@ struct window_ops confirm_window = {
 #if (MACHINE_DMD == 1)
 #define MENU_DRAW_NAME_Y    4
 #ifdef CONFIG_FIXED_TEST_FONT
-#define MENU_FONT           &font_bitmap8
+#define MENU_FONT           &font_term6
 #define MENU_DRAW_X         0
 #define MENU_DRAW_ITEM_Y    18
 #else
-#define MENU_FONT           &font_mono5
+#define MENU_FONT           &font_var5
 #define MENU_DRAW_X         8
 #define MENU_DRAW_ITEM_Y    14
 #endif
@@ -1015,9 +1015,9 @@ void font_test_draw (void)
 	const font_t *font;
 
 	sprintf ("FONT %d", menu_selection+1);
-	font_render_string_left (&font_mono5, 0, 1, sprintf_buffer);
+	font_render_string_left (&font_var5, 0, 1, sprintf_buffer);
 	sprintf_far_string (names_of_fonts + menu_selection);
-	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
+	font_render_string_right (&font_var5, 127, 1, sprintf_buffer);
 	dmd_draw_horiz_line ((U16 *)dmd_low_buffer, 7);
 
 	font = font_test_lookup ();
@@ -1452,7 +1452,7 @@ void dev_balldev_test_draw (void)
 			case 2: s = "ENABLE LOCK"; break;
 			case 3: s = "DISABLE LOCK"; break;
 		}
-		font_render_string_center (&font_mono5, 64, 28, s);
+		font_render_string_center (&font_var5, 64, 28, s);
 	}
 
 	dmd_show_low ();
@@ -2360,7 +2360,7 @@ struct menu clear_credits_item = {
 
 void burnin_test_draw (void)
 {
-	font_render_string_center (&font_mono5, 64, 2, "AUTO BURN-IN");
+	font_render_string_center (&font_var5, 64, 2, "AUTO BURN-IN");
 	SECTION_VOIDCALL (__test2__, burnin_draw);
 	dmd_show_low ();
 }
@@ -2397,7 +2397,7 @@ void presets_init (void)
 #if (MACHINE_DMD == 1)
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
-	font_render_string_left (&font_mono5, 1, 1, "PRESETS");
+	font_render_string_left (&font_var5, 1, 1, "PRESETS");
 	font_render_string_center (&font_var5, 64, 27, "PRESS ENTER TO INSTALL");
 #endif
 	SECTION_VOIDCALL (__test2__, preset_select);
@@ -2408,12 +2408,12 @@ void presets_draw (void)
 {
 #if (MACHINE_DMD == 1)
 	sprintf ("%d.", menu_selection+1);
-	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
+	font_render_string_left (&font_var5, 1, 9, sprintf_buffer);
 	preset_render_name (menu_selection);
-	font_render_string_left (&font_mono5, 15, 9, sprintf_buffer);
+	font_render_string_left (&font_var5, 15, 9, sprintf_buffer);
 
 	/* Is it installed now? */
-	font_render_string_right (&font_mono5, 127, 9,
+	font_render_string_right (&font_var5, 127, 9,
 		preset_installed_p (menu_selection) ? "YES" : "NO");
 
 	task_sleep (TIME_16MS);
@@ -2437,9 +2437,9 @@ void presets_enter (void)
 {
 	window_stop_thread ();
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 64, 8, "INSTALLING");
+	font_render_string_center (&font_var5, 64, 8, "INSTALLING");
 	preset_render_name (menu_selection);
-	print_row_center (&font_mono5, 16);
+	print_row_center (&font_var5, 16);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	sound_send (SND_TEST_CONFIRM);
@@ -2638,7 +2638,7 @@ void printout_thread (void)
 
 void printout_draw (void)
 {
-	font_render_string_center (&font_mono5, 64, 16, "PRINTING...");
+	font_render_string_center (&font_var5, 64, 16, "PRINTING...");
 	dmd_show_low ();
 }
 
@@ -2745,9 +2745,9 @@ U8 switch_display_timer;
 void switch_window_title (const char *title)
 {
 #if (MACHINE_DMD == 1)
-	font_render_string_center (&font_mono5, 80, 3, title);
+	font_render_string_center (&font_var5, 80, 3, title);
 #else
-	font_render_string_center (&font_mono5, 64, 3, title);
+	font_render_string_center (&font_var5, 64, 3, title);
 #endif
 }
 
@@ -2861,7 +2861,7 @@ void single_switch_draw (void)
 	switch_window_title ("SINGLE SWITCH");
 
 	(*browser_item_number) (menu_selection);
-	font_render_string_left (&font_mono5, 34, 9, sprintf_buffer);
+	font_render_string_left (&font_var5, 34, 9, sprintf_buffer);
 
 	sprintf_far_string (names_of_switches + menu_selection);
 	font_render_string_left (&font_var5, 50, 9, sprintf_buffer);
@@ -2964,7 +2964,7 @@ void sound_test_set_draw (void)
 	sprintf ("SET %d", sound_test_set);
 	s = sprintf_buffer;
 #endif
-	font_render_string_center (&font_mono5, 64, 9, s);
+	font_render_string_center (&font_var5, 64, 9, s);
 }
 
 void sound_test_set_change (void)
@@ -3123,14 +3123,14 @@ void solenoid_test_draw (void)
 	browser_draw ();
 
 	sprintf ("%dMS", browser_action);
-	font_render_string_left (&font_mono5, 1, 10, sprintf_buffer);
+	font_render_string_left (&font_var5, 1, 10, sprintf_buffer);
 	if (browser_action == sol_get_time (win_top->w_class.menu.selected))
 	{
 		font_render_string_left (&font_var5, 38, 10, "(DEF.)");
 	}
 
 	sprintf ("%d%%", (1+sol_duty_level) * 25);
-	font_render_string_right (&font_mono5, 127, 10, sprintf_buffer);
+	font_render_string_right (&font_var5, 127, 10, sprintf_buffer);
 	if (sol_duty_masks[sol_duty_level] == sol_get_duty (win_top->w_class.menu.selected))
 	{
 		font_render_string_right (&font_var5, 100, 10, "(DEF.)");
@@ -3283,7 +3283,7 @@ void gi_test_draw (void)
 	gi_disable (PINIO_GI_STRINGS);
 #ifdef CONFIG_TRIAC
 	sprintf ("BRIGHTNESS %d", gi_test_brightness);
-	print_row_center (&font_mono5, 29);
+	print_row_center (&font_var5, 29);
 	gi_dim (gi, gi_test_brightness);
 #else
 	gi_enable (gi);
@@ -3496,7 +3496,7 @@ void dipsw_test_draw (void)
 	window_title ("DIP SW. TEST");
 
 	locale_render ( (dipsw & 0x3C) >> 2 );
-	print_row_center (&font_mono5, 10);
+	print_row_center (&font_var5, 10);
 
 	for (sw = 0; sw < 8; sw++)
 	{
@@ -3626,7 +3626,7 @@ void display_test_draw (void)
 		dmd_clean_page_low ();
 		dmd_draw_border (dmd_low_buffer);
 		sprintf ("PAGE %d", menu_selection);
-		print_row_center (&font_mono5, 16);
+		print_row_center (&font_var5, 16);
 		dmd_show_low ();
 		return;
 	}
@@ -3785,9 +3785,9 @@ void scroller_draw (void)
 	U8 offset = win_top->w_class.scroller.offset;
 
 	s[offset * 2] ();
-	print_row_center (&font_mono5, 10);
+	print_row_center (&font_var5, 10);
 	s[offset * 2 + 1] ();
-	print_row_center (&font_mono5, 22);
+	print_row_center (&font_var5, 22);
 	dmd_show_low ();
 }
 

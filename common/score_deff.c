@@ -56,7 +56,7 @@ void scores_draw_credits (void)
 	/* TODO - this could also be moved into a ll_ routine, but
 	it just happens to work for alphanumeric as well. */
 #ifdef CONFIG_DMD_OR_ALPHA
-	font_render_string_center (&font_mono5, 64, 29, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 29, sprintf_buffer);
 #endif
 }
 

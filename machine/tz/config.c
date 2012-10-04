@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -19,6 +19,9 @@
  */
 
 #include <freewpc.h>
+#ifdef __m6809__
+#include <m6809/math.h>
+#endif
 
 U8 balls_served;
 
@@ -28,6 +31,24 @@ bool faster_quote_given;
  *
  * Machine-specific miscellaneous functions.
  */
+
+static inline U8 decimal_to_bcd_byte (U8 decimal)
+{
+#ifdef __m6809__
+	U8 quot, rem;
+	DIV10 (decimal, quot, rem);
+	return (quot << 4) + rem;
+#else
+	return ((decimal / 10) << 4) + (decimal % 10);
+#endif
+}
+
+
+void replay_code_to_score (score_t s, U8 val)
+{
+	
+		s[1] = decimal_to_bcd_byte (val * 10);
+}
 
 
 CALLSET_ENTRY (tz, start_ball)
@@ -39,8 +60,11 @@ CALLSET_ENTRY (tz, start_ball)
 CALLSET_ENTRY (tz, add_player)
 {
 #ifdef CONFIG_TZONE_IP
-	if (num_players > 1)
+	if (num_players >= 1 && num_players <= 4)
 		sound_send (SND_PLAYER_ONE + num_players - 1);
+	else
+		sound_send (SND_YOU_WANT_MORE);
+
 #endif
 }
 
@@ -102,7 +126,7 @@ CALLSET_ENTRY (config, start_ball)
 	balls_served = 0;
 }
 
-/* Reset the count so we can have a ballsave */
+/* Reset the count so we can have a ballsave on the next ball only */
 CALLSET_ENTRY (config, mball_start)
 {
 	balls_served = 1;
@@ -113,3 +137,4 @@ CALLSET_ENTRY (config, serve_ball)
 {
 	balls_served++;	
 }
+

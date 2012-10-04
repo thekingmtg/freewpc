@@ -212,7 +212,7 @@ void martian_kill_deff (void)
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	sprintf ("%d", martians_needed);
-	font_render_string_center (&font_lucida9, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_fixed10, 64, 16, sprintf_buffer);
 	dmd_copy_low_to_high ();
 	dmd_invert_page (dmd_low_buffer);
 	dmd_show_low ();

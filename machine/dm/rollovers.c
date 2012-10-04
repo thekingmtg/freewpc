@@ -29,6 +29,7 @@
  * same as original
  *
  */
+/* CALLSET_SECTION (rollovers, __machine__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -45,14 +46,6 @@ U8					rollover_SoundCounter;
 U8					rollover_MessageCounter;
 
 //external variables
-
-//prototypes
-void rollover_reset (void);
-void all_rollover_made (void);
-void rollover_sounds (void);
-void rollover_sounds_all_rollovers (void);
-void rollover_sounds_already_lit(void);
-void rollovers_effect(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -168,8 +161,8 @@ CALLSET_ENTRY (rollovers, sw_right_rollover) {
 	/****************************************************************************
 	 * rotate rollovers when buttons pressed
 	 ***************************************************************************/
-CALLSET_ENTRY (rollovers, sw_left_button, sw_u_l_flipper_button) {
-	if (in_live_game) {
+CALLSET_ENTRY (rollovers, sw_left_button, sw_upper_left_button) {
+	if (valid_playfield) {
 			if (top_rollover_activated && lower_rollover_activated) { //left (M) not activated
 				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 				lamp_tristate_on(LM_TOP_ROLLOVER);
@@ -224,8 +217,8 @@ CALLSET_ENTRY (rollovers, sw_left_button, sw_u_l_flipper_button) {
 
 
 //rotate rollovers when buttons pressed
-CALLSET_ENTRY (rollovers, sw_right_button, sw_u_r_flipper_button) {
-	if (in_live_game) {
+CALLSET_ENTRY (rollovers, sw_right_button, sw_upper_right_button) {
+	if (valid_playfield) {
 			if (top_rollover_activated && lower_rollover_activated) { //left not activated
 				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 				lamp_tristate_off(LM_TOP_ROLLOVER);
@@ -328,14 +321,14 @@ void all_rollovers_effect_deff(void) {
 		case 3:  sprintf ("3 X"); break;
 		case 4:  sprintf ("4 X"); break;
 		case 5:	 sprintf ("5 X"); break;
-		default: sprintf ("ERR"); break; //this is for development testing
+		default: sprintf ("0"); break; //this is for development testing
 		}//end of switch
-	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
-	dmd_sched_transition (&trans_sequential_boxfade);
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_emulogic, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "BONUS");
+	dmd_sched_transition (&trans_bitfade_slow);
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "BONUS");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -356,15 +349,27 @@ void rollovers_effect(void) {
 
 
 void rollovers1_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Top, "M  T  L");
-	dmd_show_low ();
-	task_sleep_sec (1);
-	dmd_sched_transition (&trans_random_boxfade);
 	dmd_clean_page_low ();
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "ADVANCE BONUS X");
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	dmd_clean_page_low ();
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	dmd_clean_page_low ();
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T  L");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	task_sleep (TIME_500MS);
+	dmd_clean_page_low ();
+	dmd_sched_transition (&trans_bitfade_slow);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "ADVANCE BONUS X");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -373,15 +378,27 @@ void rollovers1_effect_deff(void) {
 
 
 void rollovers2_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Top, "M  T  L");
-	dmd_show_low ();
-	task_sleep_sec (1);
-	dmd_sched_transition (&trans_random_boxfade);
 	dmd_clean_page_low ();
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT CRYOCLAW");
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	dmd_clean_page_low ();
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	dmd_clean_page_low ();
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T  L");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	task_sleep (TIME_500MS);
+	dmd_clean_page_low ();
+	dmd_sched_transition (&trans_bitfade_slow);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "LIGHT CRYOCLAW");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -390,16 +407,28 @@ void rollovers2_effect_deff(void) {
 
 
 void rollovers3_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_cu17, DMD_MIDDLE_X, DMD_BIG_CY_Top, "M  T  L");
-	dmd_show_low ();
-	task_sleep_sec (1);
-	dmd_sched_transition (&trans_random_boxfade);
 	dmd_clean_page_low ();
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "LIGHT ALL M T L");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_2, DMD_SMALL_CY_2, "5 TIMES");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT EXTRA BALL");
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	dmd_clean_page_low ();
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	dmd_clean_page_low ();
+	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T  L");
+	dmd_show_low ();
+	task_sleep (TIME_200MS);
+
+	task_sleep (TIME_500MS);
+	dmd_clean_page_low ();
+	dmd_sched_transition (&trans_bitfade_slow);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "5 TIMES");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "LIGHT EXTRA BALL");
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

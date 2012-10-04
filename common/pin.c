@@ -86,7 +86,7 @@ void enter_pin_deff (void)
 			if (pin_selection < MAX_INITIAL_INITIAL+1)
 			{
 				sprintf ("%12s", pin_chars + pin_selection);
-				font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
+				font_render_string_left (&font_term6, 0, 23, sprintf_buffer);
 			}
 			else
 			{
@@ -94,12 +94,12 @@ void enter_pin_deff (void)
 
 				x = ALPHABET_LEN - pin_selection;
 				sprintf ("%*s", x, pin_chars + pin_selection);
-				font_render_string_left (&font_bitmap8, 0, 23, sprintf_buffer);
+				font_render_string_left (&font_term6, 0, 23, sprintf_buffer);
 
 				x = MAX_LETTERS_SHOWN - x;
 				sprintf ("%*s", x, pin_chars);
 				x = MAX_LETTERS_SHOWN - x;
-				font_render_string_left (&font_bitmap8, x * FONT_WIDTH, 23, sprintf_buffer);
+				font_render_string_left (&font_term6, x * FONT_WIDTH, 23, sprintf_buffer);
 			}
 
 			for (n = 22; n <= 30; n++)

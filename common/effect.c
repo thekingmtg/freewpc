@@ -182,9 +182,9 @@ void nonfatal_error_deff (void)
 #ifdef DEBUGGER
 	dmd_alloc_low_clean ();
 	sprintf ("NONFATAL %ld", system_audits.non_fatal_errors);
-	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
 	sprintf ("ERRNO %i GID %i", last_nonfatal_error_code, last_nonfatal_error_gid);
-	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
 	dmd_show_low ();
 	sound_send (SND_TEST_ALERT);
 	task_sleep (TIME_200MS);
@@ -278,7 +278,7 @@ void coin_door_power_deff (void)
 void tilt_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_cu17, 64, 13, "TILT");
+	font_render_string_center (&font_fixed10, 64, 13, "TILT");
 	dmd_show_low ();
 	task_suspend ();
 }
@@ -438,17 +438,17 @@ void buyin_offer_deff (void)
 		font_render_string_center (&font_term6, 64, 5, "CONTINUE GAME");
 #if (MACHINE_DMD == 1)
 		sprintf ("%d", buyin_offer_timer);
-		font_render_string_left (&font_mono5, 4, 3, sprintf_buffer);
-		font_render_string_right (&font_mono5, 123, 3, sprintf_buffer);
+		font_render_string_left (&font_var5, 4, 3, sprintf_buffer);
+		font_render_string_right (&font_var5, 123, 3, sprintf_buffer);
 		if (buyin_offer_timer % 2)
 		{
-			font_render_string_center (&font_bitmap8, 64, 16, "INSERT COINS");
-			font_render_string_center (&font_bitmap8, 64, 26, "FOR EXTRA BALL");
+			font_render_string_center (&font_term6, 64, 16, "INSERT COINS");
+			font_render_string_center (&font_term6, 64, 26, "FOR EXTRA BALL");
 		}
 		else
 		{
-			font_render_string_center (&font_bitmap8, 64, 16, "THEN PRESS");
-			font_render_string_center (&font_bitmap8, 64, 26, "BUY EXTRA BALL");
+			font_render_string_center (&font_term6, 64, 16, "THEN PRESS");
+			font_render_string_center (&font_term6, 64, 26, "BUY EXTRA BALL");
 		}
 #else
 		sprintf ("%d SECS", buyin_offer_timer);

@@ -132,7 +132,7 @@ void grand_champion_draw (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 8, "HIGHEST SCORE AT");
 	sprintf_score (high_score_table[0].score);
-	font_render_string_center (&font_times8, 64, 22, sprintf_buffer);
+	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
 
@@ -150,7 +150,7 @@ void high_score_draw_12 (void)
 {
 	dmd_alloc_low_clean ();
 #if (MACHINE_DMD == 1)
-	font_render_string_center (&font_mono5, 64, 3, "HIGHEST SCORES");
+	font_render_string_center (&font_var5, 64, 3, "HIGHEST SCORES");
 #endif
 	high_score_draw_single (1, 8);
 	high_score_draw_single (2, 20);
@@ -162,7 +162,7 @@ void high_score_draw_34 (void)
 {
 	dmd_alloc_low_clean ();
 #if (MACHINE_DMD == 1)
-	font_render_string_center (&font_mono5, 64, 3, "HIGHEST SCORES");
+	font_render_string_center (&font_var5, 64, 3, "HIGHEST SCORES");
 #endif
 	high_score_draw_single (3, 8);
 	high_score_draw_single (4, 20);

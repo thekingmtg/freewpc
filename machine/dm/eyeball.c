@@ -17,6 +17,7 @@
  * At certain numbers of Retina Scans hits, Explode Hurry Up is activated.
  *
  */
+/* CALLSET_SECTION (eyeball, __machine__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -46,12 +47,6 @@ score_t temp_score;
 //external variables
 extern 	U8 				jet_shots_made;//found in jets_superjets.c
 
-//prototypes
-void eyeball_reset (void);
-void player_eyeball_reset (void);
-void eyeball_goal_award (void);
-void eyeball_eb_award (void);
-void eyeball_effect_chooser(void);
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
@@ -129,10 +124,11 @@ void eyeball_effect_chooser(void) {
 
 void eyeball1_effect_deff(void) {
 	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up);
 	sprintf ("OOOHHHH");
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 	sprintf ("MY EYE");
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	task_sleep (TIME_500MS);
@@ -141,9 +137,10 @@ void eyeball1_effect_deff(void) {
 
 void eyeball2_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "JETS");
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "INCREASE");
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "RETINA SCAN");
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "JETS");
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "INCREASE");
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "RETINA SCAN");
 	dmd_show_low ();
 	task_sleep_sec (1);
 	task_sleep (TIME_500MS);
@@ -152,10 +149,11 @@ void eyeball2_effect_deff(void) {
 
 void eyeball3_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "EXTRA BALL");
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "AT");
-	sprintf ("%d HITS", eyeball_eb_goal);
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "EXTRA BALL");
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "AT");
+	sprintf ("%d HITS", eyeball_eb_goal-eyeball_eb_shots_made);
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	task_sleep (TIME_500MS);
@@ -164,10 +162,11 @@ void eyeball3_effect_deff(void) {
 
 void eyeball4_effect_deff(void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "EXPLODE");
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "AT");
-	sprintf ("%d HITS", eyeball_goal );
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "EXPLODE");
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "AT");
+	sprintf ("%d HITS", eyeball_goal-eyeball_shots_made);
+	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	task_sleep (TIME_500MS);

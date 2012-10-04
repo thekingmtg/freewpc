@@ -123,8 +123,8 @@ void timed_mode_begin (struct timed_mode_ops *ops)
  */
 void timed_mode_end (struct timed_mode_ops *ops)
 {
-	task_kill_gid (ops->gid);
 	timed_mode_exit_handler (ops);
+	task_kill_gid (ops->gid);
 }
 
 

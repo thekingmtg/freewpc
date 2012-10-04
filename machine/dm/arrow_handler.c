@@ -40,7 +40,6 @@ CALLSET_ENTRY (arrow_handler, center_ramp_arrow_update) {
 	if (	!flag_test (FLAG_IS_C_RAMP_ARROW_ACTIVATED)
 	&& ( 	flag_test (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED)
 		||	flag_test (FLAG_IS_ACMAG_ACTIVATED)
-		||	flag_test (FLAG_IS_PBREAK_CENTERRAMP_ACTIVATED)
 		||	flag_test (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED) ) )
 		callset_invoke (cramp_arrow_light_on);
 	else
@@ -52,7 +51,6 @@ CALLSET_ENTRY (arrow_handler, center_ramp_arrow_update) {
 CALLSET_ENTRY (arrow_handler, uground_arrow_update) {
 	if (	!flag_test (FLAG_IS_UGROUND_ARROW_ACTIVATED)
 	&& ( 	flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
-		||	flag_test (FLAG_IS_PBREAK_UNDER_ACTIVATED)
 		||	flag_test (FLAG_IS_COMBO_UNDER_ACTIVATED) ) )
 		callset_invoke (underground_arrow_light_on);
 	else
@@ -64,7 +62,6 @@ CALLSET_ENTRY (arrow_handler, uground_arrow_update) {
 CALLSET_ENTRY (arrow_handler, l_ramp_arrow_update) {
 	if (	!flag_test (FLAG_IS_L_RAMP_ARROW_ACTIVATED)
 	&& ( 	flag_test (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_PBREAK_LEFTRAMP_ACTIVATED)
 		||	flag_test (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED) ) )
 		callset_invoke (lramp_arrow_light_on);
 	else
@@ -76,7 +73,6 @@ CALLSET_ENTRY (arrow_handler, l_ramp_arrow_update) {
 CALLSET_ENTRY (arrow_handler, s_ramp_arrow_update) {
 	if (	!flag_test (FLAG_IS_S_RAMP_ARROW_ACTIVATED)
 	&& ( 	flag_test (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_PBREAK_SIDERAMP_ACTIVATED)
 		||	flag_test (FLAG_IS_COMBO_SIDERAMP_ACTIVATED) ) )
 		callset_invoke (sramp_arrow_light_on);
 	else
@@ -87,7 +83,6 @@ CALLSET_ENTRY (arrow_handler, s_ramp_arrow_update) {
 CALLSET_ENTRY (arrow_handler, r_ramp_arrow_update) {
 	if (	!flag_test (FLAG_IS_R_RAMP_ARROW_ACTIVATED)
 	&& ( 	flag_test (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_PBREAK_RIGHTRAMP_ACTIVATED)
 		||	flag_test (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED) ) )
 		callset_invoke (rramp_arrow_light_on);
 	else
@@ -100,7 +95,6 @@ CALLSET_ENTRY (arrow_handler, r_ramp_arrow_update) {
 CALLSET_ENTRY (arrow_handler, l_orb_arrow_update) {
 	if (	!flag_test (FLAG_IS_L_LOOP_ARROW_ACTIVATED)
 	&& ( 	flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED)
-		||	flag_test (FLAG_IS_PBREAK_LEFTORB_ACTIVATED)
 		||	flag_test (FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) )
 		callset_invoke (ll_arrow_light_on);
 	else
@@ -112,7 +106,6 @@ CALLSET_ENTRY (arrow_handler, l_orb_arrow_update) {
 CALLSET_ENTRY (arrow_handler, r_orb_arrow_update) {
 	if (	!flag_test (FLAG_IS_R_LOOP_ARROW_ACTIVATED)
 	&& ( 	flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED)
-		||	flag_test (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED)
 		||	flag_test (FLAG_IS_COMBO_RIGHTORB_ACTIVATED) ) )
 		callset_invoke (rl_arrow_light_on);
 	else

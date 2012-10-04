@@ -15,6 +15,8 @@
  * TODO: handle an underground shot for computer award when the underground arrow
  * is also lit
  */
+/* CALLSET_SECTION (combos, __machine2__) */
+
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -36,12 +38,6 @@ __boolean 		computer_award_activated;
 
 //external variables
 
-//prototypes
-void combo_reset (void);
-void player_combo_reset (void);
-void flash_combos(void);
-void choose_random_flag_set(void);
-
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
@@ -54,7 +50,6 @@ void combo_reset (void) {
 	flag_off (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
 	flag_off (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
 	if (flag_test (FLAG_IS_COMPUTER_ACTIVATED) ) callset_invoke(computer_light_on);
-		else callset_invoke(computer_light_off);
 }//end of function
 
 void player_combo_reset (void) {
@@ -65,21 +60,23 @@ void player_combo_reset (void) {
 	combo_reset();
 }//end of function
 
-CALLSET_ENTRY (combo, start_player) { player_combo_reset(); }
-CALLSET_ENTRY (combo, start_ball) { combo_reset(); }
-CALLSET_ENTRY (combo, valid_playfield) { callset_invoke(combo_init); }
-
-
-
-/****************************************************************************
- * playfield lights and flags
- ***************************************************************************/
-
+CALLSET_ENTRY (combo, start_player) 	{ player_combo_reset(); }
+CALLSET_ENTRY (combo, start_ball) 		{ combo_reset(); }
+CALLSET_ENTRY (combo, valid_playfield) 	{ callset_invoke(combo_init); }
 
 /****************************************************************************
  * body
  *
  ****************************************************************************/
+CALLSET_ENTRY (combo, combo_init) {
+	flag_off (FLAG_IS_COMBOS_KILLED);
+	choose_random_flag_set();
+	callset_invoke (all_arrow_update);//at arrow_handler.c
+	task_create_gid1 (GID_COMBO, combo_task);
+}//end of function
+
+
+
 void combo_task (void) {
 	task_sleep_sec(COMBO_WAIT_TIME);
 	//no combo made yet so flash active lamps
@@ -96,15 +93,6 @@ void combo_task (void) {
 	flag_on (FLAG_IS_COMBOS_KILLED);
 	callset_invoke (all_arrow_update);
 	task_exit();
-}//end of function
-
-
-
-CALLSET_ENTRY (combo, combo_init) {
-	flag_off (FLAG_IS_COMBOS_KILLED);
-	choose_random_flag_set();
-	callset_invoke (all_arrow_update);//at arrow_handler.c
-	task_create_gid1 (GID_COMBO, combo_task);
 }//end of function
 
 
@@ -130,9 +118,9 @@ CALLSET_ENTRY (combo, combo_hit) {
 		deff_start (DEFF_COMPUTER_EFFECT);
 	} else 	if (combo_counter < combo_goal) deff_start (DEFF_COMBO_EFFECT);
 	// reset the task timer
-	task_recreate_gid (GID_COMBO, combo_task);
 	choose_random_flag_set();
 	callset_invoke (all_arrow_update);
+	task_recreate_gid (GID_COMBO, combo_task);
 }//end of function
 
 
@@ -161,49 +149,49 @@ void choose_random_flag_set(void) {
 	random_chooser = random_scaled(5);
 	switch (random_chooser) {
 	case 0:
-		flag_on (FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_UNDER_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_UNDER_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_LEFTORB_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
 		break;
 	case 1:
-		flag_on (FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_UNDER_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_UNDER_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_LEFTORB_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
 		break;
 	case 2:
-		flag_off (FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_UNDER_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_UNDER_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_LEFTORB_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
 		break;
 	case 3:
-		flag_off (FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_UNDER_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_UNDER_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_LEFTORB_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
 		break;
 	case 4:
-		flag_on (FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_UNDER_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
-		flag_off (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
-		flag_on (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_SIDERAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_LEFTRAMP_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_UNDER_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
+		flag_off 	(FLAG_IS_COMBO_LEFTORB_ACTIVATED);
+		flag_on 	(FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
 		break;
 	}//end of switch
 }//end of function
@@ -216,26 +204,44 @@ void choose_random_flag_set(void) {
  ****************************************************************************/
 
 void combo_effect_deff(void) {
+	U8 i;
+	for (i=0; i < 4; i++) {
+		dmd_sched_transition (&trans_scroll_up);
+		dmd_alloc_low_clean ();
+		sprintf ("%d COMBOS", combo_counter);
+		font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+
+		sprintf ("%d COMBOS", combo_counter);
+		font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+		dmd_show_low ();
+	}
 	dmd_alloc_low_clean ();
-	sprintf ("%d COMBOS", combo_counter);
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("%d TO COMPUTER", combo_goal - combo_counter);
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_sched_transition (&trans_scroll_up);
+	if (combo_goal - combo_counter >= 1) 	sprintf ("%d TO COMPUTER", combo_goal - combo_counter);
+	else 									sprintf ("COMPUTER READY");
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
-	task_sleep_sec (3);
+	task_sleep_sec (1);
 	deff_exit ();
 }//end of deff
 
 
 
 void computer_effect_deff(void) {
+	U8 i;
+	for (i=0; i < 4; i++) {
+		dmd_sched_transition (&trans_scroll_up);
+		dmd_alloc_low_clean ();
+		font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "COMPUTER");
+		font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "LIT");
+		dmd_show_low ();
+	}
 	dmd_alloc_low_clean ();
-	sprintf ("COMPUTER LIT");
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("SHOOT SUBWAY", combo_goal - combo_counter);
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "SHOOT");
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "SUBWAY");
 	dmd_show_low ();
-	task_sleep_sec (3);
+	task_sleep_sec (1);
 	deff_exit ();
 }//end of deff
 

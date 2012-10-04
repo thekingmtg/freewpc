@@ -26,8 +26,6 @@
  * if at least 1 ball already frozen, else will light a ball
  * and shoot left loop to start MB
  *
- *
- *
  */
 
 #include <freewpc.h>
@@ -46,12 +44,9 @@ U8 		all_loop_counter;
 U8 			right_loop_goal;
 U8 			left_loop_goal;
 U8 			all_loop_goal;
-__local__ __boolean 		left_Loop_ExtraBall_activated;
-__local__ __boolean 		left_Loop_MultiBall_activated;
-__boolean 		left_Loop_Explode_activated;
-__boolean 		left_Loop_Jackpot_activated;
-__boolean 			right_Loop_Explode_activated;
-__boolean 			right_Loop_Jackpot_activated;
+__local__ __boolean 		left_Loop_ExtraBall_activated;//local since stays from ball to ball
+__boolean 					left_Loop_Explode_activated;
+__boolean 					right_Loop_Explode_activated;
 
 //external variables
 
@@ -61,7 +56,8 @@ void left_orbit_task (void);
 void right_orbit_task (void);
 void right_loop_goal_award (void);
 void left_loop_goal_award (void);
-
+void left_orbit_shot_made(void);
+void right_orbit_shot_made(void);
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
@@ -69,12 +65,8 @@ void orbits_reset (void) {
 	left_loop_counter = 0;
 	right_loop_counter = 0;
 	all_loop_counter = 0;
-
 	left_Loop_Explode_activated = FALSE;
-	left_Loop_Jackpot_activated = FALSE;
-
 	right_Loop_Explode_activated = FALSE;
-	right_Loop_Jackpot_activated = FALSE;
 }//end of function
 
 void player_orbits_reset (void) {
@@ -83,7 +75,7 @@ void player_orbits_reset (void) {
 	left_loop_goal=ORBITS_EASY_GOAL;
 	all_loop_goal=(ORBITS_EASY_GOAL * 4);
 	left_Loop_ExtraBall_activated = FALSE;
-	left_Loop_MultiBall_activated = FALSE;
+	flag_off(FLAG_IS_MULTIBALL_ACTIVATED);
 	orbits_reset();
 }//end of function
 
@@ -109,15 +101,13 @@ CALLSET_ENTRY (orbits, extraball_light_off) {
 	lamp_tristate_off (LM_EXTRA_BALL);
 }//end of function
 
-//lit by required number of freezes accomplished - called by lock_freeze_mbstart.c
-//note well: capitalizing this will make some errors in the compiler
 CALLSET_ENTRY (orbits, multiball_light_on) {
-	left_Loop_MultiBall_activated = TRUE;
+	flag_on(FLAG_IS_MULTIBALL_ACTIVATED);
 	lamp_tristate_on (LM_START_MULTIBALL);
 }//end of function
 
 CALLSET_ENTRY (orbits, multiball_light_off) {
-	left_Loop_MultiBall_activated = FALSE;
+	flag_off(FLAG_IS_MULTIBALL_ACTIVATED);
 	lamp_tristate_off (LM_START_MULTIBALL);
 }//end of function
 
@@ -136,29 +126,26 @@ CALLSET_ENTRY (orbits, deactivate_explode_inserts) {
 	lamp_tristate_off (LM_RIGHT_LOOP_EXPLODE);
 }//end of function
 
-//lit by multiball modes --TODO:
 CALLSET_ENTRY (orbits, ll_jackpot_light_on) {
-	left_Loop_Jackpot_activated = TRUE;
+	flag_on (FLAG_IS_L_LOOP_JACKPOT_ACTIVATED);
 	lamp_tristate_on (LM_LEFT_LOOP_JACKPOT);
 }//end of function
 
 CALLSET_ENTRY (orbits, ll_jackpot_light_off) {
-	left_Loop_Jackpot_activated = FALSE;
+	flag_off (FLAG_IS_L_LOOP_JACKPOT_ACTIVATED);
 	lamp_tristate_off (LM_LEFT_LOOP_JACKPOT);
 }//end of function
 
-//lit by multiball modes --TODO:
 CALLSET_ENTRY (orbits, rl_jackpot_light_on) {
-	right_Loop_Jackpot_activated = TRUE;
+	flag_on (FLAG_IS_R_LOOP_JACKPOT_ACTIVATED);
 	lamp_tristate_on (LM_RIGHT_LOOP_JACKPOT);
 }//end of function
 
 CALLSET_ENTRY (orbits, rl_jackpot_light_off) {
-	right_Loop_Jackpot_activated = FALSE;
+	flag_off (FLAG_IS_R_LOOP_JACKPOT_ACTIVATED);
 	lamp_tristate_off (LM_RIGHT_LOOP_JACKPOT);
 }//end of function
 
-//lit by combo shots --TODO:
 CALLSET_ENTRY (orbits, ll_arrow_light_on) {
 	flag_on (FLAG_IS_L_LOOP_ARROW_ACTIVATED);
 	lamp_tristate_on (LM_LEFT_LOOP_ARROW);
@@ -169,7 +156,6 @@ CALLSET_ENTRY (orbits, ll_arrow_light_off) {
 	lamp_tristate_off (LM_LEFT_LOOP_ARROW);
 }//end of function
 
-//lit by combo shots --TODO:
 CALLSET_ENTRY (orbits, rl_arrow_light_on) {
 	flag_on (FLAG_IS_R_LOOP_ARROW_ACTIVATED);
 	lamp_tristate_on (LM_RIGHT_LOOP_ARROW);
@@ -192,83 +178,69 @@ void right_orbit_task (void) { task_sleep_sec(2); task_exit(); }
 // or start left to right check
 CALLSET_ENTRY (orbits, sw_left_loop) {
 //	if ( !single_ball_play() ) return;  //turn off during multiball?
-	if ( task_kill_gid(GID_RIGHT_ORBIT_MADE) ) callset_invoke(right_orbit_shot_made);
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+
+	if ( task_kill_gid(GID_RIGHT_ORBIT_MADE) ) right_orbit_shot_made();
 	else {
 		task_create_gid1 (GID_LEFT_ORBIT_MADE, left_orbit_task);
-		if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-			sound_start (ST_EFFECT, RACE_BY, SL_2S, PRI_GAME_QUICK5);
-		else
-			sound_start (ST_EFFECT, RACE_BY_2, SL_2S, PRI_GAME_QUICK5);
-		}//end of else
+		if (!flag_test (FLAG_IS_PBREAK_ACTIVATED) ) {
+				if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
+					sound_start (ST_EFFECT, RACE_BY, SL_2S, PRI_GAME_QUICK5);
+				else
+					sound_start (ST_EFFECT, RACE_BY_2, SL_2S, PRI_GAME_QUICK5);
+		}//end of if ! pbreak
+	}//end of else
 }//end of function
 
 // full orbit left to right
 // or start right to left check
 CALLSET_ENTRY (orbits, sw_right_freeway) {
 //	if ( !single_ball_play () ) return;  //turn off during multiball?
-	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) callset_invoke(left_orbit_shot_made);
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+
+	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) left_orbit_shot_made();
 	else {
 		task_create_gid1 (GID_RIGHT_ORBIT_MADE, right_orbit_task);
-		if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-			sound_start (ST_EFFECT, RACE_BY, SL_2S, PRI_GAME_QUICK5);
-		else
-			sound_start (ST_EFFECT, RACE_BY_2, SL_2S, PRI_GAME_QUICK5);
-		}//end of else
-}//end of function
-
-// full orbit left to hole
-CALLSET_ENTRY (orbits, sw_top_popper) {
-	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) callset_invoke(orbit_to_popper_made);
-}//end of orbits_sw_top_popper
-
-
-
-CALLSET_ENTRY (orbits, orbit_to_popper_made) {
-	sound_start (ST_EFFECT, RACE_BY_3, SL_2S, PRI_GAME_QUICK5);
-	//extra ball shot made
-	if (left_Loop_ExtraBall_activated ) {
-			callset_invoke(extraball_light_off);
-			sol_request(SOL_KNOCKER);
-			sound_start (ST_SAMPLE, EXTRA_BALL_SOUND, SL_2S, PRI_GAME_QUICK5);
-			if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
-				sound_start (ST_SPEECH, SPCH_EXTRABALL_WES, SL_4S, PRI_GAME_QUICK5);
-			else
-				sound_start (ST_SPEECH, SPCH_EXTRABALL_SLY, SL_4S, PRI_GAME_QUICK5);
-			//TODO: add an extra ball here
-			}//end of left_Loop_ExtraBall_activated
-	if (left_Loop_MultiBall_activated) callset_invoke(multiball_start);
-	//TODO: random top popper award
+		if (!flag_test (FLAG_IS_PBREAK_ACTIVATED) ) {
+				if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
+					sound_start (ST_EFFECT, RACE_BY, SL_2S, PRI_GAME_QUICK5);
+				else
+					sound_start (ST_EFFECT, RACE_BY_2, SL_2S, PRI_GAME_QUICK5);
+		}//end of if ! pbreak
+	}//end of else
 }//end of function
 
 
 
-CALLSET_ENTRY (orbits, left_orbit_shot_made) {
+void left_orbit_shot_made(void) {
 	++left_loop_counter;
 	++all_loop_counter;
-	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	score (SC_100K);//located in kernal/score.c
+	if (!flag_test (FLAG_IS_PBREAK_ACTIVATED) ) sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) callset_invoke(explode_made);
 	if(flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED) )  callset_invoke(capture_simon_made);
-	if(flag_test (FLAG_IS_PBREAK_LEFTORB_ACTIVATED) )  callset_invoke(prison_break_made);
-	if (flag_test(FLAG_IS_COMBOS_KILLED) ) callset_invoke(combo_init);
-	else if ( flag_test(FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) callset_invoke(combo_hit);
-	//TODO: jackpot shot detection
+	else {
+			if (flag_test(FLAG_IS_COMBOS_KILLED) ) callset_invoke(combo_init);
+			else if ( flag_test(FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) callset_invoke(combo_hit);
+	}
+	if (flag_test(FLAG_IS_L_LOOP_JACKPOT_ACTIVATED) ) callset_invoke(score_jackpot);
 	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
 }//end of function
 
 
 
-CALLSET_ENTRY (orbits, right_orbit_shot_made) {
+void right_orbit_shot_made(void) {
 	++right_loop_counter;
 	++all_loop_counter;
 	score (SC_100K);//located in kernal/score.c
-	sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
+	if (!flag_test (FLAG_IS_PBREAK_ACTIVATED) ) sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) callset_invoke(explode_made);
 	if(flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED) )  callset_invoke(capture_simon_made);
-	if(flag_test (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED) )  callset_invoke(prison_break_made);
-	if (flag_test(FLAG_IS_COMBOS_KILLED) ) callset_invoke(combo_init);
-	else if ( flag_test(FLAG_IS_COMBO_RIGHTORB_ACTIVATED) ) callset_invoke(combo_hit);
-	//TODO: jackpot and combo shot detection
+	else {
+			if (flag_test(FLAG_IS_COMBOS_KILLED) ) callset_invoke(combo_init);
+			else if ( flag_test(FLAG_IS_COMBO_RIGHTORB_ACTIVATED) ) callset_invoke(combo_hit);
+	}
+	if (flag_test(FLAG_IS_R_LOOP_JACKPOT_ACTIVATED) ) callset_invoke(score_jackpot);
 	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
 }//end of function
 

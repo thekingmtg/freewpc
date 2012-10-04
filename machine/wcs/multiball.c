@@ -46,7 +46,7 @@ void multiball_running_deff (void)
 		score_update_start ();
 		dmd_alloc_pair ();
 		dmd_clean_page_low ();
-		font_render_string_center (&font_mono5, 64, 5, "MULTIBALL");
+		font_render_string_center (&font_var5, 64, 5, "MULTIBALL");
 		sprintf_current_score ();
 		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 		dmd_copy_low_to_high ();

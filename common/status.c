@@ -62,9 +62,9 @@ void status_report_deff (void)
 
 	status_page_init ();
 	sprintf ("BALL %d", ball_up);
-	font_render_string_center (&font_mono5, 64, 11, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 11, sprintf_buffer);
 	credits_render ();
-	font_render_string_center (&font_mono5, 64, 21, sprintf_buffer);
+	font_render_string_center (&font_var5, 64, 21, sprintf_buffer);
 	status_page_complete ();
 
 	status_page_init ();

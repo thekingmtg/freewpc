@@ -34,17 +34,15 @@
  * estimate of average standup score: 2.5 million
  *
  * */
-
-/*ALLSET_SECTION (standupfrenzy, __machine2__) */
-
+/* CALLSET_SECTION (standupfrenzy, __machine__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
+#include "clawmagnet.h"
 
 //constants
-/** Bitmask referring to all 5 standup targets */
-#define 	NO_TARGETS 	0x0
-#define 	ALL_TARGETS 0x1f
+#define 	NO_TARGETS 	0x0/** Bitmask referring to all 5 standup targets */
+#define 	ALL_TARGETS 0x1f/** Bitmask referring to all 5 standup targets */
 const U8 			STANDUP_EASY_GOAL 	= 1;
 const U8 			STANDUP_MED_GOAL 	= 4;
 const U8 			STANDUP_HARD_GOAL 	= 7;
@@ -73,20 +71,6 @@ __boolean 		isStandupFrenzyActivated;
 //external variables
 extern __local__ __boolean 	left_Ramp_QuickFreeze_activated;
 
-//prototypes
-void standupFrenzy_mode_init (void);
-void standupFrenzy_mode_exit (void);
-void standupHandler (U8 target);
-void standupHandler1 (U8 target, U8 lamp);
-void frenzyHandler (U8 target, U8 lamp);
-void standup_lamp_update1 (U8 mask, U8 lamp);
-void standupFrenzyTotalScore_effect_deff (void);
-void standupFrenzy_mode_effect_deff (void);
-void standupFrenzy_sounds (void);
-void standup_sounds (void);
-
-
-
 /****************************************************************************
  * mode definition structure
  ***************************************************************************/
@@ -99,7 +83,7 @@ struct timed_mode_ops standupFrenzy_mode = {
 	.deff_starting = DEFF_STANDUPFRENZY_START_EFFECT,
 	.deff_running = DEFF_STANDUPFRENZY_EFFECT,
 //	.deff_ending = DEFF_STANDUPFRENZY_END_EFFECT,
-	.prio = PRI_GAME_MODE2,//lower priority than claw triggered modes
+	.prio = PRI_GAME_MODE5,
 	.init_timer = 23, //time displayed plus length of starting deff
 	.timer = &standupFrenzyTimer,
 	.grace_timer = 3, //default is 2
@@ -111,6 +95,11 @@ struct timed_mode_ops standupFrenzy_mode = {
  * initialize  and exit
  ***************************************************************************/
 void standupFrenzy_mode_init (void) {
+		//the claw mode can expire on its own and since it is a lower priority it will not display
+		//callset_invoke (end_claw_mode); // this seemed to cause occasional crashes
+		clawmagnet_off ();
+		flag_off(FLAG_IS_BALL_ON_CLAW);
+		flipper_enable ();
 	isStandupFrenzyActivated = TRUE;
 	++standupFrenzy_modes_achieved;
 	standupFrenzyNumHits = 0;
@@ -147,17 +136,12 @@ callset_invoke (lamp_update);
 }//end of function
 
 
-
-
-
 /****************************************************************************
  * external event listeners
  ****************************************************************************/
 CALLSET_ENTRY (standupFrenzy, music_refresh)  	{ timed_mode_music_refresh (&standupFrenzy_mode); }
 CALLSET_ENTRY (standupFrenzy, end_ball) 		{ if (timed_mode_running_p(&standupFrenzy_mode) ) timed_mode_end (&standupFrenzy_mode); }
 CALLSET_ENTRY (standupFrenzy, display_update) 	{ timed_mode_display_update (&standupFrenzy_mode); }
-
-
 
 
 /****************************************************************************
@@ -217,7 +201,7 @@ void frenzyHandler (U8 target, U8 lamp) {
 
 void standupHandler1 (U8 target, U8 lamp) {
 		++standup_num_of_hits;
-		deff_start (DEFF_STANDUP_EFFECT);
+		standup_effect();
 		standupLightsLit &= ~target;  /* flag that target as hit */
 		standup_lamp_update1 (target, lamp);
 		standup_sounds();
@@ -306,40 +290,97 @@ void standupFrenzy_sounds (void) {
 /****************************************************************************
  * DMD display - non-frenzy
  ****************************************************************************/
-void standup_effect_deff (void) {
+void standup_effect(void) {
+	switch (++standup_MessageCounter % 3) {
+		case 0:  deff_start (DEFF_STANDUP1_EFFECT); break;
+		case 1:  deff_start (DEFF_STANDUP2_EFFECT); break;
+		case 2:  deff_start (DEFF_STANDUP3_EFFECT); break;
+		default: deff_start (DEFF_STANDUP1_EFFECT); break;
+		}//end of switch
+}//end of FUNCTION
+
+
+
+void standup1_effect_deff (void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND UP");
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND");
+	dmd_show_low ();
+
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "UP");
+	dmd_show_low ();
+
+	dmd_clean_page_low ();
+	dmd_sched_transition (&trans_scroll_up);
+			if (standup_num_of_hits == 0) 			sprintf ("0");//for testing in development
+			else 									sprintf ("%d", standup_num_of_hits);
+			font_render_string_center(&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top - 2, sprintf_buffer);
+			sprintf ("STANDUPS");
+			font_render_string_center(&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+			sprintf ("HIT");
+			font_render_string_center(&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
-	dmd_sched_transition (&trans_vstripe_left2right);
+	task_sleep (TIME_500MS);
+	deff_exit ();
+}//end of standupFrenzy_mode_deff
+
+
+
+void standup2_effect_deff (void) {
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND");
+	dmd_show_low ();
+
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "UP");
+	dmd_show_low ();
+
+	dmd_sched_transition (&trans_scroll_up);
 	dmd_clean_page_low ();
-	switch (++standup_MessageCounter % 3) {
-		case 0:
-			sprintf ("%d STANDUPS HIT", standup_num_of_hits);
-			font_render_string_center(&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-			break;
-		case 1:
 			if (!left_Ramp_QuickFreeze_activated) {
 				sprintf ("HIT %d MORE", standup_goal - standup_num_of_hits);
-				font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, sprintf_buffer);
-				font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "TO");
-				font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "LIGHT QUICK FREEZE");
+				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
+				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
+				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "LIGHT QUICK FREEZE");
 			}
 			else {
-				font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "QUICK FREEZE");
-				font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "IS");
-				font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "ACTIVATED");
+				font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_SMALL_CY_1, "FREEZE");
+				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "IS");
+				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "ACTIVATED");
 			}
-			break;
-		case 2:
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "CRYO CLAW");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_2, DMD_SMALL_CY_2, "LOCK FREEZE");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, "STARTS");
-			font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, "STANDUP FRENZY");
-			break;
-	}//END OF SWITCH
 	dmd_show_low ();
-	task_sleep_sec (2);
+	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
+	deff_exit ();
+}//end of standupFrenzy_mode_deff
+
+
+
+void standup3_effect_deff (void) {
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND");
+	dmd_show_low ();
+
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up);
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "UP");
+	dmd_show_low ();
+
+	dmd_sched_transition (&trans_scroll_up);
+	dmd_clean_page_low ();
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "CRYO CLAW");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "LOCK FREEZE");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "STARTS");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "STANDUP FRENZY");
+	dmd_show_low ();
+	task_sleep_sec (1);
+	task_sleep (TIME_500MS);
 	deff_exit ();
 }//end of standupFrenzy_mode_deff
 
@@ -353,20 +394,24 @@ void standupfrenzy_start_effect_deff (void) {
 	U8 x;
 	U8 y;
 	U8 i = 0;
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STANDUP");
-	dmd_show_low ();
-	task_sleep_sec (2);
 	sound_send (EXPLOSION1_SHORT);
 	do { // Shake the text
-			dmd_alloc_low_clean ();
+			dmd_alloc_pair_clean ();
 			if 		(i < 5) { 	x = random_scaled (1);	y = random_scaled (2); }
 			else if (i < 10) {  x = random_scaled (2);  y = random_scaled (3); }
 			else if (i < 15) {  x = random_scaled (4);  y = random_scaled (5); }
 			else if (i < 22) {  x = random_scaled (8);  y = random_scaled (4); }
 			else 			 {  x = random_scaled (10); y = random_scaled (5); }
-			if (i % 2 == 0)  font_render_string_center (&font_fixed10, DMD_MIDDLE_X + x, y + DMD_BIG_CY_Cent, "FRENZY");
-			else 			font_render_string_center (&font_fixed10, DMD_MIDDLE_X - x, DMD_BIG_CY_Cent - y, "FRENZY");
+			if (i % 2 == 0)  {
+				font_render_string_center (&font_fireball, DMD_MIDDLE_X + x, y + DMD_BIG_CY_Cent, "FRENZY");
+				font_render_string_center (&font_fireball, DMD_MIDDLE_X - x, DMD_BIG_CY_Cent - y, "FRENZY");
+			}
+			else {
+				font_render_string_center (&font_fireball, DMD_MIDDLE_X + x, y - DMD_BIG_CY_Cent, "FRENZY");
+				font_render_string_center (&font_fireball, DMD_MIDDLE_X - x, DMD_BIG_CY_Cent + y, "FRENZY");
+			}
+				//			dmd_show_high ();
+//			dmd_show2 ();//shows a 4 color image
 			dmd_show_low ();
 			if (i == 0) sound_send (EXPLOSION1_SHORT);
 			if (i == 10) sound_send (EXPLOSION1_SHORT);
@@ -374,12 +419,12 @@ void standupfrenzy_start_effect_deff (void) {
 			if (i == 24) sound_send (EXPLOSION1_SHORT);
 			if (i == 28) sound_send (EXPLOSION1_MED);
 			task_sleep (TIME_66MS);
-	} while (i++ < 30);
+	} while (i++ < 30); //APPROX 2 SEC
 	//pulsate words in middle
 	sound_send (EXPLOSION1_LONG);
-	i = 8;
+	i = 4;
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "FRENZY");
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "FRENZY");
 	/* low = text, high = blank */
 	while (--i > 0){
 		dmd_show2 ();
@@ -395,17 +440,27 @@ void standupfrenzy_start_effect_deff (void) {
 		dmd_show2 ();
 		task_sleep (TIME_66MS);
 		dmd_flip_low_high ();
-	}//end of loop
-	deff_exit ();
+	}//end of loop - APPROX 1 SEC
+	deff_exit (); //TOTAL OF 3 SEC
 } // standupFrenzyTotalScore_deff
 
 
 
 /*HIT mode*/
 void standupfrenzy_hit_effect_deff (void) {
+	U8 i = 0;
+	do {
+		U8 x = random_scaled (6);
+		U8 y = random_scaled (4);
+		dmd_alloc_low_clean ();
+		sprintf_score (standupFrenzyLastScore);
+		if (i % 2 == 0)  { font_render_string_center (&font_fireball, DMD_MIDDLE_X + x, DMD_BIG_CY_Cent + y, sprintf_buffer); }
+		else 			 { font_render_string_center (&font_fireball, DMD_MIDDLE_X - x, DMD_BIG_CY_Cent - y, sprintf_buffer); }
+		dmd_show_low ();
+		task_sleep (TIME_66MS);
+	} while (i++ < 12);//about .8sec
 	dmd_alloc_low_clean ();
-	sprintf_score (standupFrenzyLastScore);
-	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	deff_exit ();
@@ -415,15 +470,37 @@ void standupfrenzy_hit_effect_deff (void) {
 
 /*during mode*/
 void standupfrenzy_effect_deff (void) {
+	U8 i = 0;
+	U8 j = 0;
 	for (;;) {
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_fixed6, DMD_SMALL_CX_1, DMD_SMALL_CY_1, "FRENZY");
-		sprintf ("%d SEC LEFT,  %d HIT", standupFrenzyTimer, standupFrenzyNumHits);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
-		sprintf_score (standupFrenzyNextScore);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		if (++i % 5 == 0) 	{ //once every 2.5 seconds
+				sound_send (EXPLOSION1_SHORT);
+				j = 0;
+				do {
+						U8 x = random_scaled (8);
+						U8 y = random_scaled (5);
+						dmd_alloc_low_clean ();
+						font_render_string_center (&font_fireball, DMD_MIDDLE_X + x, DMD_SMALL_CY_1 + 2 + y, "FRENZY");
+						font_render_string_center (&font_fireball, DMD_MIDDLE_X - x, DMD_SMALL_CY_1 + 2 + y, "FRENZY");
+						sprintf ("%d SEC LEFT,  %d HIT", standupFrenzyTimer, standupFrenzyNumHits);
+						font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+						sprintf_score (standupFrenzyNextScore);
+						font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+						dmd_show_low ();
+						task_sleep (TIME_100MS);
+				} while (j++ < 5);//about .5sec
+				sound_send (EXPLOSION1_SHORT);
+		}//end of if
+		else {
+			font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_SMALL_CY_1 + 2, "FRENZY");
+			sprintf ("%d SEC LEFT,  %d HIT", standupFrenzyTimer, standupFrenzyNumHits);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+			sprintf_score (standupFrenzyNextScore);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+			dmd_show_low ();
+			task_sleep (TIME_500MS);
+		}//end of else
 	}//END OF ENDLESS LOOP
 }//end of standupFrenzy_mode_deff
 
@@ -432,9 +509,9 @@ void standupfrenzy_effect_deff (void) {
 /*mode is over*/
 void standupfrenzy_end_effect_deff (void) {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STANDUP FRENZY");
+	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "FRENZY");
 	sprintf_score (standupFrenzyTotalScore);
-	font_render_string_center (&font_mono5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();

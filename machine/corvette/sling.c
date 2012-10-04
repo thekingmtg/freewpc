@@ -28,7 +28,7 @@ __local__ U8 sling_count;
 void sling_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_mono5, 96, 5, "BABES");
+	font_render_string_center (&font_var5, 96, 5, "BABES");
 	sprintf ("%d", sling_count);
 	font_render_string_center (&font_fixed10, 96, 16, sprintf_buffer);
 

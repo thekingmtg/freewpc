@@ -21,10 +21,13 @@
  * TODO: come up with proper mode
  * TODO: potentially we can make a 2nd and 3rd mode that score differently
  */
+/* CALLSET_SECTION (prison_break, __machine2__) */
 
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
+#include "clawmagnet.h"
+
 //constants
 const U8 			PRISON_BREAK_EASY_GOAL 	= 3;
 const U8 			PRISON_BREAK_MED_GOAL 	= 4;
@@ -42,19 +45,7 @@ score_t 	prison_break_mode_last_score;
 score_t 	prison_break_mode_next_score;
 score_t 	prison_break_mode_score_total_score;
 
-
-
 //external variables
-
-//prototypes
-void prison_break_reset (void);
-void prison_break_player_reset (void);
-void prison_break_effect_deff(void);
-void prison_break_mode_init (void);
-void prison_break_mode_expire (void);
-void prison_break_mode_exit (void);
-
-
 
 /****************************************************************************
  * mode definition structure
@@ -68,7 +59,7 @@ struct timed_mode_ops prison_break_mode = {
 	.deff_starting = DEFF_PRISON_BREAK_START_EFFECT,
 	.deff_running = DEFF_PRISON_BREAK_EFFECT,
 //	.deff_ending = DEFF_prison_break_END_EFFECT,
-	.prio = PRI_GAME_MODE1,
+	.prio = PRI_GAME_MODE6,
 	.init_timer = 23,
 	.timer = &prison_break_mode_timer,
 	.grace_timer = 2,
@@ -81,13 +72,7 @@ struct timed_mode_ops prison_break_mode = {
  * initialize  and exit
  ***************************************************************************/
 void prison_break_reset (void) {
-	flag_off (FLAG_IS_PBREAK_SIDERAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_LEFTRAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_RIGHTRAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_UNDER_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_CENTERRAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_LEFTORB_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED);
+	flag_off (FLAG_IS_PBREAK_ACTIVATED);
 }//end of function
 
 
@@ -102,6 +87,11 @@ void prison_break_player_reset (void) {
 
 
 void prison_break_mode_init (void) {
+			//the claw mode can expire on its own and since it is a lower priority it will not display
+			//callset_invoke (end_claw_mode); // this seemed to cause occasional crashes
+			clawmagnet_off ();
+			flag_off(FLAG_IS_BALL_ON_CLAW);
+			flipper_enable ();
 	prison_break_mode_shots_made = 0;
 	++prison_break_modes_achieved;
 	sound_start (ST_SPEECH, SPCH_CRYO_PRISON_BREAKOUT, SL_4S, PRI_GAME_QUICK5);
@@ -111,35 +101,21 @@ void prison_break_mode_init (void) {
 	lamp_tristate_on(LM_CLAW_PRISON_BREAK);
 	score_zero(prison_break_mode_score);
 	score_zero(prison_break_mode_last_score);
+	score_add(prison_break_mode_last_score, score_table[SC_500K]);
+
 	score_zero(prison_break_mode_next_score);
 	switch (prison_break_modes_achieved) {
-		case 1: score_add(prison_break_mode_next_score, score_table[SC_6M]); break;
-		case 2: score_add(prison_break_mode_next_score, score_table[SC_7M]); break;
-		case 3: score_add(prison_break_mode_next_score, score_table[SC_8M]); break;
-		default: score_add(prison_break_mode_next_score, score_table[SC_8M]);
+		case 1: score(SC_6M); break;
+		case 2: score(SC_7M); break;
+		default: score(SC_8M);
 	}//end of switch
-	flag_on (FLAG_IS_PBREAK_SIDERAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_LEFTRAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_RIGHTRAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_UNDER_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_CENTERRAMP_ACTIVATED);
-	flag_on (FLAG_IS_PBREAK_LEFTORB_ACTIVATED);
-	flag_on (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED);
-	callset_invoke(all_arrow_update);
-	score_long (prison_break_mode_last_score);
+	flag_on (FLAG_IS_PBREAK_ACTIVATED);
 }//end of function
 
 
 
 void prison_break_mode_expire (void) {
-	flag_off (FLAG_IS_PBREAK_SIDERAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_LEFTRAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_RIGHTRAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_UNDER_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_CENTERRAMP_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_LEFTORB_ACTIVATED);
-	flag_off (FLAG_IS_PBREAK_RIGHTORB_ACTIVATED);
-	callset_invoke(all_arrow_update);
+	flag_off (FLAG_IS_PBREAK_ACTIVATED);
 }//end of function
 
 
@@ -169,35 +145,13 @@ CALLSET_ENTRY (prison_break, sw_claw_prison_break) {
 
 
 
-
-
+//TODO: kill this and create
+//fast scoring
 CALLSET_ENTRY (prison_break, prison_break_made) {
 	++prison_break_mode_shots_made;
-	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
-	score_zero(prison_break_mode_last_score);
-	switch (prison_break_modes_achieved ){
-		case 1:
-			score (SC_6M);
-			score_add(prison_break_mode_last_score, score_table[SC_6M]);
-			break;
-		case 2:
-			//2nd time we are in prison_break - score differently
-			score (SC_7M);
-			score_add(prison_break_mode_last_score, score_table[SC_7M]);
-			break;
-		case 3:
-			//3rd time we are in prison_break - score differently
-			score (SC_8M);
-			score_add(prison_break_mode_last_score, score_table[SC_8M]);
-			break;
-		default:
-			//all cases past 3rd time we are in prison_break
-			score (SC_8M);
-			score_add(prison_break_mode_last_score, score_table[SC_8M]);
-			break;
-	}//end of switch
 	score_add(prison_break_mode_score, prison_break_mode_last_score);
 	score_add (prison_break_mode_score_total_score, prison_break_mode_last_score);
+	score_long (prison_break_mode_last_score);
 	deff_start (DEFF_PRISON_BREAK_HIT_EFFECT);//under /kernel/deff.c
 }//end of function
 
@@ -208,21 +162,33 @@ CALLSET_ENTRY (prison_break, prison_break_made) {
  * DMD display effects
  ****************************************************************************/
 void prison_break_start_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Top, "PRISON");
-	font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "BREAKOUT");
-	dmd_show_low ();
-	task_sleep_sec (2);
+	U8 i;
+	for (i=1; i < 9; i++) {			//SPELL OUT LETTRS
+			dmd_alloc_low_clean ();
+			sprintf ("BREAKOUT");
+			if (i < 9)
+				sprintf_buffer[i] = '\0';
+			font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
+			dmd_show_low ();
+			task_sleep (TIME_300MS);
+	}
+	task_sleep_sec (1);
 	deff_exit ();
 }//end of mode_effect_deff
 
 
 
 void prison_break_hit_effect_deff(void) {
-	dmd_alloc_low_clean ();
+	dmd_alloc_pair ();
+	dmd_clean_page_low ();
+	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
 	font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BREAKOUT");
 	sprintf_score (prison_break_mode_last_score);
 	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	dmd_copy_low_to_high ();
+	dmd_show_low ();
+	dmd_invert_page (dmd_low_buffer);
+	deff_swap_low_high (10, TIME_100MS);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -230,16 +196,19 @@ void prison_break_hit_effect_deff(void) {
 
 
 
+
 void prison_break_effect_deff(void) {
 	for (;;) {
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BREAKOUT");
+		dmd_alloc_pair_clean();
+		sprintf("BREAKOUT");
+		sprintf_buffer[1 + (prison_break_mode_shots_made * 2)] = '\0';
+		font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 		sprintf ("%d SEC LEFT,  %d HIT", prison_break_mode_timer, prison_break_mode_shots_made);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_3, DMD_SMALL_CY_3, sprintf_buffer);
-		sprintf_score (prison_break_mode_next_score);
-		font_render_string_center (&font_mono5, DMD_SMALL_CX_4, DMD_SMALL_CY_4, sprintf_buffer);
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+		sprintf_score (prison_break_mode_score);
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
 		dmd_show_low ();
-		task_sleep (TIME_200MS);
+		task_sleep (TIME_500MS);
 	}//END OF ENDLESS LOOP
 }//end of mode_effect_deff
 
@@ -248,7 +217,7 @@ void prison_break_effect_deff(void) {
 
 
 void prison_break_end_effect_deff(void) {
-	dmd_alloc_low_clean ();
+	dmd_alloc_pair_clean();
 	font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BREAKOUT");
 	sprintf("COMPLETED");
 	font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
