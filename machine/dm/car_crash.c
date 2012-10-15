@@ -45,9 +45,8 @@
 #include "dm/global_constants.h"
 
 //constants
-const U8 	CAR_CRASH_EASY_GOAL = 6;
-const U8 	CAR_CRASH_PREDEFINED_GOAL_INCREMENT = 1;//TODO: this is for making different levels besides easy
-const U8 	CAR_CRASH_GOAL_STEP = 5; //increment for later goals
+const U8 	CAR_CRASH_EASY_GOAL = 2;
+const U8 	CAR_CRASH_GOAL_STEP = 4; //increment for later goals
 const U8 	CAR_CRASH_GOAL_MAX = 50;
 
 //local variables
@@ -62,6 +61,15 @@ __boolean 	is_car_crash_ten_lit; 		//tracks which score to be awarded
 __boolean 	is_car_crash_three_lit; 		//tracks which score to be awarded
 
 //external variables
+
+//internally called function prototypes  --external found at protos.h
+void car_crash_reset (void);
+void player_car_crash_reset (void);
+void car_crash_first_switch_task (void);
+void car_crash_second_switch_task (void);
+void car_crash_third_switch_task (void);
+void carcrash_mode_effect_deff(void);
+void carcrash_effect_deff(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -93,38 +101,38 @@ CALLSET_ENTRY (car_crash, start_player) { player_car_crash_reset (); }
 /****************************************************************************
  * playfield lights and flags
  ***************************************************************************/
-CALLSET_ENTRY (car_crash, carcrash_three_on) {
+void carcrash_three_on(void) {
 	is_car_crash_three_lit = TRUE;
 	lamp_tristate_flash(LM_CAR_CRASH_BOTTOM);
 	task_sleep (TIME_1S);
 	lamp_tristate_on (LM_CAR_CRASH_BOTTOM);
 }//end of function
 
-CALLSET_ENTRY (car_crash, carcrash_three_off) {
+void carcrash_three_off(void) {
 	is_car_crash_three_lit = FALSE;
 	lamp_tristate_off (LM_CAR_CRASH_BOTTOM);
 }//end of function
 
-CALLSET_ENTRY (car_crash, carcrash_six_on) {
+void carcrash_six_on(void) {
 	is_car_crash_six_lit  = TRUE;
 	lamp_tristate_flash(LM_CAR_CRASH_CENTER);
 	task_sleep (TIME_1S);
 	lamp_tristate_on (LM_CAR_CRASH_CENTER);
 }//end of function
 
-CALLSET_ENTRY (car_crash, carcrash_six_off) {
+void carcrash_six_off(void) {
 	is_car_crash_six_lit = FALSE;
 	lamp_tristate_off (LM_CAR_CRASH_CENTER);
 }//end of function
 
-CALLSET_ENTRY (car_crash, carcrash_ten_on) {
+void carcrash_ten_on(void) {
 	is_car_crash_ten_lit = TRUE;
 	lamp_tristate_flash(LM_CAR_CRASH_TOP);
 	task_sleep (TIME_1S);
 	lamp_tristate_on (LM_CAR_CRASH_TOP);
 }//end of function
 
-CALLSET_ENTRY (car_crash, carcrash_ten_off) {
+void carcrash_ten_off(void) {
 	is_car_crash_ten_lit = FALSE;
 	lamp_tristate_off (LM_CAR_CRASH_TOP);
 }//end of function
@@ -196,24 +204,24 @@ CALLSET_ENTRY (car_crash, sw_car_chase_standup) {
 				//increment goal for next time
 				if (car_crash_goal < CAR_CRASH_GOAL_MAX)  car_crash_goal += CAR_CRASH_GOAL_STEP;
 				//start ramp mode
-				callset_invoke(start_car_chase); //at car_chase_mode.c
+				start_car_chase(); //at car_chase_mode.c
 				//turn off car crash lights
-				callset_invoke(carcrash_three_off);
-				callset_invoke(carcrash_six_off);
-				callset_invoke(carcrash_ten_off);
+				carcrash_three_off();
+				carcrash_six_off();
+				carcrash_ten_off();
 			}//end of if (car_crash_shots_made == car_crash_goal)
 			else {//no car chase yet
 				deff_start (DEFF_CARCRASH_EFFECT);
 				//set point values and lights for car crash
 				if (car_crash_shots_made == 1) {
-					if (!is_car_crash_six_lit) callset_invoke(carcrash_three_on);
+					if (!is_car_crash_six_lit) 				carcrash_three_on();
 				} else if (car_crash_shots_made == 2) {
-					if (!is_car_crash_six_lit) callset_invoke(carcrash_six_on);
-					if (!is_car_crash_three_lit) callset_invoke(carcrash_three_on);
+					if (!is_car_crash_six_lit) 				carcrash_six_on();
+					if (!is_car_crash_three_lit) 			carcrash_three_on();
 				} else if (car_crash_shots_made >= 3) {
-					if (!is_car_crash_ten_lit) callset_invoke(carcrash_ten_on);
-					if (!is_car_crash_six_lit) callset_invoke(carcrash_six_on);
-					if (!is_car_crash_three_lit) callset_invoke(carcrash_three_on);
+					if (!is_car_crash_ten_lit) 				carcrash_ten_on();
+					if (!is_car_crash_six_lit) 				carcrash_six_on();
+					if (!is_car_crash_three_lit) 			carcrash_three_on();
 				}
 			}//end of else not >= goal
 			//effectively doubles the score
@@ -230,7 +238,7 @@ CALLSET_ENTRY (car_crash, sw_car_chase_standup) {
 
 
 //called from comp award at underground.c
-CALLSET_ENTRY (car_crash, comp_award_trip_car_crash) {
+void comp_award_trip_car_crash(void) {
 	car_crash_multiplier = 3;
 }//end of function
 

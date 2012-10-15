@@ -54,12 +54,12 @@ CALLSET_ENTRY (simple_switches, sw_right_outlane, sw_left_outlane) {
 
 
 CALLSET_ENTRY (simple_switches, sw_upper_left_flipper_gate) {
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
 	else score(SC_1010);
 }
 
 CALLSET_ENTRY (simple_switches, sw_upper_rebound) {
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
 	else {
 		score(SC_1010);
 		simple_sounds();
@@ -67,7 +67,7 @@ CALLSET_ENTRY (simple_switches, sw_upper_rebound) {
 }
 
 CALLSET_ENTRY (simple_switches, sw_lower_rebound) {
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
 	else {
 		simple_sounds();
 		score(SC_1010);

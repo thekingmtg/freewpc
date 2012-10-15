@@ -55,18 +55,28 @@ PINMAME_GAME_ROM = dman_lx4.rom
 
 
 #################################################
-#
 # Object files exported by this game
 #
-# GAME_OBJS RTTs must go here.  also place files that are called often here.
+# GAME_OBJS  = .text page -- 
+# the system page.  No decorator needed on function prototypes.
+# RTTs must go here.  also place files that are called often here.
+#
+#
+# GAME_PAGED_OBJS = page 59 =	Preferably, game functions go here.
+# This works safely for any file that only uses CALLSET_ENTRY functions, deffs, and leffs.  
+# GAME_PAGED_OBJS (probably should have been called GAME1_OBJS) is page 
+# 59 (labelled MACHINE in the display at the bottom of the "err" file). 
+# Prototypes need __machine__.  The space is shared with "EVENT", which 
+# means that it is not as large as the other pages, but since "EVENT" is 
+# the machinery behind callsets, files which have lots of CALLSET_ENTRY 
+# points are more efficient when placed here. 
+#
 # 
 # GAME_TEST_OBJS = page 58 = 	All feature tests can go here.  
 # 
-# GAME_PAGED_OBJS = page 59 =	Preferably, game functions go here.
-# This works safely for any file that only uses CALLSET_ENTRY functions, deffs, and leffs.  
 # 
-# GAME2_OBJS = page 55
-# GAME3_OBJS = page 54
+# GAME2_OBJS = page 55, labelled MACHINE2, prototypes use __machine2__
+# GAME3_OBJS = page 54, labelled MACHINE3, prototypes use __machine3__
 # GAME4_OBJS = page 53
 # GAME5_OBJS = page 52
 #
@@ -76,30 +86,33 @@ PINMAME_GAME_ROM = dman_lx4.rom
 #GAME_INCLUDES =
 #################################################
 
+#only uses CALLSET_ENTRY functions, deffs, and leffs - no function calls
+#this is about 30% full from the OS - page 59 
+#also called MACHINE_PAGE - 
+GAME_PAGED_OBJS = 
 
-#all files here have NO deffs or leffs and may be frequently called
-GAME_OBJS = simple_switches.o  orbits.o   ramps.o   arrow_handler.o  jackpots.o
-#call_tester.o 
-
-#all files here that have deffs
-#this is about 30% full from the OS
-#also called MACHINE_PAGE - page 59
-GAME_PAGED_OBJS = rollovers.o jets.o superjets.o standupfrenzy.o car_chase_mode.o acmag.o eyeball.o 
+# page .text
+GAME_OBJS = simple_switches.o  orbits.o  ramps.o 
+#call_tester.o \
 
 
 #all files here that have deffs and are less frequently called
 #also called MACHINE2_PAGE - page 55
-GAME2_OBJS = inlanes.o car_crash.o combos.o eject.o underground.o  explode.o \
-capture_simon.o prison_break.o fortress.o lock_freeze_mbstart.o cryoclaw.o 
-#custom_deffs.o \
+GAME2_OBJS = rollovers.o car_chase_mode.o acmag.o startup_shutdown.o dm_amode.o underground.o  \
+jackpots.o arrow_handler.o  inlanes.o car_crash.o combos.o eject.o explode.o custom_deffs.o 
 
 #all files here that have deffs and are less frequently called
 #also called MACHINE3_PAGE - page 54
-GAME3_OBJS = bonus.o startup_shutdown.o dm_amode.o     
+GAME3_OBJS = bonus.o capture_simon.o prison_break.o \
+fortress.o museum.o cryoprison.o wasteland.o demotime.o lock_freeze_mbstart.o cryoclaw.o 
+
 
 #all files here that have deffs and are less frequently called
 #also called MACHINE4_PAGE - page 53
-GAME4_OBJS = wheelie.o bar.o dm_millions.o top_popper.o 
+GAME4_OBJS = bar.o dm_millions.o wheelie.o  top_popper.o  standupfrenzy.o 
+
+#also called MACHINE5_PAGE - page 52
+GAME5_OBJS = jets.o  superjets.o eyeball.o 
 
 #################################################
 #listing of images used

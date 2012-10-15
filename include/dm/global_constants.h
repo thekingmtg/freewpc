@@ -8,13 +8,13 @@
 #include <freewpc.h>
 
 
-
-
 #ifndef _DM_GLOBAL_CONSTANTS_H
 #define _DM_GLOBAL_CONSTANTS_H
 
 //max width is 128
 #define DMD_MIDDLE_X 	64
+#define DMD_MIDDLE_Y	16
+
 #define DMD_LEFT_X 		10
 #define DMD_RIGHT_X 	118
 

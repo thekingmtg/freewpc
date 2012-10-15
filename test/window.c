@@ -3995,8 +3995,12 @@ CALLSET_ENTRY (test_mode, sw_right_button)
 
 CALLSET_ENTRY (test_mode, sw_enter)
 {
-	if (!win_top)
+	if (!win_top) //if null then we are not yet in test mode
 	{
+#ifdef END_GAME_ON_TEST_ENTER
+		end_game();
+#endif
+
 #ifdef MACHINE_TEST_ONLY
 		window_push (&menu_window, &test_menu);
 #else
@@ -4009,6 +4013,8 @@ CALLSET_ENTRY (test_mode, sw_enter)
 		window_redraw ();
 	}
 }
+
+
 
 CALLSET_ENTRY (test_mode, sw_escape)
 {

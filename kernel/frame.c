@@ -141,19 +141,35 @@ void frame_draw_plane (U16 id)
 }
 
 
-/**
- * Draw a 2-plane, 4-color DMD frame.
- * ID identifies the first plane of the frame.  The two
- * frames have consecutive IDs.
- */
-void frame_draw (U16 id)
-{
-	frame_draw_plane (id++);
-	dmd_flip_low_high ();
-	frame_draw_plane (id);
-	dmd_flip_low_high ();
-}
 
+/**
+ * Draw one plane of a DMD frame.
+ * ID identifies the source of the frame data.
+ * The output is always drawn to the low-mapped buffer.
+ */
+void frame_draw_plane_test (U16 id)
+{
+	/* Lookup the image number in the global table.
+	 * For real ROMs, this is located at a fixed address.
+	 * In native mode, the images are kept in a separate file.
+	 */
+	U8 type;
+	struct frame_pointer *p;
+	U8 *data;
+
+	page_push (IMAGEMAP_PAGE);
+	p = (struct frame_pointer *)0x4000 + id;
+	data = PTR(p);
+
+	/* Switch to the page containing the image data.
+	 * Pull the type byte out, then decode the remaining bytes
+	 * to the display buffer. */
+	pinio_set_bank (PINIO_BANK_ROM, p->page);
+	type = data[0];
+	frame_decode (data + 1, type & ~0x1);
+
+	page_pop ();
+}
 
 /**
  * Draw an arbitrary sized bitmap at a particular region
@@ -177,6 +193,23 @@ void bmp_draw (U8 x, U8 y, U16 id)
 	page_pop ();
 	page_pop ();
 }
+
+
+
+
+/**
+ * Draw a 2-plane, 4-color DMD frame.
+ * ID identifies the first plane of the frame.  The two
+ * frames have consecutive IDs.
+ */
+void frame_draw (U16 id)
+{
+	frame_draw_plane (id++);
+	dmd_flip_low_high ();
+	frame_draw_plane (id);
+	dmd_flip_low_high ();
+}
+
 
 
 CALLSET_ENTRY (frame, init)

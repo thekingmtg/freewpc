@@ -16,15 +16,13 @@
  * same as above except:
  * scoring is higher to balance with other modes
  * 2nd and 3rd acmag mode score higher to encourage doing mode more than once
- * TODO: 20 second timer - currently mode never ends until end of ball
- * TODO: currently score does not change over time
  *
  * estimate of average acmag mode score: 60 million to 125 million
  *
  *
  *
  */
-/* CALLSET_SECTION (acmag, __machine__) */
+
 #include <freewpc.h>
 #include "dm/global_constants.h"
 #include "clawmagnet.h"
@@ -34,14 +32,24 @@
 //local variables
 U8 						acmag_mode_shots_made;
 __local__ U8 			acmag_modes_achieved;
-__local__ U8 			acmag_modes_completed;
 U8			acmag_mode_timer;
 score_t 	acmag_mode_score;
 score_t 	acmag_mode_last_score;
 score_t 	acmag_mode_next_score;
-__local__ score_t 	acmag_mode_score_total_score;
+score_t 	acmag_mode_score_total_score;
 
 //external variables
+
+//internally called function prototypes  --external found at protos.h
+void acmag_reset (void);
+void acmag_player_reset (void);
+void acmag_effect_deff(void);
+void acmag_mode_init (void);
+void acmag_mode_expire (void);
+void acmag_mode_exit (void);
+void star_draw (void);
+void show_text_on_stars (U8 times);
+
 
 /****************************************************************************
  * mode definition structure
@@ -56,7 +64,7 @@ struct timed_mode_ops acmag_mode = {
 	.deff_running = DEFF_ACMAG_EFFECT,
 	.deff_ending = DEFF_ACMAG_END_EFFECT,
 	.prio = PRI_GAME_MODE2,
-	.init_timer = 23,
+	.init_timer = 33,
 	.timer = &acmag_mode_timer,
 	.grace_timer = 2, //default is 2
 //	.pause = system_timer_pause,
@@ -76,7 +84,7 @@ void acmag_reset (void) {
 void acmag_player_reset (void) {
 	acmag_reset();
 	acmag_modes_achieved = 0;
-	acmag_modes_completed = 0;
+	acmag_mode_shots_made = 0;
 	score_zero(acmag_mode_score_total_score);
 }//end of function
 
@@ -88,10 +96,9 @@ void acmag_mode_init (void) {
 			clawmagnet_off ();
 			flag_off(FLAG_IS_BALL_ON_CLAW);
 			flipper_enable ();
-	score (SC_250K);
 	acmag_mode_shots_made = 0;
 	flag_on (FLAG_IS_ACMAG_ACTIVATED);
-	callset_invoke (center_ramp_arrow_update);
+	center_ramp_arrow_update();
 	++acmag_modes_achieved;
 	sound_start (ST_SPEECH, SPCH_ACMAG_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
@@ -113,7 +120,7 @@ void acmag_mode_init (void) {
 
 void acmag_mode_expire (void) {
 	flag_off (FLAG_IS_ACMAG_ACTIVATED);
-	callset_invoke (center_ramp_arrow_update);
+	center_ramp_arrow_update();
 }//end of function
 
 
@@ -154,40 +161,38 @@ CALLSET_ENTRY (acmag, acmag_made) {
 	lamp_tristate_off(LM_CENTER_RAMP_MIDDLE);
 	lamp_tristate_off(LM_CENTER_RAMP_OUTER);
 	lamp_tristate_off(LM_CENTER_RAMP_INNER);
-	//TODO: complete mode if xx number of shots made?
 
-	//TODO: score rolls up as time goes?
 	switch (acmag_modes_achieved ){
 		case 1:
+			score (SC_5M);
+			score_add (acmag_mode_score, score_table[SC_5M]);
+			score_add (acmag_mode_score_total_score, score_table[SC_5M]);
+			score_zero(acmag_mode_last_score);
+			score_add(acmag_mode_last_score, score_table[SC_5M]);
+			break;
+		case 2:
+			//2nd time we are in acmag - score differently
+			score (SC_10M);
+			score_add (acmag_mode_score, score_table[SC_10M]);
+			score_add (acmag_mode_score_total_score, score_table[SC_10M]);
+			score_zero(acmag_mode_last_score);
+			score_add(acmag_mode_last_score, score_table[SC_10M]);
+			break;
+		case 3:
+			//3rd time we are in acmag - score differently
 			score (SC_15M);
 			score_add (acmag_mode_score, score_table[SC_15M]);
 			score_add (acmag_mode_score_total_score, score_table[SC_15M]);
 			score_zero(acmag_mode_last_score);
 			score_add(acmag_mode_last_score, score_table[SC_15M]);
 			break;
-		case 2:
-			//2nd time we are in acmag - score differently
-			score (SC_20M);
-			score_add (acmag_mode_score, score_table[SC_20M]);
-			score_add (acmag_mode_score_total_score, score_table[SC_20M]);
-			score_zero(acmag_mode_last_score);
-			score_add(acmag_mode_last_score, score_table[SC_20M]);
-			break;
-		case 3:
-			//3rd time we are in acmag - score differently
-			score (SC_25M);
-			score_add (acmag_mode_score, score_table[SC_25M]);
-			score_add (acmag_mode_score_total_score, score_table[SC_25M]);
-			score_zero(acmag_mode_last_score);
-			score_add(acmag_mode_last_score, score_table[SC_25M]);
-			break;
 		default:
 			//all cases past 3rd time we are in acmag
-			score (SC_25M);
-			score_add (acmag_mode_score, score_table[SC_25M]);
-			score_add (acmag_mode_score_total_score, score_table[SC_25M]);
+			score (SC_15M);
+			score_add (acmag_mode_score, score_table[SC_15M]);
+			score_add (acmag_mode_score_total_score, score_table[SC_15M]);
 			score_zero(acmag_mode_last_score);
-			score_add(acmag_mode_last_score, score_table[SC_25M]);
+			score_add(acmag_mode_last_score, score_table[SC_15M]);
 			break;
 	}//end of switch
 	deff_start (DEFF_ACMAG_HIT_EFFECT);//under /kernel/deff.c
@@ -215,9 +220,9 @@ void acmag_hit_effect_deff(void) {
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 	dmd_sched_transition (&trans_bitfade_fast);
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
+//	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
 	sprintf_score (acmag_mode_last_score);
-	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	show_text_on_stars (20);
 	deff_exit ();
 }//end of mode_effect_deff

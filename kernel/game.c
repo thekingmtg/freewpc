@@ -26,6 +26,7 @@
 #include <amode.h>
 #include <search.h>
 #include <eb.h>
+#include <game.h>
 
 /**
  * \file
@@ -96,6 +97,9 @@ U8 timed_game_timer;
 U8 timed_game_suspend_count;
 
 void start_ball (void);
+void end_ball (void);
+void end_ball2 (void);
+void end_ball_task (void);
 
 
 /** Starts the attract mode */
@@ -140,62 +144,63 @@ void dump_game (void)
 #endif
 
 
+
+
 /** Handles the end game condition.
  * This is called directly from the trough update function during
  * endball.  It is also called by test mode when it starts up. */
-static void end_game_task (void)
-{
+static void end_game_task (void) {
 	U8 was_in_game = in_game;
-
 	/* Common stop/end game logic */
 	stop_game ();
 
 	/* From here, it is possible to restart a new game and
 	interrupt all of the following effects */
-
-	if (was_in_game)
-	{
+	if (was_in_game) {
 		/* Kill the flippers in case still enabled */
 		flipper_disable ();
 
 		/* If in test mode now (i.e. the game was aborted
 		by pressing Enter), then skip over the end game effects. */
-		if (!in_test)
-		{
+		if (!in_test) {
+			callset_invoke (end_game);//this will also start end game music
 			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			high_score_check ();
 			callset_invoke (extra_initials_check);
 			match_start ();
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
-			callset_invoke (end_game);
-		}
-	}
+			//was here - moved up  //callset_invoke (end_game);
+		}//end of if (!in_test)
+	}//end of if (was_in_game)
 
 	task_sleep (TIME_33MS); /* not needed? */
 	lamp_all_off ();
 
 	/* Return to attract mode, unless the game was aborted to
 	enter test mode */
-	if (!in_test)
-	{
+	if (!in_test) {
 		deff_start (DEFF_GAME_OVER);
-		amode_start ();
+		amode_start (); //this kills sounds
 	}
 	task_exit ();
-}
+}//end of function
 
-void end_game (void)
-{
-	/* To limit stack size, spawn this in a separate
-	 * task context.  We are already nested pretty deeply here, and
-	 * end game effects will need to sleep to do synchronous deffs.  I've
-	 * observed stack overflow here when running the stress test.
-	 * Ensure that this task doesn't get killed due to any duration
-	 * change - notably entering test mode. */
+
+
+
+/* To limit stack size, spawn this in a separate
+ * task context.  We are already nested pretty deeply here, and
+ * end game effects will need to sleep to do synchronous deffs.  I've
+ * observed stack overflow here when running the stress test.
+ * Ensure that this task doesn't get killed due to any duration
+ * change - notably entering test mode. */
+void end_game (void) {
 	task_remove_duration (TASK_DURATION_GAME);
 	task_create_gid1 (GID_END_GAME, end_game_task);
 	task_sleep (TIME_16MS);
 }
+
+
 
 
 /**
@@ -251,15 +256,42 @@ void end_ball (void)
 
 	/* If the ball was not tilted, start bonus. */
 	in_bonus = TRUE;
-	music_disable ();
+	//music_disable ();
 	if (!in_tilt)
 		callset_invoke (bonus);
-	callset_invoke (bonus_complete);
+
+	//create a task to monitor bonus -- if bonus exits
+	//properly then it will continue to serve the next ball
+	//if not then this timer will send the ball eventually
+	task_create_gid1 (GID_END_BALL_TASK, end_ball_task);
 
 	/* Stop tasks that should run only until end-of-ball. */
 	task_remove_duration (TASK_DURATION_BALL);
 	task_duration_expire (TASK_DURATION_BALL);
-	in_bonus = FALSE;
+
+	/* End the endball task */
+	task_exit ();
+}//end of function
+
+
+
+void end_ball_task (void) {
+	task_sleep_sec(20);
+	end_ball2 ();
+	task_exit();
+}//end of function
+
+
+
+CALLSET_ENTRY(game, bonus_complete){
+	task_kill_gid(GID_END_BALL_TASK);
+	end_ball2 ();
+}//end of function
+
+
+
+void end_ball2 (void) {
+		in_bonus = FALSE;
 
 	/* If the player has extra balls stacked, then start the
 	 * next ball without changing the current player up. */
@@ -273,7 +305,7 @@ void end_ball (void)
 #endif
 		callset_invoke (shoot_again);
 		start_ball ();
-		goto done;
+		return;
 	}
 
 	/* If this is the last ball of the game for this player,
@@ -285,7 +317,7 @@ void end_ball (void)
 		{
 			callset_invoke (buyin_start_ball);
 			start_ball ();
-			goto done;
+			return;
 		}
 		else
 		{
@@ -304,7 +336,7 @@ void end_ball (void)
 		{
 			player_restore ();
 			start_ball ();
-			goto done;
+			return;
 		}
 		else
 		{
@@ -324,21 +356,15 @@ void end_ball (void)
 		if (ball_up <= system_config.balls_per_game)
 		{
 			start_ball ();
-			goto done;
+			return;
 		}
 	}
 
 	/* After the max balls per game have been played, go into end game */
 	end_game ();
-done:
-#ifdef DEBUGGER
-	/* Dump the game state */
-	dump_game ();
-#endif
-
-	/* End the endball task */
-	task_exit ();
 }
+
+
 
 
 #ifdef CONFIG_TIMED_GAME

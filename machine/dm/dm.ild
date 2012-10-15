@@ -1,6 +1,10 @@
 IMG_OLDCAR: machine/dm/images/oldcar.pgm
+
 IMG_CITY: machine/tz/images/city.pgm
 IMG_CAR: machine/dm/images/car3.pgm
+
+IMG_ROBOT: machine/dm/images/robot.pgm
+
 IMG_TEST: machine/dm/images/test.pgm
 
 

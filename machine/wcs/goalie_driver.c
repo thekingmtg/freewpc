@@ -99,7 +99,7 @@ CALLSET_ENTRY (goalie_driver, sw_goalie_left)
 	goalie_errors &= ~GOAL_EDGE_LEFT_SEEN;
 	if (goalie_position == GOALIE_LEFT_TO_RIGHT)
 	{
-		/* TODO - right opto not seen.
+		/* ODO - right opto not seen.
 		If this persists, we can take goalie_distance/2
 		as the expected value to simulate it. */
 	}

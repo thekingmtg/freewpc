@@ -39,8 +39,6 @@ __boolean 	left_inlane_Access_Claw_activated;
 __boolean 	right_inlane_Light_Quick_Freeze_activated;
 
 //external variables
-extern __local__ __boolean 	left_Ramp_QuickFreeze_activated;
-extern __local__ __boolean 		right_Ramp_ClawReady_activated;
 
 
 /****************************************************************************
@@ -63,7 +61,7 @@ CALLSET_ENTRY (inlanes, start_player) {  new_player_inlanes_reset(); }
  * random award from computer (subway shot) or completing certain number of
  * arrow shots
  ***************************************************************************/
-CALLSET_ENTRY (inlanes, access_claw_light_on) {
+void access_claw_light_on(void) {
 	left_inlane_Access_Claw_activated = TRUE;
 	lamp_tristate_flash(LM_ACCESS_CLAW);
 	task_sleep (TIME_500MS);
@@ -72,7 +70,7 @@ CALLSET_ENTRY (inlanes, access_claw_light_on) {
 
 
 
-CALLSET_ENTRY (inlanes, access_claw_light_off) {
+void access_claw_light_off(void) {
 	left_inlane_Access_Claw_activated = FALSE;
 	lamp_tristate_flash(LM_ACCESS_CLAW);
 	task_sleep (TIME_500MS);
@@ -84,9 +82,10 @@ CALLSET_ENTRY (inlanes, access_claw_light_off) {
 CALLSET_ENTRY (inlanes, sw_left_inlane) {
 	score(SC_5770);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
-	if (!right_Ramp_ClawReady_activated && left_inlane_Access_Claw_activated)	{
-		callset_invoke(rramp_clawready_on);//at ramps.c - diverter moved there
-		callset_invoke(access_claw_light_off);
+	if (	!flag_test(FLAG_IS_R_RAMP_CLAWREADY)
+		&& 	left_inlane_Access_Claw_activated)	{
+		rramp_clawready_on();//at ramps.c - diverter moved there
+		access_claw_light_off();
 	//	leff_start (LEFF_CRYOCLAW);//LIGHTING EFFECTS
 		sound_start (ST_SPEECH, SPCH_CRYOCLAW_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 		deff_start (DEFF_CLW_INLANES_EFFECT);
@@ -97,11 +96,8 @@ CALLSET_ENTRY (inlanes, sw_left_inlane) {
 
 /****************************************************************************
  * right inlane
- *
- * quick freeze can be lit by  hitting One, Two, or Three sets of
- * standup targets.  see standupfrenzy.c
  ***************************************************************************/
-CALLSET_ENTRY (inlanes, light_quick_freeze_light_on) {
+void light_quick_freeze_light_on (void) {
 	right_inlane_Light_Quick_Freeze_activated = TRUE;
 	sound_start (ST_SPEECH, SPCH_QUICK_FREEZE_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	lamp_tristate_flash(LM_LIGHT_QUICK_FREEZE);
@@ -111,7 +107,7 @@ CALLSET_ENTRY (inlanes, light_quick_freeze_light_on) {
 
 
 
-CALLSET_ENTRY (inlanes, light_quick_freeze_light_off) {
+void light_quick_freeze_light_off(void) {
 	right_inlane_Light_Quick_Freeze_activated = FALSE;
 	lamp_tristate_flash(LM_LIGHT_QUICK_FREEZE);
 	task_sleep (TIME_500MS);
@@ -123,9 +119,9 @@ CALLSET_ENTRY (inlanes, light_quick_freeze_light_off) {
 CALLSET_ENTRY (inlanes, sw_right_inlane) {
 	score(SC_5770);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
-	if (!left_Ramp_QuickFreeze_activated && right_inlane_Light_Quick_Freeze_activated) {
+	if (!flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED) && right_inlane_Light_Quick_Freeze_activated) {
 		//leff_start (LEFF_QUICK_FREEZE);//LIGHTING EFFECTS
-		callset_invoke(activate_left_ramp_quickfreeze);//at ramps.c
+		activate_left_ramp_quickfreeze();//at ramps.c
 		deff_start (DEFF_QF_INLANES_EFFECT);
 	}
 }//end of function

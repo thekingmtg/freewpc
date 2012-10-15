@@ -37,7 +37,8 @@
  *
  */
 
-/* CALLSET_SECTION (dm_amode, __machine3__) */
+/* CALLSET_SECTION (dm_amode, __machine2__) */
+
 #include <freewpc.h>
 U8 alternator;
 
@@ -69,6 +70,7 @@ void amode_leff (void) {
 /****************************************************************************
  * display effects
  ***************************************************************************/
+
 void show_driver_animation (void) {
 	U16 fno;
 	U8 i;
@@ -85,7 +87,7 @@ void show_driver_animation (void) {
 			task_sleep (TIME_66MS);
 		}//end of inner loop
 	}//end of outer loop
-	dmd_alloc_pair_clean ();/* Clean both pages */
+	dmd_alloc_pair_clean ();// Clean both pages
 }//end of function
 
 
@@ -93,7 +95,7 @@ void show_driver_animation (void) {
 void show_rocket_animation (void) {
 	U16 fno;
 		for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno ++) {
-			/* We are drawing a full frame, so a clean isn't needed */
+			// We are drawing a full frame, so a clean isn't needed
 			dmd_alloc_pair ();
 			frame_draw (fno);
 			dmd_show2 ();
@@ -101,13 +103,13 @@ void show_rocket_animation (void) {
 		}//end of loop
 		task_sleep (TIME_1S);
 			for (fno = IMG_ROCKET_LOAD_END; fno >= IMG_ROCKET_LOAD_START; fno --) {
-				/* We are drawing a full frame, so a clean isn't needed */
+				// We are drawing a full frame, so a clean isn't needed
 				dmd_alloc_pair ();
 				frame_draw (fno);
 				dmd_show2 ();
 				task_sleep (TIME_133MS);
 		}//end of loop
-	/* Clean both pages */
+	// Clean both pages
 	dmd_alloc_pair_clean ();
 	task_sleep (TIME_1S);
 }//end of function
@@ -145,6 +147,17 @@ CALLSET_ENTRY (dm_amode, amode_page) {
 	dmd_show_low ();
 	task_sleep(TIME_2S);
 
+
+
+		dmd_alloc_pair ();
+		frame_draw_plane (IMG_TEST);
+		dmd_flip_low_high ();
+		frame_draw_plane (IMG_TEST);
+		dmd_flip_low_high ();
+		dmd_show2 ();
+		task_sleep(TIME_2S);
+
+
 	//	dmd_clean_page_high ();
 //	dmd_text_blur ();
 //	dmd_map_overlay ();
@@ -153,6 +166,8 @@ CALLSET_ENTRY (dm_amode, amode_page) {
 	/* Clean the low screen for the transition */
 //	dmd_alloc_low_clean ();
 //	dmd_show_low ();
+
+
 	dmd_sched_transition (&trans_bitfade_slow);
 	dmd_clean_page_low ();
 	font_render_string_center (&font_steel, 64, 7, "DEMOLITION");

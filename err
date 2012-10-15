@@ -1,0 +1,41 @@
+common/dmdtrans.c: In function 'trans_unroll_vertical_init':
+common/dmdtrans.c:549: warning: assignment discards qualifiers from pointer target type
+test/stress.c:156: warning: 'stress_start_button_task' defined but not used
+machine/dm/car_chase.h:292: warning: 'car1W_low_bits' defined but not used
+machine/dm/car_chase.h:313: warning: 'car1W_high_bits' defined but not used
+machine/dm/car_chase.h:377: warning: 'car1Y_low_bits' defined but not used
+machine/dm/car_chase.h:398: warning: 'car1Y_high_bits' defined but not used
+machine/dm/bonus.c: In function 'bonus_button_monitor':
+machine/dm/bonus.c:340: warning: statement with no effect
+
+direct    XXXXXXXXXXXXXXXXXXXXX...
+ram       XXXXXXXXXXXXXXXXXXX.....
+local     XXXXXXXXXXXXX...........
+permanent XXXXX...................
+nvram     XXXXX...................
+dirtab    XXXXXXXXXXXXXXXXXXXXXXXXX  warning: 100% full
+registers ........................
+.flag     XXXX....................
+.globalfla........................
+.freetimer........................
+page52    XXXXXXXXXXXXX...........   (MACHINE5)
+page53    XXXXXXXXXXXXXXXXXX......   (MACHINE4)
+page54    XXXXXXXXXXXXXXXX........   (MACHINE3)
+page55    XXXXXXXXXXXXXXXXXXXXXXXX  warning: 99% full   (MACHINE2)
+page56    XXXXXXXXXXXXXXXXXX......   (COMMON)
+page57    XXXXXXXXXX..............   (EFFECT DEFF LEFF TRANS INIT)
+page58    XXXXXXXXXXXXXXXXXXXX....   (TEST MACHINE_TEST)
+page59    XXXXX...................   (MACHINE EVENT)
+page60    XXXXXXXXXXXXXXXXXXXXXXXX  warning: 99% full   (PAGED_MD TEST2 COMMON2)
+page61    XXXXXXXXXXXXXXXXXXXX....   (FONT FON)
+.text     XXXXXXXXXXXXXXXXXXX.....
+
+
+
+
+
+
+
+
+
+

@@ -18,11 +18,8 @@
  * I do not like this mode and plan on completely changing it to something else,
  * as it is right now we are using prison_break style scoring on only side ramp and underground shots
  *
- * TODO: come up with proper mode
- * TODO: potentially we can make a 2nd and 3rd mode that score differently
  */
-/* CALLSET_SECTION (prison_break, __machine2__) */
-
+/* CALLSET_SECTION (prison_break, __machine3__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -38,7 +35,6 @@ const U8 			PRISON_BREAK_GOAL_MAX 	= 10;
 //local variables
 U8 			prison_break_mode_shots_made; //number of shots made this mode
 __local__ U8 			prison_break_modes_achieved;
-__local__ U8 			prison_break_modes_completed;
 U8			prison_break_mode_timer;
 score_t 	prison_break_mode_score; //score for this mode only
 score_t 	prison_break_mode_last_score;
@@ -46,6 +42,14 @@ score_t 	prison_break_mode_next_score;
 score_t 	prison_break_mode_score_total_score;
 
 //external variables
+
+//internally called function prototypes  --external found at protos.h
+void prison_break_reset (void);
+void prison_break_player_reset (void);
+void prison_break_effect_deff(void);
+void prison_break_mode_init (void);
+void prison_break_mode_expire (void);
+void prison_break_mode_exit (void);
 
 /****************************************************************************
  * mode definition structure
@@ -67,7 +71,6 @@ struct timed_mode_ops prison_break_mode = {
 };
 
 
-
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
@@ -80,7 +83,7 @@ void prison_break_reset (void) {
 void prison_break_player_reset (void) {
 	prison_break_reset();
 	prison_break_modes_achieved = 0;
-	prison_break_modes_completed = 0;
+	prison_break_mode_shots_made = 0;
 	score_zero(prison_break_mode_score_total_score);
 }//end of function
 
@@ -105,9 +108,9 @@ void prison_break_mode_init (void) {
 
 	score_zero(prison_break_mode_next_score);
 	switch (prison_break_modes_achieved) {
-		case 1: score(SC_6M); break;
-		case 2: score(SC_7M); break;
-		default: score(SC_8M);
+		case 1: score(SC_15M); 	score_add(prison_break_mode_score, score_table[SC_15M]);	break;
+		case 2: score(SC_20M);  score_add(prison_break_mode_score, score_table[SC_20M]);	break;
+		default: score(SC_25M);  score_add(prison_break_mode_score, score_table[SC_25M]);
 	}//end of switch
 	flag_on (FLAG_IS_PBREAK_ACTIVATED);
 }//end of function
@@ -145,9 +148,7 @@ CALLSET_ENTRY (prison_break, sw_claw_prison_break) {
 
 
 
-//TODO: kill this and create
-//fast scoring
-CALLSET_ENTRY (prison_break, prison_break_made) {
+void prison_break_made (void) {
 	++prison_break_mode_shots_made;
 	score_add(prison_break_mode_score, prison_break_mode_last_score);
 	score_add (prison_break_mode_score_total_score, prison_break_mode_last_score);
@@ -163,7 +164,7 @@ CALLSET_ENTRY (prison_break, prison_break_made) {
  ****************************************************************************/
 void prison_break_start_effect_deff(void) {
 	U8 i;
-	for (i=1; i < 9; i++) {			//SPELL OUT LETTRS
+	for (i=1; i < 9; i++) {			//SPELL OUT LETTeRS
 			dmd_alloc_low_clean ();
 			sprintf ("BREAKOUT");
 			if (i < 9)
@@ -218,8 +219,8 @@ void prison_break_effect_deff(void) {
 
 void prison_break_end_effect_deff(void) {
 	dmd_alloc_pair_clean();
-	font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BREAKOUT");
-	sprintf("COMPLETED");
+	font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BROKE OUT");
+	sprintf_score (prison_break_mode_score);
 	font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);

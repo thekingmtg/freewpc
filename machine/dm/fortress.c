@@ -8,7 +8,7 @@
  *
  *
  * */
-/* CALLSET_SECTION (fortress, __machine2__) */
+/* CALLSET_SECTION (fortress, __machine3__) */
 
 
 #include <freewpc.h>
@@ -18,9 +18,19 @@
 score_t		fortress_score;
 U8			fortress_jackpot_shots_made;
 U8			fortress_MessageCounter;
+__boolean	fortress_start_music;
 
 //external variables
 extern U8			NumBallsFrozen; //from lock_freeze_mbstart.c
+
+//internally called function prototypes  --external found at protos.h
+void fortress_player_reset (void);
+void fortress_start_effect_deff(void);
+void fortress_jackpot_effect1_deff(void);
+void fortress_jackpot_effect2_deff(void);
+void fortress_jackpot_effect3_deff(void);
+void fortress_jackpot_effect(void);
+void fortress_effect_deff (void);
 
 /****************************************************************************
  * multiball definition structure
@@ -28,7 +38,7 @@ extern U8			NumBallsFrozen; //from lock_freeze_mbstart.c
 struct mb_mode_ops fortress_mode = {
 	DEFAULT_MBMODE,
 	//.update = , /* The update callback is invoked whenever the state of the multiball changes. */
-	.music = MUS_MB,
+//	.music = MUS_MB,
 	.deff_starting = DEFF_FORTRESS_START_EFFECT,
 	.deff_running = DEFF_FORTRESS_EFFECT,
 	//.deff_ending = ,
@@ -46,41 +56,49 @@ struct mb_mode_ops fortress_mode = {
 void fortress_player_reset (void) {
 	flag_off(FLAG_IS_FORTRESS_ACTIVATED);
 	score_zero(fortress_score);
-	fortress_jackpot_shots_made = 0;
+	fortress_jackpot_shots_made = 0; //these need to be zeroed in before we enter the mode so bonus doesn't fake trigger
+	fortress_start_music = FALSE;
 }//end of function
 
+
+
 CALLSET_ENTRY (fortress, start_player) { fortress_player_reset(); }
-
-
 
 /****************************************************************************
  * external event listeners
  ****************************************************************************/
-CALLSET_ENTRY (fortress, music_refresh)  { mb_mode_music_refresh (&fortress_mode); }
+CALLSET_ENTRY (fortress, music_refresh)  {
+	if (fortress_start_music)						music_request (HELICOPTER, PRI_GAME_QUICK8);
+	else if (flag_test(FLAG_IS_FORTRESS_ACTIVATED))	music_request (MUS_MB, PRI_GAME_QUICK7);
+}//end of function
+
 CALLSET_ENTRY (fortress, display_update) { mb_mode_display_update (&fortress_mode); }
 
 CALLSET_ENTRY (fortress, end_ball) {
-	callset_invoke(cramp_jackpot_light_off);
-	if (flag_test(FLAG_IS_FORTRESS_ACTIVATED))
-				mb_mode_end_ball (&fortress_mode);
+	if (flag_test(FLAG_IS_FORTRESS_ACTIVATED)) {
+		mb_mode_end_ball (&fortress_mode);
+		jackpot_reset();
+		flag_off(FLAG_IS_FORTRESS_ACTIVATED);
+	}
+}//end of function
+
+//puts in grace period if set
+CALLSET_ENTRY (fortress, single_ball_play) {
+	if (flag_test(FLAG_IS_FORTRESS_ACTIVATED)) {
+		mb_mode_end_ball (&fortress_mode);
+		jackpot_reset();
+		flag_off(FLAG_IS_FORTRESS_ACTIVATED);
+	}
 }//end of function
 
 /****************************************************************************
  * body
  *
  ***************************************************************************/
-CALLSET_ENTRY (fortress, fortress_start) {
-	//SOUNDS
-			//music_timed_disable(5000);
-			sound_start (ST_EFFECT, HELICOPTER, SL_4S, SP_NORMAL);
-			task_sleep (TIME_2S);
-			sound_start (ST_EFFECT, HELICOPTER, SL_4S, SP_NORMAL);
-			U8 	fortress_SoundCounter;
-			fortress_SoundCounter = random_scaled(2);//from kernal/random.c - pick number from 0 to 2
-			if (fortress_SoundCounter == 0)
-				sound_start (ST_SPEECH, SPCH_SOMETHING_RIGHT_PREV_LIFE, SL_4S, PRI_GAME_QUICK5);
-			else
-				sound_start (ST_SPEECH, SPCH_SEND_MANIAC, SL_4S, PRI_GAME_QUICK5);
+void fortress_start(void) {
+	fortress_start_music = TRUE; //for to play the helicopter instead of the music
+	flag_on(FLAG_IS_FORTRESS_ACTIVATED);
+	multiball_started();//reset all MB start criteria for next time
 	//LIGHTS
 			lamp_tristate_flash(LM_FORTRESS_MULTIBALL);
 			task_sleep (TIME_2S);
@@ -89,29 +107,41 @@ CALLSET_ENTRY (fortress, fortress_start) {
 			lamp_tristate_off (LM_FREEZE_2);
 			lamp_tristate_off (LM_FREEZE_3);
 			lamp_tristate_off (LM_FREEZE_4);
-	flag_on(FLAG_IS_FORTRESS_ACTIVATED);
+	//SOUNDS
+			U8 	fortress_SoundCounter;
+			fortress_SoundCounter = random_scaled(2);//from kernal/random.c - pick number from 0 to 2
+			if (fortress_SoundCounter == 0)
+				sound_start (ST_SPEECH, SPCH_SOMETHING_RIGHT_PREV_LIFE, SL_4S, PRI_GAME_QUICK5);
+			else
+				sound_start (ST_SPEECH, SPCH_SEND_MANIAC, SL_4S, PRI_GAME_QUICK5);
+	task_sleep (TIME_3S);
+	fortress_start_music = FALSE; //for to kill the music
 	mb_mode_start(&fortress_mode);
-	//music_enable();
-	callset_invoke(jackpot_init);//randomize which jackpot shot to make
-	set_ball_count (2); //NumBallsFrozen
-	callset_invoke(multiball_started);//reset all MB start criteria for next time
+
+	choose_random_jackpot();//randomize which jackpot shot to make
+	set_ball_count (2); //TODO: NumBallsFrozen  --1ST BALL RELEASED AT TOP_POPPER.C
 }//end of function
 
 
 
 //jackpot shot
-CALLSET_ENTRY (fortress, fortress_jackpot_made) {
-	++fortress_jackpot_shots_made;
-	U8 	fortress_SoundCounter;
-	fortress_SoundCounter = random_scaled(4);//from kernal/random.c - pick number from 0 to 2
-	if (fortress_SoundCounter == 0) 		sound_start (ST_SPEECH, SPCH_AHHHGGG, SL_4S, PRI_GAME_QUICK5);
-	else if (fortress_SoundCounter == 1) 	sound_start (ST_SPEECH, SPCH_JACKPOT, SL_4S, PRI_GAME_QUICK5);
-	else if (fortress_SoundCounter == 2) 	sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_WES, SL_4S, PRI_GAME_QUICK5);
-	else 									sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_SLY, SL_4S, PRI_GAME_QUICK5);
-	score (SC_15M);
+void fortress_jackpot_made(void) {
 	score_add (fortress_score, score_table[SC_15M]);
+	U8 	fortress_SoundCounter;
+	fortress_SoundCounter = random_scaled(2);//from kernal/random.c - pick number from 0 to 2
+	if (++fortress_jackpot_shots_made % 2 == 0) {
+			if (fortress_SoundCounter == 0) 	sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_WES, SL_4S, PRI_GAME_QUICK5);
+			else 								sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_SLY, SL_4S, PRI_GAME_QUICK5);
+	}
+	else {
+			if (fortress_SoundCounter == 0) 	sound_start (ST_SPEECH, SPCH_AHHHGGG, SL_4S, PRI_GAME_QUICK5);
+			else 								sound_start (ST_SPEECH, SPCH_JACKPOT, SL_4S, PRI_GAME_QUICK5);
+	}
+	score (SC_15M);
 	fortress_jackpot_effect();//under /kernel/deff.c
 }//end of function
+
+
 
 /****************************************************************************
  * DMD display and sound effects

@@ -32,8 +32,7 @@
  * same as above except
  *
  */
-/* CALLSET_SECTION (underground, __machine2__) */
-
+/*CALLSET_SECTION (underground, __machine2__)*/
 #include <freewpc.h>
 #include "dm/global_constants.h"
 #include "search.h"
@@ -49,8 +48,17 @@ U8 			undergroundSwitchDebouncer;
 U8 			underground_shots_made;
 U8 			underground_goal;
 U8			computerAwards;
-
+__boolean 	underground_inBall_search;
 //external variables
+
+//internally called function prototypes  --external found at protos.h
+void underground_reset (void);
+void underground_task (void);
+void square_draw (U8 sq);
+void show_text_on_squares (U8 times);
+void square_init (void);
+void computer_award(void);
+void computer_light_off (void);
 
 /****************************************************************************
  * initialize  and exit
@@ -59,6 +67,7 @@ void underground_reset (void) {
 	undergroundSwitchDebouncer = 0;
 	underground_shots_made = 0;
 	underground_goal = 0;
+	underground_inBall_search = FALSE;
 }//end of function
 
 void player_underground_reset(void) {
@@ -72,27 +81,27 @@ CALLSET_ENTRY (underground, start_ball) { underground_reset(); }
 /****************************************************************************
  * playfield lights and flags
  ***************************************************************************/
-CALLSET_ENTRY (underground, underground_jackpot_light_on) {
+void underground_jackpot_light_on(void) {
 	flag_on(FLAG_IS_UGROUND_JACKPOT_ACTIVATED);
 	lamp_tristate_on (LM_UNDERGROUND_JACKPOT);
 }//end of function
 
-CALLSET_ENTRY (underground, underground_jackpot_light_off) {
+void underground_jackpot_light_off(void) {
 	flag_off(FLAG_IS_UGROUND_JACKPOT_ACTIVATED);
 	lamp_tristate_off (LM_UNDERGROUND_JACKPOT);
 }//end of function
 
-CALLSET_ENTRY (underground, underground_arrow_light_on) {
+void underground_arrow_light_on(void) {
 	flag_on (FLAG_IS_UGROUND_ARROW_ACTIVATED);
 	lamp_tristate_on (LM_UNDERGROUND_ARROW);
 }//end of function
 
-CALLSET_ENTRY (underground, underground_arrow_light_off) {
+void underground_arrow_light_off(void) {
 	flag_off (FLAG_IS_UGROUND_ARROW_ACTIVATED);
 	lamp_tristate_off (LM_UNDERGROUND_ARROW);
 }//end of function
 
-CALLSET_ENTRY (underground, computer_light_on) {
+void computer_light_on(void) {
 	flag_on (FLAG_IS_COMPUTER_ACTIVATED);
 	lamp_tristate_flash (LM_COMPUTER);
 }//end of function
@@ -125,48 +134,48 @@ void underground_task (void) {
  * it uses no lights - only have to watch what sounds are triggered
  ****************************************************************************/
 CALLSET_ENTRY (underground, sw_bottom_popper) {
-	if (++undergroundSwitchDebouncer == 1) {
-			++underground_shots_made;
-			score (SC_100K);//located in kernal/score.c
-			U8	underground_SoundCounter;
-			//LIGHTING EFFECTS*****************************
-				//	leff_start (LEFF_UNDERGROUND_KICKOUT);
-			//SOUNDS		*****************************
-			if (flag_test (FLAG_IS_PBREAK_ACTIVATED) )  { callset_invoke (prison_break_made); }
-			else {
-					underground_SoundCounter = random_scaled(2);//from kernal/random.c
-					if (underground_SoundCounter == 0 )
-						sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
-					else if (underground_SoundCounter == 1 )
-						sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
-			}
-			//CALLS			*****************************
-			if (flag_test(FLAG_IS_COMPUTER_ACTIVATED) ) 				computer_award();
-			else {
-				if (flag_test(FLAG_IS_UGROUND_JACKPOT_ACTIVATED) ) 		callset_invoke(score_jackpot);
-				if (flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED) )	callset_invoke(capture_simon_made);
-				else {
-					if (flag_test(FLAG_IS_COMBOS_KILLED) ) 				callset_invoke(combo_init);
-					else if ( flag_test(FLAG_IS_COMBO_UNDER_ACTIVATED)) callset_invoke(combo_hit);
-				}//end of else --FLAG_IS_CAPSIM_UNDER_ACTIVATED
-			}//end of  else --flag_test  FLAG_IS_COMPUTER_ACTIVATED
-			//if nothing special, do normal display effects
-			if(		!flag_test (FLAG_IS_PBREAK_ACTIVATED)
-				&& 	!flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
-				&& 	!flag_test (FLAG_IS_COMPUTER_ACTIVATED)
-				&& 	!flag_test (FLAG_IS_UGROUND_JACKPOT_ACTIVATED) )
-								deff_start (DEFF_UNDERGROUND_EFFECT);
-			//fire sol
-			if (!flag_test(FLAG_IS_COMPUTER_ACTIVATED) ) sol_request_async(SOL_BOTTOM_POPPER);
-	}//end of if DEBOUNCER
-	task_create_gid1 (GID_UG_DEBOUNCE, underground_task);
+	if (!underground_inBall_search) {
+			if (++undergroundSwitchDebouncer == 1) {
+					++underground_shots_made;
+					score (SC_100K);//located in kernal/score.c
+					U8	underground_SoundCounter;
+					//LIGHTING EFFECTS*****************************
+						//	leff_start (LEFF_UNDERGROUND_KICKOUT);
+					//SOUNDS		*****************************
+					if (flag_test (FLAG_IS_PBREAK_ACTIVATED) )  { prison_break_made(); }
+					else {
+							underground_SoundCounter = random_scaled(2);//from kernal/random.c
+							if (underground_SoundCounter == 0 )
+								sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
+							else if (underground_SoundCounter == 1 )
+								sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
+					}
+					//CALLS			*****************************
+					if (flag_test(FLAG_IS_COMPUTER_ACTIVATED) ) 				computer_award();
+					else {
+						if (flag_test(FLAG_IS_UGROUND_JACKPOT_ACTIVATED) ) 		score_jackpot();
+						if (flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED) )	capture_simon_made();
+						else {
+							if (flag_test(FLAG_IS_COMBOS_KILLED) ) 				combo_init();
+							else if ( flag_test(FLAG_IS_COMBO_UNDER_ACTIVATED)) combo_hit();
+						}//end of else --FLAG_IS_CAPSIM_UNDER_ACTIVATED
+					}//end of  else --flag_test  FLAG_IS_COMPUTER_ACTIVATED
+					//if nothing special, do normal display effects
+					if(		!flag_test (FLAG_IS_PBREAK_ACTIVATED)
+						&& 	!flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
+						&& 	!flag_test (FLAG_IS_COMPUTER_ACTIVATED)
+						&& 	!flag_test (FLAG_IS_UGROUND_JACKPOT_ACTIVATED) )
+										deff_start (DEFF_UNDERGROUND_EFFECT);
+					//fire sol
+					if (!flag_test(FLAG_IS_COMPUTER_ACTIVATED) ) sol_request_async(SOL_BOTTOM_POPPER);
+			}//end of if DEBOUNCER
+			task_create_gid1 (GID_UG_DEBOUNCE, underground_task);
+	}//end of !underground_inBall_search
 }//end of function
 
 
 void computer_award(void) {
 	ball_search_monitor_stop ();
-	//music_timed_disable(TIME_5S);
-	//music_disable();
 	deff_start (DEFF_COMPUTER_AWARD_EFFECT);
 	task_sleep(TIME_3S);
 	switch (computerAwards) {
@@ -178,41 +187,46 @@ void computer_award(void) {
 	case 1 :
 			deff_start (DEFF_COMP_TRIP_CAR_CRASH);
 			task_sleep(TIME_2S);
-			callset_invoke (comp_award_trip_car_crash);
+			comp_award_trip_car_crash();
 			break;
 	case 2 :
 			deff_start (DEFF_COMP_COLLECT_STANDUPS);
 			task_sleep(TIME_2S);
-			//TODO: put routine here
+			collect_standups();
 			break;
 	case 3 :
 			deff_start (DEFF_COMP_LIGHT_ARROWS);
 			task_sleep(TIME_2S);
-			callset_invoke (comp_award_light_arrows);
+			comp_award_light_arrows(); // combos.c
 			break;
 	case 4 :
 			deff_start (DEFF_COMP_LIGHT_EXTRA_BALL);
 			task_sleep(TIME_2S);
-			//TODO: put routine here
+			extraball_light_on();
 			break;
 	case 5 :
 			deff_start (DEFF_COMP_MAXIMIZE_FREEZES);
 			task_sleep(TIME_2S);
-			//TODO: put routine here
+			maximize_freeze();
 			break;
 	case 6 :
 			deff_start (DEFF_COMP_DOUB_RETINA);
 			task_sleep(TIME_2S);
-			callset_invoke (comp_award_doub_retina);
+			comp_award_doub_retina();
 			break;
 	}//end of switch
 	task_sleep(TIME_4S);
 	if (++undergroundSwitchDebouncer == 1)  sol_request_async(SOL_BOTTOM_POPPER);
 	task_create_gid1 (GID_UG_DEBOUNCE, underground_task);
 	computer_light_off();
-	//music_enable();
 	ball_search_monitor_start ();
 }//end of function
+
+
+CALLSET_ENTRY (underground, ball_search){
+	underground_inBall_search = TRUE;
+}
+
 
 /****************************************************************************
  * display effects

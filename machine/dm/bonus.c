@@ -1,8 +1,10 @@
 /*
  * bonus.c
  */
-/* CALLSET_SECTION (bonus, __machine3__) */
+
 #include <freewpc.h>
+#include <eb.h>
+#include <status.h>
 #include "dm/global_constants.h"
 
 //constants
@@ -25,11 +27,9 @@ extern U8 		capture_simon_modes_completed;
 
 extern U8 		prison_break_mode_shots_made;		//from prison_break.c
 extern U8 		prison_break_modes_achieved;
-extern U8 		prison_break_modes_completed;
 
 extern U8 		acmag_mode_shots_made;				//from acmag.c
 extern U8 		acmag_modes_achieved;
-extern U8 		acmag_modes_completed;
 
 extern U8 		explode_mode_shots_made;			//from EXPLODE.c
 extern score_t 	explode_mode_score;
@@ -46,25 +46,36 @@ extern U8		fortress_jackpot_shots_made;
 
 extern U8 		rollover_bonus_multiplier; 			//from rollovers.c
 
+//internally called function prototypes  --external found at protos.h
+void bonus_button_monitor (void);
+void bonus_sched_transition (void);
+void bonus_pause (void);
+bool check_for_big_score (void);
+bool check_for_puny_score (void);
 
 /****************************************************************************
  * body
  ****************************************************************************/
+
 CALLSET_ENTRY (bonus, bonus){
 	deff_start (DEFF_BONUS);
 //	leff_start (LEFF_BONUS);
-	task_sleep_sec (1);
-	while (deff_get_active() == DEFF_BONUS)
-		task_sleep (TIME_66MS);
+//	task_sleep_sec (1);
+//	while (deff_get_active() == DEFF_BONUS)  task_sleep (TIME_500MS);
 //	leff_stop (LEFF_BONUS);
 }//end of function
 
 
-void bonus_deff (void) {
-	task_sleep (TIME_100MS);	/* Wait a bit so the previous music_stop doesn't kill the sounds */
-	score_zero (total_bonus);	/* Clear the bonus score */
-	sound_start (ST_EFFECT, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 
+void bonus_deff (void) {
+	in_bonus = TRUE;
+//	music_disable();
+//			task_kill_gid (GID_MUSIC_REFRESH);
+//			music_off ();
+
+	task_sleep (TIME_100MS);	/* Wait a bit so the previous music_stop doesn't kill the sounds */
+	sound_start (ST_EFFECT, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
+	score_zero (total_bonus);	/* Clear the bonus score */
 	/* Show Initial bonus screen */
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "BONUS");
@@ -78,7 +89,7 @@ void bonus_deff (void) {
 	 * *car crash scoring and display *
 	 * **/
 	if (car_crash_shots_made > 0) {
-		sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -94,10 +105,13 @@ void bonus_deff (void) {
 			bonus_pause ();
 	}/***end of car crash scoring and display ***/
 
+
+
 	/**
 	 * *car chase scoring and display *
 	 * **/
 	if (car_chase_modes_achieved > 0) {
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -115,14 +129,16 @@ void bonus_deff (void) {
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of car chase scoring and display ***/
+
+
 
 	/**
 	 * *capture_simon scoring and display *
 	 * **/
 	if (capture_simon_modes_achieved > 0) {
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -145,14 +161,16 @@ void bonus_deff (void) {
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of capture_simon scoring and display ***/
+
+
 
 	/**
 	 * *prison_break scoring and display *
 	 * **/
 	if (prison_break_modes_achieved > 0) {
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -164,18 +182,12 @@ void bonus_deff (void) {
 			score_mul (bonus_scored, prison_break_modes_achieved);
 			score_add (total_bonus, bonus_scored);
 
-			score_zero (bonus_scored);
-			score_add (bonus_scored, score_table[SC_5M]);
-			score_mul (bonus_scored, prison_break_modes_completed);
-			score_add (total_bonus, bonus_scored);
-
 			sprintf_score (bonus_scored);
 			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("BREAKOUT");
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of prison_break scoring and display ***/
 
@@ -183,6 +195,7 @@ void bonus_deff (void) {
 	 * *acmag scoring and display *
 	 * **/
 	if (acmag_modes_achieved > 0) {
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -194,18 +207,12 @@ void bonus_deff (void) {
 			score_mul (bonus_scored, acmag_modes_achieved);
 			score_add (total_bonus, bonus_scored);
 
-			score_zero (bonus_scored);
-			score_add (bonus_scored, score_table[SC_5M]);
-			score_mul (bonus_scored, acmag_modes_completed);
-			score_add (total_bonus, bonus_scored);
-
 			sprintf_score (bonus_scored);
 			font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 			sprintf ("ACMAG");
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of acmag scoring and display ***/
 
@@ -213,6 +220,7 @@ void bonus_deff (void) {
 	 * *explode scoring and display *
 	 * **/
 	if (explode_mode_shots_made > 0) {
+			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -226,7 +234,6 @@ void bonus_deff (void) {
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of explode scoring and display ***/
 
@@ -234,6 +241,7 @@ void bonus_deff (void) {
 	 * *superjets scoring and display *
 	 * **/
 	if (superjets_modes_achieved > 0) {
+		sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -251,14 +259,16 @@ void bonus_deff (void) {
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of superjets scoring and display ***/
+
+
 
 	/**
 	 * *standupFrenzy scoring and display *
 	 * **/
-	if (standupFrenzy_modes_achieved> 0) {
+	if (standupFrenzy_modes_achieved > 0) {
+		sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			dmd_alloc_low_clean ();
 			score_zero (bonus_scored);
 			score_add (bonus_scored, score_table[SC_100K]);
@@ -276,34 +286,38 @@ void bonus_deff (void) {
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 			bonus_sched_transition ();
 			dmd_show_low ();
-			sound_start (ST_SAMPLE, BONUS_SHORT, SL_2S, PRI_GAME_QUICK2);
 			bonus_pause ();
 	}/***end of standupFrenzy scoring and display ***/
 
+
+
 	/* Show final score */
+	sound_start (ST_SAMPLE, BONUS_LONG, SL_4S, PRI_GAME_QUICK6);
 	score_long (total_bonus); // Add to total bonus to player score
 	dmd_alloc_low_clean ();
-	sound_start (ST_SAMPLE, BONUS_LONG, SL_4S, PRI_GAME_QUICK6);
 	scores_draw ();
 	dmd_sched_transition (&trans_scroll_up);
 	dmd_show_low ();
 	task_kill_gid (GID_BONUS_BUTTON_MONITOR);
+	task_sleep_sec (1);
 //	task_kill_gid (GID_BONUS_TALKING);
 
 	/*make verbal comments on final score*/
 	U8 BSoundCounter;
 	if (check_for_puny_score () ) {
-			BSoundCounter = random_scaled(3);
+			BSoundCounter = random_scaled(2);
 			if (BSoundCounter == 0)	sound_start (ST_SAMPLE, SPCH_COMPETITION, SL_2S, PRI_GAME_QUICK6);
+			if (BSoundCounter == 1)	sound_start (ST_SAMPLE, SPCH_SIMON_LAUGH_LONG, SL_2S, PRI_GAME_QUICK6);
+	}
+	else if (check_for_big_score () ) {
+			BSoundCounter = random_scaled(3);
+			if (BSoundCounter == 0)	sound_start (ST_SAMPLE, SPCH_BACK_IN_FRIDGE, SL_2S, PRI_GAME_QUICK6);
 			if (BSoundCounter == 1)	sound_start (ST_SAMPLE, SPCH_HOW_NICE, SL_2S, PRI_GAME_QUICK6);
 			if (BSoundCounter == 2)	sound_start (ST_SAMPLE, SPCH_LOVE_THIS_GUY, SL_2S, PRI_GAME_QUICK6);
 	}
-	else if (check_for_big_score () ) {
-			BSoundCounter = random_scaled(2);
-			if (BSoundCounter == 0)	sound_start (ST_SAMPLE, SPCH_BACK_IN_FRIDGE, SL_2S, PRI_GAME_QUICK6);
-			if (BSoundCounter == 1)	sound_start (ST_SAMPLE, SPCH_SIMON_LAUGH_LONG, SL_2S, PRI_GAME_QUICK6);
-	}
 	task_sleep_sec (2);
+	in_bonus = FALSE;
+	callset_invoke (bonus_complete);
 	deff_exit ();
 }//END OF FUNCTION
 
@@ -318,11 +332,13 @@ void bonus_deff (void) {
 void bonus_button_monitor (void) {
 	buttons_held = FALSE;
 	for (;;) {
-		if ((switch_poll_logical (SW_LEFT_BUTTON)
-			&& switch_poll_logical (SW_RIGHT_BUTTON))
-			&& buttons_held == FALSE)
+		if ( (	switch_poll_logical (SW_LEFT_BUTTON)
+			||	switch_poll_logical (SW_RIGHT_BUTTON) )
+			&& 	buttons_held == FALSE ) {
 					buttons_held = TRUE;
-		task_sleep (TIME_100MS);
+		}
+		else 		buttons_held == FALSE;
+		task_sleep (TIME_200MS);
 	}//end of for loop
 }//end of function
 

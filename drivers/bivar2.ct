@@ -149,6 +149,7 @@ void @self_go_right (void) {
 
 void @self_go_to_center_monitor (void) {
 	task_sleep(TIME_500MS);
+	task_sleep(TIME_100MS);
 	disable_interrupts ();
 	@self_state = @SELF_IDLE;
 	sol_disable (@right_sol);
@@ -201,6 +202,7 @@ CALLSET_ENTRY (@self, @right_sw) {
 	@self_stop (); 
 	@self_location = @SELF_RIGHT;
 }
+
 
 void @self_bump_monitor (void) {
 	task_sleep(TIME_100MS);

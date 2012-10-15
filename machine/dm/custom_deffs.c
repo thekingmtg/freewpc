@@ -83,7 +83,9 @@ void plunge_ball_effect_deff(void) {
  * trouble shooting
  *
  ****************************************************************************/
-CALLSET_ENTRY (custom_deffs, sw_left_handle_button) {deff_start (DEFF_TROUBLESHOOTING);}
+CALLSET_ENTRY (custom_deffs, sw_left_handle_button) {
+//	deff_start (DEFF_TROUBLESHOOTING);
+}
 
 void troubleshooting_deff(void) {
 	dmd_alloc_low_clean ();

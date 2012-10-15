@@ -183,8 +183,10 @@ void amode_kill_music (void)
 void (*amode_page_table[]) (void) = {
 #ifdef CONFIG_DMD_OR_ALPHA
 	amode_score_page,
-#if (MACHINE_DMD == 1)
-	amode_logo_page,
+#ifndef NO_FREEWPC_LOGO_DISPLAY
+		#if (MACHINE_DMD == 1)
+			amode_logo_page,
+		#endif
 #endif
 	amode_credits_page,
 	amode_freeplay_page,

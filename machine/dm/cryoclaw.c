@@ -8,7 +8,6 @@
  *
  *
  */
-/* CALLSET_SECTION (cryoclaw, __machine2__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -19,6 +18,14 @@
 
 //local variables
 U8			cryoclaw_mode_timer;
+
+//internally called function prototypes  --external found at protos.h
+void cryoclaw_mode_init (void);
+void cryoclaw_mode_expire (void);
+void cryoclaw_mode_exit (void);
+void cryoclaw_start_effect_deff(void);
+void cryoclaw_effect_deff(void);
+void cryoclaw_end_effect_deff(void);
 
 /****************************************************************************
  * mode definition structure
@@ -55,17 +62,16 @@ void cryoclaw_mode_init (void) {
 		sound_start (ST_SPEECH, SPCH_USE_TRIGGERS_TO_MOVE_CRYOCLAW, SL_4S, PRI_GAME_QUICK5);
 		flipper_disable ();							//approximately 4 secs, the player cannot control anything
 		task_sleep(TIME_2S);
-		clawmagnet_on (); //THIS STILL DOESN'T WORK!!!!!
+		clawmagnet_on ();
 		elevator_move_up();							//move up
 		task_sleep(TIME_100MS);						//then back down back to home
 		elevator_move_down();
 		task_sleep(TIME_500MS);
-//		claw_go_left();  							//move claw to other side
 		claw_go_left_to_center();
 		task_sleep(TIME_1S);
 		sound_start (ST_SPEECH, SPCH_USE_BUTTONS_TO_RELEASE_BALL, SL_4S, PRI_GAME_QUICK5);
 		flag_on(FLAG_IS_BALL_ON_CLAW);							//this enables control of claw with flippers
-		callset_invoke(rramp_clawready_off);		//turn off diverter
+		rramp_clawready_off();		//turn off diverter
 }//end of fufnction
 
 

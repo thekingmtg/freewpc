@@ -230,6 +230,9 @@ void dmd_reset_transition (void);
 void frame_draw (U16 id);
 void frame_draw2 (U16 id);
 void frame_draw_plane (U16 id);
+
+void frame_draw_plane_test (U16 id);
+
 void bmp_draw (U8 x, U8 y, U16 id);
 
 __transition__ void dmd_text_outline (void);

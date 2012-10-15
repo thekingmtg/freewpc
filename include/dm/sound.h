@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  * 
- * You should have received a copy of the GNU General Public License
+ * You should have 0received a copy of the GNU General Public License
  * along with FreeWPC; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
@@ -23,10 +23,11 @@
 
 
 
+#define MUS_NONE 0x0
 #define MUS_PLUNGER 0x1
 #define MUS_BG 0x2
-#define MUS_BG_A 0x3
-#define MUS_BG_B 0x4
+#define MUS_MB_A 0x3
+#define MUS_MB_B 0x4
 #define MUS_MB 0x5
 #define MUS_MB_READY 0x6
 #define MUS_MD_STANDUP_FRENZY 0x8

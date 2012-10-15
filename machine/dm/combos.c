@@ -12,8 +12,6 @@
  * awarded a combo and so on.  if N number of combos are reached then computer award is lit.
  * computer award can be gotten at underground shot.
  *
- * TODO: handle an underground shot for computer award when the underground arrow
- * is also lit
  */
 /* CALLSET_SECTION (combos, __machine2__) */
 
@@ -38,6 +36,13 @@ __boolean 		computer_award_activated;
 
 //external variables
 
+//internally called function prototypes  --external found at protos.h
+void combo_reset (void);
+void player_combo_reset (void);
+void flash_combos(void);
+void choose_random_flag_set(void);
+void combo_task (void);
+
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
@@ -49,7 +54,7 @@ void combo_reset (void) {
 	flag_off (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED);
 	flag_off (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
 	flag_off (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
-	if (flag_test (FLAG_IS_COMPUTER_ACTIVATED) ) callset_invoke(computer_light_on);
+	if (flag_test (FLAG_IS_COMPUTER_ACTIVATED) ) computer_light_on();
 }//end of function
 
 void player_combo_reset (void) {
@@ -62,16 +67,16 @@ void player_combo_reset (void) {
 
 CALLSET_ENTRY (combo, start_player) 	{ player_combo_reset(); }
 CALLSET_ENTRY (combo, start_ball) 		{ combo_reset(); }
-CALLSET_ENTRY (combo, valid_playfield) 	{ callset_invoke(combo_init); }
+CALLSET_ENTRY (combo, valid_playfield) 	{ combo_init(); }
 
 /****************************************************************************
  * body
  *
  ****************************************************************************/
-CALLSET_ENTRY (combo, combo_init) {
+void combo_init(void) {
 	flag_off (FLAG_IS_COMBOS_KILLED);
 	choose_random_flag_set();
-	callset_invoke (all_arrow_update);//at arrow_handler.c
+	all_arrow_update(); // at arrow_handler.c
 	task_create_gid1 (GID_COMBO, combo_task);
 }//end of function
 
@@ -91,7 +96,7 @@ void combo_task (void) {
 	flag_off (FLAG_IS_COMBO_LEFTORB_ACTIVATED);
 	flag_off (FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
 	flag_on (FLAG_IS_COMBOS_KILLED);
-	callset_invoke (all_arrow_update);
+	all_arrow_update();
 	task_exit();
 }//end of function
 
@@ -111,25 +116,25 @@ void flash_combos(void){
 
 
 
-CALLSET_ENTRY (combo, combo_hit) {
+void combo_hit(void ) {
 	if (++combo_counter >= combo_goal  && !computer_award_activated) {
 		combo_goal += COMBO_EASY_GOAL_STEP;
-		callset_invoke(computer_light_on); 	//at underground.c
+		computer_light_on(); 	//at underground.c
 		deff_start (DEFF_COMPUTER_EFFECT);
 	} else 	if (combo_counter < combo_goal) deff_start (DEFF_COMBO_EFFECT);
 	// reset the task timer
 	choose_random_flag_set();
-	callset_invoke (all_arrow_update);
+	all_arrow_update();
 	task_recreate_gid (GID_COMBO, combo_task);
 }//end of function
 
 
 
 //called from computer award in underground.c
-CALLSET_ENTRY (combo, comp_award_light_arrows) {
+void comp_award_light_arrows(void) {
 	flag_off (FLAG_IS_COMBOS_KILLED);
 	choose_random_flag_set();
-	callset_invoke (all_arrow_update);
+	all_arrow_update();
 	task_recreate_gid (GID_COMBO, combo_task);
 }//end of function
 
@@ -194,6 +199,10 @@ void choose_random_flag_set(void) {
 		flag_on 	(FLAG_IS_COMBO_RIGHTORB_ACTIVATED);
 		break;
 	}//end of switch
+	//if 1 or less shot away from computer award then do not light underground shot
+	if (	flag_test(FLAG_IS_COMBO_UNDER_ACTIVATED)
+		&&	(flag_test(FLAG_IS_COMPUTER_ACTIVATED)
+		||	combo_goal == combo_counter + 1) )			flag_off 	(FLAG_IS_COMBO_UNDER_ACTIVATED);
 }//end of function
 
 

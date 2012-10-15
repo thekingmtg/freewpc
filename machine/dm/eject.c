@@ -19,6 +19,12 @@
 U8 eject_killer_counter;
 U8 retina_scan_multiplier;
 
+//internally called function prototypes  --external found at protos.h
+void eject_reset (void);
+void player_eject_reset (void);
+void eject_killer_task (void);
+void eyeball_effect_deff(void);
+
 /****************************************************************************
  * initialize  and exit
  ***************************************************************************/
@@ -71,7 +77,7 @@ CALLSET_ENTRY (eject, sw_eject) {
 
 
 //called from comp award at underground.c
-CALLSET_ENTRY (eject, comp_award_doub_retina) {
+void comp_award_doub_retina(void) {
 	retina_scan_multiplier = 2;
 }//end of function
 

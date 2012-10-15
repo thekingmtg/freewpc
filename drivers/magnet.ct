@@ -1,0 +1,75 @@
+/*
+ *
+ * written by James Cardona and based on previous work in divhold.ct 
+ *
+ * support for magnet powered by a fliptonic II's spare circuits.
+ *
+ */
+
+@@class magnet
+
+/* The solenoid that is used*/
+@@parameter sol
+
+@@
+@@file @self.h
+@@
+
+#include <freewpc.h>
+
+void @self_on (void);
+void @self_off (void);
+
+#define @self_sol_bitmask(id) (1 << ( (id & (CHAR_BIT - 1) ) ) )
+
+#define @self_sol_enable(id, bits) { bits |= @self_sol_bitmask(id); };
+
+#define @self_sol_disable(id, bits) { bits &= ~(@self_sol_bitmask(id)); };
+
+
+
+
+
+
+@@
+@@file @self.c
+@@
+
+#include <freewpc.h>
+#include "@self.h"
+
+extern U8 fliptronic_powered_coil_outputs;
+
+/**
+ * The user API to turn on.
+ */
+void @self_on (void) {
+	register U8 out __areg__ = fliptronic_powered_coil_outputs;
+	@self_sol_enable(@sol, out);
+	fliptronic_powered_coil_outputs = out;
+}
+
+
+
+/**
+ * The user API to turn off.
+ */
+void @self_off (void) {
+	register U8 out __areg__ = fliptronic_powered_coil_outputs;
+	@self_sol_disable(@sol, out);
+	fliptronic_powered_coil_outputs = out;
+}
+
+
+
+CALLSET_ENTRY (@self, init, tilt, stop_game) { @self_off (); }
+
+/* vim: set filetype=c: */
+
+
+
+
+
+
+
+

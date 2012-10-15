@@ -68,7 +68,7 @@ static void trap_door_pulse (void)
 		sol_request (SOL_TRAP_DOOR_OPEN);
 
 	task_sleep (TIME_500MS);
-	/* TODO - read 'closed' sw. to see if it worked OK */
+	/* ODO - read 'closed' sw. to see if it worked OK */
 	task_exit ();
 }
 

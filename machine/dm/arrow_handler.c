@@ -4,10 +4,9 @@
  *
  * written by James Cardona
  *
- * Location Description:
- *
- *
  */
+/* CALLSET_SECTION (arrow_handler, __machine2__) */
+
 #include <freewpc.h>
 #include "dm/global_constants.h"
 
@@ -36,89 +35,82 @@ CALLSET_ENTRY (arrow_handler, start_player, start_ball) 	{
  * Arrow handlers
  *
  ****************************************************************************/
-CALLSET_ENTRY (arrow_handler, center_ramp_arrow_update) {
-	if (	!flag_test (FLAG_IS_C_RAMP_ARROW_ACTIVATED)
-	&& ( 	flag_test (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED)
+void center_ramp_arrow_update(void) {
+	if (	flag_test (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED)
 		||	flag_test (FLAG_IS_ACMAG_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED) ) )
-		callset_invoke (cramp_arrow_light_on);
+		||	flag_test (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED) )
+		cramp_arrow_light_on();
 	else
-		callset_invoke (cramp_arrow_light_off);
+		cramp_arrow_light_off();
 }//end of function
 
 
 
-CALLSET_ENTRY (arrow_handler, uground_arrow_update) {
-	if (	!flag_test (FLAG_IS_UGROUND_ARROW_ACTIVATED)
-	&& ( 	flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_UNDER_ACTIVATED) ) )
-		callset_invoke (underground_arrow_light_on);
+void uground_arrow_update(void) {
+	if (	flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
+		||	flag_test (FLAG_IS_COMBO_UNDER_ACTIVATED) )
+			underground_arrow_light_on();
 	else
-		callset_invoke (underground_arrow_light_off);
+			underground_arrow_light_off();
 }//end of function
 
 
 
-CALLSET_ENTRY (arrow_handler, l_ramp_arrow_update) {
-	if (	!flag_test (FLAG_IS_L_RAMP_ARROW_ACTIVATED)
-	&& ( 	flag_test (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED) ) )
-		callset_invoke (lramp_arrow_light_on);
+void l_ramp_arrow_update(void) {
+	if (	flag_test (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED)
+		||	flag_test (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED) )
+		lramp_arrow_light_on();
 	else
-		callset_invoke (lramp_arrow_light_off);
+		lramp_arrow_light_off();
 }//end of function
 
 
 
-CALLSET_ENTRY (arrow_handler, s_ramp_arrow_update) {
-	if (	!flag_test (FLAG_IS_S_RAMP_ARROW_ACTIVATED)
-	&& ( 	flag_test (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_SIDERAMP_ACTIVATED) ) )
-		callset_invoke (sramp_arrow_light_on);
+void s_ramp_arrow_update(void) {
+	if (	flag_test (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED)
+		||	flag_test (FLAG_IS_COMBO_SIDERAMP_ACTIVATED) )
+		sramp_arrow_light_on();
 	else
-		callset_invoke (sramp_arrow_light_off);
+		sramp_arrow_light_off();
 }//end of function
 
 
-CALLSET_ENTRY (arrow_handler, r_ramp_arrow_update) {
-	if (	!flag_test (FLAG_IS_R_RAMP_ARROW_ACTIVATED)
-	&& ( 	flag_test (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED) ) )
-		callset_invoke (rramp_arrow_light_on);
+void r_ramp_arrow_update(void) {
+	if (	flag_test (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED)
+		||	flag_test (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED) )
+		rramp_arrow_light_on();
 	else
-		callset_invoke (rramp_arrow_light_off);
-}//end of function
-
-
-
-
-CALLSET_ENTRY (arrow_handler, l_orb_arrow_update) {
-	if (	!flag_test (FLAG_IS_L_LOOP_ARROW_ACTIVATED)
-	&& ( 	flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) )
-		callset_invoke (ll_arrow_light_on);
-	else
-		callset_invoke (ll_arrow_light_off);
+		rramp_arrow_light_off();
 }//end of function
 
 
 
-CALLSET_ENTRY (arrow_handler, r_orb_arrow_update) {
-	if (	!flag_test (FLAG_IS_R_LOOP_ARROW_ACTIVATED)
-	&& ( 	flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_RIGHTORB_ACTIVATED) ) )
-		callset_invoke (rl_arrow_light_on);
+
+void l_orb_arrow_update(void) {
+	if (	flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED)
+		||	flag_test (FLAG_IS_COMBO_LEFTORB_ACTIVATED) )
+		ll_arrow_light_on();
 	else
-		callset_invoke (rl_arrow_light_off);
+		ll_arrow_light_off();
 }//end of function
 
 
-CALLSET_ENTRY (arrow_handler, all_arrow_update) {
-	callset_invoke(center_ramp_arrow_update);
-	callset_invoke(l_ramp_arrow_update);
-	callset_invoke(r_ramp_arrow_update);
-	callset_invoke(s_ramp_arrow_update);
-	callset_invoke(l_orb_arrow_update);
-	callset_invoke(r_orb_arrow_update);
-	callset_invoke(uground_arrow_update);
+
+void r_orb_arrow_update(void) {
+	if (	flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED)
+		||	flag_test (FLAG_IS_COMBO_RIGHTORB_ACTIVATED) )
+		rl_arrow_light_on();
+	else
+		rl_arrow_light_off();
+}//end of function
+
+
+void all_arrow_update(void) {
+	center_ramp_arrow_update();
+	l_ramp_arrow_update();
+	r_ramp_arrow_update();
+	s_ramp_arrow_update();
+	l_orb_arrow_update();
+	r_orb_arrow_update();
+	uground_arrow_update();
 }//end of function

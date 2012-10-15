@@ -26,10 +26,10 @@
  * estimate of average jets score: 2.5 million
  *
  */
-/* CALLSET_SECTION (jets, __machine__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
+
 
 //constants
 const U8 JETS_EASY_GOAL = 25;
@@ -44,6 +44,14 @@ U8 			jet_goal;
 U8			jets_modes_achieved;
 
 //external variables
+
+//internally called function prototypes  --external found at protos.h
+void jet_flasher(void);
+void jets_effect_deff(void);
+void jet_goal_reset(void);
+void jet_goal_award(void);
+void player_jet_goal_reset(void);
+
 
 /****************************************************************************
  * initialize  and exit
@@ -92,7 +100,7 @@ void jet_goal_award (void) {
  * -this is set in md deff priorities
  ***************************************************************************/
 CALLSET_ENTRY (jets, sw_jet) {
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { callset_invoke (prison_break_made); }
+	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
 	else
 	if (!flag_test (FLAG_IS_SUPERJETS_ACTIVATED) ) {//not in super jets mode
 		++jet_shots_made;
@@ -110,11 +118,14 @@ CALLSET_ENTRY (jets, sw_jet) {
 void jets_effect_deff(void) {
 	U8 i = 0;
 	do {
-		U8 x = random_scaled (4);
+		U8 x = random_scaled (6);
 		U8 y = random_scaled (4);
 		dmd_alloc_low_clean ();
 		psprintf ("1 JET", "%d JETS", jet_shots_made);
-		font_render_string_center (&font_fixed6, DMD_MIDDLE_X + x, DMD_BIG_CY_Top + y, sprintf_buffer);
+		if (i%4 == 0)		font_render_string_center (&font_fixed6, DMD_MIDDLE_X + x, DMD_BIG_CY_Top - y, sprintf_buffer);
+		else if (i%4 == 1)	font_render_string_center (&font_fixed6, DMD_MIDDLE_X + x, DMD_BIG_CY_Top + y, sprintf_buffer);
+		else if (i%4 == 2)	font_render_string_center (&font_fixed6, DMD_MIDDLE_X - x, DMD_BIG_CY_Top - y, sprintf_buffer);
+		else 				font_render_string_center (&font_fixed6, DMD_MIDDLE_X - x, DMD_BIG_CY_Top + y, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_66MS);
 	} while (i++ < 8);//about .75sec
@@ -133,8 +144,8 @@ void jets_effect_deff(void) {
 
 
 void jets_completed_effect_deff(void) {
-	display_dm_millions(0);
-	task_sleep_sec (2);
+	 if (jets_modes_achieved < 6) 	display_and_shake_dm_millions(jets_modes_achieved);
+	 else							display_and_shake_dm_millions(5);
 	deff_exit ();
 }//end of mode_effect_deff
 

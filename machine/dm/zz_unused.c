@@ -22,7 +22,6 @@ X5: Elevator 2 Flasher, flash, nosearch
 X6: Elevator 1 Flasher, flash, nosearch
 
 
-#define MUS_BG_A 0x3
 #define MUS_BG_B 0x4
 #define MUS_HIGH_SCORE 0x1F
 
@@ -37,15 +36,15 @@ X6: Elevator 1 Flasher, flash, nosearch
 #define SPECIAL_EFFECT 0x8C
 #define GUNSHOT_MUFFLED 0x98
 #define GUNSHOT 0x99
+
 #define LOW_HORN 0xAA
+
 #define TIN_CAN 0xB0
-#define RACE_BY_SHORT 0xB4
-#define RACE_BY_LONG 0xB6
 #define MACHINE10 0xBC
 #define MACHINE11 0xD1
 #define TILT 0x01FB
 #define SPARKS 0x01FC
-#define ZAPP 0x0200
+	#define ZAPP 0x0200
 #define MACHINE3 0x0202
 #define EJECT 0x0208
 #define FREEZE5 0x0209

@@ -29,7 +29,6 @@
  * same as original
  *
  */
-/* CALLSET_SECTION (rollovers, __machine__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -46,6 +45,16 @@ U8					rollover_SoundCounter;
 U8					rollover_MessageCounter;
 
 //external variables
+
+
+//internally called function prototypes  --external found at protos.h
+void rollover_reset (void);
+void all_rollover_made (void);
+void rollover_sounds (void);
+void rollover_sounds_all_rollovers (void);
+void rollover_sounds_already_lit(void);
+void rollovers_effect(void);
+void rollovers_mtl_effect(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -81,7 +90,7 @@ void all_rollover_made (void){
 		++rollover_bonus_multiplier;
 		deff_start (DEFF_ALL_ROLLOVERS_EFFECT);
 	}
-	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) callset_invoke(extraball_light_on);
+	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) extraball_light_on();
 	task_sleep (TIME_2S);
 	lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 	lamp_tristate_off(LM_TOP_ROLLOVER);
@@ -91,7 +100,7 @@ void all_rollover_made (void){
 	lower_rollover_activated = FALSE;
 	score (SC_500K);
 	//light access claw
-	callset_invoke(access_claw_light_on);//at inlanes.c
+	access_claw_light_on();//at inlanes.c
 }//end of function
 
 
@@ -162,7 +171,7 @@ CALLSET_ENTRY (rollovers, sw_right_rollover) {
 	 * rotate rollovers when buttons pressed
 	 ***************************************************************************/
 CALLSET_ENTRY (rollovers, sw_left_button, sw_upper_left_button) {
-	if (valid_playfield) {
+	if (valid_playfield && 	!flag_test(FLAG_IN_VIDEO_MODE) ) {
 			if (top_rollover_activated && lower_rollover_activated) { //left (M) not activated
 				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 				lamp_tristate_on(LM_TOP_ROLLOVER);
@@ -218,7 +227,7 @@ CALLSET_ENTRY (rollovers, sw_left_button, sw_upper_left_button) {
 
 //rotate rollovers when buttons pressed
 CALLSET_ENTRY (rollovers, sw_right_button, sw_upper_right_button) {
-	if (valid_playfield) {
+	if (valid_playfield && 	!flag_test(FLAG_IN_VIDEO_MODE) ) {
 			if (top_rollover_activated && lower_rollover_activated) { //left not activated
 				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 				lamp_tristate_off(LM_TOP_ROLLOVER);
@@ -348,23 +357,30 @@ void rollovers_effect(void) {
 }//end of FUNCTION
 
 
+
+void rollovers_mtl_effect(void) {
+dmd_clean_page_low ();
+font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M");
+dmd_show_low ();
+task_sleep (TIME_200MS);
+
+dmd_clean_page_low ();
+font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T");
+dmd_show_low ();
+task_sleep (TIME_200MS);
+
+dmd_clean_page_low ();
+font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T  L");
+dmd_show_low ();
+task_sleep (TIME_200MS);
+
+task_sleep (TIME_500MS);
+}
+
+
 void rollovers1_effect_deff(void) {
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
+	rollovers_mtl_effect();
 
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
-
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T  L");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
-
-	task_sleep (TIME_500MS);
 	dmd_clean_page_low ();
 	dmd_sched_transition (&trans_bitfade_slow);
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
@@ -378,22 +394,8 @@ void rollovers1_effect_deff(void) {
 
 
 void rollovers2_effect_deff(void) {
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
+	rollovers_mtl_effect();
 
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
-
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T  L");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
-
-	task_sleep (TIME_500MS);
 	dmd_clean_page_low ();
 	dmd_sched_transition (&trans_bitfade_slow);
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
@@ -407,22 +409,8 @@ void rollovers2_effect_deff(void) {
 
 
 void rollovers3_effect_deff(void) {
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
+	rollovers_mtl_effect();
 
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
-
-	dmd_clean_page_low ();
-	font_render_string_center (&font_bitoutline, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "M  T  L");
-	dmd_show_low ();
-	task_sleep (TIME_200MS);
-
-	task_sleep (TIME_500MS);
 	dmd_clean_page_low ();
 	dmd_sched_transition (&trans_bitfade_slow);
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
