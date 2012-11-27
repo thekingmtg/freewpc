@@ -68,8 +68,6 @@ void player_car_crash_reset (void);
 void car_crash_first_switch_task (void);
 void car_crash_second_switch_task (void);
 void car_crash_third_switch_task (void);
-void carcrash_mode_effect_deff(void);
-void carcrash_effect_deff(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -89,13 +87,18 @@ void car_crash_reset (void) {
 	lamp_tristate_off (LM_CAR_CRASH_BOTTOM);
 }//end of function
 
+
+
 void player_car_crash_reset (void) {
 	car_crash_goal = CAR_CRASH_EASY_GOAL;
 	car_crash_reset();
 }//end of function
 
+
+
 CALLSET_ENTRY (car_crash, start_ball) { car_crash_reset (); }
 CALLSET_ENTRY (car_crash, start_player) { player_car_crash_reset (); }
+
 
 
 /****************************************************************************
@@ -148,11 +151,12 @@ void car_crash_first_switch_task (void) {
 }//end of function
 
 
+
 //first car switch at bottom of car lane
 CALLSET_ENTRY (car_crash, sw_chase_car_1) {
 	if (++carCrashFirstSwitchDebouncer == 1) {
 		sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
-		score (SC_250K);
+		score (CARCRASH_SCORE_CAR1);
 		flasher_pulse (FLASH_CAR_CHASE_LOWER_FLASHER);
 	}//end of if DEBOUNCER
 	task_create_gid1 (GID_CAR_CRASH_1, car_crash_first_switch_task);
@@ -167,6 +171,7 @@ void car_crash_second_switch_task (void) {
 }//end of function
 
 
+
 //second car switch at bottom of car lane
 CALLSET_ENTRY (car_crash, sw_chase_car_2) {
 	if (++carCrashSecondSwitchDebouncer == 1) {
@@ -177,7 +182,7 @@ CALLSET_ENTRY (car_crash, sw_chase_car_2) {
 			if (is_car_crash_ten_lit)	score (SC_10M);
 			else if (is_car_crash_six_lit)	score (SC_6M);
 			else if (is_car_crash_three_lit) score (SC_3M);
-			else score (SC_1M);
+			else score (CARCRASH_SCORE_CAR2);
 		}//end of loop
 	}//end of if DEBOUNCER
 	task_create_gid1 (GID_CAR_CRASH_2, car_crash_second_switch_task);
@@ -203,6 +208,8 @@ CALLSET_ENTRY (car_crash, sw_car_chase_standup) {
 				car_crash_shots_made = 0;
 				//increment goal for next time
 				if (car_crash_goal < CAR_CRASH_GOAL_MAX)  car_crash_goal += CAR_CRASH_GOAL_STEP;
+
+				huxley_increment();
 				//start ramp mode
 				start_car_chase(); //at car_chase_mode.c
 				//turn off car crash lights
@@ -249,26 +256,29 @@ void comp_award_trip_car_crash(void) {
  ****************************************************************************/
 
 void carcrash_effect_deff(void) {
-	U8 i = 1;
-	do {
-		dmd_alloc_low_clean ();
-		font_render_string_center( &font_fipps, DMD_MIDDLE_X - (i*8), 	DMD_BIG_CY_Cent, "C");
-		font_render_string_center( &font_fipps, DMD_MIDDLE_X - (i*4), 	DMD_BIG_CY_Cent, "R");
-		font_render_string_center( &font_fipps, DMD_MIDDLE_X, 			DMD_BIG_CY_Cent, "A"); //right in middle
-		font_render_string_center( &font_fipps, DMD_MIDDLE_X + (i*4), 	DMD_BIG_CY_Cent, "S");
-		font_render_string_center( &font_fipps, DMD_MIDDLE_X + (i*8), 	DMD_BIG_CY_Cent, "H");
-		dmd_show_low ();
-		if (i < 3) 		task_sleep (TIME_100MS);
-		else if (i < 6) task_sleep (TIME_200MS);
-		else if (i < 9) task_sleep (TIME_500MS);
-	} while (i++ < 7);
+	U16 fno;
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
 
-	dmd_alloc_low_clean ();
+	for (fno = IMG_CAR_CRASH_START; fno <= IMG_CAR_CRASH_END; fno += 2) {
+		dmd_alloc_pair ();
+		frame_draw(fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}//end of inner loop
+
+	dmd_alloc_pair_clean ();// Clean both pages
+	dmd_map_overlay ();
+	dmd_clean_page_low ();
 	sprintf ("CRASH %d MORE", car_crash_goal - car_crash_shots_made );
-	font_render_string_center( &font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+	font_render_string_center( &font_fipps, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
 	sprintf ("FOR CHASE");
 	font_render_string_center( &font_fipps, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
+	dmd_text_outline ();
+	dmd_alloc_pair ();
+	frame_draw(IMG_CAR_CRASH_END);
+	dmd_overlay_outline ();
+	dmd_show2 ();
 	task_sleep_sec (2);
 	deff_exit ();
 }//end of standard_effect_deff

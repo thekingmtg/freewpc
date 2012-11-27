@@ -57,18 +57,18 @@ U8			standupFrenzy_SoundCounter = 0;//used for randomizing sound calls
 U8			standup_SoundCounter = 0;//used for randomizing sound calls
 score_t 	standupFrenzy_temp_score;//generic score for calculations
 
-__local__ U8		standupFrenzy_modes_achieved;
-__local__ U8 		standupFrenzyNumHits;
-U8 					standupFrenzyTimer;
-score_t 	standupFrenzyTotalScore;
+__local__ 	U8		standupFrenzy_modes_achieved;
+__local__ 	U8 		standupFrenzyNumHits;
+			U8 		standupFrenzyTimer;
+score_t 			standupFrenzyTotalScore;
 score_t 			standupFrenzyLastScore;
 score_t 			standupFrenzyNextScore;
-U8 					standupFrenzyLightsLit; //tracks which LIGHTS ARE LIT
-U8 					standupLightsLit; 		//tracks which LIGHTS ARE LIT
-__local__ U8 		standup_num_of_hits;
-__local__ U8 		standup_goal;
-__boolean 		isStandupFrenzyActivated;
-__local__ U8		exploded[5];
+			U8 		standupFrenzyLightsLit; //tracks which LIGHTS ARE LIT
+			U8 		standupLightsLit; 		//tracks which LIGHTS ARE LIT
+__local__ 	U8 		standup_num_of_hits;
+__local__ 	U8 		standup_goal;
+__boolean 			isStandupFrenzyActivated;
+__local__ 	U8		exploded[5];
 
 //external variables
 
@@ -79,8 +79,6 @@ void standupHandler (U8 target);
 void standupHandler1 (U8 target, U8 lamp);
 void frenzyHandler (U8 target, U8 lamp);
 void standup_lamp_update1 (U8 mask, U8 lamp);
-void standupFrenzyTotalScore_effect_deff (void);
-void standupFrenzy_mode_effect_deff (void);
 void standupFrenzy_sounds (void);
 void standup_sounds (void);
 void standup_effect(void);
@@ -123,9 +121,9 @@ void standupFrenzy_mode_init (void) {
 	score_zero (standupFrenzyTotalScore);
 	score_zero (standupFrenzyLastScore);
 	score_zero (standupFrenzyNextScore);
-	score_add (standupFrenzyNextScore, score_table[SC_5M]);
-	score_add (standupFrenzyTotalScore, score_table[SC_15M]);
-	score (SC_15M);
+	score_add (standupFrenzyNextScore, score_table[FRENZY_HIT_SCORE]);
+	score_add (standupFrenzyTotalScore, score_table[FRENZY_START_SCORE]);
+	score (FRENZY_START_SCORE);
 	U8 i;
 	for (i = 0; i < 5; i++) exploded[i] = 0;
 }//end of standupFrenzy_mode_init 
@@ -184,8 +182,11 @@ void standupHandler (U8 target) {
 	if ((standupFrenzyLightsLit & target) && timed_mode_running_p(&standupFrenzy_mode)) frenzyHandler (target, lamp);
 	//else mode NOT running ---verify target hit was a lit target
 	else if ((standupLightsLit & target) && !timed_mode_running_p(&standupFrenzy_mode)) standupHandler1 (target, lamp);
-	//else mode NOT running and target NOT lit ---score prison break
-	else if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
+	//else mode NOT running and target NOT lit ---check for prison break or huxley
+	else {
+		if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made();
+		else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
+	}//otherwise - do nothing
 }//end of standupHandler
 
 
@@ -203,30 +204,33 @@ void update_exploded (U8 target){
 
 void frenzyHandler (U8 target, U8 lamp) {
 		++standupFrenzyNumHits;
-//		deff_start (DEFF_STANDUPFRENZY_HIT_EFFECT);
 		sound_send (EXPLOSION1_LONG);
 		update_exploded(target); //this triggers explosion in display
 		standupFrenzyLightsLit &= ~target;  // flag that target as hit
 		standup_lamp_update1 (target, lamp);//turn that lamp off
 		standupFrenzy_sounds();
+
 		//score 5 million plus 1 million times number of hits
 		score_zero (standupFrenzy_temp_score);//zero out temp score
-		score_add (standupFrenzy_temp_score, score_table[SC_1M]);//multiply 1M by num hits
+		score_add (standupFrenzy_temp_score, score_table[FRENZY_ADD_SCORE]);//multiply 1M by num hits
 		score_mul (standupFrenzy_temp_score, standupFrenzyNumHits);
-		score (SC_5M);
+		score (FRENZY_HIT_SCORE);
 		score_long_unmultiplied (standupFrenzy_temp_score); //add temp score to player's score
+
 		//do same for mode score
-		score_add (standupFrenzyTotalScore, score_table[SC_5M]);
+		score_add (standupFrenzyTotalScore, score_table[FRENZY_HIT_SCORE]);
 		score_add (standupFrenzyTotalScore, standupFrenzy_temp_score);
+
 		//do same for last score-this is the one we display
 			score_zero (standupFrenzyLastScore);
-			score_add (standupFrenzyLastScore, score_table[SC_5M]);
+			score_add (standupFrenzyLastScore, score_table[FRENZY_HIT_SCORE]);
 			score_add (standupFrenzyLastScore, standupFrenzy_temp_score);
-			//do same for next score-this is the one we display
+
+		//do same for next score-this is the one we display
 		score_zero (standupFrenzyNextScore);
-		score_add (standupFrenzyNextScore, score_table[SC_5M]);
+		score_add (standupFrenzyNextScore, score_table[FRENZY_HIT_SCORE]);
 		score_add (standupFrenzyNextScore, standupFrenzy_temp_score);
-		score_add (standupFrenzyNextScore, score_table[SC_1M]);//next score will be 1 million more
+		score_add (standupFrenzyNextScore, score_table[FRENZY_ADD_SCORE]);//next score will be 1 million more
 		//if 5th light out then reset all lights back on
 		if (standupFrenzyNumHits % 5 == 0) 	{
 			standupFrenzyLightsLit = ALL_TARGETS;
@@ -243,10 +247,10 @@ void standupHandler1 (U8 target, U8 lamp) {
 		standup_effect();
 		standupLightsLit &= ~target;  /* flag that target as hit */
 		standup_lamp_update1 (target, lamp);
-		if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) 		prison_break_made();
+		if (flag_test (FLAG_IS_PBREAK_RUNNING) ) 		prison_break_made();
 		else 											standup_sounds();
 		lamp_tristate_flash (lamp);
-		score (SC_500K);
+		score (STANDUP_SCORE);
 		//if we reached our quick freeze goal and quick freeze is not already set
 		if (standup_num_of_hits >= standup_goal  && !flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED)) {
 				sound_start (ST_SPEECH, SPCH_QUICK_FREEZE_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
@@ -265,7 +269,7 @@ void standupHandler1 (U8 target, U8 lamp) {
 U8 collect_standups_counter;
 void collect_standups(void ) {
 	for (collect_standups_counter = 0; collect_standups_counter <= standup_num_of_hits; collect_standups_counter++) {
-			score (SC_500K);
+			score (STANDUP_SCORE);
 			deff_start (DEFF_COLLECT_STANDUPS_EFFECT);
 	}//end of loop
 }//end of function
@@ -299,7 +303,10 @@ CALLSET_ENTRY (standupFrenzy, lamp_update) {
 
 
 //claw freeze starts standup frenzy instead of locking a ball
-CALLSET_ENTRY (standupFrenzy, sw_claw_freeze) { timed_mode_begin (&standupFrenzy_mode); }
+CALLSET_ENTRY (standupFrenzy, sw_claw_freeze) {
+	demotime_increment();
+	timed_mode_begin (&standupFrenzy_mode);
+}
 
 
 
@@ -369,20 +376,13 @@ void collect_standups_effect_deff(void) {
 
 
 
-
-
 void standup_effect(void) {
-	switch (++standup_MessageCounter % 3) {
-		case 0:  deff_start (DEFF_STANDUP1_EFFECT); break;
-		case 1:  deff_start (DEFF_STANDUP2_EFFECT); break;
-		case 2:  deff_start (DEFF_STANDUP3_EFFECT); break;
-		default: deff_start (DEFF_STANDUP1_EFFECT); break;
-		}//end of switch
+	deff_start (DEFF_STANDUP_EFFECT);
 }//end of FUNCTION
 
 
 
-void standup1_effect_deff (void) {
+void standup_effect_deff (void) {
 	dmd_alloc_low_clean ();
 	dmd_sched_transition (&trans_scroll_up);
 	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND");
@@ -395,6 +395,9 @@ void standup1_effect_deff (void) {
 
 	dmd_clean_page_low ();
 	dmd_sched_transition (&trans_scroll_up);
+	switch (++standup_MessageCounter % 3) {
+		default:
+		case 0:
 			if (standup_num_of_hits == 0) 			sprintf ("0");//for testing in development
 			else 									sprintf ("%d", standup_num_of_hits);
 			font_render_string_center(&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top - 2, sprintf_buffer);
@@ -402,27 +405,8 @@ void standup1_effect_deff (void) {
 			font_render_string_center(&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
 			sprintf ("HIT");
 			font_render_string_center(&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
-	deff_exit ();
-}//end of standupFrenzy_mode_deff
-
-
-
-void standup2_effect_deff (void) {
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND");
-	dmd_show_low ();
-
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "UP");
-	dmd_show_low ();
-
-	dmd_sched_transition (&trans_scroll_up);
-	dmd_clean_page_low ();
+			break;
+		case 1:
 			if (!flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED)) {
 				sprintf ("HIT %d MORE", standup_goal - standup_num_of_hits);
 				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
@@ -434,36 +418,20 @@ void standup2_effect_deff (void) {
 				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "IS");
 				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "ACTIVATED");
 			}
-	dmd_show_low ();
-	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
-	deff_exit ();
-}//end of standupFrenzy_mode_deff
-
-
-
-void standup3_effect_deff (void) {
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND");
-	dmd_show_low ();
-
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "UP");
-	dmd_show_low ();
-
-	dmd_sched_transition (&trans_scroll_up);
-	dmd_clean_page_low ();
+			break;
+		case 2:
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "CRYO CLAW");
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "LOCK FREEZE");
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "STARTS");
 			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "STANDUP FRENZY");
+			break;
+		}//end of switch
 	dmd_show_low ();
 	task_sleep_sec (1);
 	task_sleep (TIME_500MS);
 	deff_exit ();
 }//end of standupFrenzy_mode_deff
+
 
 /****************************************************************************
  * DMD display - frenzy
@@ -475,6 +443,7 @@ void standupfrenzy_start_effect_deff (void) {
 	sound_send (EXPLOSION1_SHORT);
 	do { // Shake the text
 			dmd_alloc_pair_clean ();
+			dmd_draw_thin_border (dmd_low_buffer);
 			if 		(i < 5) { 	x = random_scaled (1);	y = random_scaled (2); }
 			else if (i < 10) {  x = random_scaled (2);  y = random_scaled (3); }
 			else if (i < 15) {  x = random_scaled (4);  y = random_scaled (5); }
@@ -502,6 +471,7 @@ void standupfrenzy_start_effect_deff (void) {
 	sound_send (EXPLOSION1_LONG);
 	i = 4;
 	dmd_alloc_pair_clean ();
+	dmd_draw_thin_border (dmd_low_buffer);
 	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "FRENZY");
 	// low = text, high = blank
 	while (--i > 0){
@@ -523,30 +493,6 @@ void standupfrenzy_start_effect_deff (void) {
 } // standupFrenzyTotalScore_deff
 
 
-//deprecated
-void standupfrenzy_hit_effect_deff (void) {
-	U8 i = 0;
-	do {
-		U8 x = random_scaled (6);
-		U8 y = random_scaled (4);
-		dmd_alloc_low_clean ();
-		sprintf_score (standupFrenzyLastScore);
-		if (i % 2 == 0)  { font_render_string_center (&font_fireball, DMD_MIDDLE_X + x, DMD_BIG_CY_Cent + y, sprintf_buffer); }
-		else 			 { font_render_string_center (&font_fireball, DMD_MIDDLE_X - x, DMD_BIG_CY_Cent - y, sprintf_buffer); }
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-	} while (i++ < 12);//about .8sec
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (1);
-	deff_exit ();
-} // standupFrenzyTotalScore_deff
-
-
-
-
-
 
 void standupfrenzy_show_circle_1_rotate_cw (U8 step, U8 x, U8 y) {
 	switch (step) {
@@ -561,8 +507,6 @@ void standupfrenzy_show_circle_1_rotate_cw (U8 step, U8 x, U8 y) {
 	}//end of switch
 }//end of function
 
-
-
 void standupfrenzy_show_circle_1_rotate_ccw (U8 step, U8 x, U8 y) {
 	switch (step) {
 	case 0:	bitmap_blit (circle1_8_low_bits, x, y);	break;
@@ -575,7 +519,6 @@ void standupfrenzy_show_circle_1_rotate_ccw (U8 step, U8 x, U8 y) {
 	case 7:	bitmap_blit (circle1_1_low_bits, x, y);	break;
 	}//end of switch
 }//end of function
-
 
 void standupfrenzy_show_circle_2_rotate_cw (U8 step, U8 x, U8 y) {
 	switch (step) {
@@ -590,8 +533,6 @@ void standupfrenzy_show_circle_2_rotate_cw (U8 step, U8 x, U8 y) {
 	}//end of switch
 }//end of function
 
-
-
 void standupfrenzy_show_circle_2_rotate_ccw (U8 step, U8 x, U8 y) {
 	switch (step) {
 	case 0:	bitmap_blit (circle2_8_low_bits, x, y);	break;
@@ -605,8 +546,6 @@ void standupfrenzy_show_circle_2_rotate_ccw (U8 step, U8 x, U8 y) {
 	}//end of switch
 }//end of function
 
-
-
 void standupfrenzy_show_rotate_ccw_exploded (U8 step, U8 x, U8 y) {
 	switch (step) {
 	case 0:	bitmap_blit (explos1_1_low_bits, x, y);	break;
@@ -619,7 +558,6 @@ void standupfrenzy_show_rotate_ccw_exploded (U8 step, U8 x, U8 y) {
 	case 7:	break;
 	}//end of switch
 }//end of function
-
 
 void standupfrenzy_show_rotate_cw_exploded (U8 step, U8 x, U8 y) {
 	switch (step) {
@@ -651,6 +589,8 @@ void standupfrenzy_effect_deff (void) {
 		if (i == 110) {exploded[4]++;}
 */
 		dmd_alloc_low_clean ();
+		dmd_draw_thin_border (dmd_low_buffer);
+
 		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "SHOOT STANDUP TARGETS");
 
 		if (exploded[0]) 	standupfrenzy_show_rotate_ccw_exploded( exploded[0]++, 2, 8);

@@ -27,11 +27,12 @@
 #include "dm/global_constants.h"
 
 //constants
-const U8		SSTotalNumOfSounds	= 12;
+const U8 SSTotalNumOfSounds	= 11;
+
 const sound_code_t outlaneSoundArray[] = {	SPCH_TOO_BAD, 			SPCH_PATHETIC,		SPCH_HATE_WHEN_THAT_HAPPENS,
 											SPCH_OHH_NO,			SPCH_BAD_AIM,		SPCH_DULCH,
 											SPCH_WES_LAUGH_SHORT1, SPCH_SIMON_SNICKER, 	SPCH_WES_LAUGH_SHORT2,
-											SPCH_WES_LAUGH_SHORT3, SPCH_WOAH, 			SPCH_JUST_LOVELY };
+											SPCH_WES_LAUGH_SHORT3,		SPCH_JUST_LOVELY };
 
 
 //local variables
@@ -46,7 +47,7 @@ void simple_sounds(void);
  *
  ****************************************************************************/
 CALLSET_ENTRY (simple_switches, sw_right_outlane, sw_left_outlane) {
-	score(SC_5770);
+	score(OUTLANE_SCORE);
 	U8		outlaneSoundCounter;
 	outlaneSoundCounter = random_scaled(SSTotalNumOfSounds);//from kernal/random.c
 	sound_start (ST_SPEECH, outlaneSoundArray[outlaneSoundCounter], SL_4S, PRI_GAME_QUICK5);
@@ -54,30 +55,34 @@ CALLSET_ENTRY (simple_switches, sw_right_outlane, sw_left_outlane) {
 
 
 CALLSET_ENTRY (simple_switches, sw_upper_left_flipper_gate) {
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
-	else score(SC_1010);
+	if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made();
+
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
+	else score(UP_LEFT_FLIP_GATE_SCORE);
 }
 
 CALLSET_ENTRY (simple_switches, sw_upper_rebound) {
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
+	if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made();
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
 	else {
-		score(SC_1010);
+		score(UPPER_REBOUND_SCORE);
 		simple_sounds();
-	}
+	}//end of else
 }
 
 CALLSET_ENTRY (simple_switches, sw_lower_rebound) {
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
+	if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made();
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
 	else {
 		simple_sounds();
-		score(SC_1010);
+		score(LOWER_REBOUND_SCORE);
 		flasher_pulse (FLASH_LOWER_REBOUND_FLASHER); //FLASH followed by name of flasher in caps
-	}
+	}//end of else
 }//end of function
 
 
 CALLSET_ENTRY (simple_switches, sw_sling) {
-	score(SC_540);
+	score(SLING_SCORE);
 	simple_sounds();
 }//end of function
 
@@ -87,13 +92,9 @@ CALLSET_ENTRY (simple_switches, sw_sling) {
 void simple_sounds (void) {
 	U8		simple_SoundCounter;
 	simple_SoundCounter = random_scaled(4);//from kernal/random.c
-	if ( simple_SoundCounter == 0 )
-	sound_start (ST_EFFECT, ZAPP_1, SL_2S, PRI_GAME_QUICK5);
-else if ( simple_SoundCounter == 1 )
-	sound_start (ST_EFFECT, JOINK, SL_2S, PRI_GAME_QUICK5);
-else if ( simple_SoundCounter == 2 )
-	sound_start (ST_EFFECT, JOINK_2, SL_2S, PRI_GAME_QUICK5);
-else if ( simple_SoundCounter == 3 )
-	sound_start (ST_EFFECT, ZAPP_2, SL_2S, PRI_GAME_QUICK5);
+	if ( simple_SoundCounter == 0 )			sound_start (ST_EFFECT, ZAPP_1, SL_2S, PRI_GAME_QUICK5);
+	else if ( simple_SoundCounter == 1 )	sound_start (ST_EFFECT, JOINK, SL_2S, PRI_GAME_QUICK5);
+	else if ( simple_SoundCounter == 2 )	sound_start (ST_EFFECT, JOINK_2, SL_2S, PRI_GAME_QUICK5);
+	else if ( simple_SoundCounter == 3 )	sound_start (ST_EFFECT, ZAPP_2, SL_2S, PRI_GAME_QUICK5);
 }//end of function
 

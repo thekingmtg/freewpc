@@ -68,11 +68,16 @@ void underground_reset (void) {
 	underground_shots_made = 0;
 	underground_goal = 0;
 	underground_inBall_search = FALSE;
+	computerAwards = 0;
 }//end of function
+
+
 
 void player_underground_reset(void) {
 	underground_reset();
 }//end of function
+
+
 
 CALLSET_ENTRY (underground, start_player) { player_underground_reset(); }
 CALLSET_ENTRY (underground, start_ball) { underground_reset(); }
@@ -124,103 +129,45 @@ void underground_task (void) {
 }//end of function
 
 
-/****************************************************************************
- * priority here is:
- * 1) computer award
- * 2) multiball and capture simon - both can be triggered as use different lights
- * 3) combos since combo and capture simon use same lights we do not want to restart
- * or trigger combos if running cap sim
- * 4) prison break is basically fast scoring mode so it can run any time since
- * it uses no lights - only have to watch what sounds are triggered
- ****************************************************************************/
+
 CALLSET_ENTRY (underground, sw_bottom_popper) {
-	if (!underground_inBall_search) {
+//	if (!underground_inBall_search) {
 			if (++undergroundSwitchDebouncer == 1) {
 					++underground_shots_made;
-					score (SC_100K);//located in kernal/score.c
-					U8	underground_SoundCounter;
+					score (BOT_POP_SCORE);//located in kernal/score.c
+
 					//LIGHTING EFFECTS*****************************
 						//	leff_start (LEFF_UNDERGROUND_KICKOUT);
-					//SOUNDS		*****************************
-					if (flag_test (FLAG_IS_PBREAK_ACTIVATED) )  { prison_break_made(); }
-					else {
-							underground_SoundCounter = random_scaled(2);//from kernal/random.c
-							if (underground_SoundCounter == 0 )
-								sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
-							else if (underground_SoundCounter == 1 )
-								sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
-					}
+
+
 					//CALLS			*****************************
-					if (flag_test(FLAG_IS_COMPUTER_ACTIVATED) ) 				computer_award();
-					else {
-						if (flag_test(FLAG_IS_UGROUND_JACKPOT_ACTIVATED) ) 		score_jackpot();
-						if (flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED) )	capture_simon_made();
-						else {
-							if (flag_test(FLAG_IS_COMBOS_KILLED) ) 				combo_init();
-							else if ( flag_test(FLAG_IS_COMBO_UNDER_ACTIVATED)) combo_hit();
-						}//end of else --FLAG_IS_CAPSIM_UNDER_ACTIVATED
-					}//end of  else --flag_test  FLAG_IS_COMPUTER_ACTIVATED
-					//if nothing special, do normal display effects
-					if(		!flag_test (FLAG_IS_PBREAK_ACTIVATED)
+					if 		(flag_test(FLAG_IS_COMPUTER_ACTIVATED) ) 			deff_start_sync (DEFF_COMPUTER_AWARD);
+					else if (flag_test(FLAG_IS_DEMOTIME_ENABLED) ) 				demotime_start();
+					else if (flag_test(FLAG_IS_HUXLEY_RUNNING) )				huxley_mode_shot_made();
+					else if (flag_test(FLAG_IS_UGROUND_JACKPOT_ACTIVATED) ) 	score_jackpot();
+					else if (flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED) )		capture_simon_made();
+					else if (flag_test (FLAG_IS_PBREAK_RUNNING) )   			prison_break_made();
+					else if (flag_test(FLAG_IS_COMBOS_KILLED) ) 				combo_init();
+					else if ( flag_test(FLAG_IS_COMBO_UNDER_ACTIVATED)) 		combo_hit();
+
+			//if nothing special, do normal effects
+					if(		!flag_test (FLAG_IS_PBREAK_RUNNING)
 						&& 	!flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
 						&& 	!flag_test (FLAG_IS_COMPUTER_ACTIVATED)
-						&& 	!flag_test (FLAG_IS_UGROUND_JACKPOT_ACTIVATED) )
+						&& 	!flag_test (FLAG_IS_UGROUND_JACKPOT_ACTIVATED) ) {
 										deff_start (DEFF_UNDERGROUND_EFFECT);
-					//fire sol
-					if (!flag_test(FLAG_IS_COMPUTER_ACTIVATED) ) sol_request_async(SOL_BOTTOM_POPPER);
+										U8	underground_SoundCounter;
+										underground_SoundCounter = random_scaled(2);//from kernal/random.c
+										if (underground_SoundCounter == 0 ) sound_start (ST_EFFECT, SUBWAY, SL_2S, SP_NORMAL);
+										else if (underground_SoundCounter == 1 ) sound_start (ST_EFFECT, SUBWAY2, SL_2S, SP_NORMAL);
+					}
+			//fire sol
+					sol_request_async(SOL_BOTTOM_POPPER);
 			}//end of if DEBOUNCER
 			task_create_gid1 (GID_UG_DEBOUNCE, underground_task);
-	}//end of !underground_inBall_search
+//	}//end of !underground_inBall_search
 }//end of function
 
-
-void computer_award(void) {
-	ball_search_monitor_stop ();
-	deff_start (DEFF_COMPUTER_AWARD_EFFECT);
-	task_sleep(TIME_3S);
-	switch (computerAwards) {
-	case 0 :
-			deff_start (DEFF_COMP_COLLECT_BONUS);
-			task_sleep(TIME_2S);
-			deff_start (DEFF_BONUS);
-			break;
-	case 1 :
-			deff_start (DEFF_COMP_TRIP_CAR_CRASH);
-			task_sleep(TIME_2S);
-			comp_award_trip_car_crash();
-			break;
-	case 2 :
-			deff_start (DEFF_COMP_COLLECT_STANDUPS);
-			task_sleep(TIME_2S);
-			collect_standups();
-			break;
-	case 3 :
-			deff_start (DEFF_COMP_LIGHT_ARROWS);
-			task_sleep(TIME_2S);
-			comp_award_light_arrows(); // combos.c
-			break;
-	case 4 :
-			deff_start (DEFF_COMP_LIGHT_EXTRA_BALL);
-			task_sleep(TIME_2S);
-			extraball_light_on();
-			break;
-	case 5 :
-			deff_start (DEFF_COMP_MAXIMIZE_FREEZES);
-			task_sleep(TIME_2S);
-			maximize_freeze();
-			break;
-	case 6 :
-			deff_start (DEFF_COMP_DOUB_RETINA);
-			task_sleep(TIME_2S);
-			comp_award_doub_retina();
-			break;
-	}//end of switch
-	task_sleep(TIME_4S);
-	if (++undergroundSwitchDebouncer == 1)  sol_request_async(SOL_BOTTOM_POPPER);
-	task_create_gid1 (GID_UG_DEBOUNCE, underground_task);
-	computer_light_off();
-	ball_search_monitor_start ();
-}//end of function
 
 
 CALLSET_ENTRY (underground, ball_search){
@@ -228,133 +175,191 @@ CALLSET_ENTRY (underground, ball_search){
 }
 
 
+
 /****************************************************************************
  * display effects
  ****************************************************************************/
-void comp_collect_bonus_deff(void) {
-	dmd_alloc_low_clean ();
-	sound_start(ST_SPEECH, SPCH_COLLECT_BONUS, SL_4S, PRI_GAME_QUICK5);
-	sprintf ("COLLECT");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("BONUS");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-void comp_trip_car_crash_deff(void) {
-	dmd_alloc_low_clean ();
-	sound_start(ST_SPEECH, SPCH_TRIPLE_CAR_CRASH, SL_4S, PRI_GAME_QUICK5);
-	sprintf ("TRIPLE");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("CAR CRASH");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-void comp_collect_standups_deff(void) {
-	dmd_alloc_low_clean ();
-	sound_start(ST_SPEECH, SPCH_COLLECT_STANDUPS, SL_4S, PRI_GAME_QUICK5);
-	sprintf ("COLLECT");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("STANDUPS");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-void comp_light_arrows_deff(void) {
-	dmd_alloc_low_clean ();
-	sound_start(ST_SPEECH, SPCH_LIGHT_ARROWS, SL_4S, PRI_GAME_QUICK5);
-	sprintf ("LIGHT");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("ARROWS");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-void comp_light_extra_ball_deff(void) {
-	dmd_alloc_low_clean ();
-	sound_start(ST_SPEECH, SPCH_LIGHT_EXTRA_BALL, SL_4S, PRI_GAME_QUICK5);
-	sprintf ("LIGHT");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("EXTRA BALL");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-void comp_maximize_freezes_deff(void) {
-	dmd_alloc_low_clean ();
-	sound_start(ST_SPEECH, SPCH_MAXIMIZE_FREEZES, SL_4S, PRI_GAME_QUICK5);
-	sprintf ("MAXIMIZE");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("FREEZES");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-void comp_doub_retina_deff(void) {
-	dmd_alloc_low_clean ();
-	sound_start(ST_SPEECH, SPCH_DOUBLE_RETINA_SCAN, SL_4S, PRI_GAME_QUICK5);
-	sprintf ("DOUBLE");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("RETINA SCAN");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low ();
-	task_sleep_sec (2);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
 void underground_effect_deff(void) {
-	U8 i = 0;
-	do {
-		U8 y = random_scaled (4);
-		dmd_alloc_low_clean ();
-		task_sleep (TIME_66MS); //placing pause at tops makes display dissappear quickly at end
-		sprintf ("SUBWAY");
-		font_render_string_center (&font_steel, DMD_MIDDLE_X + (i * 5), DMD_BIG_CY_Top + y, sprintf_buffer);
-		sprintf ("%d", underground_shots_made);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X - 10 + (i * 5), DMD_BIG_CY_Bot + y, sprintf_buffer);
-		sprintf ("MADE");
-		font_render_string_center (&font_steel, DMD_MIDDLE_X + 5 + (i * 5), DMD_BIG_CY_Bot + y, sprintf_buffer);
-		dmd_show_low ();
-	} while (i++ < 40);//16 = about .8sec --40 = 2.5 SEC
-	deff_exit ();
+	U16 fno;
+	U8 	MessageCounter;
+	MessageCounter = random_scaled(3);
+
+	dmd_alloc_pair_clean ();// Clean both pages
+
+	switch (MessageCounter) {
+		default:
+		case 0:
+			for (fno = IMG_PHOENIX_A2_START; fno <= IMG_PHOENIX_A2_END; fno += 2) {
+						dmd_alloc_pair ();
+						frame_draw(fno);
+						dmd_show2 ();
+						task_sleep (TIME_100MS);
+			}//end of for loop
+
+			for (fno = IMG_PHOENIX_A2_END; fno >= IMG_PHOENIX_A2_START; fno -= 2) {
+				sprintf ("SUBWAY");
+					dmd_map_overlay ();
+					dmd_clean_page_low ();
+					font_render_string_center (&font_fireball, DMD_MIDDLE_X - 25, DMD_BIG_CY_Top, sprintf_buffer);
+						dmd_text_outline ();
+						dmd_alloc_pair ();
+						frame_draw(fno);
+						dmd_overlay_outline ();
+						dmd_show2 ();
+						task_sleep (TIME_100MS);
+			}//end of for loop
+			break;
+		case 1:
+			for (fno = IMG_JOHN_SPARTAN_A_START; fno <= IMG_JOHN_SPARTAN_A_END; fno += 2) {
+						dmd_alloc_pair ();
+						frame_draw(fno);
+						dmd_show2 ();
+						task_sleep (TIME_100MS);
+			}//end of for loop
+
+			for (fno = IMG_JOHN_SPARTAN_A_END; fno >= IMG_JOHN_SPARTAN_A_START; fno -= 2) {
+				sprintf ("SUBWAY");
+					dmd_map_overlay ();
+					dmd_clean_page_low ();
+					font_render_string_center (&font_fireball, DMD_MIDDLE_X - 25, DMD_BIG_CY_Top, sprintf_buffer);
+						dmd_text_outline ();
+						dmd_alloc_pair ();
+						frame_draw(fno);
+						dmd_overlay_outline ();
+						dmd_show2 ();
+						task_sleep (TIME_100MS);
+			}//end of for loop
+			break;
+		case 2:
+			for (fno = IMG_SIMON_FIRE1_START; fno <= IMG_SIMON_FIRE1_END; fno += 2) {
+						dmd_alloc_pair ();
+						frame_draw(fno);
+						dmd_show2 ();
+						task_sleep (TIME_100MS);
+			}//end of for loop
+
+			for (fno = IMG_SIMON_FIRE1_END; fno >= IMG_SIMON_FIRE1_START; fno -= 2) {
+				sprintf ("SUBWAY");
+					dmd_map_overlay ();
+					dmd_clean_page_low ();
+					font_render_string_center (&font_fireball, DMD_MIDDLE_X - 25, DMD_BIG_CY_Top, sprintf_buffer);
+						dmd_text_outline ();
+						dmd_alloc_pair ();
+						frame_draw(fno);
+						dmd_overlay_outline ();
+						dmd_show2 ();
+						task_sleep (TIME_100MS);
+			}//end of for loop
+			break;
+	}//END OF SWITCH
+		task_sleep (TIME_500MS);
+		deff_exit ();
 }//end of mode_effect_deff
 
 
 
-void computer_award_effect_deff(void) {
+
+
+
+void computer_award_deff(void) {
+	ball_search_monitor_stop ();
+
 	sound_start (ST_ANY, SPCH_ACCESSING, SL_3S, PRI_GAME_QUICK6);
+
 	dmd_alloc_low_clean ();
 	sprintf ("COMPUTER AWARD");
 	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (1);
 	dmd_map_overlay ();
+
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
 	sprintf ("COMPUTER AWARD");
 	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
-	sound_start (ST_EFFECT, COMPUTER_ADDING, SL_3S, PRI_GAME_QUICK6);
-	show_text_on_squares (10);//5 times per second
-	sound_start (ST_EFFECT, COMPUTER_AWARD_LONG, SL_3S, PRI_GAME_QUICK6);
-	task_sleep_sec (1);
-	deff_exit ();
-}//end of mode_effect_deff
 
+	sound_start (ST_EFFECT, COMPUTER_ADDING, SL_3S, PRI_GAME_QUICK6);
+
+	show_text_on_squares (10);//5 times per second
+
+	sound_start (ST_EFFECT, COMPUTER_AWARD_LONG, SL_3S, PRI_GAME_QUICK6);
+	task_sleep(TIME_2S);
+
+	dmd_alloc_low_clean ();
+
+	computerAwards = random_scaled(7);
+		switch (computerAwards) {
+	case 0 :
+			sound_start(ST_SPEECH, SPCH_COLLECT_BONUS, SL_4S, PRI_GAME_QUICK5);
+			sprintf ("COLLECT");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+			sprintf ("BONUS");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+			dmd_show_low ();
+			task_sleep_sec (1);
+			deff_start (DEFF_BONUS_CA);
+			break;
+	case 1 :
+			sound_start(ST_SPEECH, SPCH_TRIPLE_CAR_CRASH, SL_4S, PRI_GAME_QUICK5);
+			sprintf ("TRIPLE");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+			sprintf ("CAR CRASH");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+			dmd_show_low ();
+			comp_award_trip_car_crash();
+			break;
+	case 2 :
+			sound_start(ST_SPEECH, SPCH_COLLECT_STANDUPS, SL_4S, PRI_GAME_QUICK5);
+			sprintf ("COLLECT");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+			sprintf ("STANDUPS");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+			dmd_show_low ();
+			collect_standups();
+			break;
+	case 3 :
+			sound_start(ST_SPEECH, SPCH_LIGHT_ARROWS, SL_4S, PRI_GAME_QUICK5);
+			sprintf ("LIGHT");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+			sprintf ("ARROWS");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+			dmd_show_low ();
+			comp_award_light_arrows(); // combos.c
+			break;
+	case 4 :
+			sound_start(ST_SPEECH, SPCH_LIGHT_EXTRA_BALL, SL_4S, PRI_GAME_QUICK5);
+			sprintf ("LIGHT");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+			sprintf ("EXTRA BALL");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+			dmd_show_low ();
+			extraball_light_on();
+			break;
+	case 5 :
+			sound_start(ST_SPEECH, SPCH_MAXIMIZE_FREEZES, SL_4S, PRI_GAME_QUICK5);
+			sprintf ("MAXIMIZE");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+			sprintf ("FREEZES");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+			dmd_show_low ();
+			maximize_freeze();
+			break;
+	case 6 :
+			sound_start(ST_SPEECH, SPCH_DOUBLE_RETINA_SCAN, SL_4S, PRI_GAME_QUICK5);
+			sprintf ("DOUBLE");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, sprintf_buffer);
+			sprintf ("RETINA SCAN");
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+			dmd_show_low ();
+			comp_award_doub_retina();
+			break;
+	}//end of switch
+	task_sleep(TIME_4S);
+
+	computer_light_off();
+	ball_search_monitor_start ();
+	deff_exit ();
+}//end of function
 
 
 #define MAX_SQUARE 24
@@ -421,6 +426,8 @@ void square_init (void) {
 		s->state = random_scaled (12); // 0 to n-1
 	}
 }//end of function
+
+
 
 void square_draw (U8 sq) {
 	struct square_state *s = &square_states[sq];
@@ -495,6 +502,7 @@ void square_draw (U8 sq) {
 }//end of function
 
 
+
 void show_text_on_squares (U8 times) {
 	square_init();
 	U8 n;
@@ -514,9 +522,13 @@ void show_text_on_squares (U8 times) {
 }//END OF FUNCTION
 
 
+
+
+
 /****************************************************************************
  * lighting effects
  ****************************************************************************/
+/*
 static void under_kickout_subtask (void) {
 	U8 i;
 	for (i = 0; i < 5; i++) {
@@ -534,4 +546,4 @@ void underground_kickout_leff (void) {
 	leff_exit ();
 }//end of function
 
-
+*/

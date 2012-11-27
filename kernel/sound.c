@@ -339,6 +339,7 @@ exit_func:
 }
 
 
+
 /**
  * Write a 16-bit value to the sound board.
  */
@@ -368,6 +369,7 @@ __attribute__((noinline)) void sound_write (sound_code_t code)
 }
 
 
+
 /** Send a command to the sound board. */
 void sound_send (sound_code_t code)
 {
@@ -375,6 +377,7 @@ void sound_send (sound_code_t code)
 		return;
 	sound_start (ST_ANY, code, SL_500MS, 1);
 }
+
 
 
 /** Send a volume set command to the sound board */
@@ -416,11 +419,21 @@ void volume_set (U8 vol)
 }
 
 
+
+U8 get_volume (void) { return current_volume; }
+
+
+
+void lower_volume (void) { volume_set (current_volume - 1); }
+
+
+
 CALLSET_ENTRY (sound, music_refresh)
 {
 	if (!in_game && (deff_get_active () == DEFF_VOLUME_CHANGE))
 		music_request (MACHINE_VOLUME_CHANGE_MUSIC, PRI_VOLUME_CHANGE_MUSIC);
 }
+
 
 
 /** Decrease the master volume */
@@ -433,6 +446,7 @@ CALLSET_ENTRY (sound, volume_down)
 }
 
 
+
 /** Increase the master volume */
 CALLSET_ENTRY (sound, volume_up)
 {
@@ -442,11 +456,14 @@ CALLSET_ENTRY (sound, volume_up)
 	effect_update_request ();
 }
 
+
+
 void volume_refresh (void)
 {
 	csum_area_check (&volume_csum_info);
 	volume_set (current_volume);
 }
+
 
 
 CALLSET_ENTRY (sound, file_register)

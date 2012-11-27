@@ -53,22 +53,26 @@ void cramp_arrow_light_off(void);
 
 
 
+
+
+
+
 /*******************************************************************
  * machine page 1
  ********************************************************************/
-/* acmag.c */
-/* rollovers.c */
 
 /*******************************************************************
  * machine page 2
  ********************************************************************/
-/* car_crash.c */
-/* cryoclaw.c */
+/* acmag.c */
+__machine2__ void acmag_made(void);
+
 
 /*jackpots.c*/
 __machine2__ void jackpot_reset (void);
 __machine2__ void choose_random_jackpot(void);
 __machine2__ void score_jackpot(void);
+__machine2__ void set_all_jackpots (void);
 
 
 /* combos.c */
@@ -91,10 +95,6 @@ __machine2__ void car_chase_ramp_made(void);
 __machine2__ void comp_award_trip_car_crash(void);
 
 
-/* eject.c */
-__machine2__ void comp_award_doub_retina(void);
-
-
 /* explode.c */
 __machine2__ void start_explode(void);
 __machine2__ void explode_made(void);
@@ -105,6 +105,7 @@ __machine2__ void access_claw_light_on(void);
 __machine2__ void light_quick_freeze_light_on (void);
 __machine2__ void light_quick_freeze_light_off (void);
 
+
 /* underground.c */
 __machine2__ void underground_jackpot_light_on(void);
 __machine2__ void underground_jackpot_light_off(void);
@@ -114,11 +115,20 @@ __machine2__ void computer_light_on(void);
 __machine2__ void computer_light_off(void);
 
 
+/* demotime.c */
+__machine2__ void demotime_increment (void);
+__machine2__ void demotime_start(void);
+__machine2__ void demotime_jackpot_made(void);
+
+
+
+
 
 /*******************************************************************
  * machine page 3
  ********************************************************************/
-/* bonus.c */
+/* eject.c */
+__machine3__ void comp_award_doub_retina(void);
 
 
 /* capture_simon.c */
@@ -140,28 +150,31 @@ __machine3__ void prison_break_made (void);
 __machine3__ void fortress_start(void);
 __machine3__ void fortress_jackpot_made(void);
 
+
 /* museum.c */
 __machine3__ void museum_start(void);
 __machine3__ void museum_jackpot_made(void);
+
 
 /* cryoprison.c */
 __machine3__ void cryoprison_start(void);
 __machine3__ void cryoprison_jackpot_made(void);
 
+
 /* wasteland.c */
 __machine3__ void wasteland_start(void);
 __machine3__ void wasteland_jackpot_made(void);
 
-/* demotime.c */
-__machine3__ void demotime_start(void);
-__machine3__ void demotime_jackpot_made(void);
+
+
+
 
 
 /*******************************************************************
  * machine page 4
  ********************************************************************/
 /* bar.c */
-struct progress_bar_ops {
+/*struct progress_bar_ops {
 	U8 x;
 	U8 y;
 	U8 *fill_level;
@@ -169,15 +182,15 @@ struct progress_bar_ops {
 	U8 bar_width; //Needs to be a multiple of 5 +
 };
 __machine4__ void draw_progress_bar (struct progress_bar_ops *ops);
-
+*/
 
 /* dm_millions.c */
-__machine4__ void display_dm_millions(U8 num);
+/*__machine4__ void display_dm_millions(U8 num);
 __machine4__ void display_and_shake_dm_millions(U8 num);
-
+*/
 
 /* wheelie.c */
-__machine4__ void start_wheelie (void);
+//__machine4__ void start_wheelie (void);
 
 
 /* top_popper.c */
@@ -187,10 +200,28 @@ __machine4__ void video_mode_finished (void);
 /* standupFrenzy.c */
 void collect_standups(void );
 
+/* huxley.c*/
+__machine4__ void huxley_increment(void);
+__machine4__ void huxley_begin(void);
+__machine4__ void huxley_mode_shot_made(void);
+__machine4__ void huxley_made(void);
+
+
+
 
 /*******************************************************************
  * machine page 5
  ********************************************************************/
+/* cryoclaw.c */
+
+/* dm_amode.c */
+
 /* eyeball.c */
+
 /* jets.c */
+
 /* superjets.c */
+
+
+
+

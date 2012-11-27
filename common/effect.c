@@ -23,14 +23,42 @@
 #include <replay.h>
 #include <coin.h>
 #include <diag.h>
+#include "dm/global_constants.h"
 
 extern U8 last_nonfatal_error_code;
 extern task_gid_t last_nonfatal_error_gid;
 extern __nvram__ U8 current_volume;
 
 
-void ball_save_deff (void)
-{
+
+
+const U8 	ball_save_TotalNumOfSounds = 6; //num between 0 and N-1 == N total
+const sound_code_t ball_save_SoundsArray[] = {	SPCH_AINT_OVER_YET,		SPCH_DONT_MOVE_PHOENIX,		SPCH_DONT_MOVE,
+												SPCH_SECOND_CHANCE,		SPCH_HEADS_UP,				SPCH_NEXT_SHOT };
+
+void ball_save_deff (void) {
+#ifdef	DEMO_MAN_BALL_SAVE_EFFECT
+	U16 fno;
+	U8 ball_save_SoundCounter;
+		ball_save_SoundCounter = random_scaled(ball_save_TotalNumOfSounds);//from kernal/random.c
+
+	dmd_alloc_pair_clean ();// Clean both pages
+	sound_start (ST_SPEECH, ball_save_SoundsArray[ball_save_SoundCounter], SL_4S, PRI_GAME_QUICK5);
+
+	for (fno = IMG_GUN_START; fno <= IMG_GUN_END; fno += 2) {
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_fireball, DMD_MIDDLE_X + 30, DMD_BIG_CY_Top, "BALL");
+			font_render_string_center (&font_fireball, DMD_MIDDLE_X + 30, DMD_BIG_CY_Bot, "SAVE");
+				dmd_text_outline ();
+				dmd_alloc_pair ();
+				frame_draw(fno);
+				dmd_overlay_outline ();
+				dmd_show2 ();
+				task_sleep (TIME_100MS);
+	}//end of for loop
+	task_sleep (TIME_2S);
+#else
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 	sprintf ("PLAYER %d", player_up);
@@ -39,6 +67,7 @@ void ball_save_deff (void)
 	font_render_string_center (&font_fixed6, 64, 22, "BALL SAVED");
 	dmd_show_low ();
 	deff_swap_low_high (24, TIME_100MS);
+#endif
 	deff_exit ();
 }
 
@@ -214,8 +243,38 @@ void score_goal_deff (void)
 }
 
 
-void plunge_ball_deff (void)
-{
+
+
+const U8 	shoot_reminder_TotalNumOfSounds = 10; //num between 0 and N-1 == N total
+const sound_code_t shoot_reminder_SoundsArray[] = {	SPCH_COME_GET_ME, 		SPCH_LETS_GO2, 			SPCH_MOVE_IT_SLY,
+													SPCH_DRIVE, 			SPCH_GO_SLY,
+													SPCH_DO_SOMETHING, 		SPCH_MOVE, 				SPCH_MOVE_IT,
+													SPCH_GO_WES, 			SPCH_NOW };
+
+void plunge_ball_deff (void) {
+#ifdef	DEMO_MAN_BALL_SAVE_EFFECT
+	U16 fno;
+	U8 shoot_reminder_SoundCounter;
+	shoot_reminder_SoundCounter = random_scaled(shoot_reminder_TotalNumOfSounds);//from kernal/random.c
+
+	dmd_alloc_pair_clean ();// Clean both pages
+	sound_start (ST_SPEECH, shoot_reminder_SoundsArray[shoot_reminder_SoundCounter], SL_4S, PRI_GAME_QUICK5);
+
+		for (fno = IMG_PHOENIX_A2_START; fno <= IMG_PHOENIX_A2_END; fno += 2) {
+			dmd_map_overlay ();
+			dmd_clean_page_low ();
+			font_render_string_center (&font_fireball, DMD_MIDDLE_X - 25, DMD_BIG_CY_Top, "PLUNGE");
+			font_render_string_center (&font_fireball, DMD_MIDDLE_X - 25, DMD_BIG_CY_Bot, "BALL");
+				dmd_text_outline ();
+				dmd_alloc_pair ();
+				frame_draw(fno);
+				dmd_overlay_outline ();
+				dmd_show2 ();
+				task_sleep (TIME_100MS);
+	}//end of for loop
+	task_sleep (TIME_500MS);
+
+#else
 	dmd_alloc_pair ();
 	dmd_clean_page_low ();
 
@@ -229,6 +288,7 @@ void plunge_ball_deff (void)
 	font_render_string_center (&font_fixed6, 64, 22, "PLUNGE THE BALL");
 #endif
 	deff_swap_low_high (13, TIME_300MS);
+#endif
 	deff_exit ();
 }
 

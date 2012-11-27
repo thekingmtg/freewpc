@@ -19,10 +19,18 @@ WPC95: No
 Lamp-Matrix-Width: 18
 Lamp-Matrix-Height: 34
 
+
+
+
+
 ##########################################################################
 # Include standard definitions that apply to all WPC games.
 ##########################################################################
 include platform/wpc/wpc-dcs.md
+
+
+
+
 
 ##########################################################################
 # Use 'define' to emit a plain #define for anything not covered by
@@ -36,13 +44,18 @@ define MACHINE_CUSTOM_AMODE
 define MACHINE_AMODE_EFFECTS
 define AUTOFIRE_DELAY 				18
 define MACHINE_DEMO_MAN
-define NO_FREEWPC_LOGO_DISPLAY
 define END_GAME_ON_TEST_ENTER
+define LOWER_IMAGE_BRIGHTNESS
+define DEMO_MAN_BALL_SAVE_EFFECT
+define DEMO_MAN_PLUNGE_BALL_EFFECT
+#this means we have X sols below
+define MACHINE_SOL_EXTBOARD1
 
-define MACHINE_GRAND_CHAMPION_INITIALS { 'D', 'A', 'D' }
-define MACHINE_GRAND_CHAMPION_SCORE { 0x00, 0x20, 0x00, 0x00, 0x00 }
-define MACHINE_HIGH_SCORE_INITIALS { 'S', 'A', 'M' }, { 'J', 'O', 'E' }, { 'I', 'S', 'A' }, { 'M', 'O', 'M' }
-define MACHINE_HIGH_SCORES { 0x00, 0x17, 0x50, 0x00, 0x00 }, { 0x00, 0x15, 0x00, 0x00, 0x00 }, { 0x00, 0x12, 0x50, 0x00, 0x00 }, { 0x00, 0x10, 0x00, 0x00, 0x00 }
+define MACHINE_ADD_CREDIT_SOUND PLONK 
+
+define MACHINE_VOLUME_CHANGE_MUSIC MUS_HIGH_SCORE
+#define NO_FREEWPC_LOGO_DISPLAY
+
 
 ##########################################################################
 # Lamp Description
@@ -53,70 +66,74 @@ define MACHINE_HIGH_SCORES { 0x00, 0x17, 0x50, 0x00, 0x00 }, { 0x00, 0x15, 0x00,
 # given in terms of the Lamp-Matrix-Width and Lamp-Matrix-Height.
 ##########################################################################
 [lamps]
-11: Ball Save, 						red, 		x(28), 		y(6)
-12: Fortress Multiball, 			white, 		x(33), 		y(9)
-13: Museum Multiball, 				white, 		x(31), 		y(9)
-14: Cryoprison Multiball, 			white, 		x(29), 		y(9)
-15: Wasteland Multiball, 			white, 		x(30), 		y(9)
-16: Shoot Again, ball-save, 		red, 		x(34), 		y(9)
-17: Access Claw, 					yellow, 	x(27), 		y(1)
-18: Left Ramp Explode, 				yellow, 	x(22), 		y(9)
-21: Right Ramp Jackpot, 			red, 		x(22), 		y(14)
-22: Right Loop Explode, 			yellow,		x(23), 		y(15)
-23: Light Quick Freeze, 			yellow, 	x(27), 		y(15)
-24: Freeze 4, 						white, 		x(26), 		y(14)
-25: Claw Ready, 					yellow, 	x(25), 		y(12)
-26: Freeze 3, 						white, 		x(28), 		y(12)
-27: Freeze 2, 						white, 		x(28), 		y(6)
-28: Freeze 1, 						white, 		x(26), 		y(2)
-31: Right Loop Jackpot, 			red, 		x(21), 		y(16)
-32: Standup 5, 						blue, 		x(19), 		y(15)
-33: Right Ramp Arrow, 				red, 		x(19), 		y(14)
-34: Left Ramp Jackpot, 				red, 		x(20), 		y(8)
-35: Left Loop Jackpot, 				red, 		x(19), 		y(6)
-36: Car Crash Top, 					yellow, 	x(20), 		y(2)
-37: Standup 1, 						blue, 		x(21), 		y(5)
-38: Car Crash Center, 				yellow, 	x(22), 		y(3)
-41: Right Ramp Explode, 			yellow, 	x(23), 		y(14)
-42: Right Ramp Car Chase, 			yellow, 	x(24), 		y(13)
-43: Quick Freeze, 					yellow, 	x(24), 		y(10)
-44: Left Ramp Car Chase, 			yellow, 	x(23), 		y(9)
-45: Extra Ball, extra-ball, 		yellow, 	x(24), 		y(9)
-46: Start Multiball, 				yellow, 	x(23), 		y(8)
-47: Car Crash Bottom, 				yellow, 	x(23), 		y(4)
-48: Left Loop Explode, 				yellow, 	x(22), 		y(7)
-51: Underground Arrow, 				red, 		x(11), 		y(10)
-52: Underground Jackpot, 			red, 		x(12), 		y(9)
-53: Standup 2, 						blue, 		x(13), 		y(8)
-54: Left Ramp Arrow, 				red, 		x(14), 		y(7)
-55: Side Ramp Jackpot, 				red, 		x(16), 		y(9)
-56: Side Ramp Arrow, 				red, 		x(15), 		y(9)
-57: left Loop Arrow, 				red, 		x(14), 		y(4)
-58: Center Ramp Jackpot, 			red, 		x(10), 		y(9)
-61: Claw Capture Simon,				red, 		x(1), 		y(7)
-62: Claw Super Jets,				red, 		x(3), 		y(6)
-63: Claw Prison Break,				red, 		x(4), 		y(5)
-64: Claw Freeze, 					red, 		x(5), 		y(2)
-65: Claw Acmag, 					red, 		x(5), 		y(1)
-66: Middle Rollover, 				green, 		x(2), 		y(14)
-67: Top Rollover, 					green, 		x(2), 		y(15)
-68: Lower Rollover, 				green, 		x(2), 		y(17)
-71: Super Jackpot,					yellow, 	x(7), 		y(11)
-72: Computer,						blue, 		x(8), 		y(11)
-73: Demo Time, 						yellow, 	x(9), 		y(11)
+11: Ball Save, red, x(28), y(6)
+12: Fortress Multiball, white, x(33), y(9)
+13: Museum Multiball, white, x(31), y(9)
+14: Cryoprison Multiball, white, x(29), y(9)
+15: Wasteland Multiball, white, x(30), y(9)
+16: Shoot Again, ball-save, red, x(34), y(9)
+17: Access Claw, yellow, x(27), y(1)
+18: Left Ramp Explode, yellow, x(22), y(9)
+21: Right Ramp Jackpot, red, x(22), y(14)
+22: Right Loop Explode, yellow,	x(23), y(15)
+23: Light Quick Freeze, yellow, x(27), y(15)
+24: Freeze 4, white, x(26), y(14)
+25: Claw Ready, yellow, x(25), y(12)
+26: Freeze 3, white, x(28), y(12)
+27: Freeze 2, white, x(28), y(6)
+28: Freeze 1, white, x(26), y(2)
+31: Right Loop Jackpot, red, x(21), y(16)
+32: Standup 5, blue, x(19), y(15)
+33: Right Ramp Arrow, red, x(19), y(14)
+34: Left Ramp Jackpot, red, x(20), y(8)
+35: Left Loop Jackpot, red, x(19), y(6)
+36: Car Crash Top, yellow, x(20), y(2)
+37: Standup 1, blue, x(21), y(5)
+38: Car Crash Center, yellow, x(22), y(3)
+41: Right Ramp Explode, yellow, x(23), y(14)
+42: Right Ramp Car Chase, yellow, x(24), y(13)
+43: Quick Freeze, yellow, x(24), y(10)
+44: Left Ramp Car Chase, yellow, x(23), y(9)
+45: Extra Ball, extra-ball, yellow, x(24), y(9)
+46: Start Multiball, yellow, x(23), y(8)
+47: Car Crash Bottom, yellow, x(23), y(4)
+48: Left Loop Explode, yellow, x(22), y(7)
+51: Underground Arrow, red, x(11), y(10)
+52: Underground Jackpot, red, x(12), y(9)
+53: Standup 2, blue, x(13), y(8)
+54: Left Ramp Arrow, red, x(14), y(7)
+55: Side Ramp Jackpot, red, x(16), y(9)
+56: Side Ramp Arrow, red, x(15), y(9)
+57: left Loop Arrow, red, x(14), y(4)
+58: Center Ramp Jackpot, red, x(10), y(9)
+61: Claw Capture Simon,	red, x(1), y(7)
+62: Claw Super Jets, red, x(3), y(6)
+63: Claw Prison Break, red, x(4), y(5)
+64: Claw Freeze, red, x(5), y(2)
+65: Claw Acmag, red, x(5), y(1)
+66: Middle Rollover, green, x(2), y(14)
+67: Top Rollover, green, x(2), y(15)
+68: Lower Rollover, green, x(2), y(17)
+71: Super Jackpot, yellow, x(7), y(11)
+72: Computer, blue, x(8), y(11)
+73: Demo Time, yellow, 	x(9), y(11)
 74: Not Used 1
 75: Not Used 2
-76: Standup 4, 						blue, 		x(18), 		y(13)
-77: Standup 3, 						blue, 		x(17), 		y(10)
-78: Retina Scan, 					yellow, 	x(23), 		y(1)
-81: Center Ramp Middle, 			red,		x(6), 		y(9)
-82: Center Ramp Outer, 				red,		x(6), 		y(8)
-83: Center Ramp Inner, 				red, 		x(6), 		y(9)
-84: Center Ramp Arrow, 				red, 		x(9), 		y(9)
-85: Right Loop Arrow, 				red, 		x(16), 		y(18)
-86: Buy In Button, buyin, cabinet, 	yellow, 	x(33), 		y(18)
-87: Ball Launch, launch, cabinet, 	red, 		x(34), 		y(16)
-88: Start Button, start, cabinet, 	yellow, 	x(1), 		y(1)
+76: Standup 4, blue, x(18), y(13)
+77: Standup 3, blue, x(17), y(10)
+78: Retina Scan, yellow, x(23), y(1)
+81: Center Ramp Middle, red, x(6), y(9)
+82: Center Ramp Outer, red,	x(6), y(8)
+83: Center Ramp Inner, red, x(6), y(9)
+84: Center Ramp Arrow, red, x(9), y(9)
+85: Right Loop Arrow, red, x(16), y(18)
+86: Buy In Button, buyin, cabinet, yellow, x(33), y(18)
+87: Ball Launch, launch, cabinet, red, x(34), y(16)
+88: Start Button, start, cabinet, yellow, x(1), y(1)
+
+
+
+
 
 ##########################################################################
 # Switch Description
@@ -213,6 +230,10 @@ define MACHINE_HIGH_SCORES { 0x00, 0x17, 0x50, 0x00, 0x00 }, { 0x00, 0x15, 0x00,
 87: Car Chase Standup, ingame
 88: Lower Rebound, ingame
 
+
+
+
+
 ##########################################################################
 # Drives
 # This describes the names of the solenoid/motor drives.
@@ -254,9 +275,11 @@ L8: : Not Used 2, nosearch
 
 # G = J126 on Power Driver Board
 G1: Claw Flasher, flash, nosearch
+
 G2: Elevator Motor, motor, nosearch
 G3: Claw Left, motor, nosearch
 G4: Claw Right, motor, nosearch
+
 G5: Jets Flasher, flash, nosearch
 G6: Side Ramp Flasher, flash, nosearch
 G7: Left Ramp Up Flasher, flash, nosearch
@@ -289,6 +312,9 @@ X7: Diverter Flasher, flash, nosearch
 X8: Right Ramp Up Flasher, flash, nosearch
 
 
+
+
+
 ##########################################################################
 # templates
 # This section contains template definitions for device drivers.
@@ -316,7 +342,6 @@ X8: Right Ramp Up Flasher, flash, nosearch
 # ontime - how long the coil is kept on
 # offtime - how long the coil is kept off after it was fired, before polling the switch again.  This prevents constant lock-on.
 # auto 	- if nonzero, then automatically enable during start ball.
-
 #
 ##########################################################################
 [templates]
@@ -329,10 +354,12 @@ Diverter: driver(divhold), power_sol=SOL_DIVERTER_POWER, hold_sol=SOL_DIVERTER_H
 
 Elevator: driver(motorbank2), sol=SOL_ELEVATOR_MOTOR, up_sw_event=SW_ELEVATOR_HOLD, down_sw_event=SW_ELEVATOR_INDEX, initial_position=ELEVATOR_DOWN, includetest(yes)
 
-Claw: driver(bivar2), left_sol=SOL_CLAW_LEFT, right_sol=SOL_CLAW_RIGHT, 
-		left_sw=SW_CLAW_POSITION_1, right_sw=SW_CLAW_POSITION_2, includetest(yes)
+Claw: driver(bivar2), left_sol=SOL_CLAW_LEFT, right_sol=SOL_CLAW_RIGHT, left_sw=SW_CLAW_POSITION_1, right_sw=SW_CLAW_POSITION_2, includetest(yes)
 
 ClawMagnet: driver(magnet), sol=SOL_CLAW_MAGNET
+
+
+
 
 
 ##########################################################################
@@ -345,6 +372,10 @@ ClawMagnet: driver(magnet), sol=SOL_CLAW_MAGNET
 3: L.Right Playfield
 4: L.Left Playfield
 
+
+
+
+
 ##########################################################################
 # Tests
 # These are additional test items that should appear in the TESTS menu.
@@ -353,6 +384,9 @@ ClawMagnet: driver(magnet), sol=SOL_CLAW_MAGNET
 diverter: 		#autogenerated-test, see defintion in [templates] section.
 elevator:		#autogenerated-test, see defintion in [templates] section.
 claw:			#autogenerated-test, see defintion in [templates] section.
+
+
+
 
 
 ##########################################################################
@@ -379,21 +413,21 @@ Right Loop Awards: Right Loop Arrow, Right Loop Jackpot, Right Loop Explode
 Left Loop Awards: left Loop Arrow, Left Loop Jackpot, Left Loop Explode, Start Multiball, Extra Ball
 Freeze: Freeze 1, Freeze 2, Freeze 3, Freeze 4
 Rollovers: Middle Rollover, Top Rollover, Lower Rollover
-Loops: Left Loop Awards, Right Loop Awards
 Multiballs: Fortress Multiball, Museum Multiball, Cryoprison Multiball, Wasteland Multiball
 Claw: Claw Capture Simon, Claw Super Jets, Claw Prison Break, Claw Freeze, Claw Acmag 
 Underground Scoop: Underground Arrow, Underground Jackpot
 Standups: Standup 1, Standup 2, Standup 3, Standup 4, Standup 5
 Center Ramp: Center Ramp Arrow, Center Ramp Middle, Center Ramp Outer, Center Ramp Inner, Center Ramp Jackpot
+Side Ramp: Side Ramp Jackpot, Side Ramp Arrow
 Car Crash: Car Crash Top, Car Crash Center, Car Crash Bottom
 
-Sort1: PF:lamp_sort_bottom_to_top
-Sort2: PF:lamp_sort_top_to_bottom
-Sort3: PF:lamp_sort_left_to_right
-Sort4: PF:lamp_sort_right_to_left
-Circle Out: PF:lamp_sort_circle_out
+#Sort1: PF:lamp_sort_bottom_to_top
+#Sort2: PF:lamp_sort_top_to_bottom
+#Sort3: PF:lamp_sort_left_to_right
+#Sort4: PF:lamp_sort_right_to_left
+#Circle Out: PF:lamp_sort_circle_out
 
-Amode All: Right Ramp Awards, Left Ramp Awards, Right Loop Awards, Left Loop Awards, Freeze, Rollovers, Loops, Multiballs, 
+Amode All: Right Ramp Awards, Left Ramp Awards, Right Loop Awards, Left Loop Awards, Freeze, Rollovers, Multiballs, 
 Claw, Underground Scoop, Standups, Center Ramp, Car Crash
 Amode Rand: Amode All
 
@@ -402,6 +436,10 @@ Amode Rand: Amode All
 #Yellow Lamps: COLOR:yellow
 #Green Lamps: COLOR:green
 #Blue Lamps: COLOR:blue
+
+
+
+
 
 ##########################################################################
 # Containers
@@ -420,10 +458,23 @@ Eyeball Eject: Eject, Eject
 Subway VUK: Bottom Popper, Bottom Popper
 Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Trough 5
 
+
+
+
+##########################################################################
+##########################################################################
+##########################################################################
 #------------------------------------------------------------------------
 # The remaining sections describe software aspects, and not the physical
 # machine.
 #------------------------------------------------------------------------
+##########################################################################
+##########################################################################
+##########################################################################
+
+
+
+
 
 ##########################################################################
 # Items for the Feature Adjustments menu.  Parameters indicate the
@@ -431,20 +482,36 @@ Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Tr
 ##########################################################################
 [adjustments]
 
+
+
+
+
 ##########################################################################
 # Items for the Feature Audits menu.
 ##########################################################################
 [audits]
+
+
+
+
 
 ##########################################################################
 # Sound calls for well-known events
 ##########################################################################
 [system_sounds]
 
+
+
+
+
 ##########################################################################
 # Music calls for well-known events
 ##########################################################################
 [system_music]
+
+
+
+
 
 ##########################################################################
 # A list of all scores needed by the game rules.
@@ -475,8 +542,8 @@ Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Tr
 9M:
 10M:
 11M:
-13M:
 12M:
+13M:
 15M:
 20M:
 25M:
@@ -487,6 +554,10 @@ Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Tr
 50M:
 100M:  #used for score compare in bonus display
 
+
+
+
+
 ##########################################################################
 # The default high scores.  Use GC to indicate the grand champion.
 # The parameters are the initials followed by the score value.  Periods
@@ -495,19 +566,23 @@ Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Tr
 ##########################################################################
 [highscores]
 
+
+
+
+
 ##########################################################################
 # Per-player bit flags.
 #
 #limit of 64 total
 ##########################################################################
 [flags]
-IS_ACMAG_ACTIVATED:
-IS_CARCHASE_MODE_ACTIVATED:
-IS_EXPLODE_MODE_ACTIVATED:
+IS_ACMAG_RUNNING:
+IS_CARCHASE_MODE_RUNNING:
+IS_EXPLODE_MODE_RUNNING:
 IS_COMPUTER_ACTIVATED:
 IS_COMBOS_KILLED:
 IS_EXTRABALL_LIT:
-IS_SUPERJETS_ACTIVATED:
+IS_SUPERJETS_RUNNING:
 
 IS_COMBO_SIDERAMP_ACTIVATED:
 IS_COMBO_LEFTRAMP_ACTIVATED:
@@ -525,14 +600,6 @@ IS_CAPSIM_CENTERRAMP_ACTIVATED:
 IS_CAPSIM_LEFTORB_ACTIVATED:
 IS_CAPSIM_RIGHTORB_ACTIVATED:
 
-IS_COMBO_SIDERAMP_ACTIVATED:
-IS_COMBO_LEFTRAMP_ACTIVATED:
-IS_COMBO_RIGHTRAMP_ACTIVATED:
-IS_COMBO_UNDER_ACTIVATED:
-IS_COMBO_CENTERRAMP_ACTIVATED:
-IS_COMBO_LEFTORB_ACTIVATED:
-IS_COMBO_RIGHTORB_ACTIVATED:
-
 IS_UGROUND_ARROW_ACTIVATED:
 IS_L_LOOP_ARROW_ACTIVATED:
 IS_R_LOOP_ARROW_ACTIVATED:
@@ -549,23 +616,28 @@ IS_C_RAMP_JACKPOT_ACTIVATED:
 IS_S_RAMP_JACKPOT_ACTIVATED:
 IS_R_RAMP_JACKPOT_ACTIVATED:
 
-IS_CRYOCLAW_ACTIVATED:
-IS_MULTIBALL_ACTIVATED:
-IS_FORTRESS_ACTIVATED:
+IS_CRYOCLAW_RUNNING:
+IS_MULTIBALL_ENABLED:
+IS_FORTRESS_MB_RUNNING:
 IS_BALL_ON_CLAW:
 IS_R_RAMP_CLAWREADY:
 IN_VIDEO_MODE:
-IS_PBREAK_ACTIVATED:
+IS_PBREAK_RUNNING:
 
-IS_MUSEUM_ACTIVATED:
-IS_CRYOPRISON_ACTIVATED:
-IS_WASTELAND_ACTIVATED:
-IS_DEMOTIME_ACTIVATED:
+IS_MUSEUM_MB_RUNNING:
+IS_CRYOPRISON_MB_RUNNING:
+IS_WASTELAND_MB_RUNNING:
 IS_LRAMP_QUICKFREEZE_ACTIVATED:
-#54
+IS_HUXLEY_RUNNING:
+IS_HUXLEY_ENABLED:
+IS_DEMOTIME_RUNNING:
 
-#flag_test (FLAG_IS_R_LOOP_ARROW_ACTIVATED)
-#flag_off (FLAG_IS_R_LOOP_ARROW_ACTIVATED);
+IS_DEMOTIME_ENABLED:
+#50
+
+
+
+
 
 ##########################################################################
 # System-wide bit flags.
@@ -573,6 +645,9 @@ IS_LRAMP_QUICKFREEZE_ACTIVATED:
 #limit of 32 total
 ##########################################################################
 [globalflags]
+
+
+
 
 
 ##########################################################################
@@ -640,59 +715,61 @@ IS_LRAMP_QUICKFREEZE_ACTIVATED:
 ##########################################################################
 #can pick, at most, 4 to 10 extra fonts, depending on file size, outside of the system fonts without
 #receiving compile errors for overflowing the fonts page 
+#
+#FYI: to allow more fonts, I deleted some of the system fonts
+##########################################################################
 [fonts]
 v5prc:
 lithograph:
 steel:
-amiga4ever:
 fipps:
 bitoutline:
 bitcube10:
 fireball:
-cowboy:
 antiqua:
 
-#cardona:
+
+
+#cowboy:
+#amiga4ever:
+
+
+
 
 
 ##########################################################################
-# Display effects  -- page 1
+# Display effects  -- page 1 (56)
 ##########################################################################
 [deffs]
 
 
-##########################################################################
-# Display effects  -- page 2
-##########################################################################
-rollovers1 effect: page(MACHINE2_PAGE), PRI_GAME_LOW5, D_RESTARTABLE
-rollovers2 effect: page(MACHINE2_PAGE), PRI_GAME_LOW5
-rollovers3 effect: page(MACHINE2_PAGE), PRI_GAME_LOW5
-all rollovers effect: page(MACHINE2_PAGE), PRI_GAME_QUICK5
 
-eyeball1 effect: page(MACHINE5_PAGE), PRI_GAME_LOW3
-eyeball2 effect: page(MACHINE5_PAGE), PRI_GAME_LOW3
-eyeball3 effect: page(MACHINE5_PAGE), PRI_GAME_LOW3
-eyeball4 effect: page(MACHINE5_PAGE), PRI_GAME_LOW3
+
+
+
+
+
+##########################################################################
+# Display effects  -- page 2 (55)
+##########################################################################
+rollovers effect: page(MACHINE2_PAGE), PRI_GAME_LOW5, D_RESTARTABLE
+all rollovers effect: page(MACHINE2_PAGE), PRI_GAME_QUICK5
 
 car chase start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
 car chase effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
 car chase hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-car chase end effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
 
 acmag start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
 acmag effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
 acmag hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-acmag end effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
 
-jets effect: page(MACHINE5_PAGE), PRI_GAME_QUICK1, D_QUEUED+D_RESTARTABLE
-jets completed effect: page(MACHINE5_PAGE), PRI_GAME_QUICK2
+underground effect: page(MACHINE2_PAGE), PRI_GAME_LOW5
+computer award: page(MACHINE2_PAGE), PRI_GAME_QUICK6
 
-superjets effect: page(MACHINE5_PAGE), PRI_GAME_MODE1, D_QUEUED
-superjets hit effect: page(MACHINE5_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE
-superjets end effect: page(MACHINE5_PAGE), PRI_GAME_MODE4
-
-######## retina scan effect at eject.c
-eject effect: page(MACHINE2_PAGE), PRI_GAME_LOW5
+demotime start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3, D_QUEUED
+demotime jackpot effect: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
+demotime info effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+demotime effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
 
 clw inlanes effect: page(MACHINE2_PAGE), PRI_GAME_LOW6
 qf inlanes effect: page(MACHINE2_PAGE), PRI_GAME_LOW6
@@ -704,112 +781,110 @@ computer effect: page(MACHINE2_PAGE), PRI_GAME_LOW2, D_PAUSE+D_QUEUED
 
 explode start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
 explode effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
-explode hit1 effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-explode hit2 effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-explode hit3 effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-explode hit4 effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-explode end: page(MACHINE2_PAGE), PRI_GAME_MODE3
+explode hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 
-#############custom_deffs.c 
-ball save effect: page(MACHINE2_PAGE), PRI_GAME_QUICK7, c_decl(ball_save_deff)
-plunge ball effect:	page(MACHINE2_PAGE), PRI_GAME_QUICK7, c_decl(plunge_ball_deff)
-troubleshooting: page(MACHINE2_PAGE), PRI_GAME_QUICK7
+#override_deffs.c 
+#troubleshooting: page(MACHINE2_PAGE), PRI_GAME_QUICK7
 
 
-underground effect: page(MACHINE2_PAGE), PRI_GAME_LOW5
-computer award effect: page(MACHINE2_PAGE), PRI_GAME_QUICK6
-comp collect bonus: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
-comp trip car crash: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
-comp collect standups: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
-comp light arrows: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
-comp light extra ball: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
-comp maximize freezes: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
-comp doub retina: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_PAUSE+D_QUEUED
+
+
 
 ##########################################################################
-# Display effects  -- page 3
+# Display effects  -- page 3 (54)
 ##########################################################################
 bonus: page(MACHINE3_PAGE), PRI_BONUS, D_QUEUED
+bonus ca: page(MACHINE3_PAGE), PRI_BONUS, D_QUEUED
 
 capture simon start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3
 capture simon effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
 capture simon hit effect: page(MACHINE3_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-capture simon end effect: page(MACHINE3_PAGE), PRI_GAME_MODE3
 
 prison break start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3
 prison break effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
 prison break hit effect: page(MACHINE3_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-prison break end effect: page(MACHINE3_PAGE), PRI_GAME_MODE3
+
+#retina scan effect at eject.c
+eject effect: page(MACHINE3_PAGE), PRI_GAME_LOW5, D_QUEUED
 
 fortress start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-fortress jackpot1 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-fortress jackpot2 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-fortress jackpot3 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-fortress jackpot4 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
+fortress jackpot effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
 fortress effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
 
 museum start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-museum jackpot1 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-museum jackpot2 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-museum jackpot3 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-museum jackpot4 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
+museum jackpot effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
 museum effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
 
 cryoprison start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-cryoprison jackpot1 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-cryoprison jackpot2 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-cryoprison jackpot3 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-cryoprison jackpot4 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
+cryoprison jackpot effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
 cryoprison effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
 
 wasteland start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-wasteland jackpot1 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-wasteland jackpot2 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-wasteland jackpot3 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-wasteland jackpot4 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
+wasteland jackpot effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
 wasteland effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
 
-demotime start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-demotime jackpot1 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-demotime jackpot2 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-demotime jackpot3 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-demotime jackpot4 effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-demotime effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
-
+#lock_freeze_mbstart
 freeze effect: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_QUEUED
 
-cryoclaw effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
+
+
 
 
 ##########################################################################
-# Display effects  -- page 4
+# Display effects  -- page 4 (53)
 ##########################################################################
-wheelie: page(MACHINE4_PAGE), PRI_GAME_VMODE, D_QUEUED
+#wheelie: page(MACHINE4_PAGE), PRI_GAME_VMODE, D_QUEUED
 
 top popper effect: page(MACHINE4_PAGE), PRI_GAME_LOW5
 top popper award effect: page(MACHINE4_PAGE), PRI_GAME_QUICK5
+extra ball effect: page(MACHINE4_PAGE), PRI_GAME_QUICK5, D_QUEUED
 
 standupfrenzy start effect: page(MACHINE4_PAGE), PRI_GAME_MODE3
 standupfrenzy effect: page(MACHINE4_PAGE), PRI_GAME_MODE2, D_QUEUED
-standupfrenzy hit effect: page(MACHINE4_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-standupfrenzy end effect: page(MACHINE4_PAGE), PRI_GAME_MODE3
-
 collect standups effect: page(MACHINE4_PAGE), PRI_GAME_QUICK7, D_QUEUED
+standup effect: page(MACHINE4_PAGE), PRI_GAME_LOW4
 
-standup1 effect: page(MACHINE4_PAGE), PRI_GAME_LOW4
-standup2 effect: page(MACHINE4_PAGE), PRI_GAME_LOW4
-standup3 effect: page(MACHINE4_PAGE), PRI_GAME_LOW4
+huxley info effect: page(MACHINE4_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_RESTARTABLE
+huxley start effect: page(MACHINE4_PAGE), PRI_GAME_MODE3
+huxley effect: page(MACHINE4_PAGE), PRI_GAME_MODE2, D_QUEUED
+huxley hit effect: page(MACHINE4_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
+
+
+
+
+
+##########################################################################
+# Display effects  -- page 5 (52)
+##########################################################################
+jets effect: page(MACHINE5_PAGE), PRI_GAME_QUICK1, D_QUEUED+D_RESTARTABLE
+jets completed effect: page(MACHINE5_PAGE), PRI_GAME_QUICK2, D_QUEUED
+
+superjets effect: page(MACHINE5_PAGE), PRI_GAME_MODE1, D_QUEUED
+superjets hit effect: page(MACHINE5_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE
+
+eyeball effect: page(MACHINE5_PAGE), PRI_GAME_LOW2, D_QUEUED
+
+cryoclaw effect: page(MACHINE5_PAGE), PRI_GAME_MODE2, D_QUEUED
+
+startup effect: page(MACHINE5_PAGE), PRI_BALL_LAUNCH_MENU, D_QUEUED+D_RESTARTABLE
+
+
+
+
 
 
 ##########################################################################
 # Lamp effects
 ##########################################################################
 [leffs]
-Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE2_PAGE)
-Underground Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE5_PAGE)
+#Underground Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
 
 ######inlanes.c#########
-quick freeze: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
-cryoclaw: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+#quick freeze: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+#cryoclaw: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
+
+
+
 
 

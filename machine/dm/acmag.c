@@ -22,6 +22,9 @@
  *
  *
  */
+/* CALLSET_SECTION (acmag, __machine2__) */
+
+
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -34,7 +37,6 @@ U8 						acmag_mode_shots_made;
 __local__ U8 			acmag_modes_achieved;
 U8			acmag_mode_timer;
 score_t 	acmag_mode_score;
-score_t 	acmag_mode_last_score;
 score_t 	acmag_mode_next_score;
 score_t 	acmag_mode_score_total_score;
 
@@ -62,7 +64,7 @@ struct timed_mode_ops acmag_mode = {
 	.music = MUS_ACMAG,
 	.deff_starting = DEFF_ACMAG_START_EFFECT,
 	.deff_running = DEFF_ACMAG_EFFECT,
-	.deff_ending = DEFF_ACMAG_END_EFFECT,
+//	.deff_ending = DEFF_ACMAG_END_EFFECT,
 	.prio = PRI_GAME_MODE2,
 	.init_timer = 33,
 	.timer = &acmag_mode_timer,
@@ -76,7 +78,7 @@ struct timed_mode_ops acmag_mode = {
  * initialize  and exit
  ***************************************************************************/
 void acmag_reset (void) {
-	flag_off (FLAG_IS_ACMAG_ACTIVATED);
+	flag_off (FLAG_IS_ACMAG_RUNNING);
 }//end of function
 
 
@@ -97,7 +99,7 @@ void acmag_mode_init (void) {
 			flag_off(FLAG_IS_BALL_ON_CLAW);
 			flipper_enable ();
 	acmag_mode_shots_made = 0;
-	flag_on (FLAG_IS_ACMAG_ACTIVATED);
+	flag_on (FLAG_IS_ACMAG_RUNNING);
 	center_ramp_arrow_update();
 	++acmag_modes_achieved;
 	sound_start (ST_SPEECH, SPCH_ACMAG_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
@@ -106,20 +108,19 @@ void acmag_mode_init (void) {
 	task_sleep(TIME_500MS);
 	lamp_tristate_on(LM_CLAW_ACMAG);
 	score_zero(acmag_mode_score);
-	score_zero(acmag_mode_last_score);
 	score_zero(acmag_mode_next_score);
 	switch (acmag_modes_achieved ){
-		case 1: score_add(acmag_mode_next_score, score_table[SC_15M]); break;
-		case 2: score_add(acmag_mode_next_score, score_table[SC_20M]); break;
-		case 3: score_add(acmag_mode_next_score, score_table[SC_25M]); break;
-		default: score_add(acmag_mode_next_score, score_table[SC_25M]);
+		case 1: score_add(acmag_mode_next_score, score_table[ACMAG_HIT_SCORE_1]); break;
+		case 2: score_add(acmag_mode_next_score, score_table[ACMAG_HIT_SCORE_2]); break;
+		default:
+		case 3: score_add(acmag_mode_next_score, score_table[ACMAG_HIT_SCORE_3]); break;
 	}//end of switch
 }//end of function
 
 
 
 void acmag_mode_expire (void) {
-	flag_off (FLAG_IS_ACMAG_ACTIVATED);
+	flag_off (FLAG_IS_ACMAG_RUNNING);
 	center_ramp_arrow_update();
 }//end of function
 
@@ -145,12 +146,13 @@ CALLSET_ENTRY (acmag, start_ball) 		{ acmag_reset(); }
  *
  ***************************************************************************/
 CALLSET_ENTRY (acmag, sw_claw_acmag) {
+	demotime_increment();
 	timed_mode_begin (&acmag_mode);//start mode
 }//end of function
 
 
  //center ramp shot made during acmag mode
-CALLSET_ENTRY (acmag, acmag_made) {
+void acmag_made(void) {
 	++acmag_mode_shots_made;
 	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
 	//flash lamp for a time
@@ -164,35 +166,22 @@ CALLSET_ENTRY (acmag, acmag_made) {
 
 	switch (acmag_modes_achieved ){
 		case 1:
-			score (SC_5M);
-			score_add (acmag_mode_score, score_table[SC_5M]);
-			score_add (acmag_mode_score_total_score, score_table[SC_5M]);
-			score_zero(acmag_mode_last_score);
-			score_add(acmag_mode_last_score, score_table[SC_5M]);
+			score (ACMAG_HIT_SCORE_1);
+			score_add (acmag_mode_score, score_table[ACMAG_HIT_SCORE_1]);
+			score_add (acmag_mode_score_total_score, score_table[ACMAG_HIT_SCORE_1]);
 			break;
 		case 2:
 			//2nd time we are in acmag - score differently
-			score (SC_10M);
-			score_add (acmag_mode_score, score_table[SC_10M]);
-			score_add (acmag_mode_score_total_score, score_table[SC_10M]);
-			score_zero(acmag_mode_last_score);
-			score_add(acmag_mode_last_score, score_table[SC_10M]);
-			break;
-		case 3:
-			//3rd time we are in acmag - score differently
-			score (SC_15M);
-			score_add (acmag_mode_score, score_table[SC_15M]);
-			score_add (acmag_mode_score_total_score, score_table[SC_15M]);
-			score_zero(acmag_mode_last_score);
-			score_add(acmag_mode_last_score, score_table[SC_15M]);
+			score (ACMAG_HIT_SCORE_2);
+			score_add (acmag_mode_score, score_table[ACMAG_HIT_SCORE_2]);
+			score_add (acmag_mode_score_total_score, score_table[ACMAG_HIT_SCORE_2]);
 			break;
 		default:
-			//all cases past 3rd time we are in acmag
-			score (SC_15M);
-			score_add (acmag_mode_score, score_table[SC_15M]);
-			score_add (acmag_mode_score_total_score, score_table[SC_15M]);
-			score_zero(acmag_mode_last_score);
-			score_add(acmag_mode_last_score, score_table[SC_15M]);
+		case 3:
+			//3rd time we are in acmag - score differently
+			score (ACMAG_HIT_SCORE_3);
+			score_add (acmag_mode_score, score_table[ACMAG_HIT_SCORE_3]);
+			score_add (acmag_mode_score_total_score, score_table[ACMAG_HIT_SCORE_3]);
 			break;
 	}//end of switch
 	deff_start (DEFF_ACMAG_HIT_EFFECT);//under /kernel/deff.c
@@ -207,6 +196,7 @@ void acmag_start_effect_deff(void) {
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
+	dmd_draw_thin_border (dmd_low_buffer);
 	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
 	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "CENTER RAMP");
 	show_text_on_stars (40); //about 4 seconds
@@ -219,39 +209,51 @@ void acmag_hit_effect_deff(void) {
 	dmd_map_overlay ();
 	dmd_clean_page_high ();
 	dmd_clean_page_low ();
-	dmd_sched_transition (&trans_bitfade_fast);
+	dmd_draw_thin_border (dmd_low_buffer);
 //	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
-	sprintf_score (acmag_mode_last_score);
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
+	sprintf_score (acmag_mode_next_score);
+	font_render_string_center (&font_fixed10, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
 	show_text_on_stars (20);
 	deff_exit ();
 }//end of mode_effect_deff
 
 
+
 void acmag_effect_deff(void) {
+	U8 i = 0;
+	U8 j = 0;
+	__boolean TOGGLE = FALSE;
+	__boolean TOGGLE_BOTTOM = FALSE;
+
 	for (;;) {
 		dmd_map_overlay ();
 		dmd_clean_page_high ();
 		dmd_clean_page_low ();
+		dmd_draw_thin_border (dmd_low_buffer);
 		font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
-		sprintf ("%d SEC LEFT,  %d HIT", acmag_mode_timer, acmag_mode_shots_made);
-		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
-		sprintf_score (acmag_mode_next_score);
-		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+
+		if (++i % 3 == 0) { if (TOGGLE) TOGGLE = FALSE; else TOGGLE = TRUE; }//change TOGGLE once per n seconds
+		if (++j % 6 == 0) { if (TOGGLE_BOTTOM) TOGGLE_BOTTOM = FALSE; else TOGGLE_BOTTOM = TRUE; }//change TOGGLE once per n seconds
+
+		if (i % 20 != 0) { //draw for 4/5 and blank for 1/5
+					if (TOGGLE) {
+						sprintf ("%d SEC LEFT", acmag_mode_timer);
+						font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+							}//end of if (TOGGLE)
+					else {
+						sprintf ("%d HIT", acmag_mode_shots_made);
+						font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+						}//end of else
+		}//end of if (i % 5 != 0)
+
+		if (TOGGLE_BOTTOM)	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "SHOOT CENTER RAMP");
+		else			{	sprintf_score (acmag_mode_next_score);
+							font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer); }
+
 		show_text_on_stars (8); //about 800 ms
 	}//END OF ENDLESS LOOP
 }//end of mode_effect_deff
 
-
-void acmag_end_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
-	sprintf("COMPLETED");
-	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-	dmd_show_low (); //shows a mono image
-	task_sleep_sec (2);
-	deff_exit ();
-	}//end of mode_effect_deff
 
 
 #define MAX_STARS 12

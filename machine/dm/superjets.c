@@ -24,6 +24,8 @@
  * estimate of average superjets mode score: 20 million to 80 million
  *
  */
+/* CALLSET_SECTION (superjets, __machine5__) */
+
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -71,7 +73,7 @@ struct timed_mode_ops superjets_mode = {
 	.music = MUS_MD_SUPERJETS,
 //	.deff_starting = DEFF_SUPERJETS_START_EFFECT,
 	.deff_running = DEFF_SUPERJETS_EFFECT,
-	.deff_ending = DEFF_SUPERJETS_END_EFFECT,
+//	.deff_ending = DEFF_SUPERJETS_END_EFFECT,
 	.prio = PRI_GAME_MODE3,
 	.init_timer = 63,
 	.timer = &superjets_mode_timer,
@@ -85,7 +87,7 @@ struct timed_mode_ops superjets_mode = {
  * initialize  and exit
  ***************************************************************************/
 void superjets_reset (void) {
-	flag_off (FLAG_IS_SUPERJETS_ACTIVATED);
+	flag_off (FLAG_IS_SUPERJETS_RUNNING);
 }//end of function
 
 
@@ -107,7 +109,7 @@ void superjets_mode_init (void) {
 			flag_off(FLAG_IS_BALL_ON_CLAW);
 			flipper_enable ();
 	superjets_mode_shots_made = 0;
-	flag_on (FLAG_IS_SUPERJETS_ACTIVATED);
+	flag_on (FLAG_IS_SUPERJETS_RUNNING);
 	++superjets_modes_achieved;
 	sound_start (ST_SPEECH, SPCH_SUPERJETS_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
@@ -117,10 +119,22 @@ void superjets_mode_init (void) {
 	score_zero(superjets_mode_score);
 	score_zero(superjets_mode_next_score);
 	switch (superjets_modes_achieved ){
-		case 1: score_add(superjets_mode_next_score, score_table[SC_1M]); score_add(superjets_mode_score, score_table[SC_15M]); score(SC_15M); break;
-		case 2: score_add(superjets_mode_next_score, score_table[SC_2M]); score_add(superjets_mode_score, score_table[SC_20M]); score(SC_20M);  break;
+		case 1:
+			score_add(superjets_mode_next_score, score_table[SUPERJETS_HIT_SCORE1]);
+			score_add(superjets_mode_score, score_table[SUPERJETS_START_SCORE1]);
+			score(SUPERJETS_START_SCORE1);
+			break;
+		case 2:
+			score_add(superjets_mode_next_score, score_table[SUPERJETS_HIT_SCORE2]);
+			score_add(superjets_mode_score, score_table[SUPERJETS_START_SCORE2]);
+			score(SUPERJETS_START_SCORE2);
+			break;
 		default:
-		case 3: score_add(superjets_mode_next_score, score_table[SC_3M]); score_add(superjets_mode_score, score_table[SC_25M]); score(SC_25M);  break;
+		case 3:
+			score_add(superjets_mode_next_score, score_table[SUPERJETS_HIT_SCORE3]);
+			score_add(superjets_mode_score, score_table[SUPERJETS_START_SCORE3]);
+			score(SUPERJETS_START_SCORE3);
+			break;
 
 	}//end of switch
 }//end of function
@@ -128,7 +142,7 @@ void superjets_mode_init (void) {
 
 
 void superjets_mode_expire (void) {
-	flag_off (FLAG_IS_SUPERJETS_ACTIVATED);
+	flag_off (FLAG_IS_SUPERJETS_RUNNING);
 }//end of function
 
 
@@ -151,6 +165,7 @@ CALLSET_ENTRY (superjets, start_ball) 		{ superjets_reset(); }
  *
  ***************************************************************************/
 CALLSET_ENTRY (superjets, sw_claw_super_jets) {
+	demotime_increment();
 	timed_mode_begin (&superjets_mode);//start mode
 }//end of function
 
@@ -162,10 +177,19 @@ CALLSET_ENTRY (superjets, sw_jet) {
 		//score higher if mode done more than once
 		switch (superjets_modes_achieved) {
 			case 0: 	break; //never entered mode?
-			case 1:   score (SC_1M);  score_add (superjets_mode_score, score_table[SC_1M]); break;
-			case 2:   score (SC_2M);  score_add (superjets_mode_score, score_table[SC_2M]); break;
+			case 1:
+				score (SUPERJETS_HIT_SCORE1);
+				score_add (superjets_mode_score, score_table[SUPERJETS_HIT_SCORE1]);
+				break;
+			case 2:
+				score (SUPERJETS_HIT_SCORE2);
+				score_add (superjets_mode_score, score_table[SUPERJETS_HIT_SCORE2]);
+				break;
 			default:
-			case 3:   score (SC_3M);  score_add (superjets_mode_score, score_table[SC_3M]); break;
+			case 3:
+				score (SUPERJETS_HIT_SCORE3);
+				score_add (superjets_mode_score, score_table[SUPERJETS_HIT_SCORE3]);
+				break;
 			}//end of switch
 		if (superjets_mode_shots_made >= superjets_goal) 	superjets_goal_award();
 		else /* goal not met yet */  					deff_start (DEFF_SUPERJETS_HIT_EFFECT);
@@ -173,11 +197,11 @@ CALLSET_ENTRY (superjets, sw_jet) {
 }//end of function
 
 
+
 void superjets_goal_award (void) {
 	sound_start (ST_SPEECH, SPCH_SUPERJETS_COMPLETED, SL_4S, PRI_GAME_QUICK5);
-	deff_start (DEFF_SUPERJETS_END_EFFECT);
-	score (SC_15M);
-	score_add (superjets_mode_score, score_table[SC_15M]);
+	score (SUPERJETS_GOAL_SCORE);
+	score_add (superjets_mode_score, score_table[SUPERJETS_GOAL_SCORE]);
 	if (superjets_goal < SUPERJETS_GOAL_MAX)  superjets_goal += SUPERJETS_GOAL_STEP;
 	timed_mode_end (&superjets_mode);
 }//END OF FUNCTION
@@ -291,9 +315,9 @@ void superjets_hit_effect_deff(void) {
 
 				sprintf_score (superjets_mode_next_score);
 				if ((i % 2) == 0) {
-					font_render_string_center (&font_amiga4ever, DMD_MIDDLE_X + 30 + x, DMD_BIG_CY_Cent + y, sprintf_buffer);
+					font_render_string_center (&font_lithograph, DMD_MIDDLE_X + 30 + x, DMD_BIG_CY_Cent + y, sprintf_buffer);
 				} else {
-					font_render_string_center (&font_amiga4ever, DMD_MIDDLE_X + 30 - x, DMD_BIG_CY_Cent - y, sprintf_buffer);
+					font_render_string_center (&font_lithograph, DMD_MIDDLE_X + 30 - x, DMD_BIG_CY_Cent - y, sprintf_buffer);
 				}
 				dmd_show_low ();
 				task_sleep (TIME_100MS);
@@ -339,17 +363,3 @@ for (;;) {
 	}//END OF ENDLESS LOOP
 }//end of mode_effect_deff
 
-
-void superjets_end_effect_deff(void) {
-		dmd_alloc_low_clean ();
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "SUPERJETS");
-		font_render_string_center (&font_amiga4ever, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "COMPLETE");
-		dmd_show_low ();
-		task_sleep_sec (1);
-		dmd_alloc_low_clean ();
-		sprintf_score (superjets_mode_score);
-		font_render_string_center (&font_amiga4ever, DMD_MIDDLE_X, DMD_BIG_CY_Cent, sprintf_buffer);
-		dmd_show_low ();
-		task_sleep_sec (2);
-		deff_exit ();
-}//end of mode_effect_deff

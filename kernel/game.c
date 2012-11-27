@@ -164,12 +164,12 @@ static void end_game_task (void) {
 		by pressing Enter), then skip over the end game effects. */
 		if (!in_test) {
 			callset_invoke (end_game);//this will also start end game music
-			deff_start_sync (DEFF_SCORES_IMPORTANT);
 			high_score_check ();
 			callset_invoke (extra_initials_check);
 			match_start ();
+			callset_invoke (fade_out);
 			log_event (SEV_INFO, MOD_GAME, EV_STOP, 0);
-			//was here - moved up  //callset_invoke (end_game);
+			deff_start_sync (DEFF_SCORES_IMPORTANT);
 		}//end of if (!in_test)
 	}//end of if (was_in_game)
 

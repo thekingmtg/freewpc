@@ -61,10 +61,8 @@ const U8 		RAMPS_EASY_GOAL = 5;
 const U8 		RAMPS_PREDEFINED_GOAL_INCREMENT = 1;
 const U8 		RAMPS_GOAL_STEP = 5;
 const U8 		RAMPS_GOAL_MAX = 50;
-const U8 		RampsTotalNumOfSounds = 25; //num between 0 and 24 == 25 total
-const sound_code_t rampSoundsArray[] = {	CAR_GEAR_CHANGE, 	SPCH_PUNCH_IT, 				SPCH_PUSH_PEDAL_HARD,
-											SPCH_GO_LEFT, 		SPCH_CATCH_UP, 				SPCH_STEP_ON_IT,
-											SPCH_CATCH_UP, 		SPCH_NICE_SHOOTING_SLY, 	SPCH_NICE_SHOT_SLY,
+const U8 		RampsTotalNumOfSounds = 18; //num between 0 and 24 == 25 total
+const sound_code_t rampSoundsArray[] = {	SPCH_NICE_SHOOTING_SLY, 	SPCH_NICE_SHOT_SLY,
 											SPCH_GREAT_SHOT_SLY, SPCH_GREAT_SHOOTING, 		SPCH_NOW_THATS_WHAT_I_CALL_SHOOTING,
 											SPCH_OHH_YEAH1, 	SPCH_OHH_YEAH2, 			SPCH_OUTSTANDING_SLY,
 											SPCH_NICE, 			SPCH_VERY_NICE, 			SPCH_NICE_MOVE_SLY,
@@ -72,11 +70,11 @@ const sound_code_t rampSoundsArray[] = {	CAR_GEAR_CHANGE, 	SPCH_PUNCH_IT, 				SP
 											SPCH_NICE_SHOT, 	SPCH_NICE_SHOOTING, 	SPCH_NICE_SHOOTING,
 											SPCH_EXCELLENT };
 
-const U8 		missedTotalNumOfSounds =12;
+const U8 		missedTotalNumOfSounds =11;
 const sound_code_t missedRampSoundsArray[] = {SPCH_TOO_BAD, 		SPCH_PATHETIC,		SPCH_HATE_WHEN_THAT_HAPPENS,
 											SPCH_OHH_NO,		SPCH_BAD_AIM,		SPCH_DULCH,
 											SPCH_WES_LAUGH_SHORT1, SPCH_SIMON_SNICKER, SPCH_WES_LAUGH_SHORT2,
-											SPCH_WES_LAUGH_SHORT3, SPCH_WOAH, 			SPCH_JUST_LOVELY };
+											SPCH_WES_LAUGH_SHORT3, 			SPCH_JUST_LOVELY };
 
 //local variables
 U8	ramp_SoundCounter;
@@ -251,13 +249,12 @@ void rramp_clawready_on(void) {
 	diverter_start();//defined in divhold2.ct
 }//end of function
 
-
 //called by claw after ball is passed to it from elevator
 void rramp_clawready_off(void) {
 	flag_off(FLAG_IS_R_RAMP_CLAWREADY);
 	lamp_tristate_off (LM_CLAW_READY);
 	flasher_pulse (FLASH_DIVERTER_FLASHER);
-	diverter_stop();//defined in divhold2.ct
+	diverter_stop(); //defined in divhold2.ct
 }//end of function
 
 
@@ -319,10 +316,8 @@ void left_ramp_task (void) { task_sleep_sec(2); task_exit(); }
 CALLSET_ENTRY (ramps, sw_left_ramp_enter) {
 	task_create_gid1 (GID_LEFT_RAMP_ENTERED, left_ramp_task);
 	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
-	score (SC_100K);
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
-	else
-	if (flag_test (FLAG_IS_CARCHASE_MODE_ACTIVATED) ) sound_start (ST_SAMPLE, CAR_SKID, SL_3S, PRI_GAME_QUICK1);
+	score (RAMPS_ENTER_SCORE);
+	if (flag_test (FLAG_IS_CARCHASE_MODE_RUNNING) ) sound_start (ST_SAMPLE, CAR_SKID, SL_3S, PRI_GAME_QUICK1);
 }//end of function
 
 
@@ -334,21 +329,22 @@ CALLSET_ENTRY (ramps, sw_left_ramp_exit) {
 void left_ramp_made(void) {
 	++left_ramp_counter;
 	++all_ramp_counter;
-	score (SC_250K);
+	score (RAMPS_MADE_SCORE);
 	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
-	if (flag_test(FLAG_IS_L_RAMP_JACKPOT_ACTIVATED) ) score_jackpot();
-	if (flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) 	explode_made(); //goto eyeball_explode.c for scoring
-	if (flag_test (FLAG_IS_CARCHASE_MODE_ACTIVATED) )	car_chase_ramp_made(); //goto carchase.c for scoring
-	if (	flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED)) 				increment_freeze(); //goto lock_freeze_mbstart.c
-	if (flag_test (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED) )	capture_simon_made();
-	else {
-			if (flag_test(FLAG_IS_COMBOS_KILLED) ) combo_init();
-			else if ( flag_test(FLAG_IS_COMBO_LEFTRAMP_ACTIVATED) ) combo_hit();
-	}
+	if (flag_test(FLAG_IS_L_RAMP_JACKPOT_ACTIVATED) ) 				score_jackpot();
+	else if (flag_test(FLAG_IS_HUXLEY_RUNNING) )					huxley_mode_shot_made();
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) )  					prison_break_made();
+	else if (flag_test (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED) )		capture_simon_made();
+	else if (flag_test (FLAG_IS_EXPLODE_MODE_RUNNING) ) 			explode_made(); //goto eyeball_explode.c for scoring
+	else if (flag_test (FLAG_IS_CARCHASE_MODE_RUNNING) )			car_chase_ramp_made(); //goto carchase.c for scoring
+	else if (flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED) )	 	increment_freeze(); //goto lock_freeze_mbstart.c
+	else if (flag_test(FLAG_IS_COMBOS_KILLED) ) 					combo_init();
+	else if ( flag_test(FLAG_IS_COMBO_LEFTRAMP_ACTIVATED) ) 		combo_hit();
+
 	//if not in a mode then perform normal sounds and display effects
-	if (	!flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED)
-		&& 	!flag_test (FLAG_IS_CARCHASE_MODE_ACTIVATED)
+	if (	!flag_test (FLAG_IS_EXPLODE_MODE_RUNNING)
+		&& 	!flag_test (FLAG_IS_CARCHASE_MODE_RUNNING)
 		&& 	!flag_test (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED) )
 				ramp_sounds();
 	// TODO: normal display effects call
@@ -375,10 +371,8 @@ void right_ramp_task (void) { task_sleep_sec(2); task_exit(); }
 CALLSET_ENTRY (ramps, sw_right_ramp_enter) {
 	task_create_gid1 (GID_RIGHT_RAMP_ENTERED, right_ramp_task);
 	flasher_pulse (FLASH_RIGHT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
-	score (SC_100K);
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
-	else
-	if (flag_test (FLAG_IS_CARCHASE_MODE_ACTIVATED) ) sound_start (ST_SAMPLE, CAR_SKID, SL_3S, PRI_GAME_QUICK1);
+	score (RAMPS_ENTER_SCORE);
+	if (flag_test (FLAG_IS_CARCHASE_MODE_RUNNING) ) sound_start (ST_SAMPLE, CAR_SKID, SL_3S, PRI_GAME_QUICK1);
 }//end of function
 
 
@@ -390,20 +384,21 @@ CALLSET_ENTRY (ramps, sw_right_ramp_exit) {
 void right_ramp_made(void) {
 	++right_ramp_counter;
 	++all_ramp_counter;
-	score (SC_250K);
+	score (RAMPS_MADE_SCORE);
 	flasher_pulse (FLASH_RIGHT_RAMP_UP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
-	if (flag_test(FLAG_IS_R_RAMP_JACKPOT_ACTIVATED) ) 		score_jackpot();
-	if (flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) 		explode_made(); //goto eyeball_explode.c for scoring
-	if (flag_test (FLAG_IS_CARCHASE_MODE_ACTIVATED) )		car_chase_ramp_made(); //goto carchase.c for scoring
-	if (flag_test (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED) )	capture_simon_made();
-	else {
-			if (flag_test(FLAG_IS_COMBOS_KILLED) ) combo_init();
-			else if ( flag_test(FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED) ) combo_hit();
-	}
+	if (flag_test(FLAG_IS_R_RAMP_JACKPOT_ACTIVATED) ) 			score_jackpot();
+	else if (flag_test(FLAG_IS_HUXLEY_RUNNING) )				huxley_mode_shot_made();
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) 				prison_break_made();
+	else if (flag_test (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED) )	capture_simon_made();
+	else if (flag_test (FLAG_IS_EXPLODE_MODE_RUNNING) ) 		explode_made(); //goto eyeball_explode.c for scoring
+	else if (flag_test (FLAG_IS_CARCHASE_MODE_RUNNING) )		car_chase_ramp_made(); //goto carchase.c for scoring
+	else if (flag_test(FLAG_IS_COMBOS_KILLED) ) 				combo_init();
+	else if ( flag_test(FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED) ) 	combo_hit();
+
 	//if not in a mode then perform normal sounds and display effects
-	if (	!flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED)
-		&& 	!flag_test (FLAG_IS_CARCHASE_MODE_ACTIVATED)
+	if (	!flag_test (FLAG_IS_EXPLODE_MODE_RUNNING)
+		&& 	!flag_test (FLAG_IS_CARCHASE_MODE_RUNNING)
 		&& 	!flag_test (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED) )
 				ramp_sounds();
 	// TODO: normal display effects
@@ -427,9 +422,17 @@ void right_ramp_goal_award (void) {
 CALLSET_ENTRY (ramps, sw_center_ramp) {
 	++center_ramp_counter;
 	++all_ramp_counter;
-	score (SC_250K);
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
-	else 	ramp_sounds();
+	score (RAMPS_MADE_SCORE);
+
+	if (flag_test(FLAG_IS_C_RAMP_JACKPOT_ACTIVATED) ) 			score_jackpot();
+	else if (flag_test(FLAG_IS_HUXLEY_RUNNING) )				huxley_mode_shot_made();
+	else if (flag_test(FLAG_IS_ACMAG_RUNNING) ) 				acmag_made();
+	else if (flag_test (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED) )	capture_simon_made();
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) 				prison_break_made();
+	else if (flag_test(FLAG_IS_COMBOS_KILLED) ) 				combo_init();
+	else if ( flag_test(FLAG_IS_COMBO_CENTERRAMP_ACTIVATED) ) 	combo_hit();
+
+	if (!flag_test (FLAG_IS_PBREAK_RUNNING) ) 					ramp_sounds();
 
 	lamp_tristate_flash(LM_CENTER_RAMP_MIDDLE);
 	lamp_tristate_flash(LM_CENTER_RAMP_OUTER);
@@ -438,17 +441,10 @@ CALLSET_ENTRY (ramps, sw_center_ramp) {
 	lamp_tristate_off(LM_CENTER_RAMP_MIDDLE);
 	lamp_tristate_off(LM_CENTER_RAMP_OUTER);
 	lamp_tristate_off(LM_CENTER_RAMP_INNER);
-	//lamps will also flash at acmag call - need to see how that looks
-	if (flag_test(FLAG_IS_C_RAMP_JACKPOT_ACTIVATED) ) 		score_jackpot();
-	if (flag_test(FLAG_IS_ACMAG_ACTIVATED) ) 				callset_invoke(acmag_made);
-	if (flag_test (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED) )	capture_simon_made();
-	if (	!flag_test(FLAG_IS_ACMAG_ACTIVATED)
-		&&	!flag_test (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED) )	{
-				if (flag_test(FLAG_IS_COMBOS_KILLED) ) combo_init();
-				else if ( flag_test(FLAG_IS_COMBO_CENTERRAMP_ACTIVATED) ) combo_hit();
-	}
+
 	if (center_ramp_counter == center_ramp_goal)  center_ramp_goal_award ();
 }//end of function
+
 
 
 void center_ramp_goal_award (void) {
@@ -471,8 +467,7 @@ CALLSET_ENTRY (ramps, sw_side_ramp_enter) {
 	task_create_gid1 (GID_SIDE_RAMP_ENTERED, side_ramp_task);
 	flasher_pulse (FLASH_SIDE_RAMP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
-	score (SC_100K);
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) 						prison_break_made();
+	score (RAMPS_ENTER_SCORE);
 }//end of function
 
 
@@ -484,16 +479,19 @@ CALLSET_ENTRY (ramps, sw_side_ramp_exit) {
 void side_ramp_made(void) {
 	++side_ramp_counter;
 	++all_ramp_counter;
-	score (SC_250K);
-	ramp_sounds();
+	score (RAMPS_MADE_SCORE);
 	flasher_pulse (FLASH_SIDE_RAMP_FLASHER); //FLASH followed by name of flasher in caps
 	task_sleep (TIME_100MS);
+
 	if (flag_test(FLAG_IS_S_RAMP_JACKPOT_ACTIVATED) ) 				score_jackpot();
-	if (flag_test (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED) )				capture_simon_made();
-	else {
-			if (flag_test(FLAG_IS_COMBOS_KILLED) ) 					combo_init();
-			else if ( flag_test(FLAG_IS_COMBO_SIDERAMP_ACTIVATED) ) combo_hit();
-	}
+	else if (flag_test (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED) )		capture_simon_made();
+	else if (flag_test(FLAG_IS_HUXLEY_RUNNING) )					huxley_mode_shot_made();
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) 					prison_break_made();
+	else if (flag_test(FLAG_IS_COMBOS_KILLED) ) 					combo_init();
+	else if ( flag_test(FLAG_IS_COMBO_SIDERAMP_ACTIVATED) ) 		combo_hit();
+
+	ramp_sounds();
+
 	if (side_ramp_counter == side_ramp_goal)  side_ramp_goal_award();
 }//end of function
 

@@ -11,6 +11,9 @@
 #include <freewpc.h>
 #include "dm/global_constants.h"
 
+
+
+//constants
 const U8 lramp_mask = 0x1;
 const U8 rramp_mask = 0x2;
 const U8 sramp_mask = 0x4;
@@ -45,11 +48,11 @@ CALLSET_ENTRY (jackpot, start_player, start_ball) 		{ jackpot_reset(); }
  *
  ****************************************************************************/
 void score_jackpot(void) {
-	if (flag_test(FLAG_IS_FORTRESS_ACTIVATED) )  	fortress_jackpot_made();
-	if (flag_test(FLAG_IS_MUSEUM_ACTIVATED) )  		museum_jackpot_made();
-	if (flag_test(FLAG_IS_CRYOPRISON_ACTIVATED) )  	cryoprison_jackpot_made();
-	if (flag_test(FLAG_IS_WASTELAND_ACTIVATED) )  	wasteland_jackpot_made();
-	if (flag_test(FLAG_IS_DEMOTIME_ACTIVATED) )  	demotime_jackpot_made();
+	if (flag_test(FLAG_IS_FORTRESS_MB_RUNNING) )  		fortress_jackpot_made();
+	if (flag_test(FLAG_IS_MUSEUM_MB_RUNNING) )  		museum_jackpot_made();
+	if (flag_test(FLAG_IS_CRYOPRISON_MB_RUNNING) )  	cryoprison_jackpot_made();
+	if (flag_test(FLAG_IS_WASTELAND_MB_RUNNING) )  		wasteland_jackpot_made();
+	if (flag_test(FLAG_IS_DEMOTIME_RUNNING) )  			demotime_jackpot_made();
 }//END OF FUNCTION
 
 /****************************************************************************
@@ -71,4 +74,16 @@ void choose_random_jackpot(void) {
 	if (lloop_mask & mask) ll_jackpot_light_on();
 	if (rloop_mask & mask) rl_jackpot_light_on();
 	if (ugrnd_mask & mask) underground_jackpot_light_on();
+}//end of function
+
+
+//this only used for wizard modes
+void set_all_jackpots (void) {
+	lramp_jackpot_light_on();
+	rramp_jackpot_light_on();
+	sramp_jackpot_light_on();
+	cramp_jackpot_light_on();
+	ll_jackpot_light_on();
+	rl_jackpot_light_on();
+	underground_jackpot_light_on();
 }//end of function

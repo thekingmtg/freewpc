@@ -108,7 +108,7 @@ void amode_score_page (void)
 	if (system_config.tournament_mode == YES)
 		amode_page_end (120);
 	else
-		amode_page_end (5);
+		amode_page_end (3);
 }
 
 
@@ -125,7 +125,7 @@ void amode_logo_page (void)
 		task_sleep (TIME_66MS);
 	}
 	dmd_sched_transition (&trans_bitfade_slow);
-	amode_page_end (3);
+	amode_page_end (1);
 }
 #endif
 
@@ -133,7 +133,7 @@ void amode_credits_page (void)
 {
 	credits_draw ();
 	dmd_show_low ();
-	amode_page_end (3);
+	amode_page_end (1);
 }
 
 void amode_freeplay_page (void)
@@ -166,7 +166,7 @@ void amode_date_time_page (void)
 	if (system_config.show_date_and_time == YES)
 	{
 		rtc_show_date_time (&current_date);
-		amode_page_end (3);
+		amode_page_end (2);
 	}
 }
 #endif
@@ -183,10 +183,8 @@ void amode_kill_music (void)
 void (*amode_page_table[]) (void) = {
 #ifdef CONFIG_DMD_OR_ALPHA
 	amode_score_page,
-#ifndef NO_FREEWPC_LOGO_DISPLAY
-		#if (MACHINE_DMD == 1)
-			amode_logo_page,
-		#endif
+#if (MACHINE_DMD == 1)
+	amode_logo_page,
 #endif
 	amode_credits_page,
 	amode_freeplay_page,

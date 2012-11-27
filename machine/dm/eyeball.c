@@ -28,13 +28,13 @@ const U8 EYE_EASY_GOAL = 2;
 const U8 EYE_MED_GOAL = 3;
 const U8 EYE_HARD_GOAL = 5;
 const U8 EYE_GOAL_STEP = 3;
-const U8 EYE_GOAL_MAX = 50;
+const U8 EYE_GOAL_MAX = 11;
 
 const U8 EYE_EB_EASY_GOAL = 5;
 const U8 EYE_EB_MED_GOAL = 8;
 const U8 EYE_EB_HARD_GOAL = 12;
-const U8 EYE_EB_GOAL_STEP = 5;
-const U8 EYE_EB_GOAL_MAX = 50;
+const U8 EYE_EB_GOAL_STEP = 2;
+const U8 EYE_EB_GOAL_MAX = 15;
 
 //local variables
 U8	eyeball_MessageCounter;
@@ -53,7 +53,6 @@ void eyeball_reset (void);
 void player_eyeball_reset (void);
 void eyeball_goal_award (void);
 void eyeball_eb_award (void);
-void eyeball_effect_chooser(void);
 
 /****************************************************************************
  * initialize  and exit
@@ -81,30 +80,32 @@ CALLSET_ENTRY (eyeball, start_ball) 	{ eyeball_reset(); }
  ***************************************************************************/
 void eyeball_goal_award (void) {
 		eyeball_shots_made = 0;
+		if (eyeball_goal < EYE_GOAL_MAX)  eyeball_goal += EYE_GOAL_STEP;
 		sound_start (ST_SPEECH, SPCH_LOVE_WHEN_THAT_HAPPENS, SL_2S, PRI_GAME_QUICK5);
 		start_explode();//start explode mode
-		if (eyeball_goal < EYE_GOAL_MAX)  eyeball_goal += EYE_GOAL_STEP;
 }//end of function
+
 
 
 void eyeball_eb_award (void) {
-		extraball_light_on();
-		eyeball_eb_shots_made = 0;
-		sound_start (ST_SPEECH, SPCH_LOVE_WHEN_THAT_HAPPENS, SL_2S, PRI_GAME_QUICK5);
+	eyeball_eb_shots_made = 0;
 		if (eyeball_eb_goal < EYE_EB_GOAL_MAX)  eyeball_eb_goal += EYE_EB_GOAL_STEP;
+		sound_start (ST_SPEECH, SPCH_LOVE_WHEN_THAT_HAPPENS, SL_2S, PRI_GAME_QUICK5);
+		extraball_light_on();
 }//end of function
+
 
 
 CALLSET_ENTRY (eyeball, sw_eyeball_standup) {
 	++eyeball_shots_made;
 	sound_start (ST_SAMPLE, EXPLOSION1_MED, SL_2S, PRI_GAME_QUICK1);
 	flasher_pulse (FLASH_EYEBALL_FLASHER); //FLASH followed by name of flasher in caps
-	if (eyeball_eb_shots_made == eyeball_eb_goal)  eyeball_eb_award();
-	if (eyeball_shots_made == eyeball_goal)  eyeball_goal_award();//start explode
-	if ( 	(!eyeball_eb_shots_made == eyeball_eb_goal)
-		&& 	(!eyeball_shots_made == eyeball_goal)  )
-				eyeball_effect_chooser();
-	score (SC_5M);
+
+	if (eyeball_eb_shots_made >= eyeball_eb_goal)  			eyeball_eb_award();
+	else if (eyeball_shots_made >= eyeball_goal)  			eyeball_goal_award();//start explode
+	else 														deff_start (DEFF_EYEBALL_EFFECT);
+
+	score (EYEBALL_SCORE);
 	//100k per jet hit here
 	if (jet_shots_made > 0) {
 		score_zero (temp_score);//zero out temp score
@@ -121,81 +122,44 @@ CALLSET_ENTRY (eyeball, sw_eyeball_standup) {
 /****************************************************************************
  * display effects
  ****************************************************************************/
-void eyeball_effect_chooser(void) {
+void eyeball_effect_deff(void) {
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_scroll_up);
+
 	switch (++eyeball_MessageCounter % 4) {
-		case 0: deff_start (DEFF_EYEBALL1_EFFECT); break;
-		case 1: deff_start (DEFF_EYEBALL2_EFFECT); break;
-		case 2: deff_start (DEFF_EYEBALL3_EFFECT); break;
-		case 3: deff_start (DEFF_EYEBALL4_EFFECT); break;
+		case 0:
+			sprintf ("OOOHHH");
+			font_render_string_center (&font_lithograph, DMD_MIDDLE_X + 25, DMD_BIG_CY_Top, sprintf_buffer);
+			sprintf ("MY EYE");
+			font_render_string_center (&font_lithograph, DMD_MIDDLE_X + 25, DMD_BIG_CY_Bot, sprintf_buffer);
+			bitmap_blit (eye3_bits, 2, 2);
+			break;
+		case 1:
+			font_render_string_center (&font_var5, DMD_MIDDLE_X + 20, DMD_SMALL_CY_1, "JETS");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X + 20, DMD_SMALL_CY_2, "INCREASE");
+			font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "RETINA SCAN");
+			bitmap_blit (eye3SM_bits, 15, 2);
+			break;
+		case 2:
+			font_render_string_center (&font_var5, DMD_MIDDLE_X - 30, DMD_SMALL_CY_1, "EXTRA BALL");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X - 30, DMD_SMALL_CY_2, "AT");
+			sprintf ("%d HITS", eyeball_eb_goal-eyeball_eb_shots_made);
+			font_render_string_center (&font_lithograph, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, sprintf_buffer);
+			bitmap_blit (eye5_bits, 80, 2);
+			break;
+		case 3:
+			font_render_string_center (&font_var5, DMD_MIDDLE_X - 25, DMD_SMALL_CY_1, "EXPLODE");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X - 25, DMD_SMALL_CY_2, "AT");
+			sprintf ("%d HITS", eyeball_goal-eyeball_shots_made);
+			font_render_string_center (&font_lithograph, DMD_MIDDLE_X - 25, DMD_BIG_CY_Bot, sprintf_buffer);
+			bitmap_blit (eye3_bits, 86, 2);
+			break;
 	}//END OF SWITCH
-}//end of mode_effect_deff
-
-
-
-void eyeball1_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	sprintf ("OOOHHH");
-	font_render_string_center (&font_lithograph, DMD_MIDDLE_X + 25, DMD_BIG_CY_Top, sprintf_buffer);
-	sprintf ("MY EYE");
-	font_render_string_center (&font_lithograph, DMD_MIDDLE_X + 25, DMD_BIG_CY_Bot, sprintf_buffer);
-	bitmap_blit (eye3_bits, 2, 2);
-	dmd_show_low ();
-	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-void eyeball2_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_var5, DMD_MIDDLE_X + 20, DMD_SMALL_CY_1, "JETS");
-	font_render_string_center (&font_var5, DMD_MIDDLE_X + 20, DMD_SMALL_CY_2, "INCREASE");
-	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "RETINA SCAN");
-
-	bitmap_blit (eye3SM_bits, 15, 2);
 
 	dmd_show_low ();
 	task_sleep_sec (1);
 	task_sleep (TIME_500MS);
 	deff_exit ();
 }//end of mode_effect_deff
-
-
-
-void eyeball3_effect_deff(void) {
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_var5, DMD_MIDDLE_X - 30, DMD_SMALL_CY_1, "EXTRA BALL");
-	font_render_string_center (&font_var5, DMD_MIDDLE_X - 30, DMD_SMALL_CY_2, "AT");
-	sprintf ("%d HITS", eyeball_eb_goal-eyeball_eb_shots_made);
-	font_render_string_center (&font_lithograph, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, sprintf_buffer);
-	bitmap_blit (eye5_bits, 80, 2);
-	dmd_show_low ();
-	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-void eyeball4_effect_deff(void) {
-	dmd_alloc_pair_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_var5, DMD_MIDDLE_X - 25, DMD_SMALL_CY_1, "EXPLODE");
-	font_render_string_center (&font_var5, DMD_MIDDLE_X - 25, DMD_SMALL_CY_2, "AT");
-	sprintf ("%d HITS", eyeball_goal-eyeball_shots_made);
-	font_render_string_center (&font_lithograph, DMD_MIDDLE_X - 25, DMD_BIG_CY_Bot, sprintf_buffer);
-	bitmap_blit (eye3_bits, 86, 2);
-	dmd_show_low ();
-	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
 
 

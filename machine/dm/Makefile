@@ -10,7 +10,7 @@ MACHINE_FILE = dm.md
 # optional; you can delete it and a suitable
 # default will be taken.
 #################################################
-GAME_ROM_PREFIX = dman_lx4
+GAME_ROM_PREFIX = dman_sji_1024
 
 
 #################################################
@@ -29,14 +29,15 @@ GAME_ROM_PREFIX = dman_lx4
 # 512KB.....32 pages
 # 1MB...... 64 pages
 #################################################
-ROM_PAGE_COUNT = 32
+ROM_PAGE_COUNT = 64
+
 
 
 #################################################
 # rev number for screen in format X.XX - must be an octal number
 #################################################
 MACHINE_MAJOR = 0
-MACHINE_MINOR = 2
+MACHINE_MINOR = 56
 
 #################################################
 #
@@ -48,8 +49,8 @@ MACHINE_MINOR = 2
 # the pinmame roms directory.
 #
 #################################################
-PINMAME_MACHINE = dm_lx4
-PINMAME_GAME_ROM = dman_lx4.rom
+#PINMAME_MACHINE = dm_lx4
+#PINMAME_GAME_ROM = dman_lx4.rom
 #PINMAME_OTHER_ROMS = dmu*.rom
 
 
@@ -93,30 +94,38 @@ GAME_PAGED_OBJS =
 
 # page .text
 GAME_OBJS = simple_switches.o  orbits.o  ramps.o 
-#call_tester.o \
+#call_tester.o 
+#custom_deffs.o 
+
 
 
 #all files here that have deffs and are less frequently called
 #also called MACHINE2_PAGE - page 55
-GAME2_OBJS = rollovers.o car_chase_mode.o acmag.o startup_shutdown.o dm_amode.o underground.o  \
-jackpots.o arrow_handler.o  inlanes.o car_crash.o combos.o eject.o explode.o custom_deffs.o 
+GAME2_OBJS = rollovers.o car_chase_mode.o acmag.o underground.o  demotime.o \
+inlanes.o car_crash.o combos.o explode.o jackpots.o arrow_handler.o  
+#override_deffs.o 
 
 #all files here that have deffs and are less frequently called
 #also called MACHINE3_PAGE - page 54
-GAME3_OBJS = bonus.o capture_simon.o prison_break.o \
-fortress.o museum.o cryoprison.o wasteland.o demotime.o lock_freeze_mbstart.o cryoclaw.o 
+GAME3_OBJS = bonus.o capture_simon.o prison_break.o eject.o fortress.o museum.o \
+cryoprison.o wasteland.o lock_freeze_mbstart.o 
 
 
 #all files here that have deffs and are less frequently called
 #also called MACHINE4_PAGE - page 53
-GAME4_OBJS = bar.o dm_millions.o wheelie.o  top_popper.o  standupfrenzy.o 
+GAME4_OBJS = top_popper.o  standupfrenzy.o huxley.o 
+#bar.o   wheelie.o  dm_millions.o 
 
 #also called MACHINE5_PAGE - page 52
-GAME5_OBJS = jets.o  superjets.o eyeball.o 
+GAME5_OBJS = jets.o  superjets.o eyeball.o cryoclaw.o dm_amode.o startup_shutdown.o  
 
 #################################################
 #listing of images used
+#
+# THIS FILE IS CURRENTLY BLANK AND I HAVE MOVE MY ILD DECLARATIONS
+# TO platform/wpc/wpc.ild
+#
 #################################################
-IMAGE_MAP += $(M)/dm.ild
+IMAGE_MAP += $(M)/dm2.ild
 
 

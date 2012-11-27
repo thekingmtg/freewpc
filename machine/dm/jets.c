@@ -26,6 +26,8 @@
  * estimate of average jets score: 2.5 million
  *
  */
+/* CALLSET_SECTION (jets, __machine5__) */
+
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -77,11 +79,11 @@ void jet_goal_award (void) {
 	jet_shots_made = 0;
 	switch (++jets_modes_achieved) {  //score higher if mode done more than once
 		case 0: 	break; //never entered mode
-		case 1:  score (SC_1M);  break;
-		case 2:  score (SC_2M);  break;
-		case 3:  score (SC_3M);  break;
-		case 4:	 score (SC_4M);  break;
-		default: score (SC_5M);  break;
+		case 1:  score (JETS_GOAL_SCORE1);  break;
+		case 2:  score (JETS_GOAL_SCORE2);  break;
+		case 3:  score (JETS_GOAL_SCORE3);  break;
+		case 4:	 score (JETS_GOAL_SCORE4);  break;
+		default: score (JETS_GOAL_SCORE5);  break;
 		}//end of switch
 	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
 	deff_start (DEFF_JETS_COMPLETED_EFFECT);
@@ -90,21 +92,11 @@ void jet_goal_award (void) {
 
 
 
-/****************************************************************************
- * priority here is:
- * 1) prison break mode
- * 2) superjets hit
- * 3) jets
- * if pbreak and superjets running at same time, both will score
- * but pbreak mode will run and superjets hit will display
- * -this is set in md deff priorities
- ***************************************************************************/
 CALLSET_ENTRY (jets, sw_jet) {
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
-	else
-	if (!flag_test (FLAG_IS_SUPERJETS_ACTIVATED) ) {//not in super jets mode
+	if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
+	else if (!flag_test (FLAG_IS_SUPERJETS_RUNNING) ) {//not in super jets mode
 		++jet_shots_made;
-		score(SC_250K);
+		score(JETS_HIT_SCORE);
 		if (jet_shots_made >= jet_goal)  jet_goal_award ();//sound played in call
 		else deff_start (DEFF_JETS_EFFECT);//under /kernel/deff.c
 		}//end of not in superjets mode
@@ -144,8 +136,12 @@ void jets_effect_deff(void) {
 
 
 void jets_completed_effect_deff(void) {
-	 if (jets_modes_achieved < 6) 	display_and_shake_dm_millions(jets_modes_achieved);
-	 else							display_and_shake_dm_millions(5);
+	dmd_alloc_low_clean ();
+	dmd_sched_transition (&trans_bitfade_fastest);
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Top, "JETS");
+	font_render_string_center (&font_fixed6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "COMPLETED");
+	dmd_show_low ();
+	task_sleep (TIME_1S);
 	deff_exit ();
 }//end of mode_effect_deff
 

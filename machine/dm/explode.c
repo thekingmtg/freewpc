@@ -60,8 +60,6 @@ void explode_mode_expire (void);
 void explode_mode_exit (void);
 void explode_reset (void);
 void player_explode_reset (void);
-void explode_effect_deff(void);
-void explode_effect(void);
 
 /****************************************************************************
  * mode definition structure
@@ -87,39 +85,41 @@ struct timed_mode_ops explode_mode = {
  * initialize  and exit
  ***************************************************************************/
 void player_explode_reset (void) {
-	flag_off (FLAG_IS_EXPLODE_MODE_ACTIVATED);
+	flag_off (FLAG_IS_EXPLODE_MODE_RUNNING);
 	explode_modes_achieved_counter = 0;//these need to be zeroed in before we enter the mode so bonus doesn't fake trigger
 	explode_mode_shots_made = 0;
 	explode_SoundCounter = 0;
 }//end of function
 
+
+
 void explode_reset (void) {
-	flag_off (FLAG_IS_EXPLODE_MODE_ACTIVATED);
+	flag_off (FLAG_IS_EXPLODE_MODE_RUNNING);
 }//end of function
 
 
 
 void explode_mode_init (void) {
-	flag_on (FLAG_IS_EXPLODE_MODE_ACTIVATED);
+	flag_on (FLAG_IS_EXPLODE_MODE_RUNNING);
 	explode_mode_shots_made = 0;
 	if ( (explode_SoundCounter++ % 2) == 0 )//check if even
 		sound_start (ST_SPEECH, SPCH_EXPLODE_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
 	else
 		sound_start (ST_SPEECH, SPCH_EXPLODE_HURRYUP, SL_4S, PRI_GAME_QUICK5);
 	score_zero(explode_mode_score);
-	score(SC_15M);
+	score(EXPLODE_START);
 	score_add (explode_mode_score, score_table[SC_15M]);
 	activate_explode_inserts_ramps();
 	activate_explode_inserts_orbits();
 	++explode_modes_achieved_counter;
-	serve_ball_auto(); //add one ball to the playfield
+	serve_ball_auto(); //add one ball to the playfield - NOT a multiball since doesn't change global ball count
 	diverter_stop();//defined in divhold2.ct
 }//end of function
 
 
 
 void explode_mode_expire (void) {
-	flag_off (FLAG_IS_EXPLODE_MODE_ACTIVATED);
+	flag_off (FLAG_IS_EXPLODE_MODE_RUNNING);
 	deactivate_explode_inserts_ramps();
 	deactivate_explode_inserts_orbits();
 	if (flag_test(FLAG_IS_R_RAMP_CLAWREADY) ) 	rramp_clawready_on();
@@ -144,23 +144,24 @@ CALLSET_ENTRY (explode, start_ball) 	{ explode_reset(); }
  *
  ***************************************************************************/
 void start_explode(void) {
-		timed_mode_begin (&explode_mode);//start explode mode
+	huxley_increment();
+	timed_mode_begin (&explode_mode);//start explode mode
 }//end of function
 
 
 
 void explode_made(void) {
 	++explode_mode_shots_made;
-	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK1);
 	//score xx million counting down to 0 at end of mode  + 1 million for # of explodes hit
 	score_zero(explode_mode_temp_score);
-	score_add (explode_mode_temp_score, score_table[SC_1M]);
+	score_add (explode_mode_temp_score, score_table[EXPLODE_SCORE]);
 	score_mul (explode_mode_temp_score, explode_mode_timer);
 	score_zero(explode_mode_last_score);
 	score_add (explode_mode_last_score, explode_mode_temp_score);
 	score_long (explode_mode_temp_score);
 	score_add (explode_mode_score, explode_mode_temp_score);
-	explode_effect();
+
+	deff_start (DEFF_EXPLODE_HIT_EFFECT);
 }//end of function
 
 
@@ -171,6 +172,7 @@ void explode_made(void) {
 void explode_start_effect_deff(void) {
 	U8 count = 8;
 	dmd_alloc_pair_clean ();
+	dmd_draw_border (dmd_low_buffer);
 	font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "EXPLODE");
 	/* low = text, high = blank */
 	while (--count > 0){
@@ -193,111 +195,68 @@ void explode_start_effect_deff(void) {
 
 
 
-void explode_effect(void) {
+void explode_hit_effect_deff(void) {
+	U16 fno;
+	dmd_alloc_pair_clean ();// Clean both pages
+
+	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK1);
+
 	switch (++explode_MessageCounter % 4) {
-		case 0:  deff_start (DEFF_EXPLODE_HIT1_EFFECT); break;
-		case 1:  deff_start (DEFF_EXPLODE_HIT2_EFFECT); break;
-		case 2:  deff_start (DEFF_EXPLODE_HIT3_EFFECT); break;
-		default: deff_start (DEFF_EXPLODE_HIT4_EFFECT); break;
+		default:
+		case 0:
+			for (fno = IMG_FORTRESS_C_START; fno <= IMG_FORTRESS_C_MID; fno += 2) {
+				dmd_map_overlay ();
+				dmd_clean_page_low ();
+				font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BABY");
+				dmd_text_outline ();
+				dmd_alloc_pair ();
+				frame_draw(fno);
+				dmd_overlay_outline ();
+				dmd_show2 ();
+				task_sleep (TIME_66MS);
+			}//end of inner loop
+			break;
+		case 1:
+			for (fno = IMG_FORTRESS_C_MID; fno <= IMG_FORTRESS_C_END; fno += 2) {
+				dmd_map_overlay ();
+				dmd_clean_page_low ();
+				font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "BOOOOOYAH");
+				dmd_text_outline ();
+				dmd_alloc_pair ();
+				frame_draw(fno);
+				dmd_overlay_outline ();
+				dmd_show2 ();
+				task_sleep (TIME_66MS);
+			}//end of inner loop
+			break;
+		case 2:
+			for (fno = IMG_FORTRESS_C_MID; fno <= IMG_FORTRESS_C_END; fno += 2) {
+				dmd_map_overlay ();
+				dmd_clean_page_low ();
+				font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BOOM");
+				dmd_text_outline ();
+				dmd_alloc_pair ();
+				frame_draw(fno);
+				dmd_overlay_outline ();
+				dmd_show2 ();
+				task_sleep (TIME_66MS);
+			}//end of inner loop
+			break;
+		case 3:
+			for (fno = IMG_FORTRESS_C_START; fno <= IMG_FORTRESS_C_MID; fno += 2) {
+				dmd_map_overlay ();
+				dmd_clean_page_low ();
+				font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "POW");
+				dmd_text_outline ();
+				dmd_alloc_pair ();
+				frame_draw(fno);
+				dmd_overlay_outline ();
+				dmd_show2 ();
+				task_sleep (TIME_66MS);
+			}//end of inner loop
+			break;
 		}//end of switch
-}//end of FUNCTION
-
-
-void explode_hit_one (U8 step, U8 x, U8 y) {
-	switch (step) {
-	case 0:	bitmap_blit (explode1_1_low_bits, 56, y);	break;
-	case 1:	bitmap_blit (explode1_2_low_bits, 52, y);	break;
-	case 2:	bitmap_blit (explode1_3_low_bits, 40, y);	break;
-	case 3:	bitmap_blit (explode1_4_low_bits, 28, y);	break;
-	case 4:	bitmap_blit (explode1_5_low_bits, 12, y);	break;
-	case 5:	bitmap_blit (explode1_6_low_bits,  8, y);	break;
-	case 6:	bitmap_blit (explode1_7_low_bits, 12, y);	break;
-	case 7:	bitmap_blit (explode1_8_low_bits, 12, y);	break;
-	case 8:	bitmap_blit (explode1_9_low_bits, 16, y);	break;
-	}//end of switch
-}//end of function
-
-
-
-void explode_hit1_effect_deff(void) {
-	U8 i;
-	for (i = 0; i < 9; i++) {
-		dmd_alloc_pair_clean ();
-		explode_hit_one (i, 0, 5);
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BABY");
-		sprintf_score (explode_mode_last_score);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-		dmd_flip_low_high ();
-		explode_hit_one (i, 0, 3);
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BABY");
-		sprintf_score (explode_mode_last_score);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	}//end of loop
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-void explode_hit2_effect_deff(void) {
-	U8 i;
-	for (i = 0; i < 9; i++) {
-		dmd_alloc_pair_clean ();
-		explode_hit_one (i, 0, 5);
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOOOOYAH");
-		sprintf_score (explode_mode_last_score);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-		dmd_flip_low_high ();
-		explode_hit_one (i, 0, 3);
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOOOOYAH");
-		sprintf_score (explode_mode_last_score);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	}//end of loop
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-void explode_hit3_effect_deff(void) {
-	U8 i;
-	for (i = 0; i < 9; i++) {
-		dmd_alloc_pair_clean ();
-		explode_hit_one (i, 0, 5);
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BOOM");
-		sprintf_score (explode_mode_last_score);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-		dmd_flip_low_high ();
-		explode_hit_one (i, 0, 3);
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "BOOM BOOM");
-		sprintf_score (explode_mode_last_score);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	}//end of loop
-	deff_exit ();
-}//end of mode_effect_deff
-
-
-
-void explode_hit4_effect_deff(void) {
-	U8 i;
-	for (i = 0; i < 9; i++) {
-		dmd_alloc_pair_clean ();
-		explode_hit_one (i, 0, 5);
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "POW");
-		sprintf_score (explode_mode_last_score);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-		dmd_flip_low_high ();
-		explode_hit_one (i, 0, 3);
-		font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "POW");
-		sprintf_score (explode_mode_last_score);
-		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	}//end of loop
+	task_sleep (TIME_200MS);
 	deff_exit ();
 }//end of mode_effect_deff
 
@@ -307,6 +266,7 @@ void explode_effect_deff(void) {
 	U8 i = 0;
 	for (;;) {
 			dmd_alloc_low_clean ();
+			dmd_draw_border (dmd_low_buffer);
 			font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_BIG_CY_Top, "EXPLODE");
 			score_zero(explode_mode_display_score);
 			score_add (explode_mode_display_score, score_table[SC_1M]);

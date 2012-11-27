@@ -94,8 +94,8 @@ bool ballsave_test_active (void)
  */
 static void ballsave_launch (void)
 {
-		deff_start (DEFF_BALL_SAVE);
-		serve_ball_auto ();
+	serve_ball_auto ();
+	deff_start (DEFF_BALL_SAVE);
 }
 
 

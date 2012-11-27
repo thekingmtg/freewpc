@@ -63,7 +63,7 @@ U8 high_score_player;
 /** The default grand champion score */
 static U8 default_gc_score[HIGH_SCORE_WIDTH] =
 #ifndef MACHINE_GRAND_CHAMPION_SCORE
-	{ 0x05, 0x00, 0x00, 0x00, 0x00 }
+	{ 0x00, 0x00, 0x00, 0x00, 0x00 }
 #else
 	MACHINE_GRAND_CHAMPION_SCORE
 #endif
@@ -72,7 +72,7 @@ static U8 default_gc_score[HIGH_SCORE_WIDTH] =
 
 static U8 default_gc_initials[HIGH_SCORE_NAMESZ] =
 #ifndef MACHINE_GRAND_CHAMPION_INITIALS
-	{ 'B', 'C', 'D' }
+	{ 'D', 'A', 'D' }
 #else
 	MACHINE_GRAND_CHAMPION_INITIALS
 #endif
@@ -81,10 +81,10 @@ static U8 default_gc_initials[HIGH_SCORE_NAMESZ] =
 
 static U8 default_highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH] = {
 #ifndef MACHINE_HIGH_SCORES
-	{ 0x04, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x03, 0x50, 0x00, 0x00, 0x00 },
-	{ 0x03, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x02, 0x50, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
 #else
 	MACHINE_HIGH_SCORES
 #endif
@@ -93,10 +93,10 @@ static U8 default_highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH] = {
 
 static U8 default_high_score_initials[NUM_HIGH_SCORES][HIGH_SCORE_NAMESZ] = {
 #ifndef MACHINE_HIGH_SCORE_INITIALS
-	{ 'Q', 'Q', 'Q' },
-	{ 'F', 'T', 'L' },
-	{ 'N', 'P', 'L' },
-	{ 'P', 'Y', 'L' },
+	{ 'S', 'A', 'M' },
+	{ 'J', 'O', 'E' },
+	{ 'I', 'S', 'A' },
+	{ 'M', 'O', 'M' },
 #else
 	MACHINE_HIGH_SCORE_INITIALS
 #endif
@@ -209,6 +209,8 @@ void high_score_reset (void)
 	high_score_check_reset ();
 }
 
+
+
 #ifdef CONFIG_DMD_OR_ALPHA
 void hsentry_deff (void)
 {
@@ -233,6 +235,7 @@ void hsentry_deff (void)
 #endif
 	deff_exit ();
 }
+
 
 
 void hscredits_deff (void)

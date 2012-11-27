@@ -40,6 +40,9 @@ __boolean 	right_inlane_Light_Quick_Freeze_activated;
 
 //external variables
 
+//prototypes
+void left_inlane_task (void);
+
 
 /****************************************************************************
  * initialize  and exit
@@ -51,7 +54,10 @@ void new_player_inlanes_reset (void) {
 	lamp_tristate_on(LM_LIGHT_QUICK_FREEZE);
 }//end of reset
 
+
+
 CALLSET_ENTRY (inlanes, start_player) {  new_player_inlanes_reset(); }
+
 
 
 /****************************************************************************
@@ -77,10 +83,12 @@ void access_claw_light_off(void) {
 	lamp_tristate_off (LM_ACCESS_CLAW);
 }//end of function
 
+void left_inlane_task (void) { task_sleep_sec(3); task_exit(); }
 
 
 CALLSET_ENTRY (inlanes, sw_left_inlane) {
-	score(SC_5770);
+	task_create_gid1 (GID_LEFT_INLANE_MADE, left_inlane_task);
+	score(INLANE_SCORE);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
 	if (	!flag_test(FLAG_IS_R_RAMP_CLAWREADY)
 		&& 	left_inlane_Access_Claw_activated)	{
@@ -117,7 +125,7 @@ void light_quick_freeze_light_off(void) {
 
 
 CALLSET_ENTRY (inlanes, sw_right_inlane) {
-	score(SC_5770);
+	score(INLANE_SCORE);
 	sound_start (ST_SAMPLE, INLANE_SOUND, SL_2S, PRI_GAME_QUICK5);
 	if (!flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED) && right_inlane_Light_Quick_Freeze_activated) {
 		//leff_start (LEFF_QUICK_FREEZE);//LIGHTING EFFECTS
@@ -128,11 +136,10 @@ CALLSET_ENTRY (inlanes, sw_right_inlane) {
 
 
 
-
 /****************************************************************************
  * lighting effects
  ****************************************************************************/
-
+/*
 static void quick_freeze_subtask (void) {
 	U8 i;
 	for (i = 0; i < 5; i++) {
@@ -142,6 +149,8 @@ static void quick_freeze_subtask (void) {
 	task_exit ();
 }//end of function
 
+
+
 void quick_freeze_leff (void) {
 	gi_leff_enable (PINIO_GI_STRINGS);
 	leff_create_peer (quick_freeze_subtask);
@@ -149,6 +158,7 @@ void quick_freeze_leff (void) {
 	gi_leff_enable (PINIO_GI_STRINGS);
 	leff_exit ();
 }//end of function
+
 
 
 static void cryoclaw_subtask (void) {
@@ -160,6 +170,8 @@ static void cryoclaw_subtask (void) {
 	task_exit ();
 }//end of function
 
+
+
 void cryoclaw_leff (void) {
 	gi_leff_enable (PINIO_GI_STRINGS);
 	leff_create_peer (cryoclaw_subtask);
@@ -168,7 +180,7 @@ void cryoclaw_leff (void) {
 	leff_exit ();
 }//end of function
 
-
+*/
 
 /****************************************************************************
  *
@@ -196,8 +208,4 @@ void qf_inlanes_effect_deff(void) {
 	task_sleep_sec (2);
 	deff_exit ();
 }//end of mode_effect_deff
-
-
-
-
 

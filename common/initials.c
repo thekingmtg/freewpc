@@ -30,7 +30,7 @@
 
 #define NUM_INITIALS_ALLOWED 3
 
-#define INITIALS_TIMER_INIT 30
+#define INITIALS_TIMER_INIT 25
 
 /** The array of characters that can be entered.
  * Keep the length of this as a power of 2 (32) so that
@@ -142,7 +142,7 @@ void enter_initials_deff (void)
 			if (initials_selection < MAX_INITIAL_INITIAL+1)
 			{
 				sprintf ("%12s", initial_chars + initials_selection);
-				font_render_string_left (&font_term6, 0, 23, sprintf_buffer);
+				font_render_string_left (&font_var5, 0, 23, sprintf_buffer);
 			}
 			else
 			{
@@ -150,12 +150,12 @@ void enter_initials_deff (void)
 
 				x = ALPHABET_LEN - initials_selection;
 				sprintf ("%*s", x, initial_chars + initials_selection);
-				font_render_string_left (&font_term6, 0, 23, sprintf_buffer);
+				font_render_string_left (&font_var5, 0, 23, sprintf_buffer);
 
 				x = MAX_LETTERS_SHOWN - x;
 				sprintf ("%*s", x, initial_chars);
 				x = MAX_LETTERS_SHOWN - x;
-				font_render_string_left (&font_term6, x * FONT_WIDTH, 23, sprintf_buffer);
+				font_render_string_left (&font_var5, x * FONT_WIDTH, 23, sprintf_buffer);
 			}
 
 			for (n = 22; n <= 30; n++)

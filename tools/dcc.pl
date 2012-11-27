@@ -43,7 +43,7 @@ my $attr = {
 	# The attributes for the next "print" element.
 	color => 3,
 	bgcolor => 0,
-	font => "var5",
+	font => "mono5",
 	blink => "none", # options: none, or a time rate
 	align => "center", # options: left, center, right
 	valign => "center", # options: top, center, bottom
@@ -60,17 +60,17 @@ my $attr = {
 my %fontheight = (
 	"cu17" => 22,
 	"var5" => 5,
-	"var5" => 5,
+	"mono5" => 5,
 	"fixed6" => 9,
 	"fixed10" => 12,
 	"fixed12" => 18,
-	"fixed10" => 13,
+	"lucida9" => 13,
 	"luctype" => 10,
 	"miscfixed" => 10,
 	"schu" => 10,
 	"term6" => 8,
 	"times10" => 12,
-	"fixed10" => 12,
+	"times8" => 12,
 	"utopia" => 10,
 );
 

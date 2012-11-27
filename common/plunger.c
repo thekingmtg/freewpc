@@ -26,16 +26,6 @@
 #define INCLUDE_AUTOPLUNGER
 #endif
 
-
-/* When using an autoplunger, LAUNCH_DELAY says how much time to wait
-after launching a ball, before trying to launch another one (could be
-another ball served, or the same ball which failed to launch OK). */
-#ifndef AUTOFIRE_DELAY
-#define AUTOFIRE_DELAY 7
-#endif
-
-
-
 /**
  * \file
  * \brief Common logic for dealing with the shooter switch and the
@@ -111,11 +101,10 @@ static void launch_button_pressed (void)
 }
 #endif
 
-
 #ifdef INCLUDE_AUTOPLUNGER
 static void timed_plunger_monitor (void)
 {
-	task_sleep_sec (AUTOFIRE_DELAY);
+	task_sleep_sec (7);
 	launch_button_pressed ();
 	task_exit ();
 }

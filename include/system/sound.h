@@ -136,4 +136,8 @@ bool sound_version_render (void);
 void volume_reset (void);
 void volume_refresh (void);
 
+U8 get_volume (void);
+void lower_volume (void);
+
+
 #endif /* _SYS_SOUND_H */

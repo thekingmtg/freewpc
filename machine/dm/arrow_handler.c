@@ -37,7 +37,7 @@ CALLSET_ENTRY (arrow_handler, start_player, start_ball) 	{
  ****************************************************************************/
 void center_ramp_arrow_update(void) {
 	if (	flag_test (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_ACMAG_ACTIVATED)
+		||	flag_test (FLAG_IS_ACMAG_RUNNING)
 		||	flag_test (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED) )
 		cramp_arrow_light_on();
 	else

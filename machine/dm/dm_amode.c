@@ -37,9 +37,12 @@
  *
  */
 
-/* CALLSET_SECTION (dm_amode, __machine2__) */
+/* CALLSET_SECTION (dm_amode, __machine5__) */
 
 #include <freewpc.h>
+#include "dm/global_constants.h"
+
+
 U8 alternator;
 
 /****************************************************************************
@@ -70,54 +73,352 @@ void amode_leff (void) {
 /****************************************************************************
  * display effects
  ***************************************************************************/
-
-void show_driver_animation (void) {
+void dm_amode_animation_display_effect (U16 start_frame, U16 end_frame){
 	U16 fno;
-	U8 i;
+	for (fno = start_frame; fno <= end_frame; fno += 2) {
+		dmd_alloc_pair ();
+		frame_draw(fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}//end of inner loop
+}
+
+void dm_amode_frame_bitfade_fast (U16 frame){
+	dmd_sched_transition (&trans_bitfade_fast);
+	dmd_alloc_pair ();
+	frame_draw(frame);
+	dmd_show2 ();
+	task_sleep (TIME_100MS);
+}
+
+
+
+
+void show_john_spartan_animation(void) {
 	dmd_clean_page_high ();//
 	dmd_clean_page_low ();//
-	for (i = 0; i < 5; i++) {
-		for (fno = IMG_DRIVER_START; fno <= IMG_DRIVER_END; fno += 2) {
-			dmd_alloc_pair ();
-			frame_draw_plane (fno++);
-			dmd_flip_low_high ();
-			frame_draw_plane (fno);
-			dmd_flip_low_high ();
-			dmd_show2 ();
-			task_sleep (TIME_66MS);
-		}//end of inner loop
-	}//end of outer loop
+	dm_amode_animation_display_effect (IMG_FORTRESS_D1_START, IMG_FORTRESS_D1_END);
+	dm_amode_frame_bitfade_fast(IMG_FORTRESS_D2_START);
+	dm_amode_animation_display_effect (IMG_FORTRESS_D2_START, IMG_FORTRESS_D2_END);
+	dm_amode_frame_bitfade_fast(IMG_FORTRESS_D3_START);
+	dm_amode_animation_display_effect (IMG_FORTRESS_D3_START, IMG_FORTRESS_D4_END);
+
 	dmd_alloc_pair_clean ();// Clean both pages
-}//end of function
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "JOHN");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Bot, "SPARTAN");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_FORTRESS_D4_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+	task_sleep(TIME_2S);
+}//end of mode_effect_deff
 
 
-
-void show_rocket_animation (void) {
+void show_john_spartan2_animation(void) {
 	U16 fno;
-		for (fno = IMG_ROCKET_LOAD_START; fno <= IMG_ROCKET_LOAD_END; fno ++) {
-			// We are drawing a full frame, so a clean isn't needed
-			dmd_alloc_pair ();
-			frame_draw (fno);
-			dmd_show2 ();
-			task_sleep (TIME_133MS);
-		}//end of loop
-		task_sleep (TIME_1S);
-			for (fno = IMG_ROCKET_LOAD_END; fno >= IMG_ROCKET_LOAD_START; fno --) {
-				// We are drawing a full frame, so a clean isn't needed
-				dmd_alloc_pair ();
-				frame_draw (fno);
-				dmd_show2 ();
-				task_sleep (TIME_133MS);
-		}//end of loop
-	// Clean both pages
-	dmd_alloc_pair_clean ();
-	task_sleep (TIME_1S);
-}//end of function
+	dmd_alloc_pair_clean ();// Clean both pages
+
+	for (fno = IMG_JOHN_SPARTAN_A_END; fno >= IMG_JOHN_SPARTAN_A_START; fno -= 2) {
+		dmd_alloc_pair ();
+		frame_draw(fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	} //end of loop
+
+	dm_amode_animation_display_effect (IMG_JOHN_SPARTAN_A_START, IMG_JOHN_SPARTAN_A_END);
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X + 25, DMD_BIG_CY_Top, "JOHN");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X + 25, DMD_BIG_CY_Bot, "SPARTAN");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_JOHN_SPARTAN_A_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+	task_sleep(TIME_2S);
+}//end of mode_effect_deff
+
+
+
+void show_simon_phoenix_animation(void) {
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_SIMON_A_START, IMG_SIMON_A_END);
+	dm_amode_frame_bitfade_fast(IMG_SIMON_B_START);
+	dm_amode_animation_display_effect (IMG_SIMON_B_START, IMG_SIMON_B_END);
+	dm_amode_animation_display_effect (IMG_SIMON_C_START, IMG_SIMON_C_END);
+
+	dmd_alloc_pair_clean ();// Clean both pages
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "SIMON");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, "PHOENIX");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_SIMON_C_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep(TIME_2S);
+}//end of mode_effect_deff
+
+
+
+void show_simon_phoenix2_animation(void) {
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_MUSEUM_D1_START, IMG_MUSEUM_D1_END);
+	dm_amode_frame_bitfade_fast(IMG_MUSEUM_C2_START);
+	dm_amode_animation_display_effect (IMG_MUSEUM_C2_START, IMG_MUSEUM_C2_END);
+	dm_amode_frame_bitfade_fast(IMG_MUSEUM_D3_START);
+	dm_amode_animation_display_effect (IMG_MUSEUM_D3_START, IMG_MUSEUM_D3_END);
+	dm_amode_animation_display_effect (IMG_MUSEUM_D3_START, IMG_MUSEUM_D3_END);
+	dm_amode_animation_display_effect (IMG_MUSEUM_D3_START, IMG_MUSEUM_D3_END);
+	dm_amode_animation_display_effect (IMG_MUSEUM_D3_START, IMG_MUSEUM_D3_END);
+
+	dmd_alloc_pair_clean ();// Clean both pages
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "SIMON");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, "PHOENIX");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_MUSEUM_D3_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep(TIME_2S);
+}//end of mode_effect_deff
+
+
+
+void show_assoc_bob_animation(void) {
+	U16 fno;
+
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_ASSOC_BOB_START, IMG_ASSOC_BOB_END);
+
+	for (fno = IMG_ASSOC_BOB_END; fno >= IMG_ASSOC_BOB_START; fno -= 2) {
+		dmd_alloc_pair ();
+		frame_draw(fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	} //end of loop
+
+	dm_amode_animation_display_effect (IMG_ASSOC_BOB_START, IMG_ASSOC_BOB_END);
+
+	dmd_alloc_pair_clean ();// Clean both pages
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "ASSOCIATE");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, "BOB");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_ASSOC_BOB_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep(TIME_2S);
+}//end of mode_effect_deff
+
+
+
+
+void show_chief_earle_animation(void) {
+	U16 fno;
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_CHIEF_EARLE2_START, IMG_CHIEF_EARLE2_END);
+
+	for (fno = IMG_CHIEF_EARLE2_END; fno >= IMG_CHIEF_EARLE2_START; fno -= 2) {
+		dmd_alloc_pair ();
+		frame_draw(fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	} //end of loop
+
+	dm_amode_animation_display_effect (IMG_CHIEF_EARLE2_START, IMG_CHIEF_EARLE2_END);
+
+	dmd_alloc_pair_clean ();// Clean both pages
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "CHIEF");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, "EARLE");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_CHIEF_EARLE2_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep(TIME_2S);
+}//end of mode_effect_deff
+
+
+
+
+void show_cocteau_animation(void) {
+	U16 fno;
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_DR_COCTEAU_B_START, IMG_DR_COCTEAU_B_END);
+
+	for (fno = IMG_DR_COCTEAU_B_END; fno >= IMG_DR_COCTEAU_B_START; fno -= 2) {
+		dmd_alloc_pair ();
+		frame_draw(fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	} //end of loop
+
+	dm_amode_animation_display_effect (IMG_DR_COCTEAU_B_START, IMG_DR_COCTEAU_B_END);
+
+	dmd_alloc_pair_clean ();// Clean both pages
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "DR");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, "COCTEAU");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_DR_COCTEAU_B_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep(TIME_2S);
+}//end of mode_effect_deff
+
+
+
+
+
+void show_lenina1_animation(void) {
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_HUXLEY_A_START, IMG_HUXLEY_A_END);
+	dm_amode_frame_bitfade_fast(IMG_HUXLEY_B1_START);
+	dm_amode_animation_display_effect (IMG_HUXLEY_B1_START, IMG_HUXLEY_B1_END);
+	dm_amode_frame_bitfade_fast(IMG_HUXLEY_B2_START);
+	dm_amode_animation_display_effect (IMG_HUXLEY_B2_START, IMG_HUXLEY_B2_END);
+
+	dmd_alloc_pair_clean ();// Clean both pages
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Top, "LENINA");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, "HUXLEY");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_HUXLEY_B2_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep(TIME_2S);
+}//end of mode_effect_deff
+
+
+
+void show_lenina2_animation(void) {
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_HUXLEY_D_START, IMG_HUXLEY_D_END);
+	dm_amode_frame_bitfade_fast(IMG_HUXLEY_E_START);
+	dm_amode_animation_display_effect (IMG_HUXLEY_E_START, IMG_HUXLEY_E_END);
+
+	dmd_alloc_pair_clean ();// Clean both pages
+		dmd_map_overlay ();
+		dmd_clean_page_low ();
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Top, "LENINA");
+		font_render_string_center (&font_steel, DMD_MIDDLE_X - 30, DMD_BIG_CY_Bot, "HUXLEY");
+		dmd_text_outline ();
+		dmd_alloc_pair ();
+		frame_draw(IMG_HUXLEY_E_END);
+		dmd_overlay_outline ();
+		dmd_show2 ();
+		task_sleep(TIME_2S);
+}//end of mode_effect_deff
+
+
+
+void show_huxley_info (void) {
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_HUXLEY_B1_START, IMG_HUXLEY_B1_END);
+	dm_amode_frame_bitfade_fast(IMG_HUXLEY_B2_START);
+	dm_amode_animation_display_effect (IMG_HUXLEY_B2_START, IMG_HUXLEY_B2_END);
+	task_sleep_sec (1);
+			dmd_sched_transition (&trans_scroll_down);
+			dmd_clean_page_low ();
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "START 4 NON-CLAW");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "MODES FOR");
+			font_render_string_center (&font_fipps, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "HUXLEY");
+			dmd_show_low();
+			task_sleep_sec (3);
+}//end of mode_effect_deff
+
+
+
+
+
+void show_rollovers1_info (void) {
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_CAPSIMON_C_START, IMG_CAPSIMON_C_END);
+	task_sleep_sec (1);
+			dmd_sched_transition (&trans_scroll_down);
+			dmd_clean_page_low ();
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "ROLLOVERS");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "LIGHT CRYOCLAW");
+			dmd_show_low();
+			task_sleep_sec (3);
+}//end of mode_effect_deff
+
+
+
+
+void show_standups_info (void) {
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_WASTELAND_A1_START, IMG_WASTELAND_A1_END);
+	dm_amode_frame_bitfade_fast(IMG_WASTELAND_A2_START);
+	dm_amode_animation_display_effect (IMG_WASTELAND_A2_START, IMG_WASTELAND_A2_END);
+	task_sleep_sec (1);
+			dmd_sched_transition (&trans_scroll_down);
+			dmd_clean_page_low ();
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "HIT STANDUPS");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
+			font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "LIGHT QUICK FREEZE");
+			dmd_show_low();
+			task_sleep_sec (3);
+}//end of mode_effect_deff
+
+
+
+void show_demotime_info (void) {
+	dmd_clean_page_high ();//
+	dmd_clean_page_low ();//
+	dm_amode_animation_display_effect (IMG_SIMON_FIRE1_START, IMG_SIMON_SHOOT_END);
+	dm_amode_frame_bitfade_fast(IMG_FIGHT_A_START);
+	dm_amode_animation_display_effect (IMG_FIGHT_A_START, IMG_JOHN_SPARTAN_A_END);
+	task_sleep_sec (1);
+
+			dmd_sched_transition (&trans_scroll_down);
+			dmd_clean_page_low ();
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "START 5");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "CLAW MODES");
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "FOR");
+			font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "DEMOLITION TIME");
+			dmd_show_low();
+			task_sleep_sec (3);
+}//end of mode_effect_deff
+
+
+
+
+
+
 
 
 
 
 CALLSET_ENTRY (dm_amode, amode_page) {
+	U8 numOfAlts = 4;
 	alternator++;
 	dmd_clean_page_low ();
 	font_render_string_center (&font_steel, 64, 7, "DEMOLITION");
@@ -125,13 +426,22 @@ CALLSET_ENTRY (dm_amode, amode_page) {
 	dmd_show_low ();
 	task_sleep(TIME_4S);
 
-	if (alternator % 2 == 0) {
+	if (alternator % numOfAlts == 0) {
 		dmd_sched_transition (&trans_scroll_right);
-		show_rocket_animation ();
-	} else {
+		show_john_spartan_animation ();
+
+	} else if (alternator % numOfAlts == 1) {
+		dmd_sched_transition (&trans_scroll_right);
+		show_assoc_bob_animation();
+
+	} else if (alternator % numOfAlts == 2) {
 		dmd_sched_transition (&trans_scroll_left);
-		show_driver_animation ();
-		}
+		show_john_spartan2_animation ();
+
+	} else if (alternator % numOfAlts == 3) {
+		dmd_sched_transition (&trans_scroll_left);
+		show_lenina1_animation();
+	}
 
 	dmd_sched_transition (&trans_bitfade_slow);
 	dmd_clean_page_low ();
@@ -142,31 +452,27 @@ CALLSET_ENTRY (dm_amode, amode_page) {
 
 	dmd_sched_transition (&trans_scroll_up_slow);
 	dmd_clean_page_low ();
-	font_render_string_center (&font_lithograph, 64, 7, "GRAPHICS BY");
-	font_render_string_center (&font_term6, 64, 20, "CARDONA");
+	font_render_string_center (&font_lithograph, 64, 7, "DOTS BY");
+	font_render_string_center (&font_term6, 64, 20, "SJI");
 	dmd_show_low ();
 	task_sleep(TIME_2S);
 
+	if (alternator % numOfAlts == 0) {
+		dmd_sched_transition (&trans_scroll_right);
+		show_simon_phoenix_animation ();
 
+	} else if (alternator % numOfAlts == 1) {
+		dmd_sched_transition (&trans_scroll_left);
+		show_cocteau_animation();
 
-		dmd_alloc_pair ();
-		frame_draw_plane (IMG_TEST);
-		dmd_flip_low_high ();
-		frame_draw_plane (IMG_TEST);
-		dmd_flip_low_high ();
-		dmd_show2 ();
-		task_sleep(TIME_2S);
+	} else if (alternator % numOfAlts == 2) {
+	dmd_sched_transition (&trans_scroll_right);
+	show_simon_phoenix2_animation ();
 
-
-	//	dmd_clean_page_high ();
-//	dmd_text_blur ();
-//	dmd_map_overlay ();
-	//	frame_draw (IMG_TEST);
-	//show_random_factoid ();
-	/* Clean the low screen for the transition */
-//	dmd_alloc_low_clean ();
-//	dmd_show_low ();
-
+	} else if (alternator % numOfAlts == 3) {
+		dmd_sched_transition (&trans_scroll_left);
+		show_chief_earle_animation();
+		}
 
 	dmd_sched_transition (&trans_bitfade_slow);
 	dmd_clean_page_low ();
@@ -174,5 +480,23 @@ CALLSET_ENTRY (dm_amode, amode_page) {
 	font_render_string_center (&font_steel, 64, 22, "TIME");
 	dmd_show_low ();
 	task_sleep(TIME_4S);
+
+	if (alternator % numOfAlts == 0) {
+		dmd_sched_transition (&trans_scroll_right);
+		show_huxley_info ();
+
+	} else if (alternator % numOfAlts == 1) {
+		dmd_sched_transition (&trans_scroll_left);
+		show_rollovers1_info ();
+
+	} else if (alternator % numOfAlts == 2) {
+		dmd_sched_transition (&trans_scroll_right);
+		show_standups_info ();
+
+	} else if (alternator % numOfAlts == 3) {
+		dmd_sched_transition (&trans_scroll_left);
+		show_demotime_info ();
+		}
+
 }//end of function
 

@@ -29,6 +29,7 @@
  */
 
 #include <freewpc.h>
+#include "dm/global_constants.h"
 
 //constants
 const U8 ORBITS_EASY_GOAL = 5;
@@ -73,7 +74,7 @@ void player_orbits_reset (void) {
 	right_loop_goal = 0;
 	left_loop_goal=ORBITS_EASY_GOAL;
 	all_loop_goal=(ORBITS_EASY_GOAL * 4);
-	flag_off(FLAG_IS_MULTIBALL_ACTIVATED);
+	flag_off(FLAG_IS_MULTIBALL_ENABLED);
 	flag_off(FLAG_IS_EXTRABALL_LIT);
 	orbits_reset();
 }//end of function
@@ -104,7 +105,7 @@ void multiball_light_on(void) {
 }//end of function
 
 void multiball_light_off(void) {
-	flag_off(FLAG_IS_MULTIBALL_ACTIVATED);
+	flag_off(FLAG_IS_MULTIBALL_ENABLED);
 	lamp_tristate_off (LM_START_MULTIBALL);
 }//end of function
 
@@ -170,16 +171,23 @@ void rl_arrow_light_off(void) {
 void left_orbit_task (void) { task_sleep_sec(2); task_exit(); }
 void right_orbit_task (void) { task_sleep_sec(2); task_exit(); }
 
+
+
 // full orbit right to left
 // or start left to right check
 CALLSET_ENTRY (orbits, sw_left_loop) {
-//	if ( !single_ball_play() ) return;  //turn off during multiball?
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
+	if (flag_test(FLAG_IS_L_LOOP_JACKPOT_ACTIVATED) ) 			score_jackpot();
+	else if (flag_test(FLAG_IS_HUXLEY_RUNNING) )				huxley_mode_shot_made();
+	else if (flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED) )  	capture_simon_made();
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) 				prison_break_made();
+	else if(flag_test (FLAG_IS_EXPLODE_MODE_RUNNING) ) 			explode_made();
+	else if (flag_test(FLAG_IS_COMBOS_KILLED) ) 				combo_init();
+	else if ( flag_test(FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) 		combo_hit();
 
 	if ( task_kill_gid(GID_RIGHT_ORBIT_MADE) ) right_orbit_shot_made();
 	else {
 		task_create_gid1 (GID_LEFT_ORBIT_MADE, left_orbit_task);
-		if (!flag_test (FLAG_IS_PBREAK_ACTIVATED) ) {
+		if (!flag_test (FLAG_IS_PBREAK_RUNNING) ) {
 				if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
 					sound_start (ST_EFFECT, RACE_BY, SL_2S, PRI_GAME_QUICK5);
 				else
@@ -188,16 +196,23 @@ CALLSET_ENTRY (orbits, sw_left_loop) {
 	}//end of else
 }//end of function
 
+
+
 // full orbit left to right
 // or start right to left check
 CALLSET_ENTRY (orbits, sw_right_freeway) {
-//	if ( !single_ball_play () ) return;  //turn off during multiball?
-	if (flag_test (FLAG_IS_PBREAK_ACTIVATED) ) { prison_break_made(); }
+	if (flag_test(FLAG_IS_R_LOOP_JACKPOT_ACTIVATED) ) 			score_jackpot();
+	else if (flag_test(FLAG_IS_HUXLEY_RUNNING) )				huxley_mode_shot_made();
+	else if(flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED) )  	capture_simon_made();
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) )   			prison_break_made();
+	else if(flag_test (FLAG_IS_EXPLODE_MODE_RUNNING) ) 			explode_made();
+	else if (flag_test(FLAG_IS_COMBOS_KILLED) ) 				combo_init();
+	else if ( flag_test(FLAG_IS_COMBO_RIGHTORB_ACTIVATED) ) 	combo_hit();
 
 	if ( task_kill_gid(GID_LEFT_ORBIT_MADE) ) left_orbit_shot_made();
 	else {
 		task_create_gid1 (GID_RIGHT_ORBIT_MADE, right_orbit_task);
-		if (!flag_test (FLAG_IS_PBREAK_ACTIVATED) ) {
+		if (!flag_test (FLAG_IS_PBREAK_RUNNING) ) {
 				if ( (orbits_SoundCounter++ % 2) == 0 )//check if even
 					sound_start (ST_EFFECT, RACE_BY, SL_2S, PRI_GAME_QUICK5);
 				else
@@ -211,15 +226,8 @@ CALLSET_ENTRY (orbits, sw_right_freeway) {
 void left_orbit_shot_made(void) {
 	++left_loop_counter;
 	++all_loop_counter;
-	score (SC_100K);//located in kernal/score.c
-	if (!flag_test (FLAG_IS_PBREAK_ACTIVATED) ) sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
-	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) explode_made();
-	if(flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED) )  capture_simon_made();
-	else {
-			if (flag_test(FLAG_IS_COMBOS_KILLED) ) combo_init();
-			else if ( flag_test(FLAG_IS_COMBO_LEFTORB_ACTIVATED) ) combo_hit();
-	}
-	if (flag_test(FLAG_IS_L_LOOP_JACKPOT_ACTIVATED) ) score_jackpot();
+	score (ORBIT_SCORE);//located in kernal/score.c
+	if (!flag_test (FLAG_IS_PBREAK_RUNNING) ) sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	if (left_loop_counter == left_loop_goal)  left_loop_goal_award ();
 }//end of function
 
@@ -228,15 +236,8 @@ void left_orbit_shot_made(void) {
 void right_orbit_shot_made(void) {
 	++right_loop_counter;
 	++all_loop_counter;
-	score (SC_100K);//located in kernal/score.c
-	if (!flag_test (FLAG_IS_PBREAK_ACTIVATED) ) sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
-	if(flag_test (FLAG_IS_EXPLODE_MODE_ACTIVATED) ) explode_made();
-	if(flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED) )  capture_simon_made();
-	else {
-			if (flag_test(FLAG_IS_COMBOS_KILLED) ) combo_init();
-			else if ( flag_test(FLAG_IS_COMBO_RIGHTORB_ACTIVATED) ) combo_hit();
-	}
-	if (flag_test(FLAG_IS_R_LOOP_JACKPOT_ACTIVATED) ) score_jackpot();
+	score (ORBIT_SCORE);//located in kernal/score.c
+	if (!flag_test (FLAG_IS_PBREAK_RUNNING) ) sound_start (ST_SAMPLE, MACHINE12, SL_2S, PRI_GAME_QUICK1);
 	if (right_loop_counter == right_loop_goal)  right_loop_goal_award ();
 }//end of function
 
@@ -244,14 +245,16 @@ void right_orbit_shot_made(void) {
 
 void right_loop_goal_award (void) {
 	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
-	score (SC_250K);
+	score (ORBIT_GOAL_SCORE);
 	right_loop_counter = 0;
 	if (right_loop_goal < ORBITS_GOAL_MAX)  right_loop_goal += ORBITS_GOAL_STEP;
 }//end of function
 
+
+
 void left_loop_goal_award (void) {
 	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
-	score (SC_250K);
+	score (ORBIT_GOAL_SCORE);
 	left_loop_counter = 0;
 	if (left_loop_goal < ORBITS_GOAL_MAX)  left_loop_goal += ORBITS_GOAL_STEP;
 }//end of function
