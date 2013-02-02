@@ -73,7 +73,7 @@ static void line_printer (U8 index, const char *line)
 	else
 		return;
 
-	font_render_string_center (&font_var5, 64, row, line);
+	font_render_string_center (&font_mono5, 64, row, line);
 }
 
 

@@ -9,25 +9,54 @@
 #include <freewpc.h>
 
 #define RAMPS
-//#define CAPTURE
-//#define PRISON
-//#define CMAG		//acmag.c
-//#define LOCK
-//#define CARCHASE
-//#define FORTRESS
-//#define EXPLO		//expolde.c
+#define CAPTURE
+#define PRISON
+#define CMAG		//acmag.c
+#define LOCK
+#define CARCHASE
+#define FORTRESS
+#define EXPLO		//expolde.c
 //#define JETS
-//#define COMBOS
-//#define JACKPOTS
-//#define INLANES
-//#define ARROWS
-//#define DEMOTIME
-//#define CRYOPRISON
-//#define WASTELAND
-//#define CRASH
-//#define UGROUND
-//#define HUXLEY
+#define COMBOS
+#define JACKPOTS
+#define INLANES
+#define ARROWS
+#define DEMOTIME
+#define CRYOPRISON
+#define WASTELAND
+#define CRASH
+#define UGROUND
+#define HUXLEY
+//#define SKILL
+//#define XTRABALL
+//#define SJ_REMINDER
 
+
+#ifndef SJETS
+U8 		superjets_modes_achieved;			//from superjets.c
+U8 		superjets_mode_shots_made;
+#endif
+
+
+#ifndef SKILL
+void award_skill_shot (U8 type_skill_shot_made){}
+#endif
+
+#ifndef XTRABALL
+void start_extraball(void){}
+void end_extraball(void){}
+#endif
+
+#ifndef SJ_REMINDER
+void start_super_jackpot_reminder (void){}
+void end_super_jackpot_reminder (void){}
+#endif
+
+#ifndef PLD
+void enable_back_in_the_fridge(void){}
+void start_back_in_the_fridge(void){}
+void back_in_the_fridge_shot_made(void){}
+#endif
 
 #ifndef HUXLEY
 void huxley_increment(void){}
@@ -125,8 +154,9 @@ void demotime_jackpot_made(void){}
 #endif
 
 #ifndef CRYOPRISON
-void cryoprison_start(void){}
+void cryoprison_start(U8 num){}
 void cryoprison_jackpot_made(void){}
+void cryoprison_award_super_jackpot(void){}
 #endif
 
 #ifndef WASTELAND

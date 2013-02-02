@@ -85,11 +85,12 @@ fixed6:
 fixed10:
 term6:
 symbol:
+bitmap8:
+mono5:		
+lucida9:	# used in common/score_deff_dmd.c only, could be replaced
 
-#cu17: 		#replaced with fixed10
-#times8:	#replaced with term6
-#bitmap8:	#replaced with term6
-#mono5:		#replaced with var5
-#lucida9:	#replaced with fixed10
-
+#####################################################################################
+# the below system fonts were eliminated to allow more custom fonts
+#times8:	#replaced with term6 -- was only used on common/highscore.c for one line
+#cu17: 		#replaced with fixed10 -- was only used on common/effect.c for one line
 

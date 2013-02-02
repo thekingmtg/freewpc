@@ -41,15 +41,15 @@
 #include <freewpc.h>
 
 U8 unlit_shot_count;
-__local__ bool backdoor_award_collected;
+bool backdoor_award_collected;
 /* last switch that was collected unlit */
 U8 unlit_called_from_stored;
 
 void backdoor_award_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_fireball, 64, 8, "BACKDOOR");
-	font_render_string_center (&font_antiqua, 64, 20, "AWARD");
+	sprintf ("BACKDOOR AWARD");
+	font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
 	dmd_show_low ();
 	task_sleep_sec (2);
 	deff_exit ();
@@ -67,14 +67,6 @@ inline static bool can_award_unlit_shot (U8 unlit_called_from)
 		return FALSE;
 	else
 		return TRUE;
-}
-
-bool unlit_shots_lit (void)
-{
-	/*TODO Use a big if to check whether its actually possible to get
-	 * another unlit shot
-	 */
-	return TRUE;
 }
 
 void award_unlit_shot (U8 unlit_called_from)
@@ -95,9 +87,8 @@ void award_unlit_shot (U8 unlit_called_from)
 		/* Reset if the player hits the same unlit shot twice */
 		if (unlit_called_from == unlit_called_from_stored)
 			unlit_shot_count = 0;	
-		if (unlit_shot_count == 4 )
+		if (unlit_shot_count == 4)
 		{
-			//TODO Check for unlit shots
 			/* Hint to the player that backdoor award is ready */
 			sound_send (SND_TWILIGHT_ZONE_SHORT_SOUND);
 		}
@@ -106,14 +97,7 @@ void award_unlit_shot (U8 unlit_called_from)
 	}
 }
 
-CALLSET_ENTRY (unlit, serve_ball)
-{
-	unlit_shot_count = 0;
-	unlit_called_from_stored = 0;
-
-}
-
-CALLSET_ENTRY (unlit, start_player)
+CALLSET_ENTRY (unlit, start_ball)
 {
 	unlit_shot_count = 0;
 	unlit_called_from_stored = 0;

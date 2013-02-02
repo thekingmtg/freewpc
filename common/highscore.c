@@ -63,7 +63,7 @@ U8 high_score_player;
 /** The default grand champion score */
 static U8 default_gc_score[HIGH_SCORE_WIDTH] =
 #ifndef MACHINE_GRAND_CHAMPION_SCORE
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 }
+	{ 0x00, 0x05, 0x00, 0x00, 0x00 }
 #else
 	MACHINE_GRAND_CHAMPION_SCORE
 #endif
@@ -81,10 +81,10 @@ static U8 default_gc_initials[HIGH_SCORE_NAMESZ] =
 
 static U8 default_highest_scores[NUM_HIGH_SCORES][HIGH_SCORE_WIDTH] = {
 #ifndef MACHINE_HIGH_SCORES
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
-	{ 0x00, 0x00, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x04, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x03, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x02, 0x00, 0x00, 0x00 },
+	{ 0x00, 0x01, 0x00, 0x00, 0x00 },
 #else
 	MACHINE_HIGH_SCORES
 #endif
@@ -132,7 +132,7 @@ void grand_champion_draw (void)
 	dmd_alloc_low_clean ();
 	font_render_string_center (&font_fixed6, 64, 8, "HIGHEST SCORE AT");
 	sprintf_score (high_score_table[0].score);
-	font_render_string_center (&font_fixed10, 64, 22, sprintf_buffer);
+	font_render_string_center (&font_term6, 64, 22, sprintf_buffer);
 	dmd_show_low ();
 }
 
@@ -150,7 +150,7 @@ void high_score_draw_12 (void)
 {
 	dmd_alloc_low_clean ();
 #if (MACHINE_DMD == 1)
-	font_render_string_center (&font_var5, 64, 3, "HIGHEST SCORES");
+	font_render_string_center (&font_mono5, 64, 3, "HIGHEST SCORES");
 #endif
 	high_score_draw_single (1, 8);
 	high_score_draw_single (2, 20);
@@ -162,7 +162,7 @@ void high_score_draw_34 (void)
 {
 	dmd_alloc_low_clean ();
 #if (MACHINE_DMD == 1)
-	font_render_string_center (&font_var5, 64, 3, "HIGHEST SCORES");
+	font_render_string_center (&font_mono5, 64, 3, "HIGHEST SCORES");
 #endif
 	high_score_draw_single (3, 8);
 	high_score_draw_single (4, 20);
@@ -174,27 +174,28 @@ void high_score_draw_34 (void)
 
 void high_score_check_reset (void)
 {
-	/* Initialize the counters that will force a reset
-	 * automatically after some time */
-	/* TODO - what if adjustment is OFF ? */
+	///Initialize the counters that will force a reset
+	 // automatically after some time */
+	// TODO - what if adjustment is OFF ? */
 	hs_reset_counter1 = hstd_config.hs_reset_every;
 	hs_reset_counter2 = 250;
 }
 
 
-/** Reset all of the high scores, including the grand champion,
- * to default values */
+// Reset all of the high scores, including the grand champion,
+ // to default values
 void high_score_reset (void)
 {
+
 	U8 place;
 
 	dbprintf ("Resetting high score table\n");
 
-	/* Reset the grand champion */
+	// Reset the grand champion
 	memcpy (high_score_table[0].score, default_gc_score, HIGH_SCORE_WIDTH);
 	memcpy (high_score_table[0].initials, default_gc_initials, HIGH_SCORE_NAMESZ);
 
-	/* Reset the other high scores */
+	// Reset the other high scores
 	for (place=0; place < NUM_HIGH_SCORES; place++)
 	{
 		memcpy (high_score_table[place+1].score, default_highest_scores[place],
@@ -205,11 +206,10 @@ void high_score_reset (void)
 
 	csum_area_update (&high_csum_info);
 
-	/* Reset when the next auto-reset will occur */
+	// Reset when the next auto-reset will occur
 	high_score_check_reset ();
+
 }
-
-
 
 #ifdef CONFIG_DMD_OR_ALPHA
 void hsentry_deff (void)
@@ -235,7 +235,6 @@ void hsentry_deff (void)
 #endif
 	deff_exit ();
 }
-
 
 
 void hscredits_deff (void)

@@ -36,6 +36,7 @@ const U8 	ball_save_TotalNumOfSounds = 6; //num between 0 and N-1 == N total
 const sound_code_t ball_save_SoundsArray[] = {	SPCH_AINT_OVER_YET,		SPCH_DONT_MOVE_PHOENIX,		SPCH_DONT_MOVE,
 												SPCH_SECOND_CHANCE,		SPCH_HEADS_UP,				SPCH_NEXT_SHOT };
 
+
 void ball_save_deff (void) {
 #ifdef	DEMO_MAN_BALL_SAVE_EFFECT
 	U16 fno;
@@ -211,9 +212,9 @@ void nonfatal_error_deff (void)
 #ifdef DEBUGGER
 	dmd_alloc_low_clean ();
 	sprintf ("NONFATAL %ld", system_audits.non_fatal_errors);
-	font_render_string_center (&font_var5, 64, 10, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 10, sprintf_buffer);
 	sprintf ("ERRNO %i GID %i", last_nonfatal_error_code, last_nonfatal_error_gid);
-	font_render_string_center (&font_var5, 64, 20, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 20, sprintf_buffer);
 	dmd_show_low ();
 	sound_send (SND_TEST_ALERT);
 	task_sleep (TIME_200MS);
@@ -245,11 +246,14 @@ void score_goal_deff (void)
 
 
 
+
+
 const U8 	shoot_reminder_TotalNumOfSounds = 10; //num between 0 and N-1 == N total
 const sound_code_t shoot_reminder_SoundsArray[] = {	SPCH_COME_GET_ME, 		SPCH_LETS_GO2, 			SPCH_MOVE_IT_SLY,
 													SPCH_DRIVE, 			SPCH_GO_SLY,
 													SPCH_DO_SOMETHING, 		SPCH_MOVE, 				SPCH_MOVE_IT,
 													SPCH_GO_WES, 			SPCH_NOW };
+
 
 void plunge_ball_deff (void) {
 #ifdef	DEMO_MAN_BALL_SAVE_EFFECT
@@ -291,6 +295,7 @@ void plunge_ball_deff (void) {
 #endif
 	deff_exit ();
 }
+
 
 
 void coin_door_buttons_deff (void)
@@ -498,17 +503,17 @@ void buyin_offer_deff (void)
 		font_render_string_center (&font_term6, 64, 5, "CONTINUE GAME");
 #if (MACHINE_DMD == 1)
 		sprintf ("%d", buyin_offer_timer);
-		font_render_string_left (&font_var5, 4, 3, sprintf_buffer);
-		font_render_string_right (&font_var5, 123, 3, sprintf_buffer);
+		font_render_string_left (&font_mono5, 4, 3, sprintf_buffer);
+		font_render_string_right (&font_mono5, 123, 3, sprintf_buffer);
 		if (buyin_offer_timer % 2)
 		{
-			font_render_string_center (&font_term6, 64, 16, "INSERT COINS");
-			font_render_string_center (&font_term6, 64, 26, "FOR EXTRA BALL");
+			font_render_string_center (&font_bitmap8, 64, 16, "INSERT COINS");
+			font_render_string_center (&font_bitmap8, 64, 26, "FOR EXTRA BALL");
 		}
 		else
 		{
-			font_render_string_center (&font_term6, 64, 16, "THEN PRESS");
-			font_render_string_center (&font_term6, 64, 26, "BUY EXTRA BALL");
+			font_render_string_center (&font_bitmap8, 64, 16, "THEN PRESS");
+			font_render_string_center (&font_bitmap8, 64, 26, "BUY EXTRA BALL");
 		}
 #else
 		sprintf ("%d SECS", buyin_offer_timer);

@@ -36,6 +36,8 @@ const sound_code_t outlaneSoundArray[] = {	SPCH_TOO_BAD, 			SPCH_PATHETIC,		SPCH
 
 
 //local variables
+U8	secretCodeCount;
+__boolean simple_ball_search;
 
 //external variables
 
@@ -46,6 +48,10 @@ void simple_sounds(void);
  * body
  *
  ****************************************************************************/
+CALLSET_ENTRY (simple_switches, start_ball) { simple_ball_search = FALSE; }
+
+
+
 CALLSET_ENTRY (simple_switches, sw_right_outlane, sw_left_outlane) {
 	score(OUTLANE_SCORE);
 	U8		outlaneSoundCounter;
@@ -54,37 +60,136 @@ CALLSET_ENTRY (simple_switches, sw_right_outlane, sw_left_outlane) {
 }//end of function
 
 
+
 CALLSET_ENTRY (simple_switches, sw_upper_left_flipper_gate) {
 	if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made();
-
-	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) )  prison_break_made();
 	else score(UP_LEFT_FLIP_GATE_SCORE);
-}
+}//end of function
+
 
 CALLSET_ENTRY (simple_switches, sw_upper_rebound) {
+	leff_start (LEFF_UPPER_REBOUND);
 	if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made();
 	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
 	else {
 		score(UPPER_REBOUND_SCORE);
 		simple_sounds();
 	}//end of else
-}
+}//end of function
+
+
+
+
 
 CALLSET_ENTRY (simple_switches, sw_lower_rebound) {
+	leff_start (LEFF_LOWER_REBOUND);
 	if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made();
 	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
 	else {
 		simple_sounds();
 		score(LOWER_REBOUND_SCORE);
-		flasher_pulse (FLASH_LOWER_REBOUND_FLASHER); //FLASH followed by name of flasher in caps
 	}//end of else
 }//end of function
 
 
+
 CALLSET_ENTRY (simple_switches, sw_sling) {
-	score(SLING_SCORE);
-	simple_sounds();
+	if (!simple_ball_search) {
+		score(SLING_SCORE);
+		simple_sounds();
+	}
 }//end of function
+
+
+
+CALLSET_ENTRY (simple_switches, ball_search){
+	//VERIFY WE DON'T HAVE ALL THE BALLS IN THE TROUGH AND JUST LOST COUNT
+	U8 temp_live_balls;
+	temp_live_balls = (5 - device_recount(device_entry (DEVNO_TROUGH) ));
+	if (live_balls > temp_live_balls) live_balls = temp_live_balls;
+	if (live_balls == 0) {
+		live_balls++;
+		device_remove_live (); //this will remove only 1
+	}
+	simple_ball_search = TRUE;
+
+	//the smart thing to do would be to actually be a "real" programmer
+	//and figure out why search.c is not working - maybe I'll do that
+	//someday.  but for now, here is some really crappy code!
+	if (simple_ball_search) { sol_request_async(SOL_LEFT_SLING); task_sleep (TIME_300MS); }
+	if (simple_ball_search) { sol_request_async(SOL_RIGHT_SLING); task_sleep (TIME_300MS); }
+	if (simple_ball_search) { sol_request_async(SOL_LEFT_JET); task_sleep (TIME_300MS); }
+	if (simple_ball_search) { sol_request_async(SOL_RIGHT_JET); task_sleep (TIME_300MS); }
+	if (simple_ball_search) { sol_request_async(SOL_TOP_SLING); task_sleep (TIME_300MS); }
+	if (simple_ball_search) { sol_request (SOL_EJECT); task_sleep (TIME_300MS); }
+	if (simple_ball_search) { sol_request_async(SOL_TOP_POPPER); task_sleep (TIME_300MS); }
+	if (simple_ball_search) { sol_request_async(SOL_BOTTOM_POPPER); }
+}//end of function
+
+
+
+CALLSET_ENTRY (simple_switches, ball_search_end){ simple_ball_search = FALSE; }
+CALLSET_ENTRY (simple_switches, start_player) { secretCodeCount = 0; }
+
+
+//secret testing button
+CALLSET_ENTRY (simple_switches, sw_left_handle_button) {
+	if (IN_TEST) {
+		secretCodeCount++;
+//		if (secretCodeCount == 3) huxley_increment_all();
+//		if (secretCodeCount == 6) demotime_increment_all();
+		if (secretCodeCount == 5) enable_back_in_the_fridge();
+
+//		increment_freeze();
+	}//END OF IN TEST
+}//end of function
+
+
+//secret testing button
+CALLSET_ENTRY (simple_switches, sw_escape) { if (IN_TEST)  scores_reset (); }
+
+/****************************************************************************
+ * lighting effects
+ ****************************************************************************/
+void upper_rebound_leff (void) {
+	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER);
+	task_sleep (TIME_33MS);
+	flasher_pulse (FLASH_DIVERTER_FLASHER);
+	task_sleep (TIME_33MS);
+	flasher_pulse (FLASH_RIGHT_RAMP_UP_FLASHER);
+	task_sleep (TIME_100MS);
+
+	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER);
+	task_sleep (TIME_33MS);
+	flasher_pulse (FLASH_DIVERTER_FLASHER);
+	task_sleep (TIME_33MS);
+	flasher_pulse (FLASH_RIGHT_RAMP_UP_FLASHER);
+	task_sleep (TIME_100MS);
+
+	flasher_pulse (FLASH_LEFT_RAMP_UP_FLASHER);
+	task_sleep (TIME_33MS);
+	flasher_pulse (FLASH_DIVERTER_FLASHER);
+	task_sleep (TIME_33MS);
+	flasher_pulse (FLASH_RIGHT_RAMP_UP_FLASHER);
+	leff_exit ();
+}//end of function
+
+
+
+void lower_rebound_leff (void) {
+	flasher_pulse (FLASH_LOWER_REBOUND_FLASHER);
+	task_sleep (TIME_100MS);
+	flasher_pulse (FLASH_LOWER_REBOUND_FLASHER);
+	task_sleep (TIME_100MS);
+	flasher_pulse (FLASH_LOWER_REBOUND_FLASHER);
+	task_sleep (TIME_100MS);
+	flasher_pulse (FLASH_LOWER_REBOUND_FLASHER);
+	leff_exit ();
+}//end of function
+
+
+
 
 /****************************************************************************
  * sound effects

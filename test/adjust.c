@@ -102,7 +102,7 @@ struct adjustment standard_adjustments[] = {
 	{ "BALLS PER GAME", &balls_per_game_value, 3, &system_config.balls_per_game },
 	{ "TILT WARNINGS", &balls_per_game_value, 3, &system_config.tilt_warnings },
 	{ "MAX E.B.", &max_eb_value, 5, &system_config.max_ebs },
-	{ "MAX E.B. PER B.I.P.", &max_eb_value, 4, &system_config.max_ebs_per_bip },
+	{ "MAX E.B. PER B.I.P.", &max_eb_value, 3, &system_config.max_ebs_per_bip },
 	{ "REPLAY SYSTEM", &replay_system_value, REPLAY_FIXED, &system_config.replay_system },
 	{ "REPLAY PERCENT", &replay_percent_value, 7, &system_config.replay_percent },
 	{ "REPLAY START", &replay_score_value, REPLAY_SCORE_TYPE_DEFAULT, &system_config.replay_start },
@@ -112,12 +112,12 @@ struct adjustment standard_adjustments[] = {
 	{ "REPLAY 3 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[2] },
 	{ "REPLAY 4 " STR_LEVEL, &replay_score_value, 0, &system_config.replay_level[3] },
 #ifdef CONFIG_REPLAY_BOOST_BOOLEAN
-	{ "REPLAY BOOST", &on_off_value, ON, &system_config.replay_boost },
+	{ "REPLAY BOOST", &on_off_value, OFF, &system_config.replay_boost },
 #else
 	{ "REPLAY BOOST", &replay_boost_value, REPLAY_BOOST_TYPE_DEFAULT, &system_config.replay_boost },
 #endif
-	{ "REPLAY AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.replay_award },
-	{ "SPECIAL AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.special_award },
+	{ "REPLAY AWARD", &free_award_value, FREE_AWARD_EB, &system_config.replay_award },
+	{ "SPECIAL AWARD", &free_award_value, FREE_AWARD_EB, &system_config.special_award },
 	{ "MATCH AWARD", &free_award_value, FREE_AWARD_CREDIT, &system_config.match_award },
 	{ "EX. BALL TICKET", &yes_no_value, NO, &system_config.extra_ball_ticket },
 	{ "MAX. TICKET/PLAYER" ,&max_tickets_value, 25, &system_config.max_tickets_per_player },
@@ -152,11 +152,11 @@ struct adjustment feature_adjustments[] = {
 	{ "BUY EXTRA BALL", &yes_no_value, NO, &system_config.buy_extra_ball },
 #endif
 #ifdef MACHINE_LAUNCH_SWITCH
-	{ "TIMED PLUNGER", &on_off_value, OFF, &system_config.timed_plunger },
+	{ "TIMED PLUNGER", &on_off_value, ON, &system_config.timed_plunger },
 	{ "FLIPPER PLUNGER", &on_off_value, OFF, &system_config.flipper_plunger },
 #endif
 #ifdef CONFIG_FAMILY_MODE
-	{ "FAMILY MODE", &yes_no_value, NO, &system_config.family_mode },
+	{ "FAMILY MODE", &yes_no_value, YES, &system_config.family_mode },
 #endif
 #ifdef CONFIG_NOVICE_MODE
 	{ "NOVICE MODE", &yes_no_value, NO, &system_config.novice_mode },
@@ -165,7 +165,15 @@ struct adjustment feature_adjustments[] = {
 	{ "GAME MUSIC", &on_off_value, ON, &system_config.game_music },
 
 #ifdef CONFIG_TIMED_GAME
-	{ "TIMED GAME", &yes_no_value, YES, &system_config.timed_game },
+	{ "TIMED GAME", &yes_no_value, NO, &system_config.timed_game },
+#endif
+
+#ifdef CONFIG_DIFFICULTY_LEVEL
+	{ "DIFFICULTY", &easy_or_hard_value, EASY, &system_config.difficulty },
+#endif
+
+#ifdef CONFIG_DISABLE_CLAW
+	{ "DISABLE CLAW", &yes_no_value, NO, &system_config.disable_claw },
 #endif
 
 	/* The game-specific feature adjustments go here. */
@@ -210,7 +218,7 @@ struct adjustment pricing_adjustments[] = {
 #ifdef FREE_ONLY
 	{ "", &yes_no_value, YES, &price_config.free_play },
 #else
-	{ "FREE PLAY", &yes_no_value, NO, &price_config.free_play },
+	{ "FREE PLAY", &yes_no_value, YES, &price_config.free_play },
 #endif
 
 	{ "HIDE COIN AUDITS", &yes_no_value, NO, &price_config.hide_coin_audits },
@@ -230,11 +238,11 @@ struct adjustment hstd_adjustments[] = {
 	{ "HIGHEST SCORES", &on_off_value, ON, &hstd_config.highest_scores },
 	{ "H.S.T.D. AWARD", &free_award_value, FREE_AWARD_CREDIT, &hstd_config.hstd_award },
 	{ "CHAMP. H.S.T.D.", &on_off_value, ON, &hstd_config.champion_hstd },
-	{ "CHAMP. CREDITS", &credit_count_value, 2, &hstd_config.champion_credits },
-	{ "H.S.T.D. 1 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[0] },
-	{ "H.S.T.D. 2 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[1] },
-	{ "H.S.T.D. 3 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[2] },
-	{ "H.S.T.D. 4 CREDITS", &credit_count_value, 1, &hstd_config.hstd_credits[3] },
+	{ "CHAMP. CREDITS", &credit_count_value, 0, &hstd_config.champion_credits },
+	{ "H.S.T.D. 1 CREDITS", &credit_count_value, 0, &hstd_config.hstd_credits[0] },
+	{ "H.S.T.D. 2 CREDITS", &credit_count_value, 0, &hstd_config.hstd_credits[1] },
+	{ "H.S.T.D. 3 CREDITS", &credit_count_value, 0, &hstd_config.hstd_credits[2] },
+	{ "H.S.T.D. 4 CREDITS", &credit_count_value, 0, &hstd_config.hstd_credits[3] },
 	/* The next adjustment is stored in units of 250 games, so this is really
 	3000 games per reset ... */
 	{ "H.S. RESET EVERY", &hs_reset_value, 12, &hstd_config.hs_reset_every },
@@ -292,17 +300,18 @@ struct adjustment modify_game_adjustments[] = {
 	{ NULL, NULL, 0, NULL },
 };
 
+
+
 struct adjustment empty_adjustments[] = {
 	{ "EMPTY ADJ. SET", &integer_value, 0, NULL },
 	{ NULL, NULL, 0, NULL },
 };
 
-void adj_reset (struct adjustment *adjs)
-{
-	while (adjs->name != NULL)
-	{
-		if (adjs->nvram)
-		{
+
+
+void adj_reset (struct adjustment *adjs) {
+	while (adjs->name != NULL) {
+		if (adjs->nvram) {
 			*(adjs->nvram) = adjs->factory_default;
 		}
 		adjs++;
@@ -310,31 +319,33 @@ void adj_reset (struct adjustment *adjs)
 }
 
 
-void adj_verify (struct adjustment *adjs)
-{
+
+
+void adj_verify (struct adjustment *adjs) {
 	U8 val;
 
-	while (adjs->name != NULL)
-	{
-		if (adjs->nvram)
-		{
+	while (adjs->name != NULL) {
+		if (adjs->nvram) {
 			val = *(adjs->nvram);
-			if ((val < adjs->values->min) || (val > adjs->values->max))
-			{
+			if ((val < adjs->values->min) || (val > adjs->values->max)) {
 				pinio_nvram_unlock ();
 				*(adjs->nvram) = adjs->factory_default;
 				pinio_nvram_lock ();
-			}
-		}
+
+				sound_start (ST_ANY, LOW_HORN, SL_1S, PRI_GAME_QUICK5);
+				task_sleep (TIME_500MS);
+				task_sleep (TIME_500MS);
+			}//end of inner if
+		}//end of outer if
 		adjs++;
-	}
-}
+	}//end of while
+}//end of function
+
 
 struct adjustment *adj_lookup;
 
 
-void adj_prepare_lookup (struct adjustment *table)
-{
+void adj_prepare_lookup (struct adjustment *table) {
 	adj_lookup = table;
 }
 
@@ -364,6 +375,8 @@ void adj_name_for_preset (U8 * const nvram, const U8 value)
 }
 #endif
 
+
+//called by csum failure at kernal/adj.c
 void adj_reset_all (void)
 {
 	adj_reset (standard_adjustments);
@@ -374,6 +387,7 @@ void adj_reset_all (void)
 }
 
 
+//called at init to verify adjustment is in range
 void adj_verify_all (void)
 {
 	adj_verify (standard_adjustments);
@@ -384,10 +398,13 @@ void adj_verify_all (void)
 }
 
 
+
+
 void adj_set_current (struct adjustment *first)
 {
 	current_adjustment_set = first;
 }
+
 
 
 U8 adj_count_current (void)

@@ -5,11 +5,10 @@
  * written by James Cardona
  *
  */
-/* CALLSET_SECTION (startup_shutdown, __machine5__) */
+/* CALLSET_SECTION (startup_shutdown, __machine__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
-//include "startup_shutdown.h"
 
 
 //local variables
@@ -44,10 +43,14 @@ void startup_effect_deff (void){
 
 CALLSET_ENTRY (startup_shutdown, start_player) 	{
 	in_ending = FALSE;
-//	task_sleep (TIME_500MS);
 	deff_start (DEFF_STARTUP_EFFECT);
 }//end of function
 
+
+
+CALLSET_ENTRY (startup_shutdown, sw_launch_button) {
+	if (in_game && !valid_playfield ) 	sound_start (ST_ANY, EXPLOSION, SL_4S, PRI_GAME_QUICK5);
+}//end of function
 
 
 
@@ -55,12 +58,13 @@ CALLSET_ENTRY (startup_shutdown, start_player) 	{
 CALLSET_ENTRY (startup_shutdown, music_refresh) {
 
 	//note that there is a music disable call in /kernel/game.c:255 that is commented out
-	if (in_bonus)										music_request (MUS_NONE, PRI_BONUS);
+	if (in_tilt)										music_request (MUS_HIGH_SCORE, PRI_GAME_OVER);
+	else if (in_bonus)									music_request (MUS_END_GAME, PRI_GAME_OVER);
 	else if (in_ending)									music_request (MUS_END_GAME, PRI_GAME_OVER);
 	else if (!in_live_game)								music_request (0, PRI_GAME_OVER);
 
 	//if this far then we are in a live game, but not in bonus
-	else if (valid_playfield)							music_request (MUS_BG , PRI_SCORES);
+	else if (valid_playfield)							music_request (MUS_BG, PRI_SCORES);
 	else												music_request (MUS_PLUNGER, PRI_EGG4);
 }//end of function
 
@@ -88,24 +92,25 @@ CALLSET_ENTRY (startup_shutdown, end_game) {
 
 
 
+
 //this is invoked once initials are entered
 //or after task time out (above) - which ever sooner
 CALLSET_ENTRY (startup_shutdown, fade_out) {
-	 U8 i;
-	 U8 volume_restore_point;
-	 volume_restore_point = get_volume();	 //record current volume level :: at kernal/sound.c
+//	 U8 i;
+//	 U8 volume_restore_point;
+//	 volume_restore_point = get_volume();	 //record current volume level :: at kernal/sound.c
 
 	// N-second fadeout
 	//FIXME: this actually lowers volume permanently
 	//so if game is turned off during this time, then volume will be permanently lowered
-	 for (i = 0; i < volume_restore_point - 1; i++) { //go down to volume level 2
-		 lower_volume (); //lower volume by 1 tick :: at sound.c
-		 task_sleep (TIME_2S);
-	 }//end of loop
+//	 for (i = 0; i < volume_restore_point - 1; i++) { //go down to volume level 2
+//		 lower_volume (); //lower volume by 1 tick :: at sound.c
+//		 task_sleep (TIME_2S);
+//	 }//end of loop
 
-	in_ending = FALSE; 					//turn off all music
-	task_sleep_sec (2); 				//wait for all tasks to catch up
-	volume_set (volume_restore_point); //restore volume level for next game
+//	in_ending = FALSE; 					//turn off all music
+//	task_sleep_sec (2); 				//wait for all tasks to catch up
+//	volume_set (volume_restore_point); //restore volume level for next game
 }//end of function
 
 
@@ -122,10 +127,22 @@ CALLSET_ENTRY (startup_shutdown, fade_out) {
 //}//end of function
 
 
+
+
+
 //ensure no balls left on shooter lane
 CALLSET_ENTRY (startup_shutdown, amode_start) {
-	if (!in_test) {
-		if (switch_poll_logical (MACHINE_SHOOTER_SWITCH)) launch_ball();
-	}
+	if (!in_test && switch_poll_logical (MACHINE_SHOOTER_SWITCH) ) launch_ball();
+
 }//end of function
+
+
+
+
+
+CALLSET_ENTRY (startup_shutdown, tilt) {
+	if (!in_game) sound_start (ST_EFFECT, TILT, SL_1S, PRI_GAME_QUICK5);
+}//end of function
+
+
 

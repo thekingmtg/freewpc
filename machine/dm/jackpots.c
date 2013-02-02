@@ -6,7 +6,7 @@
  *
  *
  */
-/* CALLSET_SECTION (jackpots, __machine2__) */
+
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -39,34 +39,50 @@ void jackpot_reset (void) {
 	underground_jackpot_light_off();
 	ll_jackpot_light_off();
 	rl_jackpot_light_off();
+	end_super_jackpot_reminder();
 }//end of function
 
+
+
 CALLSET_ENTRY (jackpot, start_player, start_ball) 		{ jackpot_reset(); }
+
+
+
+
 
 /****************************************************************************
  * body
  *
  ****************************************************************************/
 void score_jackpot(void) {
-	if (flag_test(FLAG_IS_FORTRESS_MB_RUNNING) )  		fortress_jackpot_made();
-	if (flag_test(FLAG_IS_MUSEUM_MB_RUNNING) )  		museum_jackpot_made();
-	if (flag_test(FLAG_IS_CRYOPRISON_MB_RUNNING) )  	cryoprison_jackpot_made();
-	if (flag_test(FLAG_IS_WASTELAND_MB_RUNNING) )  		wasteland_jackpot_made();
-	if (flag_test(FLAG_IS_DEMOTIME_RUNNING) )  			demotime_jackpot_made();
+	if 		(flag_test(FLAG_IS_FORTRESS_MB_RUNNING) )  		fortress_jackpot_made();
+	else if (flag_test(FLAG_IS_MUSEUM_MB_RUNNING) )  		museum_jackpot_made();
+	else if (flag_test(FLAG_IS_CRYOPRISON_MB_RUNNING) )  	cryoprison_jackpot_made();
+	else if (flag_test(FLAG_IS_WASTELAND_MB_RUNNING) )  	wasteland_jackpot_made();
+	else if (flag_test(FLAG_IS_DEMOTIME_RUNNING) )  		demotime_jackpot_made();
 }//END OF FUNCTION
 
-/****************************************************************************
- *
- * randomize flag chosen
- *
- ****************************************************************************/
-void choose_random_jackpot(void) {
+
+
+void score_super_jackpot (void) {
+	if 		(flag_test(FLAG_IS_FORTRESS_MB_RUNNING) )  		fortress_award_super_jackpot();
+	else if (flag_test(FLAG_IS_MUSEUM_MB_RUNNING) )  		museum_award_super_jackpot();
+	else if (flag_test(FLAG_IS_CRYOPRISON_MB_RUNNING) )  	cryoprison_award_super_jackpot();
+	else if (flag_test(FLAG_IS_WASTELAND_MB_RUNNING) )  	wasteland_award_super_jackpot();
+
+	end_super_jackpot_reminder();
+}//end of function
+
+
+
+
+void choose_single_jackpot(void) {
 	U8 random_chooser;
 	random_chooser = random_scaled(6); // choose random # from 0 to 6
 	U8 mask = 1;//make a 1 bit flag so that only 1 jackpot is lit
 	mask <<= random_chooser;//slide the bit over a random # of times - could be 0
 	//turn on the appropriate jackpot
-	//TODO: handle jackpots already picked for stacked MBs
+	//TODO: handle jackpots already picked
 	if (lramp_mask & mask) lramp_jackpot_light_on();
 	if (rramp_mask & mask) rramp_jackpot_light_on();
 	if (sramp_mask & mask) sramp_jackpot_light_on();
@@ -77,7 +93,33 @@ void choose_random_jackpot(void) {
 }//end of function
 
 
-//this only used for wizard modes
+
+void choose_random_jackpot(void) {
+	jackpot_reset ();
+	task_sleep (TIME_33MS);
+	choose_single_jackpot();
+	all_arrow_update(); // at arrow_handler.c
+}//end of function
+
+
+
+//the most we will choose here is 3
+void choose_multiple_random_jackpot(U8 numOfJackpots) {
+	jackpot_reset ();
+	task_sleep (TIME_33MS);
+	if (numOfJackpots > 5) set_all_jackpots ();
+	else {
+		U8 i;
+		for (i = 0; i < numOfJackpots; i++) {
+			choose_single_jackpot();
+		}//end of loop
+		all_arrow_update(); // at arrow_handler.c
+	}//end of else
+}//end of function
+
+
+
+//this only used for wizard modes  --- CURRENTLY ONLY DEMO TIME
 void set_all_jackpots (void) {
 	lramp_jackpot_light_on();
 	rramp_jackpot_light_on();
@@ -86,4 +128,10 @@ void set_all_jackpots (void) {
 	ll_jackpot_light_on();
 	rl_jackpot_light_on();
 	underground_jackpot_light_on();
+	all_arrow_update(); // at arrow_handler.c
 }//end of function
+
+
+
+
+

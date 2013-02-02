@@ -64,7 +64,7 @@ struct timed_mode_ops prison_break_mode = {
 	.deff_running = DEFF_PRISON_BREAK_EFFECT,
 //	.deff_ending = DEFF_prison_break_END_EFFECT,
 	.prio = PRI_GAME_MODE6,
-	.init_timer = 33,
+	.init_timer = 48,
 	.timer = &prison_break_mode_timer,
 	.grace_timer = 2,
 //	.pause = system_timer_pause,
@@ -95,6 +95,7 @@ void prison_break_mode_init (void) {
 			clawmagnet_off ();
 			flag_off(FLAG_IS_BALL_ON_CLAW);
 			flipper_enable ();
+			ballsave_add_time (10);
 	prison_break_mode_shots_made = 0;
 	++prison_break_modes_achieved;
 	sound_start (ST_SPEECH, SPCH_CRYO_PRISON_BREAKOUT, SL_4S, PRI_GAME_QUICK5);
@@ -147,6 +148,7 @@ CALLSET_ENTRY (prison_break, start_ball) 		{ prison_break_reset(); }
 
 
 /****************************************************************************
+ *
  * body
  *
  ***************************************************************************/
@@ -168,7 +170,9 @@ void prison_break_made (void) {
 
 
 /****************************************************************************
- * DMD display effects
+ *
+ * display effects
+ *
  ****************************************************************************/
 void prison_break_animation_display_effect (U16 start_frame, U16 end_frame){
 	U16 fno;
@@ -238,10 +242,10 @@ void prison_break_start_effect_deff(void) {
 
 
 
-
+U8 			prison_break_MessageCounter;
 void prison_break_hit_effect_deff(void) {
-	U8 			prison_break_MessageCounter;
-	prison_break_MessageCounter = random_scaled(8);
+//	if (++prison_break_MessageCounter > 6) 	prison_break_MessageCounter = 0; //for testing
+	prison_break_MessageCounter = random_scaled(7);
 
 	dmd_alloc_pair_clean ();
 	sound_start (ST_SAMPLE, EXPLOSION, SL_2S, PRI_GAME_QUICK5);
@@ -282,11 +286,6 @@ void prison_break_hit_effect_deff(void) {
 			sprintf_score (prison_break_mode_score);
 			frame_with_words_display_v5prc_effect (IMG_PRISON_BREAK_D2_END, DMD_MIDDLE_X + 20, DMD_BIG_CY_Top, sprintf_buffer);
 			break;
-		case 7:
-			prison_break_animation_display_effect (IMG_SHOT_DOC_A_START, IMG_SHOT_DOC_A_END);
-			sprintf_score (prison_break_mode_score);
-			frame_with_words_display_v5prc_effect (IMG_SHOT_DOC_A_END, DMD_MIDDLE_X + 20, DMD_BIG_CY_Top, sprintf_buffer);
-			break;
 		}//end of switch
 	task_sleep (TIME_500MS);
 	deff_exit ();
@@ -294,7 +293,7 @@ void prison_break_hit_effect_deff(void) {
 
 
 
-
+//THE MORE HITS THAT ARE MADE, THE LESS BARS THAT ARE DRAWN
 void dmd_draw_jail_bars (U8 *dbuf) {
 	U8 i;
 	dbuf += 16; //skip first 2 rows
@@ -306,9 +305,7 @@ void dmd_draw_jail_bars (U8 *dbuf) {
 		if (prison_break_mode_shots_made < 4) 	dbuf[12] = 0x07;
 		if (prison_break_mode_shots_made < 5) 	dbuf[4] = 0x07;
 		if (prison_break_mode_shots_made < 6) 	dbuf[14] = 0x07;
-		if (prison_break_mode_shots_made < 7)	dbuf[6] = 0x07;
-		if (prison_break_mode_shots_made < 8)	dbuf[12] = 0x07;
-		if (prison_break_mode_shots_made < 9)	dbuf[2] = 0x07;
+		if (prison_break_mode_shots_made < 7)	dbuf[2] = 0x07;
 		dbuf += 16;
 	}//end of loop
 }//end of mode_effect_deff
@@ -318,30 +315,42 @@ void dmd_draw_jail_bars (U8 *dbuf) {
 
 
 void prison_break_effect_deff(void) {
-	U8 draw_jail_bars_timer;  //for testing only
-	draw_jail_bars_timer = 0; //for testing only
+	U8 draw_jail_bars_timer;
+	draw_jail_bars_timer = 0;
+	U8 i = 0;
+	U8 toggle = 0;
 
 	for (;;) {
+		i++;
+
+		if (i % 20 == 0) if (++toggle > 3) toggle = 0;//change TOGGLE once per n seconds
+
 		dmd_alloc_pair_clean();
 		dmd_draw_border (dmd_low_buffer);
 
-		++draw_jail_bars_timer;												//for testing only
-//		if ( (draw_jail_bars_timer % 5) == 0) prison_break_mode_shots_made++; //for testing only
+		if (IN_TEST) {
+			++draw_jail_bars_timer;
+			if ( (draw_jail_bars_timer % 5) == 0) prison_break_mode_shots_made++;
+		}
 
 		dmd_draw_jail_bars (dmd_low_buffer);
 
 		sprintf("BREAKOUT");
 		sprintf_buffer[1 + prison_break_mode_shots_made] = '\0';
-		font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Top + 2, sprintf_buffer);
+		font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_SMALL_CY_2, sprintf_buffer);
 
 		sprintf ("%d", prison_break_mode_timer);
-		font_render_string_center (&font_var5, DMD_MIDDLE_X - 55, DMD_SMALL_CY_4, sprintf_buffer);
+		font_render_string_center (&font_term6, DMD_MIDDLE_X - 55, DMD_SMALL_CY_4, sprintf_buffer);
+		font_render_string_center (&font_term6, DMD_MIDDLE_X + 55, DMD_SMALL_CY_4, sprintf_buffer);
 
-		sprintf ("%d", prison_break_mode_timer);
-		font_render_string_center (&font_var5, DMD_MIDDLE_X + 55, DMD_SMALL_CY_4, sprintf_buffer);
+		if (toggle == 1) 		sprintf ("%d SEC LEFT", prison_break_mode_timer);
+		else if (toggle == 2)	sprintf ("%d HIT", prison_break_mode_shots_made);
+		else if (toggle == 0)	sprintf ("SHOOT EVERYTHING");
+
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3 + 1, sprintf_buffer);
 
 		sprintf_score (prison_break_mode_score);
-		font_render_string_center (&font_v5prc, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_5 - 3, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_500MS);
 	}//END OF ENDLESS LOOP

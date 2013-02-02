@@ -96,8 +96,8 @@ __common__ void replay_code_to_boost (score_t, U8);
 #ifndef REPLAY_SCORE_DEFAULT
 #define REPLAY_SCORE_MIN 10
 #define REPLAY_SCORE_STEP 2
-#define REPLAY_SCORE_MAX 50
-#define REPLAY_SCORE_DEFAULT 20
+#define REPLAY_SCORE_MAX 500
+#define REPLAY_SCORE_DEFAULT 100
 #define REPLAY_BOOST_MIN 1
 #define REPLAY_BOOST_STEP 1
 #define REPLAY_BOOST_MAX 10

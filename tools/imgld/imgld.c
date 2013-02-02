@@ -379,6 +379,32 @@ struct buffer *pgm_get_plane (struct buffer *buf, unsigned int plane)
 		/* Each byte in the image contains an intensity value ranging from
 		0 to 255.  For FreeWPC images, these need to be scaled down
 		to one of 4 levels (0-3). */
+#ifdef LOWER_IMAGE_BRIGHTNESS1
+		/*tried 25/75/90 - images too dark*/
+		/*tried 25/50/75 - images too bright*/
+		if (buf->data[off] <= 32 * 0xFF / 100)
+			level = 0;
+		else if (buf->data[off] <= 67 * 0xFF / 100)
+			level = 1;
+		else if (buf->data[off] <= 82 * 0xFF / 100)
+			level = 2;
+		else
+			level = 3;
+
+#elif defined (LOWER_IMAGE_BRIGHTNESS2)
+		/*tried 25/75/90 - images too dark*/
+		/*tried 32/67/82 - some images too bright like faces mainly, some too dark - mainly car chase scenes*/
+		/*tried 25/50/75 - images too bright*/
+		if (buf->data[off] <= 28 * 0xFF / 100)
+			level = 0;
+		else if (buf->data[off] <= 69 * 0xFF / 100)
+			level = 1;
+		else if (buf->data[off] <= 84 * 0xFF / 100)
+			level = 2;
+		else
+			level = 3;
+
+#else
 		if (buf->data[off] <= 25 * 0xFF / 100)
 			level = 0;
 		else if (buf->data[off] <= 50 * 0xFF / 100)
@@ -387,7 +413,7 @@ struct buffer *pgm_get_plane (struct buffer *buf, unsigned int plane)
 			level = 2;
 		else
 			level = 3;
-
+#endif
 		/* Set the data byte to a '1' if the level is enabled in this plane,
 		or '0' otherwise. */
 		planebuf->data[off] = (level & (1 << plane)) ? 1 : 0;

@@ -20,18 +20,17 @@ score_t		fortress_score;
 U8			fortress_jackpot_shots_made;
 U8			fortress_MessageCounter;
 __boolean	fortress_start_music;
+__boolean	fortress_ballsave;
+U8 fortress_display_counter;
+U8 FORT_TOGGLE;
 
 //external variables
 extern U8			NumBallsFrozen; //from lock_freeze_mbstart.c
 
 //internally called function prototypes  --external found at protos.h
 void fortress_player_reset (void);
-void fortress_start_effect_deff(void);
-void fortress_jackpot_effect1_deff(void);
-void fortress_jackpot_effect2_deff(void);
-void fortress_jackpot_effect3_deff(void);
-void fortress_jackpot_effect(void);
-void fortress_effect_deff (void);
+
+
 
 /****************************************************************************
  * multiball definition structure
@@ -62,54 +61,126 @@ void fortress_player_reset (void) {
 	score_zero(fortress_score);
 	fortress_jackpot_shots_made = 0; //these need to be zeroed in before we enter the mode so bonus doesn't fake trigger
 	fortress_start_music = FALSE;
+	fortress_ballsave = FALSE;
 }//end of function
 
 
 
 CALLSET_ENTRY (fortress, start_player) { fortress_player_reset(); }
 
+
+
+
+
+
 /****************************************************************************
  * external event listeners
  ****************************************************************************/
 CALLSET_ENTRY (fortress, music_refresh)  {
-	if (fortress_start_music)						music_request (HELICOPTER, PRI_GAME_QUICK8);
-	else if (flag_test(FLAG_IS_FORTRESS_MB_RUNNING))	music_request (MUS_MB, PRI_GAME_QUICK7);
+	//if (fortress_start_music)						music_request (HELICOPTER, PRI_GAME_QUICK8);
+	//else
+	if (flag_test(FLAG_IS_FORTRESS_MB_RUNNING))	music_request (MUS_MB, PRI_GAME_QUICK7);
 }//end of function
 
-CALLSET_ENTRY (fortress, display_update) { mb_mode_display_update (&fortress_mode); }
+
+
+CALLSET_ENTRY (fortress, display_update) {
+	//mb_mode_display_update (&fortress_mode); //this doesn't work  --why???
+	if (flag_test(FLAG_IS_FORTRESS_MB_RUNNING))
+			deff_start_bg (DEFF_FORTRESS_EFFECT, PRI_MULTIBALL);
+}//end of function
+
+
 
 CALLSET_ENTRY (fortress, end_ball) {
 	if (flag_test(FLAG_IS_FORTRESS_MB_RUNNING)) {
 		mb_mode_end_ball (&fortress_mode);
 		jackpot_reset();
+		end_super_jackpot_reminder();
 		flag_off(FLAG_IS_FORTRESS_MB_RUNNING);
-		if (flag_test(FLAG_IS_R_RAMP_CLAWREADY) ) 	rramp_clawready_on();
-		else										rramp_clawready_off();
 	}
 }//end of function
+
+
 
 //puts in grace period if set
 CALLSET_ENTRY (fortress, single_ball_play) {
-	if (flag_test(FLAG_IS_FORTRESS_MB_RUNNING)) {
-		mb_mode_end_ball (&fortress_mode);
-		jackpot_reset();
-		flag_off(FLAG_IS_FORTRESS_MB_RUNNING);
-		if (flag_test(FLAG_IS_R_RAMP_CLAWREADY) ) 	rramp_clawready_on();
-		else										rramp_clawready_off();
+	if (	flag_test(FLAG_IS_FORTRESS_MB_RUNNING)
+		&& !fortress_ballsave ) {
+				mb_mode_end_ball (&fortress_mode);
+				end_super_jackpot_reminder();
+				combo_init();
+				diverter_check();
+				//this acts as kind of a grace period for the jackpots
+				task_sleep_sec(3);
+				flag_off(FLAG_IS_FORTRESS_MB_RUNNING);
+				jackpot_reset();
 	}
 }//end of function
 
+
+
+
+//if a ball drains during the mode and with time still on the ballsave timer - send it back in play
+CALLSET_BOOL_ENTRY (fortress, ball_drain) { //thrown by device.c
+	if	(flag_test(FLAG_IS_FORTRESS_MB_RUNNING)
+		&& fortress_ballsave)	{
+		sound_start (ST_SPEECH, SPCH_AHHHGGG, SL_2S, PRI_GAME_QUICK5);
+		serve_ball_auto ();
+		return FALSE; //this is not a valid drain, don't count it
+	}
+	else return TRUE; //this is a valid drain
+}//end of callset
+
+
+
+
+
 /****************************************************************************
+ *
  * body
  *
  ***************************************************************************/
-void fortress_start(void) {
-	fortress_start_music = TRUE; //for to play the helicopter instead of the music
+void fortress_ballsave_task (void) {
+	task_sleep_sec(15);
+	fortress_ballsave = FALSE;
+	task_exit();
+}//end of function
+
+
+
+
+void fortress_start_sounds (void) {
+	U8 i;
+	for(i = 0; i < 8; i++) {
+		sound_start (ST_ANY, HELICOPTER, SL_1S, PRI_GAME_QUICK5);
+		task_sleep (TIME_500MS);
+	}
+	task_exit();
+}//end of function
+
+
+
+
+
+void fortress_start(U8 num) {
+	kill_combos();
+//	fortress_start_music = TRUE; //for to play the helicopter instead of the music
+	task_create_gid1 (GID_FORTRESS_START_NOISE, fortress_start_sounds);
 	flag_on(FLAG_IS_FORTRESS_MB_RUNNING);
+	fortress_display_counter = 0;
+	FORT_TOGGLE = 0;
+	fortress_ballsave = TRUE;
+
 	mb_mode_start(&fortress_mode);
+	score_add (fortress_score, score_table[FORTRESS_MB_SCORE]);
+	score (FORTRESS_MB_SCORE);
+
 	deff_start (DEFF_FORTRESS_START_EFFECT);
 	multiball_started();//reset all MB start criteria for next time
 	diverter_stop();//defined in divhold2.ct
+	task_kill_gid (GID_CR_LIGHTS);
+
 	//LIGHTS
 			lamp_tristate_flash(LM_FORTRESS_MULTIBALL);
 			task_sleep (TIME_2S);
@@ -129,27 +200,90 @@ void fortress_start(void) {
 	task_sleep (TIME_3S);
 	fortress_start_music = FALSE; //for to kill the music
 
-	choose_random_jackpot();//randomize which jackpot shot to make
-	//----------
 	//serve balls
-	//----------
-			serve_ball_auto(); //add one ball to the playfield - NOT technically a multiball since doesn't change global ball count
+//	serve_ball_auto(); //add one ball to the playfield
+	if (num >= 4) set_ball_count (5);
+	else set_ball_count (num + 1);
+	task_sleep (TIME_3S);
+	set_all_jackpots(); //all 6 lit
+
+	//start the ball save timer
+	task_create_gid1 (GID_FORTRESS_BALLSAVE_TIMER, fortress_ballsave_task);
 }//end of function
 
 
 
-//jackpot shot
+
+/*******************
+ * start with all jackpot shots lit and as shots are made decrease # of lights lit
+ ******************/
 void fortress_jackpot_made(void) {
-	score_add (fortress_score, score_table[FORTRESS_MB_SCORE]);
-	score (FORTRESS_MB_SCORE);
-	fortress_jackpot_effect();
+	++fortress_jackpot_shots_made;
+	score_add (fortress_score, score_table[FORTRESS_JP_MB_SCORE]);
+	score (FORTRESS_JP_MB_SCORE);
+
+	deff_start (DEFF_FORTRESS_JACKPOT_EFFECT);
+
+	if 		(fortress_jackpot_shots_made < 2)	choose_multiple_random_jackpot (3); //after 1 made, at most 3 lit
+	else if (fortress_jackpot_shots_made < 4)	choose_multiple_random_jackpot (2); //for 2nd and 3rd, at most 2 lit
+	else 										choose_random_jackpot ();			//for rest, only 1 lit
+
+	if (IN_TEST) {	start_super_jackpot_reminder(); }
+	else			if (fortress_jackpot_shots_made % 5 == 0) 	start_super_jackpot_reminder();
 }//end of function
+
+
+
+void fortress_award_super_jackpot(void) {
+	score_add (fortress_score, score_table[FORTRESS_SUPER_JP_MB_SCORE]);
+	score (FORTRESS_SUPER_JP_MB_SCORE);
+	deff_start(DEFF_FORTRESS_SUPER_JACKPOT);
+}//end of function
+
+
 
 
 
 /****************************************************************************
+ *
  * DMD display and sound effects
+ *
  ****************************************************************************/
+void fortress_super_jackpot_deff (void) {
+	U8 i;
+
+		for (i = 0; i < 7; i++) {			//slid from side
+			switch (i) {
+				case 0: sound_start (ST_SPEECH, SPCH_AHHHGGG, SL_2S, PRI_GAME_QUICK5); break;
+				case 4: sound_start (ST_SPEECH, SPCH_HURRY_UP, SL_2S, PRI_GAME_QUICK5); break;
+				case 8: sound_start (ST_SPEECH, SPCH_CLOSE_ENOUGH, SL_2S, PRI_GAME_QUICK5);
+			}//END OF SWITCH
+			dmd_alloc_low_clean ();
+			sprintf ("SUPER");
+			if (i < 7) sprintf_buffer[i + 1] = '\0';
+			font_render_string_center (&font_fireball, 64, 8, sprintf_buffer);
+
+			sprintf ("JACKPOT");
+			if (i < 7) sprintf_buffer[i + 1] = '\0';
+			font_render_string_center (&font_fireball, 64, 24, sprintf_buffer);
+
+			dmd_show_low ();
+			sound_start (ST_ANY, EXPLOSION1_SHORT, SL_2S, PRI_GAME_QUICK5);
+			task_sleep (TIME_300MS);
+		}
+		sample_start (MACHINE14_LONG, SL_1S);
+
+	task_sleep (TIME_500MS);
+	speech_start (SPCH_SUPER_JACKPOT, SL_1S);
+	task_sleep_sec (1);
+	deff_exit ();
+}//end of function
+
+
+
+
+
+
 void fortress_animation_display_effect (U16 start_frame, U16 end_frame){
 	U16 fno;
 	for (fno = start_frame; fno <= end_frame; fno += 2) {
@@ -176,6 +310,7 @@ void fortress_frame_with_words_display_steel_effect (U16 frame, U8 x, U8 y, char
 	dmd_alloc_pair_clean ();// Clean both pages
 	dmd_map_overlay ();
 	dmd_clean_page_low ();
+	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "FORTRESS");
 	font_render_string_center (&font_steel, x, y, words);
 	dmd_text_outline ();
 	dmd_alloc_pair ();
@@ -222,18 +357,21 @@ void fortress_start_effect_deff(void) {
 			break;
 		case 1:
 			fortress_animation_display_effect (IMG_FORTRESS_A_START, IMG_FORTRESS_A_END);
-			fortress_frame_bitfade_fast(IMG_FORTRESS_B_START);
-			fortress_animation_display_effect (IMG_FORTRESS_B_START, IMG_FORTRESS_B_END);
-			dmd_map_overlay ();
-			dmd_clean_page_low ();
-			font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "FORTRESS");
-			font_render_string_center (&font_steel, DMD_MIDDLE_X - 15, DMD_BIG_CY_Bot, "MULTIBALL");
-			dmd_text_outline ();
-			dmd_alloc_pair ();
-			frame_draw(IMG_FORTRESS_B_END);
-			dmd_overlay_outline ();
-			dmd_show2 ();
-			break;
+			fortress_frame_bitfade_fast(IMG_FORTRESS_D4_START);
+
+			dmd_alloc_pair_clean ();// Clean both pages
+			for (fno = IMG_FORTRESS_D4_START; fno <= IMG_FORTRESS_D4_END; fno += 2) {
+				dmd_map_overlay ();
+				dmd_clean_page_low ();
+				font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "FORTRESS");
+				font_render_string_center (&font_steel, DMD_MIDDLE_X - 15, DMD_BIG_CY_Bot, "MULTIBALL");
+				dmd_text_outline ();
+				dmd_alloc_pair ();
+				frame_draw(fno);
+				dmd_overlay_outline ();
+				dmd_show2 ();
+				task_sleep (TIME_100MS);
+			}//end of inner loop
 	}//end of switch
 	task_sleep_sec (1);
 	deff_exit ();
@@ -241,44 +379,51 @@ void fortress_start_effect_deff(void) {
 
 
 
+
+
 void fortress_jackpot_sounds_task(void) {
 	U8 			fortress_MessageCounter;
 	fortress_MessageCounter = random_scaled(3);
-	if (++fortress_jackpot_shots_made % 2 == 0) {
-			switch (fortress_MessageCounter) {
-				case 0: 	sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_WES, SL_2S, PRI_GAME_QUICK5); break;
-				case 1: 	sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_SLY, SL_2S, PRI_GAME_QUICK5); break;
-				case 2: 	sound_start (ST_SPEECH, SPCH_DOUBLE, SL_2S, PRI_GAME_QUICK5); break;
-			}//end of switch
-	}//end of if
-	else {
-		switch (fortress_MessageCounter) {
-			case 0: 	sound_start (ST_SPEECH, SPCH_AHHHGGG, SL_2S, PRI_GAME_QUICK5); break;
-			case 1: 	sound_start (ST_SPEECH, SPCH_JOHN_SCREAM, SL_2S, PRI_GAME_QUICK5); break;
-			case 2: 	sound_start (ST_SPEECH, SPCH_UHHN, SL_2S, PRI_GAME_QUICK5); break;
-		}//end of switch
-	}//end of else
-	task_sleep (TIME_500MS);
+
 	sound_start (ST_EFFECT, GUNSHOT_MUFFLED, SL_1S, PRI_GAME_QUICK5);
 	task_sleep (TIME_200MS);
 	sound_start (ST_EFFECT, GUNSHOT_MUFFLED, SL_1S, PRI_GAME_QUICK5);
 	task_sleep (TIME_200MS);
 	sound_start (ST_EFFECT, RICOCHET, SL_2S, PRI_GAME_QUICK5);
 	task_sleep (TIME_500MS);
+
+	switch (fortress_MessageCounter) {
+		case 0: 	sound_start (ST_SPEECH, SPCH_AHHHGGG, SL_2S, PRI_GAME_QUICK5); break;
+		case 1: 	sound_start (ST_SPEECH, SPCH_JOHN_SCREAM, SL_2S, PRI_GAME_QUICK5); break;
+		case 2: 	sound_start (ST_SPEECH, SPCH_UHHN, SL_2S, PRI_GAME_QUICK5); break;
+	}//end of switch
+
+	sound_start (ST_EFFECT, GUNSHOT_MUFFLED, SL_1S, PRI_GAME_QUICK5);
+	task_sleep (TIME_200MS);
+	sound_start (ST_EFFECT, GUNSHOT_MUFFLED, SL_1S, PRI_GAME_QUICK5);
+	task_sleep (TIME_200MS);
+	sound_start (ST_EFFECT, GUNSHOT_MUFFLED, SL_1S, PRI_GAME_QUICK5);
+	task_sleep (TIME_200MS);
+	sound_start (ST_EFFECT, RICOCHET, SL_2S, PRI_GAME_QUICK5);
+	task_sleep (TIME_200MS);
+
+	if (fortress_jackpot_shots_made % 2 == 0) {
+			switch (fortress_MessageCounter) {
+				case 0: 	sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_WES, SL_2S, PRI_GAME_QUICK5); break;
+				case 1: 	sound_start (ST_SPEECH, SPCH_DOUBLE_JACKPOT_SLY, SL_2S, PRI_GAME_QUICK5); break;
+				case 2: 	sound_start (ST_SPEECH, SPCH_DOUBLE, SL_2S, PRI_GAME_QUICK5); break;
+			}//end of switch
+	}//end of if
+
 	task_exit();
 }//end of mode_effect_deff
 
 
 
-void fortress_jackpot_effect(void) {
-	deff_start (DEFF_FORTRESS_JACKPOT_EFFECT);
-}//end of FUNCTION
 
-
-U8 			fortress_MessageCounter;
 void fortress_jackpot_effect_deff(void) {
-//	if (++fortress_MessageCounter > 5) fortress_MessageCounter = 0; //for testing
-	fortress_MessageCounter = random_scaled(5);
+//	if (++fortress_MessageCounter > 4) fortress_MessageCounter = 0; //for testing
+	fortress_MessageCounter = random_scaled(4);
 	dmd_alloc_pair_clean();
 
 	task_create_gid1 (GID_FORTRESS_JACKPOT_SOUND, fortress_jackpot_sounds_task);
@@ -287,25 +432,21 @@ void fortress_jackpot_effect_deff(void) {
 		default:
 		case 0:
 			fortress_animation_display_effect (IMG_FORTRESS_A_START, IMG_FORTRESS_A_END);
-			fortress_frame_with_words_display_steel_effect (IMG_FORTRESS_A_END, DMD_MIDDLE_X + 20, DMD_BIG_CY_Top, "JACKPOT");
+			fortress_frame_with_words_display_steel_effect (IMG_FORTRESS_A_END, DMD_MIDDLE_X + 20, DMD_BIG_CY_Bot, "JACKPOT");
 			break;
 		case 1:
-			fortress_animation_display_effect (IMG_FORTRESS_B_START, IMG_FORTRESS_B_END);
-			fortress_frame_with_words_display_steel_effect (IMG_FORTRESS_B_END, DMD_MIDDLE_X - 20, DMD_BIG_CY_Bot, "JACKPOT");
-			break;
-		case 2:
 			fortress_animation_display_effect (IMG_FORTRESS_D1_START, IMG_FORTRESS_D1_END);
 			fortress_animation_display_effect (IMG_FORTRESS_D2_START, IMG_FORTRESS_D2_END);
 			fortress_frame_with_words_display_steel_effect (IMG_FORTRESS_D2_END, DMD_MIDDLE_X - 20, DMD_BIG_CY_Bot, "JACKPOT");
 			break;
-		case 3:
+		case 2:
 			fortress_animation_display_effect (IMG_FORTRESS_D3_START, IMG_FORTRESS_D3_END);
 			fortress_animation_display_effect (IMG_FORTRESS_D4_START, IMG_FORTRESS_D4_END);
 			fortress_frame_with_words_display_steel_effect (IMG_FORTRESS_D4_END, DMD_MIDDLE_X - 20, DMD_BIG_CY_Bot, "JACKPOT");
 			break;
-		case 4:
+		case 3:
 			fortress_animation_display_effect (IMG_BURN_FORTRESS_START, IMG_BURN_FORTRESS_END);
-			fortress_frame_with_words_display_steel_effect (IMG_BURN_FORTRESS_END, DMD_MIDDLE_X + 20, DMD_BIG_CY_Top, "JACKPOT");
+			fortress_frame_with_words_display_steel_effect (IMG_BURN_FORTRESS_END, DMD_MIDDLE_X + 20, DMD_BIG_CY_Bot, "JACKPOT");
 			break;
 		}//end of switch
 	task_sleep_sec (1);
@@ -321,22 +462,28 @@ U8 fortress_effect_deff_table[] = {	0, 2, 0, 2, 4, 2, 4, 2, 0, 0,
 									2, 6, 8, 4, 6, 8, 2, 0, 2, 0, 4, 2 };
 
 void fortress_effect_deff (void) {
-	U8 fortress_display_counter = 0;
-	__boolean TOGGLE = FALSE;
-
 	dmd_alloc_pair_clean();
-
 	for (;;) {
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
 			dmd_draw_thin_border (dmd_low_buffer);
-			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "FORTRESS");
-			if (fortress_display_counter % 10 != 0) { //draw for 9/10 and blank for 1/10
-						if (TOGGLE) 	sprintf ("15 MILLION");
-						else 			sprintf ("JACKPOT LIT"); }
-			else 						sprintf ("");
 
-			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer);
+			sprintf_score(current_score);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+
+			font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top - 2, "FORTRESS");
+			if (fortress_display_counter % 10 != 0) { //draw for 9/10 and blank for 1/10
+				if (FORT_TOGGLE == 0) 		{ sprintf ("10 MILLION"); font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer); }
+				else if (FORT_TOGGLE == 1)	{ sprintf ("JACKPOT LIT"); font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Bot, sprintf_buffer); }
+				else if (FORT_TOGGLE == 2)	{
+					sprintf ("%d JACKPOTS MADE", fortress_jackpot_shots_made);
+					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+
+					if (flag_test(FLAG_IS_SUPER_JACKPOT_ACTIVATED) ) sprintf ("SUPER JACKPOT LIT");
+					else sprintf ("SHOOT %d TO LIGHT SUPER", 5 - (fortress_jackpot_shots_made % 5) );
+					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_5, sprintf_buffer);
+				}
+			} else 						  sprintf ("");
 
 			dmd_text_outline ();
 			dmd_alloc_pair ();
@@ -345,9 +492,11 @@ void fortress_effect_deff (void) {
 			dmd_show2 ();
 		task_sleep (TIME_200MS);
 
-		fortress_display_counter++;
-		if (fortress_display_counter >= 30) fortress_display_counter  = 0;
-		if (fortress_display_counter % 10 == 0) { if (TOGGLE) TOGGLE = FALSE; else TOGGLE = TRUE; }//change TOGGLE once per second
+		if (++fortress_display_counter >= 30) fortress_display_counter  = 0;
+		if (fortress_display_counter % 20 == 0) {
+			if (++FORT_TOGGLE > 2) FORT_TOGGLE = 0; //change FORT_TOGGLE once per second
+			if (IN_TEST) 	score (FORTRESS_MB_SCORE);
+		}
 	}//END OF ENDLESS LOOP
 }//end of function
 

@@ -151,13 +151,13 @@ CALLSET_ENTRY (stress, init)
 	switch_stress_enable = NO;
 #endif
 }
-
+/*
 static void stress_start_button_task (void)
 {
 	callset_invoke (sw_start_button);
 	task_exit ();
 }
-
+*/
 CALLSET_ENTRY (stress, minute_elapsed)
 {
 #ifdef CONFIG_STRESS_AUTO

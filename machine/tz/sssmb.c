@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2011 by Brian Dominy <brian@oddchange.com>
+ * Copyright 2006-2010 by Brian Dominy <brian@oddchange.com>
  *
  * This file is part of FreeWPC.
  *
@@ -24,7 +24,6 @@ extern void maybe_ramp_divert (void);
 extern U8 autofire_request_count;
 extern bool mball_jackpot_uncollected;
 extern U8 unlit_shot_count;
-//extern bool autofire_busy;
 
 U8 sssmb_initial_ramps_to_divert;
 U8 sssmb_ramps_to_divert;
@@ -34,8 +33,7 @@ bool sssmb_can_divert_to_plunger (void)
 {
 	if (global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING)
 		&& sssmb_ramps_to_divert == 0
-		&& !switch_poll_logical (SW_SHOOTER)
-		&& !task_find_gid (GID_AUTOFIRE_HANDLER))
+		&& !switch_poll_logical (SW_SHOOTER))
 		return TRUE;
 	else
 		return FALSE;
@@ -43,53 +41,51 @@ bool sssmb_can_divert_to_plunger (void)
 
 void sssmb_running_deff (void)
 {
-	U16 fno;
 	for (;;)
 	{
+		score_update_start ();
+		dmd_alloc_pair ();
+		dmd_clean_page_low ();
 
-		for (fno = IMG_BOLT_TESLA_START; fno <= IMG_BOLT_TESLA_END; fno += 2)
+		font_render_string_center (&font_term6, 64, 4, "SKILL MULTIBALL");
+
+		sprintf_current_score ();
+		font_render_string_center (&font_fixed6, 64, 16, sprintf_buffer);
+
+		dmd_copy_low_to_high ();
+
+		if (timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 		{
-			dmd_alloc_pair_clean ();
-			dmd_map_overlay ();
-			dmd_clean_page_low ();
+			sprintf ("SKILL SHOT SCORES JACKPOT");
+		}
+		else if (sssmb_ramps_to_divert == 0)
+		{
+			sprintf ("SHOOT LEFT RAMP NOW");
+		}
+		else if (sssmb_ramps_to_divert == 1)
+		{
+			sprintf ("1 RAMP FOR SKILL SHOT");
+		}
+		else
+		{
+			sprintf ("%d RAMPS FOR SKILL SHOT", sssmb_ramps_to_divert);
+		}
+		font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
 
-			font_render_string_left (&font_bitoutline, 1, 1, "SKILL");
-			font_render_string_left (&font_quadrit, 54, 2, "MULTIBALL");
-			sprintf_current_score ();
-			font_render_string_center (&font_cowboy, 64, 16, sprintf_buffer);
-	
-			if (timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
-			{
-				sprintf ("SKILL SHOT SCORES JACKPOT");
-			}
-			else if (sssmb_ramps_to_divert == 0)
-			{
-				sprintf ("SHOOT LEFT RAMP NOW");
-				}
-			else if (sssmb_ramps_to_divert == 1)
-			{
-				sprintf ("1 RAMP FOR SKILL SHOT");
-			}
-			else
-			{
-				sprintf ("%d RAMPS FOR SKILL SHOT", sssmb_ramps_to_divert);
-			}
-			font_render_string_center (&font_var5, 64, 26, sprintf_buffer);
-			dmd_text_outline ();
-			dmd_alloc_pair ();
-			frame_draw (fno);
-			dmd_overlay_outline ();
-			dmd_show2 ();
+		dmd_show_low ();
+		while (!score_update_required ())
+		{
 			task_sleep (TIME_66MS);
-		}	
+			dmd_show_other ();
+		}
 	}
 }
 
 void sssmb_jackpot_lit_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_quadrit, 64, 9, "GET THE");
-	font_render_string_center (&font_fireball, 64, 22, "JACKPOT");
+	font_render_string_center (&font_fixed10, 64, 9, "GET THE");
+	font_render_string_center (&font_fixed10, 64, 22, "JACKPOT");
 	dmd_show_low ();
 	sound_send (SND_SPIRAL_EB_LIT);
 	task_sleep_sec (2);
@@ -97,7 +93,7 @@ void sssmb_jackpot_lit_deff (void)
 	{
 		dmd_alloc_low_clean ();
 		sprintf ("JACKPOT IS %d,000,000", sssmb_jackpot_value);
-		font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
+		font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_100MS);
 	}
@@ -124,17 +120,12 @@ static void sssmb_relight_all_jackpots (void)
 	global_flag_on (GLOBAL_FLAG_SSSMB_YELLOW_JACKPOT);
 }
 
+
 static void sssmb_award_jackpot (void)
 {
-	if (!task_kill_gid (GID_SSSMB_JACKPOT_READY))
-		return;
-
 	mball_jackpot_uncollected = FALSE;
 	sssmb_initial_ramps_to_divert++;
-	if (feature_config.dixon_anti_cradle == YES)
-		sssmb_jackpot_value += 5;
 	score_1M (sssmb_jackpot_value);
-	leff_start (LEFF_PIANO_JACKPOT_COLLECTED);
 	deff_start (DEFF_JACKPOT);
 	deff_start (DEFF_SSSMB_JACKPOT_COLLECTED);
 	sound_send (SND_EXPLOSION_1);
@@ -182,8 +173,7 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 		callset_invoke (mball_restart_stop);
 		mball_jackpot_uncollected = TRUE;
 		unlit_shot_count = 0;
-		deff_update ();
-		music_refresh ();
+		effect_update_request ();
 		global_flag_on (GLOBAL_FLAG_SSSMB_RUNNING);
 		global_flag_on (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
 		global_flag_on (GLOBAL_FLAG_SSSMB_ORANGE_JACKPOT);
@@ -200,14 +190,10 @@ CALLSET_ENTRY (sssmb, sssmb_start)
 
 void sssmb_stop (void)
 {
-	callset_invoke (sssmb_stop);
 	if (!global_flag_test (GLOBAL_FLAG_SSSMB_RUNNING))
 		return;	
 	if (mball_jackpot_uncollected == TRUE)
-	{
 		sound_send (SND_NOOOOOOOO);
-		callset_invoke (start_hurryup);
-	}
 
 	global_flag_off (GLOBAL_FLAG_SSSMB_RUNNING);
 	global_flag_off (GLOBAL_FLAG_SSSMB_RED_JACKPOT);
@@ -217,7 +203,7 @@ void sssmb_stop (void)
 	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 	deff_stop (DEFF_SSSMB_RUNNING);
 	lamp_tristate_off (LM_SUPER_SKILL);
-	music_refresh ();
+	effect_update_request ();
 }
 
 CALLSET_ENTRY (sssmb, lamp_update)
@@ -254,11 +240,6 @@ CALLSET_ENTRY (sssmb, single_ball_play)
 CALLSET_ENTRY (sssmb, end_ball)
 {
 	sssmb_stop ();
-}
-
-CALLSET_ENTRY (sssmb, skill_missed)
-{
-	task_kill_gid (GID_SSSMB_JACKPOT_READY);
 }
 
 CALLSET_ENTRY (sssmb, skill_red)
@@ -317,8 +298,10 @@ CALLSET_ENTRY (sssmb, sw_shooter)
 		&& timer_find_gid (GID_SSSMB_DIVERT_DEBOUNCE))
 	{
 		extern U8 skill_switch_reached;
-		/* It will always reach at least the first switch */
+		/* It will always reach at least the fist switch */
 		skill_switch_reached = 1;
+		/* TODO: handle case where red jackpot switch is tripped but
+		ball falls back to plunger lane */
 		task_create_gid1 (GID_SSSMB_JACKPOT_READY, sssmb_jackpot_ready_task);
 	}
 }

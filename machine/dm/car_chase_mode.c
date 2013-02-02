@@ -65,7 +65,7 @@ void car_chase_mode_exit (void);
 struct timed_mode_ops car_chase_mode = {
 	DEFAULT_MODE,
 	.init = car_chase_mode_init,
-	.exit = car_chase_mode_exit,
+	.exit = car_chase_mode_expire,
 	.gid = GID_CAR_CHASE_MODE_RUNNING,
 	.music = MUS_MD_CAR_CRASH,
 	.deff_starting = DEFF_CAR_CHASE_START_EFFECT,
@@ -102,8 +102,12 @@ void car_chase_player_reset (void) {
 void car_chase_mode_init (void) {
 	car_chase_mode_shots_made = 0;
 	flag_on (FLAG_IS_CARCHASE_MODE_RUNNING);
+	ballsave_add_time (10);
 	++car_chase_modes_achieved;
+	diverter_stop();//defined in divhold2.ct
+	task_kill_gid (GID_CR_LIGHTS);
 	carchase_mode_on(); //at ramps.c
+	serve_ball_auto(); //add one ball to the playfield - NOT a multiball since doesn't change global ball count
 	sound_start (ST_SPEECH, SPCH_WUSS_SPARTAN, SL_4S, PRI_GAME_QUICK5);
 	task_sleep_sec (2);
 	sound_start (ST_SPEECH, SPCH_EXCUSE_ME, SL_4S, PRI_GAME_QUICK5);
@@ -111,21 +115,32 @@ void car_chase_mode_init (void) {
 	sound_start (ST_SPEECH, SPCH_BETWEEN_YOU_N_ME, SL_4S, PRI_GAME_QUICK5);
 	//flash lamp for a time
 	score_zero(car_chase_mode_score);
-	diverter_stop();//defined in divhold2.ct
+
+	lamp_tristate_off (LM_CLAW_READY);
 }//end of function
 
 
 
+//this is an exit on timeout, ball still in play
 void car_chase_mode_expire (void) {
 	carchase_mode_off(); //at ramps.c
 	flag_off (FLAG_IS_CARCHASE_MODE_RUNNING);
-	if (flag_test(FLAG_IS_R_RAMP_CLAWREADY) ) 	rramp_clawready_on();
-	else										rramp_clawready_off();
+	diverter_check();
 }//end of function
 
 
 
-void car_chase_mode_exit (void) { car_chase_mode_expire();}
+
+
+//this is an exit on end of ball
+//must do this differently to prevent excessive cycling of diverter which
+//tends to blow fuses
+void car_chase_mode_exit (void) {
+	carchase_mode_off(); //at ramps.c
+	flag_off (FLAG_IS_CARCHASE_MODE_RUNNING);
+
+	timed_mode_end2(&car_chase_mode);
+}//end of function
 
 
 
@@ -134,7 +149,7 @@ void car_chase_mode_exit (void) { car_chase_mode_expire();}
  * external event listeners
  ****************************************************************************/
 CALLSET_ENTRY (car_chase, music_refresh)  	{ timed_mode_music_refresh (&car_chase_mode); }
-CALLSET_ENTRY (car_chase, end_ball) 		{ if (timed_mode_running_p(&car_chase_mode) ) timed_mode_end (&car_chase_mode); }
+CALLSET_ENTRY (car_chase, end_ball) 		{ if (timed_mode_running_p(&car_chase_mode) ) car_chase_mode_exit(); }
 CALLSET_ENTRY (car_chase, display_update) 	{ timed_mode_display_update (&car_chase_mode); }
 
 CALLSET_ENTRY (car_chase, start_player) 	{ car_chase_player_reset(); }
@@ -144,6 +159,7 @@ CALLSET_ENTRY (car_chase, start_ball) 		{ car_chase_reset(); }
 
 
 /****************************************************************************
+ *
  * body
  *
  ***************************************************************************/
@@ -182,7 +198,9 @@ void car_chase_ramp_made(void) {
 
 
 /****************************************************************************
+ *
  * DMD display and sound effects
+ *
  ****************************************************************************/
 void car_chase_animation_display_effect (U16 start_frame, U16 end_frame){
 	U16 fno;
@@ -245,14 +263,17 @@ void car_frame_with_words_display_fipps_effect (U16 frame, U8 x, U8 y, char *wor
 
 void car_chase_start_effect_deff(void) {
 	sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
-	car_chase_animation_display_effect_w_words (IMG_CARCHASE_A_START, IMG_CARCHASE_A_END);
-	car_chase_animation_display_effect_w_words (IMG_CARCHASE_B_START, IMG_CARCHASE_B_END);
-	car_chase_animation_display_effect_w_words (IMG_CARCHASE_C_START, IMG_CARCHASE_C_END);
-	car_chase_animation_display_effect_w_words (IMG_CARCHASE_D_START, IMG_CARCHASE_D_END);
+
+	car_chase_animation_display_effect (IMG_CARCHASE_A_START, IMG_CARCHASE_A_END);
+	car_chase_animation_display_effect (IMG_CARCHASE_B_START, IMG_CARCHASE_B_END);
+	car_chase_animation_display_effect (IMG_CARCHASE_C_START, IMG_CARCHASE_C_END);
+	car_chase_animation_display_effect (IMG_CARCHASE_D_START, IMG_CARCHASE_D_END);
 
 	dmd_sched_transition (&trans_scroll_left_fast);
 	dmd_alloc_low_clean ();
+
 	sound_start (ST_SAMPLE, CAR_SKID, SL_2S, PRI_GAME_QUICK5);
+
 	font_render_string_center (&font_fipps, DMD_MIDDLE_X, DMD_BIG_CY_Cent, "SHOOT RAMPS");
 	dmd_show_low ();
 	task_sleep_sec (1);
@@ -273,7 +294,9 @@ void car_chase_hit_effect_deff(void) {
 	sound_start (ST_SPEECH, car_chase_SoundsArray[car_chase_SoundCounter], SL_4S, PRI_GAME_QUICK2);
 	sound_start (ST_EFFECT, CAR_GEAR_CHANGE, SL_2S, PRI_GAME_QUICK2);
 
-	carchase_MessageCounter = random_scaled(9);//from kernal/random.c
+	if (IN_TEST) {	if (++carchase_MessageCounter > 8) carchase_MessageCounter = 0; }
+	else			carchase_MessageCounter = random_scaled(9);
+
 
 	switch (carchase_MessageCounter) {
 		default:
@@ -314,7 +337,7 @@ void car_chase_hit_effect_deff(void) {
 			car_chase_animation_display_effect (IMG_CARCHASE_E_START, IMG_CARCHASE_E_END);
 			break;
 		}//end of switch
-	task_sleep_sec (1);
+	task_sleep (TIME_100MS);
 	deff_exit ();
 }//end of function
 
@@ -332,7 +355,7 @@ void car_chase_effect_deff(void) {
 		sprintf ("%d SEC LEFT,  %d HIT", car_chase_mode_timer, car_chase_mode_shots_made);
 		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
 		sprintf_score (car_chase_mode_score);
-		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
+		font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_MED_CY_3, sprintf_buffer);
 		dmd_show_low ();
 		task_sleep (TIME_500MS);
 	}//END OF ENDLESS LOOP

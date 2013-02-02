@@ -116,7 +116,7 @@ typedef U16 sound_cmd_t;
 
 #define MIN_VOLUME				0
 #define MAX_VOLUME				31
-#define DEFAULT_VOLUME			8
+#define DEFAULT_VOLUME			12
 
 /** Returned by the sound board when the last sound clip finishes. */
 #define SND_FINISHED				0x80

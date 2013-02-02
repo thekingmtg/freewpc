@@ -103,7 +103,7 @@ diag_post_error (char *message, U8 page)
 		if (diag_error_count == 1)
 		{
 			diag_message_start ();
-			font_render_string_center (&font_var5, 64, 6, "TEST REPORT...");
+			font_render_string_center (&font_mono5, 64, 6, "TEST REPORT...");
 			diag_message_flash ();
 		}
 
@@ -142,8 +142,8 @@ diag_announce_if_errors (void)
 	{
 #ifdef CONFIG_DMD_OR_ALPHA
 		diag_message_start ();
-		font_render_string_center (&font_var5, 64, 10, "PRESS ENTER");
-		font_render_string_center (&font_var5, 64, 21, "FOR TEST REPORT");
+		font_render_string_center (&font_mono5, 64, 10, "PRESS ENTER");
+		font_render_string_center (&font_mono5, 64, 21, "FOR TEST REPORT");
 		diag_message_flash ();
 #endif
 	}

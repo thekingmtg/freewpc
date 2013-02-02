@@ -151,11 +151,11 @@ void amode_high_score_page (void)
 	if (hstd_config.highest_scores == ON)
 	{
 		high_score_draw_gc ();
-		amode_sleep_sec (3);
+		amode_sleep_sec (2);
 		high_score_draw_12 ();
-		amode_sleep_sec (3);
+		amode_sleep_sec (2);
 		high_score_draw_34 ();
-		amode_sleep_sec (3);
+		amode_sleep_sec (2);
 	}
 	amode_page_end (0);
 }

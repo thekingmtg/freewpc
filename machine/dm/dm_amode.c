@@ -50,8 +50,7 @@ U8 alternator;
  ***************************************************************************/
 U8 lamplist;
 
-static void amode_leff1 (void)
-{
+static void amode_leff1 (void) {
 	register U8 my_lamplist = lamplist;
 	lamplist_set_apply_delay (TIME_133MS);
 	for (;;)
@@ -83,6 +82,21 @@ void dm_amode_animation_display_effect (U16 start_frame, U16 end_frame){
 	}//end of inner loop
 }
 
+
+
+void dm_amode_animation_display_effect_reverse (U16 start_frame, U16 end_frame){
+	U16 fno;
+	for (fno = start_frame; fno >= end_frame; fno -= 2) {
+		dmd_alloc_pair ();
+		frame_draw(fno);
+		dmd_show2 ();
+		task_sleep (TIME_100MS);
+	}//end of inner loop
+}
+
+
+
+
 void dm_amode_frame_bitfade_fast (U16 frame){
 	dmd_sched_transition (&trans_bitfade_fast);
 	dmd_alloc_pair ();
@@ -95,15 +109,14 @@ void dm_amode_frame_bitfade_fast (U16 frame){
 
 
 void show_john_spartan_animation(void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean (); // Clean both pages
 	dm_amode_animation_display_effect (IMG_FORTRESS_D1_START, IMG_FORTRESS_D1_END);
 	dm_amode_frame_bitfade_fast(IMG_FORTRESS_D2_START);
 	dm_amode_animation_display_effect (IMG_FORTRESS_D2_START, IMG_FORTRESS_D2_END);
 	dm_amode_frame_bitfade_fast(IMG_FORTRESS_D3_START);
 	dm_amode_animation_display_effect (IMG_FORTRESS_D3_START, IMG_FORTRESS_D4_END);
 
-	dmd_alloc_pair_clean ();// Clean both pages
+		dmd_alloc_pair_clean ();// Clean both pages
 		dmd_map_overlay ();
 		dmd_clean_page_low ();
 		font_render_string_center (&font_steel, DMD_MIDDLE_X - 20, DMD_BIG_CY_Top, "JOHN");
@@ -118,15 +131,8 @@ void show_john_spartan_animation(void) {
 
 
 void show_john_spartan2_animation(void) {
-	U16 fno;
 	dmd_alloc_pair_clean ();// Clean both pages
-
-	for (fno = IMG_JOHN_SPARTAN_A_END; fno >= IMG_JOHN_SPARTAN_A_START; fno -= 2) {
-		dmd_alloc_pair ();
-		frame_draw(fno);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	} //end of loop
+	dm_amode_animation_display_effect_reverse (IMG_JOHN_SPARTAN_A_END, IMG_JOHN_SPARTAN_A_START);
 
 	dm_amode_animation_display_effect (IMG_JOHN_SPARTAN_A_START, IMG_JOHN_SPARTAN_A_END);
 		dmd_map_overlay ();
@@ -144,11 +150,7 @@ void show_john_spartan2_animation(void) {
 
 
 void show_simon_phoenix_animation(void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
-	dm_amode_animation_display_effect (IMG_SIMON_A_START, IMG_SIMON_A_END);
-	dm_amode_frame_bitfade_fast(IMG_SIMON_B_START);
-	dm_amode_animation_display_effect (IMG_SIMON_B_START, IMG_SIMON_B_END);
+	dmd_alloc_pair_clean ();	dm_amode_animation_display_effect (IMG_SIMON_B_START, IMG_SIMON_B_END);
 	dm_amode_animation_display_effect (IMG_SIMON_C_START, IMG_SIMON_C_END);
 
 	dmd_alloc_pair_clean ();// Clean both pages
@@ -167,9 +169,7 @@ void show_simon_phoenix_animation(void) {
 
 
 void show_simon_phoenix2_animation(void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
-	dm_amode_animation_display_effect (IMG_MUSEUM_D1_START, IMG_MUSEUM_D1_END);
+	dmd_alloc_pair_clean ();	dm_amode_animation_display_effect (IMG_MUSEUM_D1_START, IMG_MUSEUM_D1_END);
 	dm_amode_frame_bitfade_fast(IMG_MUSEUM_C2_START);
 	dm_amode_animation_display_effect (IMG_MUSEUM_C2_START, IMG_MUSEUM_C2_END);
 	dm_amode_frame_bitfade_fast(IMG_MUSEUM_D3_START);
@@ -194,19 +194,9 @@ void show_simon_phoenix2_animation(void) {
 
 
 void show_assoc_bob_animation(void) {
-	U16 fno;
-
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean ();
 	dm_amode_animation_display_effect (IMG_ASSOC_BOB_START, IMG_ASSOC_BOB_END);
-
-	for (fno = IMG_ASSOC_BOB_END; fno >= IMG_ASSOC_BOB_START; fno -= 2) {
-		dmd_alloc_pair ();
-		frame_draw(fno);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	} //end of loop
-
+	dm_amode_animation_display_effect_reverse (IMG_ASSOC_BOB_END, IMG_ASSOC_BOB_START);
 	dm_amode_animation_display_effect (IMG_ASSOC_BOB_START, IMG_ASSOC_BOB_END);
 
 	dmd_alloc_pair_clean ();// Clean both pages
@@ -226,18 +216,9 @@ void show_assoc_bob_animation(void) {
 
 
 void show_chief_earle_animation(void) {
-	U16 fno;
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean ();
 	dm_amode_animation_display_effect (IMG_CHIEF_EARLE2_START, IMG_CHIEF_EARLE2_END);
-
-	for (fno = IMG_CHIEF_EARLE2_END; fno >= IMG_CHIEF_EARLE2_START; fno -= 2) {
-		dmd_alloc_pair ();
-		frame_draw(fno);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	} //end of loop
-
+	dm_amode_animation_display_effect_reverse (IMG_CHIEF_EARLE2_END, IMG_CHIEF_EARLE2_START);
 	dm_amode_animation_display_effect (IMG_CHIEF_EARLE2_START, IMG_CHIEF_EARLE2_END);
 
 	dmd_alloc_pair_clean ();// Clean both pages
@@ -257,18 +238,9 @@ void show_chief_earle_animation(void) {
 
 
 void show_cocteau_animation(void) {
-	U16 fno;
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean ();
 	dm_amode_animation_display_effect (IMG_DR_COCTEAU_B_START, IMG_DR_COCTEAU_B_END);
-
-	for (fno = IMG_DR_COCTEAU_B_END; fno >= IMG_DR_COCTEAU_B_START; fno -= 2) {
-		dmd_alloc_pair ();
-		frame_draw(fno);
-		dmd_show2 ();
-		task_sleep (TIME_100MS);
-	} //end of loop
-
+	dm_amode_animation_display_effect_reverse (IMG_DR_COCTEAU_B_END, IMG_DR_COCTEAU_B_START);
 	dm_amode_animation_display_effect (IMG_DR_COCTEAU_B_START, IMG_DR_COCTEAU_B_END);
 
 	dmd_alloc_pair_clean ();// Clean both pages
@@ -289,8 +261,7 @@ void show_cocteau_animation(void) {
 
 
 void show_lenina1_animation(void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean ();
 	dm_amode_animation_display_effect (IMG_HUXLEY_A_START, IMG_HUXLEY_A_END);
 	dm_amode_frame_bitfade_fast(IMG_HUXLEY_B1_START);
 	dm_amode_animation_display_effect (IMG_HUXLEY_B1_START, IMG_HUXLEY_B1_END);
@@ -313,8 +284,7 @@ void show_lenina1_animation(void) {
 
 
 void show_lenina2_animation(void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean ();
 	dm_amode_animation_display_effect (IMG_HUXLEY_D_START, IMG_HUXLEY_D_END);
 	dm_amode_frame_bitfade_fast(IMG_HUXLEY_E_START);
 	dm_amode_animation_display_effect (IMG_HUXLEY_E_START, IMG_HUXLEY_E_END);
@@ -335,8 +305,7 @@ void show_lenina2_animation(void) {
 
 
 void show_huxley_info (void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean ();
 	dm_amode_animation_display_effect (IMG_HUXLEY_B1_START, IMG_HUXLEY_B1_END);
 	dm_amode_frame_bitfade_fast(IMG_HUXLEY_B2_START);
 	dm_amode_animation_display_effect (IMG_HUXLEY_B2_START, IMG_HUXLEY_B2_END);
@@ -355,8 +324,7 @@ void show_huxley_info (void) {
 
 
 void show_rollovers1_info (void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean ();
 	dm_amode_animation_display_effect (IMG_CAPSIMON_C_START, IMG_CAPSIMON_C_END);
 	task_sleep_sec (1);
 			dmd_sched_transition (&trans_scroll_down);
@@ -373,8 +341,7 @@ void show_rollovers1_info (void) {
 
 
 void show_standups_info (void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
+	dmd_alloc_pair_clean ();
 	dm_amode_animation_display_effect (IMG_WASTELAND_A1_START, IMG_WASTELAND_A1_END);
 	dm_amode_frame_bitfade_fast(IMG_WASTELAND_A2_START);
 	dm_amode_animation_display_effect (IMG_WASTELAND_A2_START, IMG_WASTELAND_A2_END);
@@ -391,11 +358,8 @@ void show_standups_info (void) {
 
 
 void show_demotime_info (void) {
-	dmd_clean_page_high ();//
-	dmd_clean_page_low ();//
-	dm_amode_animation_display_effect (IMG_SIMON_FIRE1_START, IMG_SIMON_SHOOT_END);
-	dm_amode_frame_bitfade_fast(IMG_FIGHT_A_START);
-	dm_amode_animation_display_effect (IMG_FIGHT_A_START, IMG_JOHN_SPARTAN_A_END);
+	dmd_alloc_pair_clean ();
+	dm_amode_animation_display_effect (IMG_FIGHT_A_START, IMG_FIGHT_A_END);
 	task_sleep_sec (1);
 
 			dmd_sched_transition (&trans_scroll_down);

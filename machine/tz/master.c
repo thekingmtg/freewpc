@@ -35,13 +35,12 @@ extern U8 loops;
 extern U8 combos;
 extern U8 lucky_bounces;
 extern char initials_data[3];
-extern bool amode_show_scores_long;
 
 void loop_master_entry_deff (void)
 {
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_var5, 64, 8, "CONGRATULATIONS");
-	font_render_string_center (&font_var5, 64, 16, "NEW LOOP MASTER");
+	font_render_string_center (&font_mono5, 64, 8, "CONGRATULATIONS");
+	font_render_string_center (&font_mono5, 64, 16, "NEW LOOP MASTER");
 	font_render_string_center (&font_var5, 64, 22, "ENTER INITIALS");
 	dmd_sched_transition (&trans_scroll_up);
 	sound_send (SND_GLASS_BREAKS);
@@ -54,7 +53,7 @@ void loop_master_exit_deff (void)
 {
 	dmd_alloc_pair_clean ();
 	sprintf ("%d LOOPS", loop_master_hi);
-	font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 	sound_send (SND_CLOCK_GONG);
 	dmd_show_low ();
 	task_sleep_sec (2);
@@ -64,8 +63,8 @@ void loop_master_exit_deff (void)
 void combo_master_entry_deff (void)
 {
 	dmd_alloc_pair_clean ();
-	font_render_string_center (&font_var5, 64, 8, "CONGRATULATIONS");
-	font_render_string_center (&font_var5, 64, 16, "NEW COMBO MASTER");
+	font_render_string_center (&font_mono5, 64, 8, "CONGRATULATIONS");
+	font_render_string_center (&font_mono5, 64, 16, "NEW COMBO MASTER");
 	font_render_string_center (&font_var5, 64, 22, "ENTER INITIALS");
 	dmd_sched_transition (&trans_scroll_up);
 	sound_send (SND_GLASS_BREAKS);
@@ -78,7 +77,7 @@ void combo_master_exit_deff (void)
 {
 	dmd_alloc_pair_clean ();
 	sprintf ("%d COMBOS", combo_master_hi);
-	font_render_string_center (&font_var5, 64, 16, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 16, sprintf_buffer);
 	sound_send (SND_CLOCK_GONG);
 	dmd_show_low ();
 	task_sleep_sec (2);
@@ -121,17 +120,15 @@ CALLSET_ENTRY (master, start_game)
 
 CALLSET_ENTRY (master, factory_reset)
 {
-	loop_master_hi = 5;
-	combo_master_hi = 2;
+	loop_master_hi = 0;
+	combo_master_hi = 0;
 	//loop_master_initials = "FEK";
 	//combo_master_initials = "FEK";
-	spawny_get_hi = 1;
+	spawny_get_hi = 0;
 }
 
 CALLSET_ENTRY (master, amode_page)
 {
-	if (amode_show_scores_long)
-		return;
 	dmd_sched_transition (&trans_vstripe_left2right);
 	dmd_map_overlay ();
 	dmd_clean_page_high ();

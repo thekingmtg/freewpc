@@ -117,7 +117,7 @@ void histogram_browser_draw_1 (void)
 	extern U8 browser_max;
 	U16 min, max;
 	sprintf ("%s %d", browser_histogram->label, menu_selection+1);
-	print_row_center (&font_var5, 10);
+	print_row_center (&font_mono5, 10);
 
 	if (menu_selection != 0)
 		min = browser_histogram->values[menu_selection-1];
@@ -129,10 +129,10 @@ void histogram_browser_draw_1 (void)
 		sprintf (browser_histogram->render_max, min);
 	else
 		sprintf (browser_histogram->render, min, max);
-	font_render_string_left (&font_var5, 0, 21, sprintf_buffer);
+	font_render_string_left (&font_mono5, 0, 21, sprintf_buffer);
 
 	sprintf ("%ld", browser_histogram->audits[menu_selection]);
-	font_render_string_right (&font_var5, 127, 21, sprintf_buffer);
+	font_render_string_right (&font_mono5, 127, 21, sprintf_buffer);
 	dmd_show_low ();
 }
 

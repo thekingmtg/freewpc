@@ -42,19 +42,24 @@ define MACHINE_BALL_SAVE_TIME       7
 define MACHINE_MAX_BALLS            5
 define MACHINE_CUSTOM_AMODE
 define MACHINE_AMODE_EFFECTS
-define AUTOFIRE_DELAY 				18
+define AUTOFIRE_DELAY 				20
 define MACHINE_DEMO_MAN
 define END_GAME_ON_TEST_ENTER
-define LOWER_IMAGE_BRIGHTNESS
 define DEMO_MAN_BALL_SAVE_EFFECT
 define DEMO_MAN_PLUNGE_BALL_EFFECT
 #this means we have X sols below
 define MACHINE_SOL_EXTBOARD1
-
+define MACHINE_BALL_SEARCH_TIME 10
 define MACHINE_ADD_CREDIT_SOUND PLONK 
 
+define CONFIG_DIFFICULTY_LEVEL #add these to configuration menu
+define CONFIG_DISABLE_CLAW
+
+
 define MACHINE_VOLUME_CHANGE_MUSIC MUS_HIGH_SCORE
-#define NO_FREEWPC_LOGO_DISPLAY
+
+#define LOWER_IMAGE_BRIGHTNESS1
+define LOWER_IMAGE_BRIGHTNESS2
 
 
 ##########################################################################
@@ -255,7 +260,7 @@ define MACHINE_VOLUME_CHANGE_MUSIC MUS_HIGH_SCORE
 [drives]
 #H = high power J130
 H1: BallServe, ballserve, duty(SOL_DUTY_100), time(TIME_133MS)
-H2: Bottom Popper, time(TIME_200MS)
+H2: Bottom Popper, time(TIME_133MS) 
 H3: Launch, launch, nosearch, duty(SOL_DUTY_100), time(TIME_133MS)
 H4: Top Popper, time(TIME_100MS)
 H5: Diverter Power, duty(SOL_DUTY_75)
@@ -269,7 +274,7 @@ L3: Left Jet, duty(SOL_DUTY_100)
 L4: Top Sling, duty(SOL_DUTY_100)
 L5: Right Jet, duty(SOL_DUTY_100)
 
-L6: Eject, duty(SOL_DUTY_75), time(TIME_133MS)
+L6: Eject, duty(SOL_DUTY_75), time(TIME_66MS)
 L7: Diverter Hold, nosearch
 L8: : Not Used 2, nosearch
 
@@ -292,10 +297,10 @@ A3: Right Ramp Flasher, flash, nosearch
 A4: Eject Flasher, flash, nosearch
 
 # F = J902 on Fliptronic II
-F1: L.R. Flip Power, time(TIME_33MS)
-F2: L.R. Flip Hold, time(TIME_100MS)
-F3: L.L. Flip Power, time(TIME_33MS)
-F4: L.L. Flip Hold, time(TIME_100MS)
+F1: L.R. Flip Power
+F2: L.R. Flip Hold
+F3: L.L. Flip Power
+F4: L.L. Flip Hold
 F5: Claw Magnet 
 F6: Not Used, nosearch
 F7: U.L. Flip Power, time(TIME_33MS)
@@ -419,23 +424,22 @@ Underground Scoop: Underground Arrow, Underground Jackpot
 Standups: Standup 1, Standup 2, Standup 3, Standup 4, Standup 5
 Center Ramp: Center Ramp Arrow, Center Ramp Middle, Center Ramp Outer, Center Ramp Inner, Center Ramp Jackpot
 Side Ramp: Side Ramp Jackpot, Side Ramp Arrow
+Inlanes: Access Claw, Light Quick Freeze
 Car Crash: Car Crash Top, Car Crash Center, Car Crash Bottom
 
-#Sort1: PF:lamp_sort_bottom_to_top
-#Sort2: PF:lamp_sort_top_to_bottom
-#Sort3: PF:lamp_sort_left_to_right
-#Sort4: PF:lamp_sort_right_to_left
+Left Right: PF:lamp_sort_bottom_to_top
+Right Left: PF:lamp_sort_top_to_bottom
+Bottom Top: PF:lamp_sort_left_to_right
+Top Bottom: PF:lamp_sort_right_to_left
 #Circle Out: PF:lamp_sort_circle_out
 
 Amode All: Right Ramp Awards, Left Ramp Awards, Right Loop Awards, Left Loop Awards, Freeze, Rollovers, Multiballs, 
-Claw, Underground Scoop, Standups, Center Ramp, Car Crash
+Claw, Underground Scoop, Standups, Center Ramp, Inlanes, Car Crash
 Amode Rand: Amode All
 
 #Red Lamps: COLOR:red
 #White Lamps: COLOR:white
 #Yellow Lamps: COLOR:yellow
-#Green Lamps: COLOR:green
-#Blue Lamps: COLOR:blue
 
 
 
@@ -454,10 +458,10 @@ Amode Rand: Amode All
 [containers]
 #name: solenoid, switch
 Top Sol: Top Popper, Top Popper
-Eyeball Eject: Eject, Eject
 Subway VUK: Bottom Popper, Bottom Popper
 Trough: BallServe, init_max_count(5), Trough 1, Trough 2, Trough 3, Trough 4, Trough 5
 
+Eyeball Eject: Eject, Eject
 
 
 
@@ -580,9 +584,9 @@ IS_ACMAG_RUNNING:
 IS_CARCHASE_MODE_RUNNING:
 IS_EXPLODE_MODE_RUNNING:
 IS_COMPUTER_ACTIVATED:
-IS_COMBOS_KILLED:
 IS_EXTRABALL_LIT:
 IS_SUPERJETS_RUNNING:
+IS_SUPER_JACKPOT_ACTIVATED:
 
 IS_COMBO_SIDERAMP_ACTIVATED:
 IS_COMBO_LEFTRAMP_ACTIVATED:
@@ -618,22 +622,38 @@ IS_R_RAMP_JACKPOT_ACTIVATED:
 
 IS_CRYOCLAW_RUNNING:
 IS_MULTIBALL_ENABLED:
-IS_FORTRESS_MB_RUNNING:
 IS_BALL_ON_CLAW:
 IS_R_RAMP_CLAWREADY:
-IN_VIDEO_MODE:
+SKILLSHOT_ENABLED:
 IS_PBREAK_RUNNING:
+IS_FORTRESS_MB_RUNNING:
 
 IS_MUSEUM_MB_RUNNING:
 IS_CRYOPRISON_MB_RUNNING:
 IS_WASTELAND_MB_RUNNING:
+IS_DEMOTIME_RUNNING:
 IS_LRAMP_QUICKFREEZE_ACTIVATED:
 IS_HUXLEY_RUNNING:
-IS_HUXLEY_ENABLED:
-IS_DEMOTIME_RUNNING:
+IS_DEMOTIME_IS_STARTING:
 
 IS_DEMOTIME_ENABLED:
-#50
+IS_COMBOS_KILLED:
+IS_COMBOS_RESTARTABLE:
+KILL_NORMAL_EJECT:
+CAPTURE_SIMON_INITIALSTART:
+BACK_IN_THE_FRIDGE_ACTIVATED:
+BACK_IN_THE_FRIDGE_RUNNING:
+
+VIDEO_MODE_RUNNING:	
+BACK_IN_THE_FRIDGE_ENDING:
+VIDEO_MODE_ENABLED:
+IS_CARCHASE_MODE_ENABLED:
+IS_EXPLODE_MODE_ENABLED:
+IS_HUXLEY_ENABLED:
+LASER_SHOT_ENABLED:
+LASER_SHOT_COMPLETED:
+
+#64
 
 
 
@@ -653,7 +673,7 @@ IS_DEMOTIME_ENABLED:
 ##########################################################################
 # Fonts used in this game.
 # these are in addition to default fonts
-# default fonts do not have to be listed (they are declared under wpc-common.md) and are:
+# default fonts do not have to be listed (they are declared under platform/wpc/wpc-common.md) and are:
 # font_mono9
 # font_num5x7
 # font_fixed10		---good only for very short words
@@ -730,61 +750,70 @@ antiqua:
 
 
 
-#cowboy:
-#amiga4ever:
+
+##########################################################################
+# Display effects  -- text page (?)
+##########################################################################
+[deffs]
+superjets effect: PRI_GAME_MODE1, D_QUEUED
+superjets hit effect: PRI_GAME_QUICK6, D_RESTARTABLE
 
 
-
-
+##########################################################################
+# Display effects  -- common page (?)
+##########################################################################
+#check generic.md for stuff I stuck on the common page because I ran out of room
 
 ##########################################################################
 # Display effects  -- page 1 (56)
 ##########################################################################
-[deffs]
+clw inlanes effect: page(MACHINE_PAGE), PRI_GAME_LOW6, D_QUEUED+D_TIMEOUT
+qf inlanes effect: page(MACHINE_PAGE), PRI_GAME_LOW6, D_QUEUED+D_TIMEOUT
+
+rollovers effect: page(MACHINE_PAGE), PRI_GAME_LOW5, D_RESTARTABLE
+all rollovers effect: page(MACHINE_PAGE), PRI_GAME_QUICK5
 
 
+standupfrenzy start effect: page(MACHINE_PAGE), PRI_GAME_MODE3
+standupfrenzy effect: page(MACHINE_PAGE), PRI_GAME_MODE2, D_QUEUED
+standup effect: page(MACHINE_PAGE), PRI_GAME_LOW4
 
+acmag start effect: page(MACHINE_PAGE), PRI_GAME_MODE3
+acmag effect: page(MACHINE_PAGE), PRI_GAME_MODE2, D_QUEUED
+acmag hit effect: page(MACHINE_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 
+startup effect: page(MACHINE_PAGE), PRI_BALL_LAUNCH_MENU, D_QUEUED
 
+cryoclaw effect: page(MACHINE_PAGE), PRI_GAME_MODE2, D_QUEUED
 
 
 
 ##########################################################################
 # Display effects  -- page 2 (55)
 ##########################################################################
-rollovers effect: page(MACHINE2_PAGE), PRI_GAME_LOW5, D_RESTARTABLE
-all rollovers effect: page(MACHINE2_PAGE), PRI_GAME_QUICK5
-
 car chase start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
 car chase effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
-car chase hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
+car chase hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_RESTARTABLE
 
-acmag start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
-acmag effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
-acmag hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
-
-underground effect: page(MACHINE2_PAGE), PRI_GAME_LOW5
-computer award: page(MACHINE2_PAGE), PRI_GAME_QUICK6
-
-demotime start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3, D_QUEUED
-demotime jackpot effect: page(MACHINE2_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
+demotime start effect: page(MACHINE2_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
+demotime jackpot effect: page(MACHINE2_PAGE), PRI_JACKPOT, D_QUEUED+D_RESTARTABLE
 demotime info effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
-demotime effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
-
-clw inlanes effect: page(MACHINE2_PAGE), PRI_GAME_LOW6
-qf inlanes effect: page(MACHINE2_PAGE), PRI_GAME_LOW6
-
-carcrash effect: page(MACHINE2_PAGE), PRI_GAME_QUICK1
-
-combo effect: page(MACHINE2_PAGE), PRI_GAME_LOW2, D_QUEUED+D_RESTARTABLE
-computer effect: page(MACHINE2_PAGE), PRI_GAME_LOW2, D_PAUSE+D_QUEUED
+demotime effect: page(MACHINE2_PAGE), PRI_MULTIBALL
 
 explode start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
 explode effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
 explode hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 
-#override_deffs.c 
-#troubleshooting: page(MACHINE2_PAGE), PRI_GAME_QUICK7
+troubleshooting: page(MACHINE2_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
+shoot again: page(MACHINE2_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
+
+huxley info effect: page(MACHINE2_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_RESTARTABLE
+huxley start effect: page(MACHINE2_PAGE), PRI_GAME_MODE3
+huxley effect: page(MACHINE2_PAGE), PRI_GAME_MODE2, D_QUEUED
+huxley hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
+
+underground effect: page(MACHINE2_PAGE), PRI_GAME_LOW5
+computer award: page(MACHINE2_PAGE), PRI_GAME_QUICK6
 
 
 
@@ -794,37 +823,27 @@ explode hit effect: page(MACHINE2_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 # Display effects  -- page 3 (54)
 ##########################################################################
 bonus: page(MACHINE3_PAGE), PRI_BONUS, D_QUEUED
-bonus ca: page(MACHINE3_PAGE), PRI_BONUS, D_QUEUED
 
 capture simon start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3
 capture simon effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
 capture simon hit effect: page(MACHINE3_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
+capture simon end effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED
 
 prison break start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3
 prison break effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
 prison break hit effect: page(MACHINE3_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 
-#retina scan effect at eject.c
-eject effect: page(MACHINE3_PAGE), PRI_GAME_LOW5, D_QUEUED
+fortress start effect: page(MACHINE3_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
+fortress jackpot effect: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_RESTARTABLE
+fortress effect: page(MACHINE3_PAGE), PRI_MULTIBALL
+fortress super jackpot: page(MACHINE3_PAGE), PRI_SUPER_JACKPOT, D_QUEUED+D_RESTARTABLE
 
-fortress start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-fortress jackpot effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-fortress effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
-
-museum start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-museum jackpot effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-museum effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
-
-cryoprison start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-cryoprison jackpot effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-cryoprison effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
-
-wasteland start effect: page(MACHINE3_PAGE), PRI_GAME_MODE3, D_QUEUED
-wasteland jackpot effect: page(MACHINE3_PAGE), PRI_GAME_QUICK5, D_QUEUED+D_RESTARTABLE
-wasteland effect: page(MACHINE3_PAGE), PRI_GAME_MODE2, D_QUEUED
-
-#lock_freeze_mbstart
 freeze effect: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_QUEUED
+
+wasteland start effect: page(MACHINE3_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
+wasteland jackpot effect: page(MACHINE3_PAGE), PRI_JACKPOT, D_QUEUED+D_RESTARTABLE
+wasteland effect: page(MACHINE3_PAGE), PRI_MULTIBALL
+wasteland super jackpot: page(MACHINE3_PAGE), PRI_SUPER_JACKPOT, D_QUEUED+D_RESTARTABLE
 
 
 
@@ -833,22 +852,25 @@ freeze effect: page(MACHINE3_PAGE), PRI_GAME_QUICK7, D_QUEUED
 ##########################################################################
 # Display effects  -- page 4 (53)
 ##########################################################################
-#wheelie: page(MACHINE4_PAGE), PRI_GAME_VMODE, D_QUEUED
-
 top popper effect: page(MACHINE4_PAGE), PRI_GAME_LOW5
-top popper award effect: page(MACHINE4_PAGE), PRI_GAME_QUICK5
 extra ball effect: page(MACHINE4_PAGE), PRI_GAME_QUICK5, D_QUEUED
 
-standupfrenzy start effect: page(MACHINE4_PAGE), PRI_GAME_MODE3
-standupfrenzy effect: page(MACHINE4_PAGE), PRI_GAME_MODE2, D_QUEUED
-collect standups effect: page(MACHINE4_PAGE), PRI_GAME_QUICK7, D_QUEUED
-standup effect: page(MACHINE4_PAGE), PRI_GAME_LOW4
+sg intro: page(MACHINE4_PAGE), PRI_VIDEO_MODE, D_QUEUED
+sg: page(MACHINE4_PAGE), PRI_VIDEO_MODE, D_QUEUED+D_RESTARTABLE
+sg end: page(MACHINE4_PAGE), PRI_VIDEO_MODE, D_QUEUED
 
-huxley info effect: page(MACHINE4_PAGE), PRI_GAME_QUICK7, D_QUEUED+D_RESTARTABLE
-huxley start effect: page(MACHINE4_PAGE), PRI_GAME_MODE3
-huxley effect: page(MACHINE4_PAGE), PRI_GAME_MODE2, D_QUEUED
-huxley hit effect: page(MACHINE4_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
+#retina scan effect at eject.c
+eject effect: page(MACHINE4_PAGE), PRI_GAME_LOW5, D_NORMAL
 
+kaboom: page(MACHINE4_PAGE), PRI_VIDEO_MODE, D_QUEUED+D_RESTARTABLE
+kaboom intro: page(MACHINE4_PAGE), PRI_VIDEO_MODE, D_QUEUED
+kaboom end: page(MACHINE4_PAGE), PRI_VIDEO_MODE, D_QUEUED
+
+bitf start effect: page(MACHINE4_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
+bitf hit effect: page(MACHINE4_PAGE), PRI_JACKPOT, D_QUEUED+D_RESTARTABLE
+bitf info effect: page(MACHINE4_PAGE), PRI_GAME_MODE2, D_QUEUED
+bitf effect: page(MACHINE4_PAGE), PRI_MULTIBALL
+bitf end effect: page(MACHINE4_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
 
 
 
@@ -856,35 +878,74 @@ huxley hit effect: page(MACHINE4_PAGE), PRI_GAME_QUICK4, D_RESTARTABLE
 ##########################################################################
 # Display effects  -- page 5 (52)
 ##########################################################################
-jets effect: page(MACHINE5_PAGE), PRI_GAME_QUICK1, D_QUEUED+D_RESTARTABLE
-jets completed effect: page(MACHINE5_PAGE), PRI_GAME_QUICK2, D_QUEUED
-
-superjets effect: page(MACHINE5_PAGE), PRI_GAME_MODE1, D_QUEUED
-superjets hit effect: page(MACHINE5_PAGE), PRI_GAME_QUICK6, D_RESTARTABLE
-
 eyeball effect: page(MACHINE5_PAGE), PRI_GAME_LOW2, D_QUEUED
 
-cryoclaw effect: page(MACHINE5_PAGE), PRI_GAME_MODE2, D_QUEUED
+cryoprison start effect: page(MACHINE5_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
+cryoprison jackpot effect: page(MACHINE5_PAGE), PRI_JACKPOT, D_QUEUED+D_RESTARTABLE
+cryoprison effect: page(MACHINE5_PAGE), PRI_MULTIBALL
+cryoprison super jackpot: page(MACHINE5_PAGE), PRI_SUPER_JACKPOT, D_QUEUED+D_RESTARTABLE
 
-startup effect: page(MACHINE5_PAGE), PRI_BALL_LAUNCH_MENU, D_QUEUED+D_RESTARTABLE
+museum start effect: page(MACHINE5_PAGE), PRI_SCORES_IMPORTANT, D_QUEUED
+museum jackpot effect: page(MACHINE5_PAGE), PRI_JACKPOT, D_QUEUED+D_RESTARTABLE
+museum effect: page(MACHINE5_PAGE), PRI_MULTIBALL
+museum super jackpot: page(MACHINE5_PAGE), PRI_SUPER_JACKPOT, D_QUEUED+D_RESTARTABLE
 
+skillshot: page(MACHINE5_PAGE), PRI_SPECIAL
 
+combo effect: page(MACHINE5_PAGE), PRI_GAME_LOW2, D_QUEUED+D_RESTARTABLE
+vm effect: page(MACHINE5_PAGE), PRI_GAME_LOW2, D_PAUSE+D_QUEUED
 
+carcrash effect: page(MACHINE5_PAGE), PRI_GAME_QUICK1
 
+laser shot: page(MACHINE5_PAGE), PRI_GAME_QUICK1
 
 
 ##########################################################################
 # Lamp effects
 ##########################################################################
 [leffs]
+#flashers only
+lower rebound: shared, PRI_LEFF2 
+upper rebound: shared, PRI_LEFF2 
+skillshot: shared, PRI_LEFF2, page(MACHINE5_PAGE)
+eyeball: shared, PRI_LEFF2, page(MACHINE5_PAGE)
+top popper: shared, PRI_LEFF2, page(MACHINE4_PAGE)
+huxley: shared, PRI_LEFF2, page(MACHINE2_PAGE)
+left ramp: shared, PRI_LEFF2
+right ramp: shared, PRI_LEFF2
+center ramp: shared, PRI_LEFF2
+side ramp: shared, PRI_LEFF2
+
+
+#lamps
+orbits runner: shared, PRI_LEFF1, LAMPS(LEFT_LOOP_AWARDS), page(MACHINE5_PAGE)
+car crash runner: PRI_LEFF1, LAMPS(CAR_CRASH), page(MACHINE5_PAGE)
+inlane quick freeze: shared, PRI_LEFF1, LAMPS(LEFT_RAMP_AWARDS), page(MACHINE_PAGE)
+inlane cryoclaw: shared, PRI_LEFF1, LAMPS(RIGHT_RAMP_AWARDS), page(MACHINE_PAGE)
+ramp quickfreeze: shared, PRI_LEFF1, LAMPS(LEFT_RAMP_AWARDS)
+ramp clawready: shared, PRI_LEFF1, LAMPS(RIGHT_RAMP_AWARDS)
+
+eject: shared, PRI_LEFF2, page(MACHINE4_PAGE) 
+Underground: shared, PRI_LEFF2, LAMPS(UNDERGROUND_SCOOP), page(MACHINE2_PAGE)
+claw: shared, PRI_LEFF2, page(MACHINE_PAGE)
+
+freeze: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE3_PAGE)
+extraball: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE4_PAGE)
+computer award: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE2_PAGE)
+shoot again: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE2_PAGE)
+flash all: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE3_PAGE)
+bot2top: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE3_PAGE)
+top2bot: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE3_PAGE)
+right2left: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE3_PAGE)
+left2right: PRI_LEFF3, LAMPS(AMODE_ALL), page(MACHINE3_PAGE)
+
 Amode: runner, PRI_LEFF1, LAMPS(AMODE_ALL), GI(ALL), page(MACHINE5_PAGE)
-#Underground Kickout: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
-
-######inlanes.c#########
-#quick freeze: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
-#cryoclaw: PRI_LEFF1, GI(ALL), page(MACHINE2_PAGE)
 
 
-
-
-
+#gi
+gi cycle: PRI_LEFF1, GI(ALL), page(MACHINE3_PAGE)
+no gi onesec: PRI_LEFF1, GI(ALL), page(MACHINE3_PAGE)
+no gi twosec: PRI_LEFF1, GI(ALL), page(MACHINE3_PAGE)
+turn off gi: PRI_LEFF1, GI(ALL), page(MACHINE3_PAGE)
+turn on gi: PRI_LEFF1, GI(ALL), page(MACHINE3_PAGE)
+flash gi: PRI_LEFF1, GI(ALL), page(MACHINE3_PAGE)

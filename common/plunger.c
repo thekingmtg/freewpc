@@ -41,7 +41,7 @@
 void shooter_clear_monitor (void)
 {
 	task_add_duration (TASK_DURATION_INF);
-	task_sleep_sec (4); /* this could be machine-specific */
+	task_sleep_sec (2); /* this could be machine-specific */ //was 4
 	global_flag_off (GLOBAL_FLAG_BALL_AT_PLUNGER);
 	task_exit ();
 }
@@ -101,10 +101,14 @@ static void launch_button_pressed (void)
 }
 #endif
 
+
+
+
+
 #ifdef INCLUDE_AUTOPLUNGER
 static void timed_plunger_monitor (void)
 {
-	task_sleep_sec (7);
+	task_sleep_sec (25);
 	launch_button_pressed ();
 	task_exit ();
 }

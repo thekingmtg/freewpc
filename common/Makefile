@@ -49,6 +49,11 @@ COMMON_SW_OBJS += common/search.o
 COMMON_SW_OBJS += common/status.o
 COMMON_SW_OBJS += $(if $(CONFIG_PLAYABLE), common/special.o)
 
+# this added from dm
+COMMON_SW_OBJS += machine/dm/jets.o 
+
+
+
 COMMON_OBJS = $(COMMON_BASIC_OBJS) $(COMMON_SW_OBJS)
 
 # Transition objects are separated out: in time these should be broken up

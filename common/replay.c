@@ -209,21 +209,22 @@ void replay_award (void)
 	{
 		case FREE_AWARD_CREDIT:
 			add_credit ();
+			#ifdef DEFF_REPLAY
+				deff_start (DEFF_REPLAY);
+			#endif
+			#ifdef LEFF_REPLAY
+				leff_start (LEFF_REPLAY);
+			#endif
 			break;
 
 		case FREE_AWARD_EB:
 			increment_extra_balls ();
+			callset_invoke (award_extra_ball_effect);
 			break;
 
 		case FREE_AWARD_OFF:
 			break;
 	}
-#ifdef DEFF_REPLAY
-	deff_start (DEFF_REPLAY);
-#endif
-#ifdef LEFF_REPLAY
-	leff_start (LEFF_REPLAY);
-#endif
 
 	audit_increment (&system_audits.replays);
 	timestamp_update (&system_timestamps.last_replay);
@@ -232,24 +233,49 @@ void replay_award (void)
 }
 
 
+
+
+
 /** Check if the current score has exceeded the next replay level,
  * and a replay needs to be awarded */
-void replay_check_current (void)
-{
-	replay_score_t *curr;
+void replay_check_current (void) {
 
-	if (unlikely (system_config.replay_award == FREE_AWARD_OFF))
-		return;
+	if (unlikely (system_config.replay_award == FREE_AWARD_OFF)) 	return;
+	if (unlikely (replay_total_this_player >= 1)) 					return;
+	if (unlikely (replay_total_this_player >= NUM_REPLAY_LEVELS))	return;
 
-	if (unlikely (replay_total_this_player >= NUM_REPLAY_LEVELS))
-		return;
+// Compares two scores.  Returns -1, 0, or 1 accordingly, like memcmp.
+	if (score_compare (current_score, next_replay_score) >= 0)  {
+				callset_invoke (replay);
+				switch (system_config.replay_award) {
+					case FREE_AWARD_CREDIT:
+						add_credit ();
+						#ifdef DEFF_REPLAY
+							deff_start (DEFF_REPLAY);
+						#endif
+						#ifdef LEFF_REPLAY
+							leff_start (LEFF_REPLAY);
+						#endif
+						break;
 
-	curr = (replay_score_t *)(current_score + REPLAY_SCORE_OFFSET);
-	if (unlikely (*curr >= next_replay_score))
-	{
-		replay_award ();
-	}
-}
+					case FREE_AWARD_EB:
+						increment_extra_balls ();
+						callset_invoke (award_extra_ball_effect);
+						break;
+
+					case FREE_AWARD_OFF:
+						break;
+				}//end of switch
+
+				audit_increment (&system_audits.replays);
+				timestamp_update (&system_timestamps.last_replay);
+				replay_total_this_player++;
+				knocker_fire ();
+	}//end of if
+}//end
+
+
+
 
 
 /** Returns true if it is possible to give out a replay award.

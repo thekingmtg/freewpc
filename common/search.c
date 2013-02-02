@@ -75,7 +75,7 @@ static bool chase_ball_enabled (void)
  */
 static bool ball_search_solenoid_ok (U8 sol)
 {
-	device_t *dev;
+//	device_t *dev;
 
 #if !defined(MACHINE_SOL_FLASHERP)
 	/* If the machine description is not proper, then we can't know
@@ -105,25 +105,23 @@ static bool ball_search_solenoid_ok (U8 sol)
 		return (FALSE);
 
 	/* Also check for all ball device kick coils; skip them */
-	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++)
-	{
-		if (sol == dev->props->sol)
-		{
+//	for (dev=device_entry(0); dev < device_entry(NUM_DEVICES); dev++){
+//		if (sol == dev->props->sol){
 			/* This coil controls a ball device. */
 
 			/* If there are no balls detected here, pulse it */
-			if (dev->actual_count == 0)
-				return TRUE;
+//			if (dev->actual_count == 0)
+//				return TRUE;
 
 			/* If chase ball is turned off, then during the 5th ball search,
 			pulse it */
-			if (!chase_ball_enabled () && ball_search_count == 5)
-				return (TRUE);
+//			if (!chase_ball_enabled () && ball_search_count == 5)
+//				return (TRUE);
 
 			/* Default is NOT to fire such a coil */
-			return (FALSE);
-		}
-	}
+//			return (FALSE);
+//		}
+//	}
 
 	/* OK, you can use it. */
 	return (TRUE);
@@ -146,6 +144,10 @@ bool ball_search_timed_out (void)
 {
 	return (ball_search_timer >= ball_search_timeout);
 }
+
+
+
+
 
 
 /** Run through all solenoids to try to find a ball. */
@@ -256,10 +258,10 @@ void ball_search_monitor_task (void)
 						leff_stop (LEFF_TILT);
 
 
-					if (ball_search_count < 10)
+					if (ball_search_count < 5)
 					{
 						/* Delay a small amount for the first few ball searches */
-						task_sleep_sec (12);
+						task_sleep_sec (5);
 					}
 					else
 					{

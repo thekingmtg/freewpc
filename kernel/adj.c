@@ -52,6 +52,12 @@ reason function is in a different ROM page, and we can't
 yet store far pointers. */
 void adj_csum_failure (void)
 {
+	sound_start (ST_ANY, SPCH_PLAYER_ONE, SL_1S, PRI_GAME_QUICK5);
+	task_sleep (TIME_500MS);
+	task_sleep (TIME_500MS);
+	task_sleep (TIME_500MS);
+	task_sleep (TIME_500MS);
+
 	adj_reset_all ();
 }
 

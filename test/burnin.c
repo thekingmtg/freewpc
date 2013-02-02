@@ -95,7 +95,7 @@ void burnin_flipper_thread (void)
 void burnin_draw (void)
 {
 	time_audit_format (&burnin_duration);
-	font_render_string_left (&font_var5, 4, 20, sprintf_buffer);
+	font_render_string_left (&font_mono5, 4, 20, sprintf_buffer);
 }
 #endif
 

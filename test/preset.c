@@ -60,7 +60,7 @@ PRESET_END (5ball, "5-BALL")
 PRESET_BEGIN (tournament)
 	PRESET_FREE_PLAY
 	{ standard_adjustments, &system_config.balls_per_game, 3 },
-	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
+	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_EB },
 	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.game_restart, GAME_RESTART_NEVER },
 	{ standard_adjustments, &system_config.max_ebs, 0 },
@@ -74,7 +74,7 @@ PRESET_END (tournament, "TOURNAMENT")
 
 PRESET_BEGIN (show)
 	PRESET_FREE_PLAY
-	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_OFF },
+	{ standard_adjustments, &system_config.replay_award, FREE_AWARD_EB },
 	{ standard_adjustments, &system_config.special_award, FREE_AWARD_OFF },
 	{ standard_adjustments, &system_config.match_feature, OFF },
 PRESET_END (show, "SHOW")

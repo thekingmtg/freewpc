@@ -63,7 +63,7 @@ void goal_scored_leff (void)
 void goal_increase_deff (void)
 {
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 8, "GOALIE HIT");
+	font_render_string_center (&font_mono5, 64, 8, "GOALIE HIT");
 	font_render_string_center (&font_var5, 64, 25, "GOAL VALUE INCREASED");
 	dmd_show_low ();
 	task_sleep (TIME_2S);

@@ -59,11 +59,20 @@ extern inline U8 platform_lamp_compute (const U8 col)
 	 * for quick effects.  Therefore leff2 is applied first,
 	 * and leff1 may override it.
 	 */
+
+
+/*
+	bits &= leff_free_set[col];
+	bits |= (leff_data_set[col] & ~leff_free_set[col]);
+	return bits;
+*/
+	// old code
 	bits &= lamp_leff2_allocated[col];
 	bits |= lamp_leff2_matrix[col];
 	bits &= lamp_leff1_allocated[col];
 	bits |= lamp_leff1_matrix[col];
 	return bits;
+	//
 }
 
 extern __fastram__ U8 sol_duty_mask;

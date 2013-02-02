@@ -101,6 +101,7 @@ struct timed_mode_task_config
 
 void timed_mode_begin (struct timed_mode_ops *ops);
 void timed_mode_end (struct timed_mode_ops *ops);
+void timed_mode_end2 (struct timed_mode_ops *ops);
 U8 timed_mode_get_timer (struct timed_mode_ops *ops);
 void timed_mode_reset (struct timed_mode_ops *ops, U8 time);
 void timed_mode_add (struct timed_mode_ops *ops, U8 time);

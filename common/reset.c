@@ -87,8 +87,8 @@ void factory_reset_if_required (void)
 		deff_stop (DEFF_SYSTEM_RESET);
 #ifdef CONFIG_DMD_OR_ALPHA
 		dmd_alloc_low_clean ();
-		font_render_string_center (&font_var5, 64, 10, "FACTORY SETTINGS");
-		font_render_string_center (&font_var5, 64, 20, "RESTORED");
+		font_render_string_center (&font_mono5, 64, 10, "FACTORY SETTINGS");
+		font_render_string_center (&font_mono5, 64, 20, "RESTORED");
 		dmd_show_low ();
 #endif
 		factory_reset ();
@@ -107,28 +107,28 @@ void system_accept_freewpc (void)
 
 #ifdef CONFIG_DMD
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 3, "FREEWPC");
-	font_render_string_center (&font_var5, 64, 9, "WARNING... BALLY WMS");
-	font_render_string_center (&font_var5, 64, 15, "DOES NOT SUPPORT");
-	font_render_string_center (&font_var5, 64, 21, "THIS SOFTWARE");
-	font_render_string_center (&font_var5, 64, 27, "PRESS ENTER");
+	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
+	font_render_string_center (&font_mono5, 64, 9, "WARNING... BALLY WMS");
+	font_render_string_center (&font_mono5, 64, 15, "DOES NOT SUPPORT");
+	font_render_string_center (&font_mono5, 64, 21, "THIS SOFTWARE");
+	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
 	wait_for_button (SW_ENTER);
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 3, "FREEWPC");
-	font_render_string_center (&font_var5, 64, 9, "NO WARRANTY EXISTS");
-	font_render_string_center (&font_var5, 64, 15, "ROM MAY CAUSE DAMAGE");
-	font_render_string_center (&font_var5, 64, 21, "TO REAL MACHINE");
-	font_render_string_center (&font_var5, 64, 27, "PRESS ENTER");
+	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
+	font_render_string_center (&font_mono5, 64, 9, "NO WARRANTY EXISTS");
+	font_render_string_center (&font_mono5, 64, 15, "ROM MAY CAUSE DAMAGE");
+	font_render_string_center (&font_mono5, 64, 21, "TO REAL MACHINE");
+	font_render_string_center (&font_mono5, 64, 27, "PRESS ENTER");
 	dmd_show_low ();
 	wait_for_button (SW_ENTER);
 
 	dmd_alloc_low_clean ();
-	font_render_string_center (&font_var5, 64, 3, "FREEWPC");
-	font_render_string_center (&font_var5, 64, 9, "IF YOU ARE SURE YOU");
-	font_render_string_center (&font_var5, 64, 15, "WANT TO CONTINUE");
-	font_render_string_center (&font_var5, 64, 21, "PRESS ENTER TWICE");
+	font_render_string_center (&font_mono5, 64, 3, "FREEWPC");
+	font_render_string_center (&font_mono5, 64, 9, "IF YOU ARE SURE YOU");
+	font_render_string_center (&font_mono5, 64, 15, "WANT TO CONTINUE");
+	font_render_string_center (&font_mono5, 64, 21, "PRESS ENTER TWICE");
 	dmd_show_low ();
 	wait_for_button (SW_ENTER);
 	wait_for_button (SW_ENTER);
@@ -171,24 +171,24 @@ void system_reset_deff (void)
 	task_sleep_sec (3);
 #ifdef CONFIG_DMD_OR_ALPHA
 	dmd_alloc_low_clean ();
-	font_render_string_left (&font_var5, 1, 1, MACHINE_NAME);
+	font_render_string_left (&font_mono5, 1, 1, MACHINE_NAME);
 
 #ifdef DEBUGGER
 	sprintf ("D%s.%s", C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #else
 	sprintf ("R%s.%s", C_STRING(MACHINE_MAJOR_VERSION), C_STRING(MACHINE_MINOR_VERSION));
 #endif
-	font_render_string_right (&font_var5, 127, 1, sprintf_buffer);
+	font_render_string_right (&font_mono5, 127, 1, sprintf_buffer);
 
 	SECTION_VOIDCALL (__common__, render_build_date);
-	font_render_string_left (&font_var5, 1, 9, sprintf_buffer);
+	font_render_string_left (&font_mono5, 1, 9, sprintf_buffer);
 
 #if (MACHINE_PIC == 1)
 	pic_render_serial_number ();
-	font_render_string_left (&font_var5, 1, 18, sprintf_buffer);
+	font_render_string_left (&font_mono5, 1, 18, sprintf_buffer);
 #endif
 
-	font_render_string_left (&font_var5, 1, 26, "TESTING...");
+	font_render_string_left (&font_mono5, 1, 26, "TESTING...");
 	dmd_show_low ();
 #endif
 

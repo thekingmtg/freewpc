@@ -52,10 +52,7 @@ U8					rollover_MessageCounter;
 //internally called function prototypes  --external found at protos.h
 void rollover_reset (void);
 void all_rollover_made (void);
-void rollover_sounds (void);
-void rollover_sounds_all_rollovers (void);
 void rollover_sounds_already_lit(void);
-void rollovers_effect(void);
 void rollovers_mtl_effect(void);
 
 /****************************************************************************
@@ -87,12 +84,11 @@ void all_rollover_made (void){
 	lamp_tristate_flash(LM_MIDDLE_ROLLOVER);
 	lamp_tristate_flash(LM_TOP_ROLLOVER);
 	lamp_tristate_flash(LM_LOWER_ROLLOVER);
-	rollover_sounds_all_rollovers();
 	if (rollover_bonus_multiplier < max_rollover_bonus_multiplier) {
 		++rollover_bonus_multiplier;
 		deff_start (DEFF_ALL_ROLLOVERS_EFFECT);
 	}
-	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) extraball_light_on();
+	else if (rollover_bonus_multiplier == max_rollover_bonus_multiplier) start_extraball();
 	task_sleep (TIME_2S);
 	lamp_tristate_off(LM_MIDDLE_ROLLOVER);
 	lamp_tristate_off(LM_TOP_ROLLOVER);
@@ -102,7 +98,7 @@ void all_rollover_made (void){
 	lower_rollover_activated = FALSE;
 	score (ALL_ROLLOVERS_SCORE);
 	//light access claw
-	access_claw_light_on();//at inlanes.c
+	increment_access_claw_light_on();//at inlanes.c
 }//end of function
 
 
@@ -118,11 +114,10 @@ CALLSET_ENTRY (rollovers, sw_left_rollover) {
 		task_sleep (TIME_500MS);
 		lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 		middle_rollover_activated = TRUE;
-		rollover_sounds();
 		score (ROLLOVERS_SCORE2);
 		//check to see if this is the third rollover to activate
 		if (top_rollover_activated && lower_rollover_activated) all_rollover_made();
-		else rollovers_effect();
+		else 	deff_start (DEFF_ROLLOVERS_EFFECT);
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_middle_rollover
 
@@ -139,11 +134,10 @@ CALLSET_ENTRY (rollovers, sw_center_rollover) {
 		task_sleep (TIME_500MS);
 		lamp_tristate_on(LM_TOP_ROLLOVER);
 		top_rollover_activated = TRUE;
-		rollover_sounds();
 		score (ROLLOVERS_SCORE2);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && lower_rollover_activated)  all_rollover_made();
-		else rollovers_effect();
+		else 	deff_start (DEFF_ROLLOVERS_EFFECT);
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_top_rollover
 
@@ -160,11 +154,10 @@ CALLSET_ENTRY (rollovers, sw_right_rollover) {
 		task_sleep (TIME_500MS);
 		lamp_tristate_on(LM_LOWER_ROLLOVER);
 		lower_rollover_activated = TRUE;
-		rollover_sounds();
 		score (ROLLOVERS_SCORE2);
 		//check to see if this is the third rollover to activate
 		if (middle_rollover_activated && top_rollover_activated)  all_rollover_made();
-		else rollovers_effect();
+		else 	deff_start (DEFF_ROLLOVERS_EFFECT);
 	}//end of else - not already lit, so activate rollover
 }//end of function rollovers_sw_lower_rollover
 
@@ -174,7 +167,7 @@ CALLSET_ENTRY (rollovers, sw_right_rollover) {
 	 * rotate rollovers when buttons pressed
 	 ***************************************************************************/
 CALLSET_ENTRY (rollovers, sw_left_button, sw_upper_left_button) {
-	if (valid_playfield && 	!flag_test(FLAG_IN_VIDEO_MODE) ) {
+	if (valid_playfield && 	!flag_test(FLAG_VIDEO_MODE_RUNNING) ) {
 			if (top_rollover_activated && lower_rollover_activated) { //left (M) not activated
 				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 				lamp_tristate_on(LM_TOP_ROLLOVER);
@@ -230,7 +223,7 @@ CALLSET_ENTRY (rollovers, sw_left_button, sw_upper_left_button) {
 
 //rotate rollovers when buttons pressed
 CALLSET_ENTRY (rollovers, sw_right_button, sw_upper_right_button) {
-	if (valid_playfield && 	!flag_test(FLAG_IN_VIDEO_MODE) ) {
+	if (valid_playfield && 	!flag_test(FLAG_VIDEO_MODE_RUNNING) ) {
 			if (top_rollover_activated && lower_rollover_activated) { //left not activated
 				lamp_tristate_on(LM_MIDDLE_ROLLOVER);
 				lamp_tristate_off(LM_TOP_ROLLOVER);
@@ -288,43 +281,39 @@ CALLSET_ENTRY (rollovers, sw_right_button, sw_upper_right_button) {
 
 
 /****************************************************************************
+ *
  * sound effects
+ *
  ****************************************************************************/
-void rollover_sounds (void) {
-	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
-	if ( rollover_SoundCounter  == 0 )
-	sound_start (ST_EFFECT, MACHINE1_SHORT, SL_2S, PRI_GAME_QUICK5);
-else if ( rollover_SoundCounter  == 1 )
-	sound_start (ST_EFFECT, MACHINE1_MED, SL_2S, PRI_GAME_QUICK5);
-else if ( rollover_SoundCounter  == 2 )
-	sound_start (ST_EFFECT, MACHINE1_LONG, SL_2S, PRI_GAME_QUICK5);
-}//end of function
-
-
-
-void rollover_sounds_all_rollovers (void) {
-	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
-	if ( rollover_SoundCounter  == 0 )
-	sound_start (ST_EFFECT, STORM1_SHORT, SL_2S, PRI_GAME_QUICK5);
-else if ( rollover_SoundCounter  == 1 )
-	sound_start (ST_EFFECT, STORM1_MED, SL_2S, PRI_GAME_QUICK5);
-else if ( rollover_SoundCounter  == 2 )
-	sound_start (ST_EFFECT, STORM1_LONG, SL_2S, PRI_GAME_QUICK5);
-}//end of function
-
-
-
 void rollover_sounds_already_lit(void) {
 	rollover_SoundCounter = random_scaled(2);//from kernal/random.c
-	if ( rollover_SoundCounter  == 0 )
+	if ( rollover_SoundCounter  == 0 ) {
 	sound_start (ST_EFFECT, TOINK1, SL_2S, PRI_GAME_QUICK5);
-else if ( rollover_SoundCounter  == 1 )
+	task_sleep (TIME_100MS);
+	sound_start (ST_EFFECT, TOINK1, SL_2S, PRI_GAME_QUICK5);
+	task_sleep (TIME_100MS);
+	sound_start (ST_EFFECT, TOINK1, SL_2S, PRI_GAME_QUICK5);
+	task_sleep (TIME_100MS);
+	sound_start (ST_EFFECT, TOINK1, SL_2S, PRI_GAME_QUICK5);
+	}
+else if ( rollover_SoundCounter  == 1 ) {
 	sound_start (ST_EFFECT, TOINK2, SL_2S, PRI_GAME_QUICK5);
+	task_sleep (TIME_100MS);
+	sound_start (ST_EFFECT, TOINK2, SL_2S, PRI_GAME_QUICK5);
+	task_sleep (TIME_100MS);
+	sound_start (ST_EFFECT, TOINK2, SL_2S, PRI_GAME_QUICK5);
+	task_sleep (TIME_100MS);
+	sound_start (ST_EFFECT, TOINK2, SL_2S, PRI_GAME_QUICK5);
+}
 }//end of function
+
+
 
 
 /****************************************************************************
+ *
  * display effects
+ *
  ****************************************************************************/
 void rollovers_animation_display_effect (U16 start_frame, U16 end_frame){
 	U16 fno;
@@ -354,7 +343,17 @@ void all_rollovers_effect_deff(void) {
 	U16 fno;
 	dmd_alloc_pair_clean ();// Clean both pages
 
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+	if ( rollover_SoundCounter  == 0 ) 		sound_start (ST_EFFECT, STORM1_SHORT, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 1 ) sound_start (ST_EFFECT, STORM1_MED, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 2 ) sound_start (ST_EFFECT, STORM1_LONG, SL_2S, PRI_GAME_QUICK5);
+
 	rollovers_animation_display_effect_reverse (IMG_GUN_END, IMG_GUN_START);
+
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+	if ( rollover_SoundCounter  == 0 ) 		sound_start (ST_EFFECT, STORM1_SHORT, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 1 ) sound_start (ST_EFFECT, STORM1_MED, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 2 ) sound_start (ST_EFFECT, STORM1_LONG, SL_2S, PRI_GAME_QUICK5);
 
 	dmd_alloc_pair_clean ();// Clean both pages
 	for (fno = IMG_GUN_START; fno <= IMG_GUN_END; fno += 2) {
@@ -376,12 +375,18 @@ void all_rollovers_effect_deff(void) {
 				task_sleep (TIME_100MS);
 	}//end of for loop
 
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+	if ( rollover_SoundCounter  == 0 ) 		sound_start (ST_EFFECT, STORM1_SHORT, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 1 ) sound_start (ST_EFFECT, STORM1_MED, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 2 ) sound_start (ST_EFFECT, STORM1_LONG, SL_2S, PRI_GAME_QUICK5);
+
 	dmd_alloc_pair_clean ();// Clean both pages
 	for (fno = IMG_GUN_END; fno >= IMG_GUN_START; fno -= 2) {
 			sprintf ("BONUS");
 			dmd_map_overlay ();
 			dmd_clean_page_low ();
 			font_render_string_center (&font_fireball, DMD_MIDDLE_X + 30, DMD_BIG_CY_Cent, sprintf_buffer);
+			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_5, "CLAW LIT");
 				dmd_text_outline ();
 				dmd_alloc_pair ();
 				frame_draw(fno);
@@ -389,6 +394,11 @@ void all_rollovers_effect_deff(void) {
 				dmd_show2 ();
 				task_sleep (TIME_100MS);
 	}//end of for loop
+
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+	if ( rollover_SoundCounter  == 0 ) 		sound_start (ST_EFFECT, STORM1_SHORT, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 1 ) sound_start (ST_EFFECT, STORM1_MED, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 2 ) sound_start (ST_EFFECT, STORM1_LONG, SL_2S, PRI_GAME_QUICK5);
 
 	task_sleep_sec (1);
 	deff_exit ();
@@ -398,15 +408,15 @@ void all_rollovers_effect_deff(void) {
 
 
 
-void rollovers_effect(void) {
-	deff_start (DEFF_ROLLOVERS_EFFECT);
-}//end of FUNCTION
-
-
-
 void rollovers_mtl_effect(void) {
 	U16 fno;
 	dmd_alloc_pair_clean ();// Clean both pages
+
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+
+	if ( rollover_SoundCounter  == 0 ) 		sound_start (ST_EFFECT, MACHINE1_SHORT, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 1 ) sound_start (ST_EFFECT, MACHINE1_MED, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 2 ) sound_start (ST_EFFECT, MACHINE1_LONG, SL_2S, PRI_GAME_QUICK5);
 
 	for (fno = IMG_GUN_START; fno <= IMG_GUN_END; fno += 2) {
 				sprintf ("M  T  L");
@@ -428,16 +438,26 @@ void rollovers_mtl_effect(void) {
 void rollovers_effect_deff(void) {
 	rollovers_mtl_effect();
 
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+
+	if ( rollover_SoundCounter  == 0 ) 		sound_start (ST_EFFECT, MACHINE1_SHORT, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 1 ) sound_start (ST_EFFECT, MACHINE1_MED, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 2 ) sound_start (ST_EFFECT, MACHINE1_LONG, SL_2S, PRI_GAME_QUICK5);
+
 	dmd_alloc_pair_clean ();// Clean both pages
-	switch (++rollover_MessageCounter % 3) {
+
+	if (IN_TEST) {	if (++rollover_MessageCounter > 2) rollover_MessageCounter = 0; }
+	else			rollover_MessageCounter = random_scaled(3);
+
+	switch (rollover_MessageCounter) {
 			default:
 			case 0:
 					dmd_map_overlay ();
 					dmd_clean_page_low ();
 					dmd_sched_transition (&trans_bitfade_slow);
-					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+					font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_MED_CY_1, "LIGHT M T L");
 					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
-					font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "ADVANCE BONUS X");
+					font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_MED_CY_3, "ADVANCE BONUS X");
 					dmd_text_outline ();
 					dmd_alloc_pair ();
 					frame_draw(IMG_GUN_END);
@@ -448,9 +468,9 @@ void rollovers_effect_deff(void) {
 				dmd_map_overlay ();
 				dmd_clean_page_low ();
 				dmd_sched_transition (&trans_bitfade_slow);
-				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
+				font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_MED_CY_1, "LIGHT M T L");
 				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
-				font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "LIGHT CRYOCLAW");
+				font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_MED_CY_3, "LIGHT CRYOCLAW");
 				dmd_text_outline ();
 				dmd_alloc_pair ();
 				frame_draw(IMG_GUN_END);
@@ -461,10 +481,9 @@ void rollovers_effect_deff(void) {
 					dmd_map_overlay ();
 					dmd_clean_page_low ();
 					dmd_sched_transition (&trans_bitfade_slow);
-					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "LIGHT ALL M T L");
-					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "5 TIMES");
-					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
-					font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_SMALL_CY_4, "LIGHT EXTRA BALL");
+					font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_MED_CY_1, "LIGHT M T L");
+					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_MED_CY_2, "5 TIMES TO");
+					font_render_string_center (&font_bitcube10, DMD_MIDDLE_X, DMD_MED_CY_3, "LIGHT EXTRA BALL");
 					dmd_text_outline ();
 					dmd_alloc_pair ();
 					frame_draw(IMG_GUN_END);
@@ -472,6 +491,12 @@ void rollovers_effect_deff(void) {
 					dmd_show2 ();
 					break;
 			}//end of switch
+
+	rollover_SoundCounter = random_scaled(3);//from kernal/random.c
+
+	if ( rollover_SoundCounter  == 0 ) 		sound_start (ST_EFFECT, MACHINE1_SHORT, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 1 ) sound_start (ST_EFFECT, MACHINE1_MED, SL_2S, PRI_GAME_QUICK5);
+	else if ( rollover_SoundCounter  == 2 ) sound_start (ST_EFFECT, MACHINE1_LONG, SL_2S, PRI_GAME_QUICK5);
 
 	task_sleep_sec (1);
 	deff_exit ();

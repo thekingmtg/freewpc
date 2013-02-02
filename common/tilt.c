@@ -42,22 +42,19 @@ free_timer_id_t tilt_ignore_timer;
 
 /** Lamp effect function for a leff that turns all lights off.
  * Used by the system-defined tilt function. */
-void no_lights_leff (void)
-{
+void no_lights_leff (void) {
 	for (;;)
 		task_sleep_sec (5);
 }
 
 
-void tilt_warning_leff (void)
-{
+void tilt_warning_leff (void) {
 	task_sleep (TIME_500MS);
 	leff_exit ();
 }
 
 
-CALLSET_ENTRY (tilt, sw_tilt)
-{
+CALLSET_ENTRY (tilt, sw_tilt) {
 	extern U8 in_tilt;
 
 	/* Ignore tilt switch activity while already in tilt state.
@@ -71,8 +68,7 @@ CALLSET_ENTRY (tilt, sw_tilt)
 
 	/* IDEA : Disable tilt while a ball search is in progress? */
 
-	else if (++tilt_warnings == system_config.tilt_warnings)
-	{
+	else if (++tilt_warnings == system_config.tilt_warnings) {
 		/* Warnings exceeded... tilt the current ball */
 		sound_reset ();
 #ifdef CONFIG_GI
@@ -89,6 +85,9 @@ CALLSET_ENTRY (tilt, sw_tilt)
 		task_duration_expire (TASK_DURATION_LIVE);
 		audit_increment (&system_audits.tilts);
 		audit_increment (&system_audits.plumb_bob_tilts);
+
+	//at this point ball should drain and bonus should take over
+	//and tilt condition will be reset below
 	}
 	else
 	{
@@ -146,12 +145,10 @@ CALLSET_ENTRY (tilt, sw_slam_tilt)
 }
 
 
-CALLSET_ENTRY (tilt, bonus_complete)
-{
+CALLSET_ENTRY (tilt, bonus_complete) {
 	/* Clear the tilt flag.  Note, this is not combined
 	with the above to handle tilt while bonus is running. */
-	if (in_tilt)
-	{
+	if (in_tilt) {
 		/* Wait for tilt bob to settle */
 		while (free_timer_test (tilt_ignore_timer))
 			task_sleep (TIME_100MS);
@@ -166,6 +163,8 @@ CALLSET_ENTRY (tilt, bonus_complete)
 		in_tilt = FALSE;
 	}
 }
+
+
 
 
 CALLSET_ENTRY (tilt, start_ball)

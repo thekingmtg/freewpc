@@ -22,7 +22,7 @@
  *
  *
  */
-/* CALLSET_SECTION (acmag, __machine2__) */
+/* CALLSET_SECTION (acmag, __machine__) */
 
 
 
@@ -98,6 +98,7 @@ void acmag_mode_init (void) {
 			clawmagnet_off ();
 			flag_off(FLAG_IS_BALL_ON_CLAW);
 			flipper_enable ();
+			ballsave_add_time (10);
 	acmag_mode_shots_made = 0;
 	flag_on (FLAG_IS_ACMAG_RUNNING);
 	center_ramp_arrow_update();
@@ -142,6 +143,7 @@ CALLSET_ENTRY (acmag, start_ball) 		{ acmag_reset(); }
 
 
 /****************************************************************************
+ *
  * body
  *
  ***************************************************************************/
@@ -190,7 +192,9 @@ void acmag_made(void) {
 
 
 /****************************************************************************
+ *
  * DMD display and sound effects
+ *
  ****************************************************************************/
 void acmag_start_effect_deff(void) {
 	dmd_map_overlay ();
@@ -198,7 +202,7 @@ void acmag_start_effect_deff(void) {
 	dmd_clean_page_low ();
 	dmd_draw_thin_border (dmd_low_buffer);
 	font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
-	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "CENTER RAMP");
+	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_BIG_CY_Bot, "CENTER RAMP");
 	show_text_on_stars (40); //about 4 seconds
 	deff_exit ();
 }//end of mode_effect_deff
@@ -230,25 +234,29 @@ void acmag_effect_deff(void) {
 		dmd_clean_page_high ();
 		dmd_clean_page_low ();
 		dmd_draw_thin_border (dmd_low_buffer);
-		font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top, "ACMAG");
+
+		sprintf_score(current_score);
+		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
+
+		font_render_string_center (&font_steel, DMD_MIDDLE_X, DMD_BIG_CY_Top + 2, "ACMAG");
 
 		if (++i % 3 == 0) { if (TOGGLE) TOGGLE = FALSE; else TOGGLE = TRUE; }//change TOGGLE once per n seconds
 		if (++j % 6 == 0) { if (TOGGLE_BOTTOM) TOGGLE_BOTTOM = FALSE; else TOGGLE_BOTTOM = TRUE; }//change TOGGLE once per n seconds
 
 		if (i % 20 != 0) { //draw for 4/5 and blank for 1/5
 					if (TOGGLE) {
-						sprintf ("%d SEC LEFT", acmag_mode_timer);
-						font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+						sprintf ("%d SEC", acmag_mode_timer);
+						font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3 + 3, sprintf_buffer);
 							}//end of if (TOGGLE)
 					else {
 						sprintf ("%d HIT", acmag_mode_shots_made);
-						font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
+						font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3 + 3, sprintf_buffer);
 						}//end of else
 		}//end of if (i % 5 != 0)
 
-		if (TOGGLE_BOTTOM)	font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "SHOOT CENTER RAMP");
+		if (TOGGLE_BOTTOM)	font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_MED_CY_3, "SHOOT CENTER RAMP");
 		else			{	sprintf_score (acmag_mode_next_score);
-							font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer); }
+							font_render_string_center (&font_term6, DMD_MIDDLE_X, DMD_MED_CY_3 + 2, sprintf_buffer); }
 
 		show_text_on_stars (8); //about 800 ms
 	}//END OF ENDLESS LOOP
@@ -317,11 +325,3 @@ void show_text_on_stars (U8 times) {
 	dmd_alloc_pair_clean ();
 }
 
-
-/****************************************************************************
- * status display
- *
- * called from common/status.c automatically whenever either flipper button
- * is held for 4 seconds or longer.  since called by callset, order of
- * various status reports will be random depending upon call stack
-****************************************************************************/

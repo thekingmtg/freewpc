@@ -37,6 +37,13 @@ Coin Door Power: page(EFFECT_PAGE), PRI_JACKPOT
 Ball Save: page(EFFECT_PAGE), c_decl(ball_save_deff), PRI_BALLSAVE
 Enter Initials: page(COMMON_PAGE), PRI_HSENTRY
 
+jets effect: page(COMMON_PAGE), PRI_GAME_QUICK1, D_QUEUED+D_RESTARTABLE
+jets completed effect: page(COMMON_PAGE), PRI_GAME_QUICK2, D_QUEUED
+
+
+
+
+
 [leffs]
 NULL: PRI_NULL
 Amode: runner, PRI_AMODE, c_decl(system_amode_leff), page(COMMON_PAGE)

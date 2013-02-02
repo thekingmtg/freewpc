@@ -179,16 +179,29 @@ typedef struct
 	adjval_t allow_chase_ball; /* done */
 
 	adjval_t family_mode;
+
 #ifdef MACHINE_LAUNCH_SWITCH
 	adjval_t flipper_plunger;
 	adjval_t timed_plunger;
 #endif
+
 	adjval_t game_music;
+
 #ifdef CONFIG_TIMED_GAME
 	adjval_t timed_game;
 #endif
+
 	adjval_t buy_extra_ball;
 	adjval_t coin_door_ball_save;
+
+#ifdef CONFIG_DIFFICULTY_LEVEL
+	adjval_t difficulty;
+#endif
+
+#ifdef CONFIG_DISABLE_CLAW
+	adjval_t disable_claw;
+#endif
+
 } std_adj_t;
 
 extern __nvram__ std_adj_t system_config;
@@ -214,7 +227,7 @@ extern __nvram__ std_adj_t system_config;
 #define config_timed_plunger (system_config.timed_plunger)
 #else
 #define config_flipper_plunger OFF
-#define config_timed_plunger OFF
+#define config_timed_plunger ON
 #endif
 
 typedef struct

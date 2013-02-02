@@ -35,13 +35,13 @@
 void shoot_alert_task (void)
 {
 #ifdef MACHINE_SHOOTER_SWITCH
-	task_sleep_sec (15);
+	task_sleep_sec (5);
 	for (;;)
 	{
 		if (switch_poll (MACHINE_SHOOTER_SWITCH))
 		{
 			deff_start (DEFF_PLUNGE_BALL);
-			task_sleep_sec (20);
+			task_sleep_sec (7);
 		}
 		else
 			task_sleep_sec (5);

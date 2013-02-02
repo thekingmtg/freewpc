@@ -34,7 +34,7 @@
  * estimate of average standup score: 2.5 million
  *
  * */
-/* CALLSET_SECTION (standupfrenzy, __machine4__) */
+/* CALLSET_SECTION (standupfrenzy, __machine__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -45,9 +45,9 @@
 #define 	NO_TARGETS 	0x0/** Bitmask referring to all 5 standup targets */
 #define 	ALL_TARGETS 0x1f/** Bitmask referring to all 5 standup targets */
 const U8 			STANDUP_EASY_GOAL 	= 1;
-const U8 			STANDUP_MED_GOAL 	= 4;
 const U8 			STANDUP_HARD_GOAL 	= 7;
 const U8 			STANDUP_GOAL_INCREMENT = 5;
+const U8 			STANDUP_HARD_GOAL_INCREMENT = 10;
 const U8 			STANDUP_GOAL_MAX 	= 100;
 
 //local variables
@@ -81,7 +81,6 @@ void frenzyHandler (U8 target, U8 lamp);
 void standup_lamp_update1 (U8 mask, U8 lamp);
 void standupFrenzy_sounds (void);
 void standup_sounds (void);
-void standup_effect(void);
 
 
 /****************************************************************************
@@ -97,7 +96,7 @@ struct timed_mode_ops standupFrenzy_mode = {
 	.deff_running = DEFF_STANDUPFRENZY_EFFECT,
 //	.deff_ending = DEFF_STANDUPFRENZY_END_EFFECT,
 	.prio = PRI_GAME_MODE5,
-	.init_timer = 23, //time displayed plus length of starting deff
+	.init_timer = 48, //time displayed plus length of starting deff
 	.timer = &standupFrenzyTimer,
 	.grace_timer = 3, //default is 2
 	//.pause = , // default is null_false_function - other is system_timer_pause,
@@ -113,6 +112,7 @@ void standupFrenzy_mode_init (void) {
 		clawmagnet_off ();
 		flag_off(FLAG_IS_BALL_ON_CLAW);
 		flipper_enable ();
+		ballsave_add_time (10);
 	isStandupFrenzyActivated = TRUE;
 	++standupFrenzy_modes_achieved;
 	standupFrenzyNumHits = 0;
@@ -133,24 +133,38 @@ void standupFrenzy_mode_init (void) {
 void standupFrenzy_mode_exit (void) {
 	/* Light all 'default' lamps */
 	isStandupFrenzyActivated = FALSE;
-	standupFrenzyLightsLit = NO_TARGETS;
+	task_sleep (TIME_100MS);
 	standupLightsLit  = ALL_TARGETS;
 	callset_invoke (lamp_update);
+	//	standupFrenzyLightsLit = NO_TARGETS;
 }//end of standupFrenzy_mode_exit 
 
 
 
+CALLSET_ENTRY (standupFrenzy, start_ball) {
+	/* Light all 'default' lamps */
+	standupFrenzyLightsLit = NO_TARGETS;
+	standupLightsLit  = ALL_TARGETS;
+	callset_invoke (lamp_update);
+}//end of function
+
+
 CALLSET_ENTRY (standupFrenzy, start_player) {
-standup_MessageCounter = 0;
-standupFrenzy_modes_achieved = 0;  //these need to be zeroed in before we enter the mode so bonus doesn't fake trigger
-standupFrenzyNumHits = 0;
-/* Light all 'default' lamps */
-standupFrenzyLightsLit = NO_TARGETS;
-standupLightsLit  = ALL_TARGETS;
-standup_num_of_hits = 0;
-standup_goal = STANDUP_EASY_GOAL;
-isStandupFrenzyActivated = FALSE;
-callset_invoke (lamp_update);
+	standup_MessageCounter = 0;
+	standupFrenzy_modes_achieved = 0;  //these need to be zeroed in before we enter the mode so bonus doesn't fake trigger
+	standupFrenzyNumHits = 0;
+	/* Light all 'default' lamps */
+	standupFrenzyLightsLit = NO_TARGETS;
+	standupLightsLit  = ALL_TARGETS;
+	standup_num_of_hits = 0;
+	standup_goal = STANDUP_EASY_GOAL;
+	isStandupFrenzyActivated = FALSE;
+	callset_invoke (lamp_update);
+
+#ifdef CONFIG_DIFFICULTY_LEVEL
+	if (system_config.difficulty == EASY) 	standup_goal = STANDUP_EASY_GOAL;
+	else									standup_goal = STANDUP_HARD_GOAL;
+#endif
 }//end of function
 
 
@@ -178,15 +192,17 @@ CALLSET_ENTRY (standupFrenzy, sw_standup_5) { standupHandler(0x10); }
 void standupHandler (U8 target) {
 	const U8 sw = task_get_arg ();
 	const U8 lamp = switch_lookup_lamp (sw);
+
 	//verify target hit was a lit target and verify mode is running
 	if ((standupFrenzyLightsLit & target) && timed_mode_running_p(&standupFrenzy_mode)) frenzyHandler (target, lamp);
-	//else mode NOT running ---verify target hit was a lit target
+
+	//else frenzy mode NOT running - check for other modes
+	else if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made(); //do not change status of standup light
+	else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) 	prison_break_made(); //do not change status of standup light
+
+	//else no modes running ---verify target hit was a lit target
 	else if ((standupLightsLit & target) && !timed_mode_running_p(&standupFrenzy_mode)) standupHandler1 (target, lamp);
-	//else mode NOT running and target NOT lit ---check for prison break or huxley
-	else {
-		if (flag_test(FLAG_IS_HUXLEY_RUNNING) )	huxley_mode_shot_made();
-		else if (flag_test (FLAG_IS_PBREAK_RUNNING) ) { prison_break_made(); }
-	}//otherwise - do nothing
+	//otherwise - do nothing since an unlit target was hit
 }//end of standupHandler
 
 
@@ -200,6 +216,7 @@ void update_exploded (U8 target){
 			case 0x10: exploded[4]++; break;
 	}//end of switch
 }//end of function
+
 
 
 void frenzyHandler (U8 target, U8 lamp) {
@@ -244,7 +261,6 @@ void frenzyHandler (U8 target, U8 lamp) {
 
 void standupHandler1 (U8 target, U8 lamp) {
 		++standup_num_of_hits;
-		standup_effect();
 		standupLightsLit &= ~target;  /* flag that target as hit */
 		standup_lamp_update1 (target, lamp);
 		if (flag_test (FLAG_IS_PBREAK_RUNNING) ) 		prison_break_made();
@@ -252,11 +268,18 @@ void standupHandler1 (U8 target, U8 lamp) {
 		lamp_tristate_flash (lamp);
 		score (STANDUP_SCORE);
 		//if we reached our quick freeze goal and quick freeze is not already set
-		if (standup_num_of_hits >= standup_goal  && !flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED)) {
-				sound_start (ST_SPEECH, SPCH_QUICK_FREEZE_ACTIVATED, SL_4S, PRI_GAME_QUICK5);
-				light_quick_freeze_light_on();//sent to inlanes.c
-				if (standup_goal < STANDUP_GOAL_MAX ) standup_goal += STANDUP_GOAL_INCREMENT;
+		if (standup_num_of_hits >= standup_goal) {
+				increment_light_quick_freeze_light();//sent to inlanes.c
+
+				#ifdef CONFIG_DIFFICULTY_LEVEL
+					if (system_config.difficulty == EASY) 	standup_goal += STANDUP_GOAL_INCREMENT;
+					else									standup_goal += STANDUP_HARD_GOAL_INCREMENT;
+				#elif
+															standup_goal += STANDUP_GOAL_INCREMENT;
+				#endif
+
 			}
+		deff_start (DEFF_STANDUP_EFFECT);
 		//if 5th light out then reset all lights back on
 		if (standup_num_of_hits % 5 == 0) 	{
 			standupLightsLit = ALL_TARGETS;
@@ -266,20 +289,12 @@ void standupHandler1 (U8 target, U8 lamp) {
 
 
 
-U8 collect_standups_counter;
-void collect_standups(void ) {
-	for (collect_standups_counter = 0; collect_standups_counter <= standup_num_of_hits; collect_standups_counter++) {
-			score (STANDUP_SCORE);
-			deff_start (DEFF_COLLECT_STANDUPS_EFFECT);
-	}//end of loop
-}//end of function
-
 
 /****************************************************************************
  * stand up lamps update
  ****************************************************************************/
 void standup_lamp_update1 (U8 mask, U8 lamp) {
-	if (timed_mode_running_p (&standupFrenzy_mode))	{
+	if (isStandupFrenzyActivated)	{
 			//target was not hit yet, flash it
 			if (standupFrenzyLightsLit & mask)	lamp_tristate_flash (lamp);
 			else								lamp_tristate_off (lamp);
@@ -319,7 +334,9 @@ void standupFrenzy_mode_expire (void) {
 
 
 /****************************************************************************
+ *
  * sound effects
+ *
  ****************************************************************************/
 void standup_sounds (void) {
 	standup_SoundCounter = random_scaled(3);//from kernal/random.c
@@ -345,96 +362,9 @@ void standupFrenzy_sounds (void) {
 
 
 /****************************************************************************
- * DMD display - non-frenzy
- ****************************************************************************/
-//flash the page and show the number - counting down
-void collect_standups_effect_deff(void) {
-	dmd_alloc_pair ();
-	dmd_clean_page_low ();
-	sprintf ("%d", standup_num_of_hits - collect_standups_counter);
-	font_render_string_center(&font_fireball, DMD_MIDDLE_X, DMD_MIDDLE_Y, sprintf_buffer);
-	dmd_copy_low_to_high ();
-	dmd_show_low ();
-	dmd_invert_page (dmd_low_buffer);
-	deff_swap_low_high (1, TIME_100MS);
-
-	if (collect_standups_counter < 3 )		{
-		sound_start (ST_EFFECT, ZAPP_3_LONG, SL_2S, PRI_GAME_QUICK2);
-		task_sleep (TIME_500MS);
-		task_sleep (TIME_250MS);
-	}
-	else if (collect_standups_counter < 6) {
-		sound_start (ST_EFFECT, ZAPP_3_MED, SL_2S, PRI_GAME_QUICK3);
-		task_sleep (TIME_500MS);
-	}
-	else 			{
-		sound_start (ST_EFFECT, ZAPP_3_SHORT, SL_2S, PRI_GAME_QUICK5);
-		task_sleep (TIME_300MS);
-	}
-	deff_exit ();
-}//end of FUNCTION
-
-
-
-void standup_effect(void) {
-	deff_start (DEFF_STANDUP_EFFECT);
-}//end of FUNCTION
-
-
-
-void standup_effect_deff (void) {
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "STAND");
-	dmd_show_low ();
-
-	dmd_alloc_low_clean ();
-	dmd_sched_transition (&trans_scroll_up);
-	font_render_string_center (&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top, "UP");
-	dmd_show_low ();
-
-	dmd_clean_page_low ();
-	dmd_sched_transition (&trans_scroll_up);
-	switch (++standup_MessageCounter % 3) {
-		default:
-		case 0:
-			if (standup_num_of_hits == 0) 			sprintf ("0");//for testing in development
-			else 									sprintf ("%d", standup_num_of_hits);
-			font_render_string_center(&font_fireball, DMD_MIDDLE_X, DMD_BIG_CY_Top - 2, sprintf_buffer);
-			sprintf ("STANDUPS");
-			font_render_string_center(&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, sprintf_buffer);
-			sprintf ("HIT");
-			font_render_string_center(&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, sprintf_buffer);
-			break;
-		case 1:
-			if (!flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED)) {
-				sprintf ("HIT %d MORE", standup_goal - standup_num_of_hits);
-				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
-				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "TO");
-				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "LIGHT QUICK FREEZE");
-			}
-			else {
-				font_render_string_center (&font_lithograph, DMD_MIDDLE_X, DMD_SMALL_CY_1, "FREEZE");
-				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "IS");
-				font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "ACTIVATED");
-			}
-			break;
-		case 2:
-			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "CRYO CLAW");
-			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_2, "LOCK FREEZE");
-			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_3, "STARTS");
-			font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_4, "STANDUP FRENZY");
-			break;
-		}//end of switch
-	dmd_show_low ();
-	task_sleep_sec (1);
-	task_sleep (TIME_500MS);
-	deff_exit ();
-}//end of standupFrenzy_mode_deff
-
-
-/****************************************************************************
- * DMD display - frenzy
+ *
+ * display effects -- frenzy mode only
+ *
  ****************************************************************************/
 void standupfrenzy_start_effect_deff (void) {
 	U8 x;
@@ -570,7 +500,7 @@ void standupfrenzy_show_rotate_cw_exploded (U8 step, U8 x, U8 y) {
 	case 6:	bitmap_blit (explos2_7_low_bits, x, y);	break;
 	case 7:	bitmap_blit (explos2_8_low_bits, x, y);	break;
 	case 8:	bitmap_blit (explos2_9_low_bits, x, y);	break;
-	case 9:	bitmap_blit (explos2_10_low_bits, x, y);	break;
+	case 9:	bitmap_blit (explos2_10_low_bits, x, y); break;
 	}//end of switch
 }//end of function
 
@@ -578,20 +508,27 @@ void standupfrenzy_show_rotate_cw_exploded (U8 step, U8 x, U8 y) {
 
 void standupfrenzy_effect_deff (void) {
 	U8 i = 0;
+	U8 toggle = 0;
 	for (;;) {
 		i++;
 		//for testing only
-/*
-		if (i == 30) {exploded[0]++;}
-		if (i == 50) {exploded[1]++;}
-		if (i == 70) {exploded[2]++;}
-		if (i == 90) {exploded[3]++;}
-		if (i == 110) {exploded[4]++;}
-*/
+		if (IN_TEST) {
+			if (i == 30) {exploded[0]++;}
+			if (i == 50) {exploded[1]++;}
+			if (i == 70) {exploded[2]++;}
+			if (i == 90) {exploded[3]++;}
+			if (i == 110) {exploded[4]++;}
+		}
 		dmd_alloc_low_clean ();
 		dmd_draw_thin_border (dmd_low_buffer);
 
-		font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, "SHOOT STANDUP TARGETS");
+		if (i % 50 == 0) if (++toggle > 3) toggle = 0;//change TOGGLE once per n seconds
+
+					if (toggle == 1) 		sprintf ("%d SEC LEFT", standupFrenzyTimer);
+					else if (toggle == 2)	sprintf ("%d HIT", standupFrenzyNumHits);
+					else if (toggle == 0)	sprintf ("SHOOT STANDUP TARGETS");
+
+					font_render_string_center (&font_var5, DMD_MIDDLE_X, DMD_SMALL_CY_1, sprintf_buffer);
 
 		if (exploded[0]) 	standupfrenzy_show_rotate_ccw_exploded( exploded[0]++, 2, 8);
 		else				standupfrenzy_show_circle_2_rotate_ccw 	( (i)%8, 	2, 8);
@@ -622,3 +559,56 @@ void standupfrenzy_end_effect_deff (void) {
 	task_sleep_sec (2);
 	deff_exit ();
 } // standupFrenzyTotalScore_deff
+
+
+
+
+
+
+/****************************************************************************
+ *
+ * DMD display - non-frenzy
+ *
+ ****************************************************************************/
+void standup_effect_deff (void) {
+	U8 i = 0;
+	if (IN_TEST) {	if (++standup_MessageCounter > 2) standup_MessageCounter = 0; standup_num_of_hits++;}
+	else			standup_MessageCounter = random_scaled(3);
+
+	for (i = 0; i < 20; i++) {
+			dmd_alloc_low_clean ();
+			standupfrenzy_show_circle_2_rotate_ccw 	( (i)%8, 	102, 8);
+
+			switch (standup_MessageCounter) {
+				default:
+				case 0:
+					sprintf ("%d", standup_num_of_hits);
+					font_render_string_right (&font_fireball, 80, DMD_BIG_CY_Top - 7, sprintf_buffer);
+					font_render_string_right (&font_fireball, 95, DMD_BIG_CY_Bot - 7, "TARGETS");
+					break;
+				case 1:
+					if (!flag_test(FLAG_IS_LRAMP_QUICKFREEZE_ACTIVATED)) {
+						sprintf ("HIT %d MORE", standup_goal - standup_num_of_hits);
+						font_render_string_right (&font_term6, 95, DMD_MED_CY_1 - 4, sprintf_buffer);
+						font_render_string_right (&font_var5, 95, DMD_SMALL_CY_3 - 3, "TO LIGHT");
+						font_render_string_right (&font_lithograph, 95, DMD_MED_CY_3 - 9, "FREEZE");
+					}
+					else {
+						font_render_string_right (&font_lithograph, 95, DMD_BIG_CY_Top - 7, "FREEZE");
+						font_render_string_right (&font_lithograph, 99, DMD_BIG_CY_Bot - 7, "ACTIVATED");
+					}
+					break;
+				case 2:
+					font_render_string_right (&font_term6, 95, DMD_MED_CY_1 - 4, "CLAW FREEZE");
+					font_render_string_right (&font_var5, 95, DMD_SMALL_CY_3 - 6, "STARTS");
+					font_render_string_right (&font_fireball, 95, DMD_MED_CY_3 - 9, "FRENZY");
+					break;
+				}//end of switch
+			task_sleep (TIME_100MS);
+			dmd_show_low ();
+	}//end of for loop
+	deff_exit ();
+}//end of standupFrenzy_mode_deff
+
+
+

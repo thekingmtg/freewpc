@@ -99,7 +99,7 @@ CALLSET_ENTRY (goalie_driver, sw_goalie_left)
 	goalie_errors &= ~GOAL_EDGE_LEFT_SEEN;
 	if (goalie_position == GOALIE_LEFT_TO_RIGHT)
 	{
-		/* ODO - right opto not seen.
+		/* TODO - right opto not seen.
 		If this persists, we can take goalie_distance/2
 		as the expected value to simulate it. */
 	}
@@ -192,7 +192,7 @@ void goalie_status_display (void)
 {
 	const char *s;
 
-	font_render_string_center (&font_var5, 64, 2, "GOALIE TEST");
+	font_render_string_center (&font_mono5, 64, 2, "GOALIE TEST");
 
 	if (goalie_status & GOALIE_CALIBRATING)
 		s = "CALIBRATING";
@@ -219,7 +219,7 @@ void goalie_status_display (void)
 	font_render_string_center (&font_var5, 64, 16, s);
 
 	sprintf ("POS %d/%d", goalie_distance, goal_width);
-	font_render_string_center (&font_var5, 64, 24, sprintf_buffer);
+	font_render_string_center (&font_mono5, 64, 24, sprintf_buffer);
 
 	dmd_show_low ();
 }

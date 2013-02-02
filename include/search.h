@@ -34,7 +34,7 @@ __common__ void ball_search_now (void);
 #ifdef MACHINE_BALL_SEARCH_TIME
 #define BS_TIMEOUT_DEFAULT MACHINE_BALL_SEARCH_TIME
 #else
-#define BS_TIMEOUT_DEFAULT	15
+#define BS_TIMEOUT_DEFAULT	20
 #endif
 
 #endif /* _SEARCH_H */

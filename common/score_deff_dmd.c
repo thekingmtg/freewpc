@@ -92,22 +92,22 @@ const struct score_font_info
 
 	/* The height of the bounding box in rows (equal to font height) */
 } score_font_info_table[] = {
-	[SCORE_POS_CENTER_LARGE] = { fontargs_render_string_center, &font_fixed10, 64, 10, 3*DMD_BYTE_WIDTH, DMD_BYTE_WIDTH },
+	[SCORE_POS_CENTER_LARGE] = { fontargs_render_string_center, &font_lucida9, 64, 10, 3*DMD_BYTE_WIDTH, DMD_BYTE_WIDTH },
 
 #define LROW(fontsize) (DMD_STATUS_ROW - 3 - (fontsize))
-	[SCORE_POS_UL_LARGE] = { fontargs_render_string_left, &font_fixed10, 0, 1, 1*DMD_BYTE_WIDTH, DMD_BYTE_WIDTH },
-	[SCORE_POS_LL_LARGE] = { fontargs_render_string_left, &font_fixed10, 0, LROW(13), LROW(13UL)*DMD_BYTE_WIDTH, DMD_BYTE_WIDTH },
-	[SCORE_POS_LR_LARGE] = { fontargs_render_string_right, &font_fixed10, 127, LROW(13), LROW(13UL)*DMD_BYTE_WIDTH, DMD_BYTE_WIDTH },
+	[SCORE_POS_UL_LARGE] = { fontargs_render_string_left, &font_lucida9, 0, 1, 1*DMD_BYTE_WIDTH, DMD_BYTE_WIDTH },
+	[SCORE_POS_LL_LARGE] = { fontargs_render_string_left, &font_lucida9, 0, LROW(13), LROW(13UL)*DMD_BYTE_WIDTH, DMD_BYTE_WIDTH },
+	[SCORE_POS_LR_LARGE] = { fontargs_render_string_right, &font_lucida9, 127, LROW(13), LROW(13UL)*DMD_BYTE_WIDTH, DMD_BYTE_WIDTH },
 
 	[SCORE_POS_UL_MED] = { fontargs_render_string_left, &font_mono9, 0, 1, 1*DMD_BYTE_WIDTH, 8 },
 	[SCORE_POS_UR_MED] = { fontargs_render_string_right, &font_mono9, 127, 1, 1*DMD_BYTE_WIDTH+8, 8 },
 	[SCORE_POS_LL_MED] = { fontargs_render_string_left, &font_mono9, 0, LROW(8), LROW(8UL)*DMD_BYTE_WIDTH, 8 },
 	[SCORE_POS_LR_MED] = { fontargs_render_string_right, &font_mono9, 127, LROW(8), LROW(8UL)*DMD_BYTE_WIDTH+8, 8 },
 
-	[SCORE_POS_UL_SMALL] = { fontargs_render_string_left, &font_var5, 0, 1 },
-	[SCORE_POS_UR_SMALL] = { fontargs_render_string_right, &font_var5, 127, 1 },
-	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_var5, 0, LROW(6) },
-	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_var5, 127, LROW(6) },
+	[SCORE_POS_UL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, 1 },
+	[SCORE_POS_UR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, 1 },
+	[SCORE_POS_LL_SMALL] = { fontargs_render_string_left, &font_mono5, 0, LROW(6) },
+	[SCORE_POS_LR_SMALL] = { fontargs_render_string_right, &font_mono5, 127, LROW(6) },
 
 	[SCORE_POS_UL_TINY] = { fontargs_render_string_left, &font_tinynum, 0, 1 },
 	[SCORE_POS_UR_TINY] = { fontargs_render_string_right, &font_tinynum, 127, 1 },

@@ -52,10 +52,10 @@ void rule_begin (void)
 static void rule_msg (const char *line1, const char *line2, const char *line3, const char *line4)
 {
 	dmd_alloc_pair_clean ();
-	font_render_string_left (&font_fixed6, 2, 2, line1)
-	font_render_string_center (&font_var5, 64, 15, line2)
-	font_render_string_center (&font_var5, 64, 22, line3)
-	font_render_string_center (&font_var5, 64, 29, line4)
+	font_render_string_left (&font_fixed6, 2, 2, line1);
+	font_render_string_center (&font_var5, 64, 15, line2);
+	font_render_string_center (&font_var5, 64, 22, line3);
+	font_render_string_center (&font_var5, 64, 29, line4);
 	dmd_sched_transition (&trans_sequential_boxfade);
 	dmd_show_low ();
 }
@@ -71,7 +71,7 @@ void rules_leff (void)
 
 void rules_rollover_leff (void)
 {
-	triac_disable (TRIAC_GI_MASK);
+	gi_disable (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		lamp_tristate_off (LM_RIGHT_INLANE);
@@ -88,7 +88,7 @@ void rules_rollover_leff (void)
 
 void rules_sssmb_leff (void)
 {
-	triac_disable (TRIAC_GI_MASK);
+	gi_disable (PINIO_GI_STRINGS);
 	for (;;)
 	{
 		lamp_tristate_off (LM_BONUS_X);
@@ -189,11 +189,11 @@ void rules_ramp_battle_leff (void)
 {
 	for (;;)
 	{
-		triac_disable (GI_POWERFIELD);
+		gi_disable (GI_POWERFIELD);
 		lamp_tristate_flash (LM_RAMP_BATTLE);
 		task_sleep_sec (4);
 		lamp_tristate_off (LM_RAMP_BATTLE);
-		triac_enable (GI_POWERFIELD);
+		gi_enable (GI_POWERFIELD);
 		task_sleep_sec (3);
 	}
 }
@@ -202,9 +202,9 @@ void rules_powerfield_leff (void)
 {
 	for (;;)
 	{
-		triac_enable (GI_POWERFIELD);
+		gi_enable (GI_POWERFIELD);
 		task_sleep_sec (2);
-		triac_disable (GI_POWERFIELD);
+		gi_disable (GI_POWERFIELD);
 		leff_start (LEFF_MPF_HIT);
 		task_sleep_sec (2);
 	}
@@ -245,61 +245,13 @@ void rules_doinks_leff (void)
 	}
 }
 
-void rules_oddchange1_leff (void)
-{
-	for (;;)
-	{
-		lamp_tristate_flash (LM_LL_5M);
-		task_sleep (TIME_200MS);
-		lamp_tristate_off (LM_LL_5M);
-
-		lamp_tristate_flash (LM_ML_5M);
-		task_sleep (TIME_200MS);
-		lamp_tristate_off (LM_ML_5M);
-
-		lamp_tristate_flash (LM_UL_5M);
-		task_sleep (TIME_200MS);
-		lamp_tristate_off (LM_UL_5M);
-
-		lamp_tristate_flash (LM_UR_5M);
-		task_sleep (TIME_200MS);
-		lamp_tristate_off (LM_UR_5M);
-		
-		lamp_tristate_flash (LM_MR1_5M);
-		task_sleep (TIME_200MS);
-		lamp_tristate_off (LM_MR1_5M);
-
-		lamp_tristate_flash (LM_MR2_5M);
-		task_sleep (TIME_200MS);
-		lamp_tristate_off (LM_MR2_5M);
-
-		lamp_tristate_flash (LM_LR_5M);
-		task_sleep (TIME_200MS);
-		lamp_tristate_off (LM_LR_5M);
-	}
-}
-
-void rules_oddchange2_leff (void)
-{
-	for (;;)
-	{
-		lamp_tristate_flash (LM_PIANO_JACKPOT);
-		task_sleep_sec (1);
-		lamp_tristate_off (LM_PIANO_JACKPOT);
-
-		lamp_tristate_flash (LM_SLOT_MACHINE);
-		task_sleep_sec (1);
-		lamp_tristate_off (LM_SLOT_MACHINE);
-	}
-}
-
 void rules_deff (void)
 {
 	music_disable ();
 	leff_stop_all ();
 
 	rule_begin ();
-	triac_disable (TRIAC_GI_MASK);
+	gi_disable (PINIO_GI_STRINGS);
 	rule_msg ("BACK TO THE ZONE", "", "HOW TO PLAY", "");
 	rules_sleep_sec (5);
 	rule_complete ();
@@ -353,38 +305,27 @@ void rules_deff (void)
 	rule_begin ();
 	rule_msg ("POWERFIELD", "HITCHHIKERS UNLOCK", "THE RIGHT RAMP", "TO THE POWERFIELD");
 	task_create_gid1 (GID_RULES_LEFF, rules_ramp_battle_leff);
-	rules_sleep_sec (9);
+	task_sleep_sec (9);
 	rule_complete ();
 
 	rule_begin ();
 	rule_msg ("POWERFIELD", "PRESS THE FLIPPER BUTTONS", "TO SHOOT THE BALL INTO", "THE TOP OF THE POWERFIELD");
 	task_create_gid1 (GID_RULES_LEFF, rules_powerfield_leff);
 	rules_sleep_sec (9);
-	triac_disable (GI_POWERFIELD);
+	gi_disable (GI_POWERFIELD);
 	rule_complete ();
 
 	rule_begin ();
 	rule_msg ("DOINK MODE", "SHOOT THE LEFT RAMP", "FROM THE RIGHT INLANE", "TO START DOINK MODE");
 	task_create_gid1 (GID_RULES_LEFF, rules_doinks_leff);
 	rules_sleep_sec (9);
-	rule_msg ("DOINK MODE", "HIT THE FLIPPER BUTTONS", "WHILST THE BALL IS BEING HELD", "TO SCORE POINTS");
-	rules_sleep_sec (9);
-	rule_complete ();
-	
-	rule_begin ();
-	rule_msg ("ODDCHANGE", "HITTING THE YELLOW", "TARGETS RANDOMLY BUILDS", "THE ODDCHANGE POT");
-	task_create_gid1 (GID_RULES_LEFF, rules_oddchange1_leff);
+
+	rule_msg ("DOINK MODE", "WHILST THE BALL IS BEING HELD", "HIT THE FLIPPER BUTTONS", "TO SCORE POINTS");
 	rules_sleep_sec (9);
 	rule_complete ();
 
 	rule_begin ();
-	rule_msg ("ODDCHANGE", "HIT THE PIANO OR", "THE SLOT MACHINE WHEN", "UNLIT TO COLLECT");
-	task_create_gid1 (GID_RULES_LEFF, rules_oddchange2_leff);
-	rules_sleep_sec (9);
-	rule_complete ();
-
-	rule_begin ();
-	rule_msg ("THANKS", "WE HOPE YOU", "ENJOY PLAYING","WWW.ODDCHANGE.COM/FREEWPC");
+	rule_msg ("", "AND HAVE SOME FUN", "WHILST YOU ARE AT IT", "");
 	rules_sleep_sec (4);
 	rule_complete ();
 	

@@ -257,8 +257,11 @@ void end_ball (void)
 	/* If the ball was not tilted, start bonus. */
 	in_bonus = TRUE;
 	//music_disable ();
-	if (!in_tilt)
-		callset_invoke (bonus);
+	if (!in_tilt) {
+		if (flag_test(FLAG_BACK_IN_THE_FRIDGE_ENDING) ) callset_invoke (bitf_end);
+		else 											callset_invoke (bonus);
+	}
+	else callset_invoke (bonus_complete); // if tilted, player gets no bonus
 
 	//create a task to monitor bonus -- if bonus exits
 	//properly then it will continue to serve the next ball
@@ -291,14 +294,14 @@ CALLSET_ENTRY(game, bonus_complete){
 
 
 void end_ball2 (void) {
-		in_bonus = FALSE;
+	in_bonus = FALSE;
 
 	/* If the player has extra balls stacked, then start the
 	 * next ball without changing the current player up. */
 	if (decrement_extra_balls ())
 	{
 #ifdef DEFF_SHOOT_AGAIN
-		deff_start_sync (DEFF_SHOOT_AGAIN);
+		deff_start (DEFF_SHOOT_AGAIN);
 #endif
 #ifdef LEFF_SHOOT_AGAIN
 		leff_start (LEFF_SHOOT_AGAIN);
@@ -517,8 +520,9 @@ void start_ball (void)
 #ifdef CONFIG_GI
 	gi_enable (PINIO_GI_STRINGS);
 #endif
-	ball_search_timeout_set (12);
+	ball_search_timeout_set (15);
 	ball_search_monitor_start ();
+
 
 	/* If timed game support is built-in and enabled, then
 	start a task to monitor the game time. */
@@ -546,6 +550,7 @@ void set_valid_playfield (void)
 		valid_playfield = TRUE;		
 		callset_invoke (valid_playfield);
 		effect_update_request ();
+//		ball_search_timeout_set (15);
 	}
 }
 

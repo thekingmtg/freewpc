@@ -61,14 +61,19 @@ void ball_save_leff (void)
 
 
 /**
- * Start/extend the ballsaver.
+ * Start / extend a ballsaver
+ * but limit the total time that we can have ballsave to something reasonable
  */
-void ballsave_add_time (U8 secs)
-{
-	if (in_tilt)
-		return;
-	timed_mode_add (&ball_save_mode, secs);
-}
+void ballsave_add_time (U8 secs) {
+	if (in_tilt) return;
+	if (timed_mode_running_p (&ball_save_mode) ) {
+		if (timed_mode_get_timer(&ball_save_mode) < 15 ) timed_mode_reset (&ball_save_mode, 15);
+	}
+	else { //its not already running so start it fresh
+		timed_mode_begin (&ball_save_mode); //starts mode with default time
+		timed_mode_reset (&ball_save_mode, secs); //reset time to the time we want
+	}
+}//end of function
 
 
 /**

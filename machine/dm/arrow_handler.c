@@ -5,7 +5,6 @@
  * written by James Cardona
  *
  */
-/* CALLSET_SECTION (arrow_handler, __machine2__) */
 
 #include <freewpc.h>
 #include "dm/global_constants.h"
@@ -38,7 +37,8 @@ CALLSET_ENTRY (arrow_handler, start_player, start_ball) 	{
 void center_ramp_arrow_update(void) {
 	if (	flag_test (FLAG_IS_CAPSIM_CENTERRAMP_ACTIVATED)
 		||	flag_test (FLAG_IS_ACMAG_RUNNING)
-		||	flag_test (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED) )
+		||	flag_test (FLAG_IS_COMBO_CENTERRAMP_ACTIVATED)
+		||	flag_test (FLAG_IS_C_RAMP_JACKPOT_ACTIVATED) )
 		cramp_arrow_light_on();
 	else
 		cramp_arrow_light_off();
@@ -48,7 +48,8 @@ void center_ramp_arrow_update(void) {
 
 void uground_arrow_update(void) {
 	if (	flag_test (FLAG_IS_CAPSIM_UNDER_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_UNDER_ACTIVATED) )
+		||	flag_test (FLAG_IS_COMBO_UNDER_ACTIVATED)
+		||	flag_test (FLAG_IS_UGROUND_JACKPOT_ACTIVATED) )
 			underground_arrow_light_on();
 	else
 			underground_arrow_light_off();
@@ -58,7 +59,8 @@ void uground_arrow_update(void) {
 
 void l_ramp_arrow_update(void) {
 	if (	flag_test (FLAG_IS_CAPSIM_LEFTRAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED) )
+		||	flag_test (FLAG_IS_COMBO_LEFTRAMP_ACTIVATED)
+		||	flag_test (FLAG_IS_L_RAMP_JACKPOT_ACTIVATED) )
 		lramp_arrow_light_on();
 	else
 		lramp_arrow_light_off();
@@ -68,7 +70,8 @@ void l_ramp_arrow_update(void) {
 
 void s_ramp_arrow_update(void) {
 	if (	flag_test (FLAG_IS_CAPSIM_SIDERAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_SIDERAMP_ACTIVATED) )
+		||	flag_test (FLAG_IS_COMBO_SIDERAMP_ACTIVATED)
+		||	flag_test (FLAG_IS_S_RAMP_JACKPOT_ACTIVATED) )
 		sramp_arrow_light_on();
 	else
 		sramp_arrow_light_off();
@@ -77,7 +80,8 @@ void s_ramp_arrow_update(void) {
 
 void r_ramp_arrow_update(void) {
 	if (	flag_test (FLAG_IS_CAPSIM_RIGHTRAMP_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED) )
+		||	flag_test (FLAG_IS_COMBO_RIGHTRAMP_ACTIVATED)
+		||	flag_test (FLAG_IS_R_RAMP_JACKPOT_ACTIVATED) )
 		rramp_arrow_light_on();
 	else
 		rramp_arrow_light_off();
@@ -88,7 +92,8 @@ void r_ramp_arrow_update(void) {
 
 void l_orb_arrow_update(void) {
 	if (	flag_test (FLAG_IS_CAPSIM_LEFTORB_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_LEFTORB_ACTIVATED) )
+		||	flag_test (FLAG_IS_COMBO_LEFTORB_ACTIVATED)
+		||	flag_test (FLAG_IS_L_LOOP_JACKPOT_ACTIVATED) )
 		ll_arrow_light_on();
 	else
 		ll_arrow_light_off();
@@ -98,7 +103,8 @@ void l_orb_arrow_update(void) {
 
 void r_orb_arrow_update(void) {
 	if (	flag_test (FLAG_IS_CAPSIM_RIGHTORB_ACTIVATED)
-		||	flag_test (FLAG_IS_COMBO_RIGHTORB_ACTIVATED) )
+		||	flag_test (FLAG_IS_COMBO_RIGHTORB_ACTIVATED)
+		||	flag_test (FLAG_IS_R_LOOP_JACKPOT_ACTIVATED) )
 		rl_arrow_light_on();
 	else
 		rl_arrow_light_off();

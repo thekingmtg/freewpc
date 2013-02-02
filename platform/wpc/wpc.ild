@@ -194,6 +194,12 @@ images/wasteland/museum_8770.pgm
 images/wasteland/museum_8772.pgm
 IMG_WASTELAND_B1_END: images/wasteland/museum_8774.pgm
 
+IMG_WASTELAND_B2_START: images/wasteland/museum_8776.pgm
+images/wasteland/museum_8780.pgm
+images/wasteland/museum_8781.pgm
+images/wasteland/museum_8783.pgm
+IMG_WASTELAND_B2_END: images/wasteland/museum_8784.pgm
+
 
 
 ##################################################################################
@@ -393,17 +399,6 @@ IMG_FORTRESS_C_END: images/fortress/1museum_a_199.pgm
 #### CAPTURE SIMON MODE
 ##################################################################################
 ##################################################################################
-IMG_SIMON_A_START: images/wasteland/simon_1_80.pgm
-images/wasteland/simon_1_82.pgm
-images/wasteland/simon_1_84.pgm
-images/wasteland/simon_1_86.pgm
-images/wasteland/simon_1_88.pgm
-images/wasteland/simon_1_90.pgm
-images/wasteland/simon_1_92.pgm
-images/wasteland/simon_1_94.pgm
-images/wasteland/simon_1_96.pgm
-IMG_SIMON_A_END: images/wasteland/simon_1_98.pgm
-
 IMG_SIMON_B_START: images/wasteland/simon_2_65.pgm
 images/wasteland/simon_2_69.pgm
 images/wasteland/simon_2_73.pgm
@@ -428,14 +423,6 @@ images/capture_simon/cap_simon_437.pgm
 images/capture_simon/cap_simon_442.pgm
 IMG_CAPSIMON_A_END: images/capture_simon/cap_simon_449.pgm
 
-IMG_CAPSIMON_B_START: images/capture_simon/cap_simon_1772.pgm
-images/capture_simon/cap_simon_1776.pgm
-images/capture_simon/cap_simon_1779.pgm
-images/capture_simon/cap_simon_1784.pgm
-images/capture_simon/cap_simon_1788.pgm
-images/capture_simon/cap_simon_1791.pgm
-images/capture_simon/cap_simon_1800.pgm
-IMG_CAPSIMON_B_END: images/capture_simon/cap_simon_1803.pgm
 
 
 
@@ -530,13 +517,6 @@ images/cryoprison/prison_break_5_299.pgm
 images/cryoprison/prison_break_5_301.pgm
 IMG_PRISON_BREAK_D2_END: images/cryoprison/prison_break_5_302.pgm
 
-IMG_SHOT_DOC_A_START: images/wasteland/shoot_dr_cocteau_1055.pgm
-images/wasteland/shoot_dr_cocteau_1056.pgm
-images/wasteland/shoot_dr_cocteau_1057.pgm
-images/wasteland/shoot_dr_cocteau_1058.pgm
-images/wasteland/shoot_dr_cocteau_1059.pgm
-images/wasteland/shoot_dr_cocteau_1062.pgm
-IMG_SHOT_DOC_A_END: images/wasteland/shoot_dr_cocteau_1065.pgm
 
 
 
@@ -721,29 +701,6 @@ images/fortress/museum_a_142.pgm
 images/fortress/museum_a_146.pgm
 IMG_FORTRESS_A_END: images/fortress/museum_a_154.pgm
 
-IMG_FORTRESS_B_START: images/fortress/museum_a_188.pgm
-images/fortress/museum_a_192.pgm
-images/fortress/museum_a_196.pgm
-images/fortress/museum_a_200.pgm
-images/fortress/museum_a_204.pgm
-images/fortress/museum_a_208.pgm
-images/fortress/museum_a_212.pgm
-images/fortress/museum_a_216.pgm
-images/fortress/museum_a_220.pgm
-images/fortress/museum_a_224.pgm
-images/fortress/museum_a_228.pgm
-images/fortress/museum_a_232.pgm
-images/fortress/museum_a_236.pgm
-images/fortress/museum_a_240.pgm
-images/fortress/museum_a_244.pgm
-images/fortress/museum_a_248.pgm
-images/fortress/museum_a_252.pgm
-images/fortress/museum_a_254.pgm
-images/fortress/museum_a_341.pgm
-images/fortress/museum_a_345.pgm
-images/fortress/museum_a_349.pgm
-IMG_FORTRESS_B_END: images/fortress/museum_a_357.pgm
-
 IMG_FORTRESS_D1_START: images/fortress/fortress759.pgm
 images/fortress/fortress763.pgm
 images/fortress/fortress765.pgm
@@ -872,8 +829,8 @@ images/wasteland/simon_3_271.pgm
 images/wasteland/simon_3_273.pgm
 IMG_SIMON_C_END: images/wasteland/simon_3_276.pgm
 
-
-
+IMG_JACKPOT_14: machine/tz/animation/jackpot/jackpot14.pgm
+IMG_JACKPOT_END: machine/tz/animation/jackpot/jackpot15.pgm
 
 
 
@@ -882,6 +839,9 @@ IMG_SIMON_C_END: images/wasteland/simon_3_276.pgm
 #### WASTELAND MULTIBALL
 ##################################################################################
 ##################################################################################
+IMG_WASTELAND_RUNNING: images/wasteland/wasteland_running_1.pgm
+
+
 IMG_FLYKICK_A_START: images/wasteland/fly_kick_385.pgm
 images/wasteland/fly_kick_386.pgm
 images/wasteland/fly_kick_387.pgm
@@ -924,11 +884,6 @@ images/wasteland/museum_8059.pgm
 images/wasteland/museum_8062.pgm
 IMG_WASTELAND_A3_END: images/wasteland/museum_8065.pgm
 
-IMG_WASTELAND_B2_START: images/wasteland/museum_8776.pgm
-images/wasteland/museum_8780.pgm
-images/wasteland/museum_8781.pgm
-images/wasteland/museum_8783.pgm
-IMG_WASTELAND_B2_END: images/wasteland/museum_8784.pgm
 
 
 
@@ -938,36 +893,6 @@ IMG_WASTELAND_B2_END: images/wasteland/museum_8784.pgm
 #### CRYOPRISON MULTIBALL
 ##################################################################################
 ##################################################################################
-IMG_FIGHT_B_START: images/wasteland/fight_2_02.pgm
-images/wasteland/fight_2_06.pgm
-images/wasteland/fight_2_10.pgm
-images/wasteland/fight_2_14.pgm
-images/wasteland/fight_2_18.pgm
-images/wasteland/fight_2_22.pgm
-images/wasteland/fight_2_26.pgm
-images/wasteland/fight_2_30.pgm
-images/wasteland/fight_2_34.pgm
-images/wasteland/fight_2_38.pgm
-images/wasteland/fight_2_42.pgm
-images/wasteland/fight_2_46.pgm
-images/wasteland/fight_2_50.pgm
-images/wasteland/fight_2_54.pgm
-images/wasteland/fight_2_58.pgm
-images/wasteland/fight_2_62.pgm
-images/wasteland/fight_2_66.pgm
-images/wasteland/fight_2_70.pgm
-images/wasteland/fight_2_74.pgm
-images/wasteland/fight_2_78.pgm
-images/wasteland/fight_2_82.pgm
-images/wasteland/fight_2_86.pgm
-images/wasteland/fight_2_90.pgm
-images/wasteland/fight_2_101.pgm
-images/wasteland/fight_2_103.pgm
-images/wasteland/fight_2_105.pgm
-images/wasteland/fight_2_107.pgm
-images/wasteland/fight_2_109.pgm
-IMG_FIGHT_B_END: images/wasteland/fight_2_111.pgm
-
 IMG_CAPSIMON_C_START: images/capture_simon/cap_simon_2504.pgm
 images/capture_simon/cap_simon_2516.pgm
 images/capture_simon/cap_simon_2540.pgm
@@ -1008,13 +933,14 @@ images/fortress/museum_031.pgm
 images/fortress/museum_033.pgm
 IMG_CRYOPRISON_E2_END: images/fortress/museum_035.pgm
 
-IMG_SIMON_SHOOT_START: images/wasteland/simon_4_72.pgm
-images/wasteland/simon_4_75.pgm
-images/wasteland/simon_4_78.pgm
-images/wasteland/simon_4_79.pgm
-images/wasteland/simon_4_80.pgm
-images/wasteland/simon_4_81.pgm
-IMG_SIMON_SHOOT_END: images/wasteland/simon_4_82.pgm
+IMG_DR_COCTEAU_B_START: images/side_chars/dr_cocteau_4_736.pgm
+images/side_chars/dr_cocteau_4_740.pgm
+images/side_chars/dr_cocteau_4_748.pgm
+images/side_chars/dr_cocteau_4_756.pgm
+images/side_chars/dr_cocteau_4_760.pgm
+IMG_DR_COCTEAU_B_END: images/side_chars/dr_cocteau_4_774.pgm
+
+
 
 
 
@@ -1117,6 +1043,128 @@ IMG_HUXLEY_END_SCENE_11:  images/huxley/huxley_scene_910.pgm
 
 ##################################################################################
 ##################################################################################
+#### BACK IN THE FRIDGE - WIZARD MODE
+##################################################################################
+##################################################################################
+IMG_FREEZER1_START: images/demo_time/freezer_a_740.pgm
+images/demo_time/freezer_a_743.pgm
+images/demo_time/freezer_a_791.pgm
+images/demo_time/freezer_a_794.pgm
+images/demo_time/freezer_a_797.pgm
+images/demo_time/freezer_a_799.pgm
+images/demo_time/freezer_a_801.pgm
+images/demo_time/freezer_a_804.pgm
+images/demo_time/freezer_a_807.pgm
+images/demo_time/freezer_a_809.pgm
+images/demo_time/freezer_a_811.pgm
+images/demo_time/freezer_a_814.pgm
+images/demo_time/freezer_a_817.pgm
+images/demo_time/freezer_a_819.pgm
+images/demo_time/freezer_a_821.pgm
+images/demo_time/freezer_a_824.pgm
+IMG_FREEZER1_END: images/demo_time/freezer_a_827.pgm
+
+IMG_FREEZER2_START: images/demo_time/freezer_a_854.pgm
+images/demo_time/freezer_a_856.pgm
+images/demo_time/freezer_a_859.pgm
+images/demo_time/freezer_a_862.pgm
+images/demo_time/freezer_a_864.pgm
+images/demo_time/freezer_a_866.pgm
+images/demo_time/freezer_a_869.pgm
+images/demo_time/freezer_a_872.pgm
+images/demo_time/freezer_a_874.pgm
+images/demo_time/freezer_a_876.pgm
+images/demo_time/freezer_a_879.pgm
+images/demo_time/freezer_a_882.pgm
+images/demo_time/freezer_a_884.pgm
+images/demo_time/freezer_a_886.pgm
+images/demo_time/freezer_a_889.pgm
+images/demo_time/freezer_a_892.pgm
+images/demo_time/freezer_a_894.pgm
+IMG_FREEZER2_END: images/demo_time/freezer_a_896.pgm
+
+IMG_FREEZER3_START: images/demo_time/freezer_a_931.pgm
+images/demo_time/freezer_a_933.pgm
+images/demo_time/freezer_a_936.pgm
+images/demo_time/freezer_a_939.pgm
+images/demo_time/freezer_a_941.pgm
+images/demo_time/freezer_a_943.pgm
+images/demo_time/freezer_a_946.pgm
+images/demo_time/freezer_a_949.pgm
+images/demo_time/freezer_a_951.pgm
+images/demo_time/freezer_a_953.pgm
+images/demo_time/freezer_a_956.pgm
+images/demo_time/freezer_a_959.pgm
+images/demo_time/freezer_a_961.pgm
+images/demo_time/freezer_a_963.pgm
+IMG_FREEZER3_END: images/demo_time/freezer_a_966.pgm
+
+
+
+
+
+
+##################################################################################
+##################################################################################
+#### COMBOS
+##################################################################################
+##################################################################################
+IMG_COMBO1_START: images/combos/combo1.pgm
+images/combos/combo2.pgm
+images/combos/combo3.pgm
+images/combos/combo4.pgm
+images/combos/combo5.pgm
+images/combos/combo6.pgm
+images/combos/combo7.pgm
+images/combos/combo8.pgm
+IMG_COMBO1_END: images/combos/combo9.pgm
+
+
+IMG_COMBO2_START: images/combos/combo2-1.pgm
+images/combos/combo2-2.pgm
+images/combos/combo2-3.pgm
+images/combos/combo2-4.pgm
+images/combos/combo2-5.pgm
+images/combos/combo2-6.pgm
+images/combos/combo2-7.pgm
+images/combos/combo2-8.pgm
+images/combos/combo2-9.pgm
+images/combos/combo2-10.pgm
+images/combos/combo2-11.pgm
+IMG_COMBO2_END: images/combos/combo2-12.pgm
+
+
+
+
+
+
+##################################################################################
+##################################################################################
+#### SPECIAL SHOTS
+##################################################################################
+##################################################################################
+IMG_SIMON_FIRE2_START: images/wasteland/simon_fortress_2_88.pgm
+images/wasteland/simon_fortress_2_90.pgm
+images/wasteland/simon_fortress_2_92.pgm
+images/wasteland/simon_fortress_2_95.pgm
+images/wasteland/simon_fortress_2_97.pgm
+images/wasteland/simon_fortress_2_99.pgm
+images/wasteland/simon_fortress_2_101.pgm
+images/wasteland/simon_fortress_2_136.pgm
+images/wasteland/simon_fortress_2_139.pgm
+images/wasteland/simon_fortress_2_140.pgm
+images/wasteland/simon_fortress_2_143.pgm
+images/wasteland/simon_fortress_2_147.pgm
+images/wasteland/simon_fortress_2_149.pgm
+images/wasteland/simon_fortress_2_151.pgm
+IMG_SIMON_FIRE2_END: images/wasteland/simon_fortress_2_152.pgm
+
+
+
+
+
+##################################################################################
+##################################################################################
 ##################################################################################
 ##################################################################################
 ##################################################################################
@@ -1125,12 +1173,5 @@ IMG_HUXLEY_END_SCENE_11:  images/huxley/huxley_scene_910.pgm
 ##################################################################################
 
 
-
-IMG_DR_COCTEAU_B_START: images/side_chars/dr_cocteau_4_736.pgm
-images/side_chars/dr_cocteau_4_740.pgm
-images/side_chars/dr_cocteau_4_748.pgm
-images/side_chars/dr_cocteau_4_756.pgm
-images/side_chars/dr_cocteau_4_760.pgm
-IMG_DR_COCTEAU_B_END: images/side_chars/dr_cocteau_4_774.pgm
 
 

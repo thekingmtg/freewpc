@@ -308,7 +308,7 @@ CALLSET_ENTRY (ultra, sw_left_jet, sw_upper_jet, sw_lower_jet)
 
 CALLSET_ENTRY (ultra, sw_spinner_slow)
 {
-	/* ODO - this is getting called much faster than we can
+	/* TODO - this is getting called much faster than we can
 	 * process it on a hard shot */
 	ultra_score (&ultra_award_table[3]);
 }

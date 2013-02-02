@@ -63,7 +63,7 @@ match_draw_scores (void)
 	for (n = 0; n < num_players; n++)
 	{
 		sprintf ("%2b", &scores[n][BYTES_PER_SCORE-1]);
-		font_render_string_left (&font_var5, 0, 6*n, sprintf_buffer);
+		font_render_string_left (&font_mono5, 0, 6*n, sprintf_buffer);
 	}
 }
 

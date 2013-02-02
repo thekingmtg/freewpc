@@ -129,6 +129,17 @@ void timed_mode_end (struct timed_mode_ops *ops)
 
 
 /**
+ * End a mode without handler.
+ */
+void timed_mode_end2 (struct timed_mode_ops *ops)
+{
+	task_kill_gid (ops->gid);
+	*ops->timer = 0;
+}
+
+
+
+/**
  * Get the current timer for a mode.  This can be zero for a mode that is in
  * its grace period.
  *

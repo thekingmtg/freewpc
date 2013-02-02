@@ -42,10 +42,10 @@ checkpage ()
 	done
 
 	if [ "$used" -gt "$max" ]; then
-		echo "  error: overflow ($*)"
+		echo "  error: overflow $percent_used% ($*)"
 		return 1
 	fi
-	if [ "$percent_used" -gt 95 ]; then
+	if [ "$percent_used" -gt 50 ]; then
 		echo -n "  warning: $percent_used% full"
 	fi
 

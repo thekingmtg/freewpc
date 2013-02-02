@@ -24,7 +24,7 @@
  * estimate of average superjets mode score: 20 million to 80 million
  *
  */
-/* CALLSET_SECTION (superjets, __machine5__) */
+
 
 
 #include <freewpc.h>
@@ -75,7 +75,7 @@ struct timed_mode_ops superjets_mode = {
 	.deff_running = DEFF_SUPERJETS_EFFECT,
 //	.deff_ending = DEFF_SUPERJETS_END_EFFECT,
 	.prio = PRI_GAME_MODE3,
-	.init_timer = 63,
+	.init_timer = 58,
 	.timer = &superjets_mode_timer,
 	.grace_timer = 2, //default is 2
 //	.pause = system_timer_pause,
@@ -135,8 +135,8 @@ void superjets_mode_init (void) {
 			score_add(superjets_mode_score, score_table[SUPERJETS_START_SCORE3]);
 			score(SUPERJETS_START_SCORE3);
 			break;
-
 	}//end of switch
+	serve_ball_auto(); //add one ball to the playfield - NOT a multiball since doesn't change global ball count
 }//end of function
 
 
@@ -206,94 +206,15 @@ void superjets_goal_award (void) {
 	timed_mode_end (&superjets_mode);
 }//END OF FUNCTION
 
+
+
+
 /****************************************************************************
- * DMD display and sound effects
+ *
+ * display effects
+ *
  ****************************************************************************/
-void superjets_raceby (void){
-	dmd_alloc_pair_clean ();
-
-	if (sj_counter%2 == 0) 	sound_start (ST_ANY, RACE_BY_SHORT, SL_2S, PRI_GAME_QUICK5);
-	else 					sound_start (ST_ANY, RACE_BY_LONG, SL_2S, PRI_GAME_QUICK5);
-
-	bitmap_blit (superjets_across1_bits, 0, 32 - superjets_across1_height);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-	bitmap_blit (superjets_across2_bits, 0, 32 - superjets_across2_height);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-		bitmap_blit (superjets_across3_bits, 0, 32 - superjets_across3_height);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-	bitmap_blit (superjets_across4_bits, 0, 32 - superjets_across4_height);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-		bitmap_blit (superjets_across5_bits, 0, 32 - superjets_across5_height);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-	bitmap_blit (superjets_across6_bits, 0, 0);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-	bitmap_blit (superjets_across7_bits, 0, 0);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-	bitmap_blit (superjets_across8_bits, 0, 0);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-	bitmap_blit (superjets_across9_bits, 0, 0);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-		bitmap_blit (superjets_across10_bits, 0, 0);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-	bitmap_blit (superjets_across11_bits, 0, 0);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-		bitmap_blit (superjets_across12_bits, 0, 0);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-	bitmap_blit (superjets_across13_bits, 16, 0);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-		bitmap_blit (superjets_across14_bits, 32, 32 - superjets_across14_height);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-		bitmap_blit (superjets_across15_bits, 48, 32 - superjets_across15_height);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-	bitmap_blit (superjets_across16_bits, 64, 32 - superjets_across16_height);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-		bitmap_blit (superjets_across17_bits, 80, 32 - superjets_across17_height);
-		dmd_show_low ();
-		task_sleep (TIME_66MS);
-		dmd_clean_page_low ();
-	bitmap_blit (superjets_across18_bits, 96, 32 - superjets_across18_height);
-	dmd_show_low ();
-	task_sleep (TIME_66MS);
-	dmd_clean_page_low ();
-}//end of function
-
-
-
 void superjets_hit_effect_deff(void) {
-	if (superjets_mode_shots_made % 10 == 0) superjets_raceby();
-	else {
 			U8 i = 0;
 			sj_counter = 0;
 			U8 superjets_SoundCounter;
@@ -304,8 +225,8 @@ void superjets_hit_effect_deff(void) {
 			else 										sound_start (ST_SPEECH, SPCH_WOW, SL_2S, PRI_GAME_QUICK5);
 			//display 		*********************
 			do {
-				U8 x = random_scaled (6);
-				U8 y = random_scaled (4);
+				U8 x = random_scaled (8);
+				U8 y = random_scaled (3);
 				sj_counter++;
 				dmd_alloc_low_clean ();
 				if (sj_counter < 2)			bitmap_blit (superjets_bounce0_bits, 0, 0);
@@ -313,53 +234,56 @@ void superjets_hit_effect_deff(void) {
 				else 						bitmap_blit (superjets_bounce0_bits, 0, 0);
 
 
-				sprintf_score (superjets_mode_next_score);
-				if ((i % 2) == 0) {
-					font_render_string_center (&font_lithograph, DMD_MIDDLE_X + 30 + x, DMD_BIG_CY_Cent + y, sprintf_buffer);
-				} else {
-					font_render_string_center (&font_lithograph, DMD_MIDDLE_X + 30 - x, DMD_BIG_CY_Cent - y, sprintf_buffer);
-				}
+				sprintf ("%d", superjets_mode_shots_made);
+				if (i % 2 == 0) 	font_render_string_center (&font_antiqua, DMD_RIGHT_X + x, DMD_MIDDLE_Y + y, sprintf_buffer);
+				else 				font_render_string_center (&font_antiqua, DMD_RIGHT_X - x, DMD_MIDDLE_Y - y, sprintf_buffer);
+
 				dmd_show_low ();
 				task_sleep (TIME_100MS);
 			} while (i++ < 8);//about .8sec
 			sj_counter = 0;//reset for return to other mode
-	}//end of else
 	deff_exit ();
 }//end of mode_effect_deff
 
 
+
+
+
+
+
 void superjets_effect_deff(void) {
-U8 sj_swap = 0;
-dmd_alloc_low_clean ();
-for (;;) {
-		dmd_clean_page_low ();
-		sj_counter++;				//display coord in upper left corner - 40 bits wide at largest
-		if (sj_counter % 5 == 1)	bitmap_blit (superjets_bounce1_bits, 0, 0);
-		if (sj_counter % 5 == 2)	bitmap_blit (superjets_bounce2_bits, 0, 0);
-		if (sj_counter % 5 == 3)	bitmap_blit (superjets_bounce3_bits, 0, 0);
-		if (sj_counter % 5 == 4)	bitmap_blit (superjets_bounce2_bits, 0, 0);
-		if (sj_counter % 5 == 0)	bitmap_blit (superjets_bounce1_bits, 0, 0);
+	U8 sj_swap = 0;
+	U8 TOGGLE = 0;
 
-		//128-40 / 2 +40 = 84
+	for (;;) {
+				sprintf_score(current_score);
+				font_render_string_center (&font_var5, 90, DMD_SMALL_CY_1, sprintf_buffer);
 
-		if (sj_counter % 10 == 0) {
-			if (sj_swap) 	sj_swap = 0; 		else sj_swap = 1;
-		}
-		if (sj_swap) 	{
-			sprintf ("%d", superjets_mode_shots_made);
-			font_render_string_center (&font_var5, 84, DMD_SMALL_CY_5, sprintf_buffer);
-			font_render_string_center (&font_antiqua, 84, DMD_SMALL_CY_1, "SUPER");
-			font_render_string_center (&font_antiqua, 84, DMD_SMALL_CY_3, "JETS");
-		}
-		else 			{
-			sprintf ("%d TO GOAL", superjets_goal);
-			font_render_string_center (&font_var5, 84, DMD_SMALL_CY_5, sprintf_buffer);
-			font_render_string_center (&font_antiqua, 84, DMD_SMALL_CY_1, "SHOOT");
-			font_render_string_center (&font_antiqua, 84, DMD_SMALL_CY_3, "BUMPERS");
-		}
+				if (TOGGLE == 0) 		font_render_string_center (&font_antiqua, DMD_RIGHT_X, DMD_SMALL_CY_2, "SUPER");
+				else if (TOGGLE == 1)	font_render_string_center (&font_antiqua, DMD_RIGHT_X, DMD_SMALL_CY_2, "JETS");
+				else if (TOGGLE == 2)	font_render_string_center (&font_antiqua, DMD_RIGHT_X, DMD_SMALL_CY_2, "SHOOT");
+				else if (TOGGLE == 3)	font_render_string_center (&font_antiqua, DMD_RIGHT_X, DMD_SMALL_CY_2, "BUMPERS");
 
-		dmd_show_low ();
-		task_sleep (TIME_300MS);
+				sprintf ("%d SEC", superjets_mode_timer );
+				font_render_string_center (&font_var5, DMD_RIGHT_X, DMD_SMALL_CY_4, sprintf_buffer);
+
+				sprintf ("%d TO GOAL", superjets_goal - superjets_mode_shots_made);
+				font_render_string_center (&font_var5, DMD_RIGHT_X, DMD_SMALL_CY_5, sprintf_buffer);
+
+				sj_counter++;				//display coord in upper left corner - 40 bits wide at largest
+
+					if (sj_counter % 5 == 1)	bitmap_blit (superjets_bounce1_bits, 0, 0);
+					if (sj_counter % 5 == 2)	bitmap_blit (superjets_bounce2_bits, 0, 0);
+					if (sj_counter % 5 == 3)	bitmap_blit (superjets_bounce3_bits, 0, 0);
+					if (sj_counter % 5 == 4)	bitmap_blit (superjets_bounce2_bits, 0, 0);
+					if (sj_counter % 5 == 0) {  bitmap_blit (superjets_bounce1_bits, 0, 0); sj_counter = 0; }
+
+					dmd_show_low ();
+					task_sleep (TIME_500MS);
+
+				if (++sj_swap % 4 == 0) { if (++TOGGLE > 3) TOGGLE = 0; } //change TOGGLE once xx second
+				dmd_clean_page_low ();
 	}//END OF ENDLESS LOOP
+	deff_exit();
 }//end of mode_effect_deff
 

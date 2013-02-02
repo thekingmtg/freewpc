@@ -1,4 +1,12 @@
 /*******************************************************************
+ * common page
+ ********************************************************************/
+/* ballsave.c */
+__common__ void ballsave_add_time(U8 secs);
+__common__ void ballsave_disable(void);
+
+
+/*******************************************************************
  * .text page == GAME_OBJS
  ********************************************************************/
 /* orbits.c */
@@ -52,6 +60,22 @@ void cramp_arrow_light_on(void);
 void cramp_arrow_light_off(void);
 
 
+/* arrow_handler.c*/
+void center_ramp_arrow_update(void);
+void all_arrow_update(void);
+
+
+/*jackpots.c*/
+void jackpot_reset (void);
+void choose_random_jackpot(void);
+void choose_multiple_random_jackpot(U8 numOfJakpots);
+void score_jackpot(void);
+void set_all_jackpots (void);
+void score_super_jackpot (void);
+
+
+/*diverter_check.c*/
+void diverter_check (void);
 
 
 
@@ -60,39 +84,37 @@ void cramp_arrow_light_off(void);
 /*******************************************************************
  * machine page 1
  ********************************************************************/
+/*inlanes.c*/
+__machine__ void access_claw_light_on(void);
+__machine__ void light_quick_freeze_light_on (void);
+__machine__ void light_quick_freeze_light_off (void);
+__machine__ void increment_access_claw_light_on(void);
+__machine__ void check_access_claw_relight (void);
+__machine__ void increment_light_quick_freeze_light (void);
+
+/*extra_ball.c*/
+__machine__ void start_extraball(void);
+__machine__ void end_extraball(void);
+
+
+/*start_super_jackpot_reminder.c*/
+__machine__ void start_super_jackpot_reminder (void);
+__machine__ void end_super_jackpot_reminder (void);
+
+
+/* standupFrenzy.c */
+
+/* acmag.c */
+__machine__ void acmag_made(void);
+
+__machine__ void disabled_claw_hit (void);
 
 /*******************************************************************
  * machine page 2
  ********************************************************************/
-/* acmag.c */
-__machine2__ void acmag_made(void);
-
-
-/*jackpots.c*/
-__machine2__ void jackpot_reset (void);
-__machine2__ void choose_random_jackpot(void);
-__machine2__ void score_jackpot(void);
-__machine2__ void set_all_jackpots (void);
-
-
-/* combos.c */
-__machine2__ void comp_award_light_arrows(void);
-__machine2__ void combo_hit(void );
-__machine2__ void combo_init(void);
-
-
-/* arrow_handler.c*/
-__machine2__ void center_ramp_arrow_update(void);
-__machine2__ void all_arrow_update(void);
-
-
 /* car_chase_mode.c */
 __machine2__ void start_car_chase(void);
 __machine2__ void car_chase_ramp_made(void);
-
-
-/* car_crash.c */
-__machine2__ void comp_award_trip_car_crash(void);
 
 
 /* explode.c */
@@ -100,10 +122,19 @@ __machine2__ void start_explode(void);
 __machine2__ void explode_made(void);
 
 
-/*inlanes.c*/
-__machine2__ void access_claw_light_on(void);
-__machine2__ void light_quick_freeze_light_on (void);
-__machine2__ void light_quick_freeze_light_off (void);
+/* demotime.c */
+__machine2__ void demotime_increment (void);
+__machine2__ void demotime_increment_all (void);
+__machine2__ void demotime_start(void);
+__machine2__ void demotime_jackpot_made(void);
+
+
+/* huxley.c*/
+__machine2__ void huxley_increment(void);
+__machine2__ void huxley_increment_all(void);
+__machine2__ void huxley_begin(void);
+__machine2__ void huxley_mode_shot_made(void);
+__machine2__ void huxley_made(void);
 
 
 /* underground.c */
@@ -115,22 +146,12 @@ __machine2__ void computer_light_on(void);
 __machine2__ void computer_light_off(void);
 
 
-/* demotime.c */
-__machine2__ void demotime_increment (void);
-__machine2__ void demotime_start(void);
-__machine2__ void demotime_jackpot_made(void);
-
-
 
 
 
 /*******************************************************************
  * machine page 3
  ********************************************************************/
-/* eject.c */
-__machine3__ void comp_award_doub_retina(void);
-
-
 /* capture_simon.c */
 __machine3__ void capture_simon_made(void);
 
@@ -147,25 +168,18 @@ __machine3__ void prison_break_made (void);
 
 
 /* fortress.c */
-__machine3__ void fortress_start(void);
+__machine3__ void fortress_start(U8 num);
 __machine3__ void fortress_jackpot_made(void);
-
-
-/* museum.c */
-__machine3__ void museum_start(void);
-__machine3__ void museum_jackpot_made(void);
-
-
-/* cryoprison.c */
-__machine3__ void cryoprison_start(void);
-__machine3__ void cryoprison_jackpot_made(void);
+__machine3__ void fortress_award_super_jackpot(void);
 
 
 /* wasteland.c */
-__machine3__ void wasteland_start(void);
+__machine3__ void wasteland_start(U8 num);
 __machine3__ void wasteland_jackpot_made(void);
+__machine3__ void wasteland_award_super_jackpot(void);
 
 
+/*leffs.c*/
 
 
 
@@ -173,38 +187,32 @@ __machine3__ void wasteland_jackpot_made(void);
 /*******************************************************************
  * machine page 4
  ********************************************************************/
-/* bar.c */
-/*struct progress_bar_ops {
-	U8 x;
-	U8 y;
-	U8 *fill_level;
-	U8 *max_level;
-	U8 bar_width; //Needs to be a multiple of 5 +
-};
-__machine4__ void draw_progress_bar (struct progress_bar_ops *ops);
-*/
-
-/* dm_millions.c */
-/*__machine4__ void display_dm_millions(U8 num);
-__machine4__ void display_and_shake_dm_millions(U8 num);
-*/
-
-/* wheelie.c */
-//__machine4__ void start_wheelie (void);
-
-
 /* top_popper.c */
+__machine4__ void top_popper_video_mode_finished (void);
+
+
+/* vm_handler.c */
+__machine4__ void start_video_mode (U8 sender);
 __machine4__ void video_mode_finished (void);
 
 
-/* standupFrenzy.c */
-void collect_standups(void );
+/*shooting_gallery.c*/
+__machine4__ void start_shooting_gallery (void);
 
-/* huxley.c*/
-__machine4__ void huxley_increment(void);
-__machine4__ void huxley_begin(void);
-__machine4__ void huxley_mode_shot_made(void);
-__machine4__ void huxley_made(void);
+
+/* eject.c */
+__machine4__ void comp_award_doub_retina(void);
+__machine4__ void eject_video_mode_finished(void);
+
+
+/*kaboom.c*/
+__machine4__ void start_kaboom (void);
+
+
+/*back_in_the_fridge.c*/
+__machine4__ void enable_back_in_the_fridge(void);
+__machine4__ void start_back_in_the_fridge(void);
+__machine4__ void back_in_the_fridge_shot_made(void);
 
 
 
@@ -212,16 +220,35 @@ __machine4__ void huxley_made(void);
 /*******************************************************************
  * machine page 5
  ********************************************************************/
-/* cryoclaw.c */
-
-/* dm_amode.c */
-
-/* eyeball.c */
-
-/* jets.c */
-
-/* superjets.c */
+/* museum.c */
+__machine5__ void museum_start(U8 num);
+__machine5__ void museum_jackpot_made(void);
+__machine5__ void museum_award_super_jackpot(void);
 
 
+/* cryoprison.c */
+__machine5__ void cryoprison_start(U8 num);
+__machine5__ void cryoprison_jackpot_made(void);
+__machine5__ void cryoprison_award_super_jackpot(void);
 
+
+
+/*skillshot.c*/
+__machine5__ void award_skill_shot (U8 type_skill_shot_made);
+
+
+/* combos.c */
+__machine5__ void comp_award_light_arrows(void);
+__machine5__ void combo_hit(void );
+__machine5__ void combo_init(void);
+__machine5__ void kill_combos(void);
+__machine5__ void combo_rehit_check(void );
+
+/* car_crash.c */
+__machine5__ void comp_award_trip_car_crash(void);
+__machine5__ void restore_carcrash_lights_state(void);
+
+
+/* special_shots.c */
+__machine5__ void laser_shot_made(void);
 

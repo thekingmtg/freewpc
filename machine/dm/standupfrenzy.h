@@ -484,7 +484,7 @@ static U8 circle2_8_low_bits[] = { circle2_8_low_width , circle2_8_low_height,
  * explosion 1
  ****************************************************************************/
 #define explos1_1_low_width 24
-#define explos1_1_low_height 23
+#define explos1_1_low_height 15
 static U8 explos1_1_low_bits[] = { explos1_1_low_width , explos1_1_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -501,20 +501,12 @@ static U8 explos1_1_low_bits[] = { explos1_1_low_width , explos1_1_low_height,
 		0x00, 0x7C, 0x00, //           #####
 		0x00, 0x5C, 0x00, //           ### #
 		0x00, 0x20, 0x00, //              #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
 
 #define explos1_2_low_width 24
-#define explos1_2_low_height 23
+#define explos1_2_low_height 17
 static U8 explos1_2_low_bits[] = { explos1_2_low_width , explos1_2_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -533,18 +525,12 @@ static U8 explos1_2_low_bits[] = { explos1_2_low_width , explos1_2_low_height,
 		0x00, 0xFE, 0x03, //          #########
 		0x00, 0xFA, 0x05, //          # ###### #
 		0x00, 0xF4, 0x01, //           # #####
-		0x00, 0x80, 0x00, //                #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
 
 #define explos1_3_low_width 24
-#define explos1_3_low_height 23
+#define explos1_3_low_height 18
 static U8 explos1_3_low_bits[] = { explos1_3_low_width , explos1_3_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -564,17 +550,12 @@ static U8 explos1_3_low_bits[] = { explos1_3_low_width , explos1_3_low_height,
 		0xC0, 0xEF, 0x01, //       ###### ####
 		0x80, 0xFE, 0x00, //        # #######
 		0x00, 0x64, 0x00, //           #  ##
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
 
 #define explos1_4_low_width 24
-#define explos1_4_low_height 23
+#define explos1_4_low_height 18
 static U8 explos1_4_low_bits[] = { explos1_4_low_width , explos1_4_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -594,18 +575,13 @@ static U8 explos1_4_low_bits[] = { explos1_4_low_width , explos1_4_low_height,
 		0xA0, 0xFD, 0x03, //      # ## ########
 		0xC0, 0xAD, 0x00, //       ### ## # #
 		0x00, 0x0A, 0x00, //          # #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
 
 
 #define explos1_5_low_width 24
-#define explos1_5_low_height 23
+#define explos1_5_low_height 18
 static U8 explos1_5_low_bits[] = { explos1_5_low_width , explos1_5_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -625,11 +601,6 @@ static U8 explos1_5_low_bits[] = { explos1_5_low_width , explos1_5_low_height,
 		0x00, 0xA9, 0x02, //         #  # # # #
 		0x40, 0x12, 0x00, //       #  #  #
 		0x40, 0x04, 0x00, //       #   #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 
 };
 
@@ -637,7 +608,7 @@ static U8 explos1_5_low_bits[] = { explos1_5_low_width , explos1_5_low_height,
 
 
 #define explos1_6_low_width 24
-#define explos1_6_low_height 23
+#define explos1_6_low_height 17
 static U8 explos1_6_low_bits[] = { explos1_6_low_width , explos1_6_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -656,19 +627,13 @@ static U8 explos1_6_low_bits[] = { explos1_6_low_width , explos1_6_low_height,
 		0x00, 0x80, 0x00, //                #
 		0x00, 0x24, 0x00, //           #  #
 		0x00, 0x00, 0x01, //                 #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
 
 
 #define explos1_7_low_width 24
-#define explos1_7_low_height 23
+#define explos1_7_low_height 12
 static U8 explos1_7_low_bits[] = { explos1_7_low_width , explos1_7_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -682,17 +647,6 @@ static U8 explos1_7_low_bits[] = { explos1_7_low_width , explos1_7_low_height,
 		0x00, 0x05, 0x00, //         # #
 		0x00, 0x08, 0x00, //            #
 		0x00, 0x02, 0x00, //          #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
@@ -701,7 +655,7 @@ static U8 explos1_7_low_bits[] = { explos1_7_low_width , explos1_7_low_height,
  * explosion 2
  ****************************************************************************/
 #define explos2_1_low_width 24
-#define explos2_1_low_height 23
+#define explos2_1_low_height 21
 static U8 explos2_1_low_bits[] = { explos2_1_low_width , explos2_1_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -724,14 +678,12 @@ static U8 explos2_1_low_bits[] = { explos2_1_low_width , explos2_1_low_height,
 		0x40, 0x10, 0x00, //       #     #
 		0x00, 0x00, 0x00, //
 		0x00, 0x02, 0x00, //          #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
 
 #define explos2_2_low_width 24
-#define explos2_2_low_height 23
+#define explos2_2_low_height 21
 static U8 explos2_2_low_bits[] = { explos2_2_low_width , explos2_2_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -754,8 +706,6 @@ static U8 explos2_2_low_bits[] = { explos2_2_low_width , explos2_2_low_height,
 		0xC0, 0xF9, 0x0F, //       ###  #########
 		0x00, 0xD0, 0x07, //             # #####
 		0x00, 0x20, 0x00, //              #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
@@ -884,7 +834,7 @@ static U8 explos2_6_low_bits[] = { explos2_6_low_width , explos2_6_low_height,
 
 
 #define explos2_7_low_width 24
-#define explos2_7_low_height 23
+#define explos2_7_low_height 22
 static U8 explos2_7_low_bits[] = { explos2_7_low_width , explos2_7_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -908,14 +858,12 @@ static U8 explos2_7_low_bits[] = { explos2_7_low_width , explos2_7_low_height,
 		0x10, 0x40, 0x02, //     #         #  #
 		0x80, 0x44, 0x0A, //        #  #   #  # #
 		0x00, 0x90, 0x00, //             #  #
-		0x00, 0x00, 0x00, //
-
 };
 
 
 
 #define explos2_8_low_width 24
-#define explos2_8_low_height 23
+#define explos2_8_low_height 22
 static U8 explos2_8_low_bits[] = { explos2_8_low_width , explos2_8_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -939,13 +887,12 @@ static U8 explos2_8_low_bits[] = { explos2_8_low_width , explos2_8_low_height,
 		0x00, 0x80, 0x00, //                #
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x04, //                   #
-		0x00, 0x00, 0x00, //
 };
 
 
 
 #define explos2_9_low_width 24
-#define explos2_9_low_height 23
+#define explos2_9_low_height 17
 static U8 explos2_9_low_bits[] = { explos2_9_low_width , explos2_9_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -964,18 +911,12 @@ static U8 explos2_9_low_bits[] = { explos2_9_low_width , explos2_9_low_height,
 		0x20, 0x00, 0x00, //      #
 		0x40, 0x02, 0x00, //       #  #
 		0x00, 0x90, 0x00, //             #  #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
 
 
 
 #define explos2_10_low_width 24
-#define explos2_10_low_height 23
+#define explos2_10_low_height 14
 static U8 explos2_10_low_bits[] = { explos2_10_low_width , explos2_10_low_height,
 		0x00, 0x00, 0x00, //
 		0x00, 0x00, 0x00, //
@@ -991,13 +932,4 @@ static U8 explos2_10_low_bits[] = { explos2_10_low_width , explos2_10_low_height
 		0x00, 0x00, 0x00, //
 		0x00, 0x10, 0x00, //             #
 		0x00, 0x80, 0x00, //                #
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
-		0x00, 0x00, 0x00, //
 };
